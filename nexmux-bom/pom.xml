@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-bom</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../../innospots-nexus/innospots-nexus-bom/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nexmux-bom</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <name>nexmux-bom</name>
+    <description>Nexmux product BOM; extends innospots-nexus-bom.</description>
+
+    <properties>
+        <revision>0.1.0-SNAPSHOT</revision>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>nexmux-kernel</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>nexmux-spring</artifactId>
+                <version>${revision}</version>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+</project>

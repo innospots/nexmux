@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.innospots</groupId>
+        <artifactId>innospots-nexus-parent</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+        <relativePath>../innospots-nexus/innospots-nexus-parent/pom.xml</relativePath>
+    </parent>
+
+    <artifactId>nexmux</artifactId>
+    <version>${revision}</version>
+    <packaging>pom</packaging>
+
+    <name>nexmux</name>
+    <description>Nexmux product reactor.</description>
+
+    <properties>
+        <revision>0.1.0-SNAPSHOT</revision>
+        <innospots.nexus.version>${revision}</innospots.nexus.version>
+        <maven-assembly-plugin.version>3.7.1</maven-assembly-plugin.version>
+    </properties>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>${maven-assembly-plugin.version}</version>
+                    <executions>
+                        <execution>
+                            <id>make-assembly</id>
+                            <phase>package</phase>
+                            <goals>
+                                <goal>single</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                    <configuration>
+                        <outputDirectory>${project.basedir}/../dist</outputDirectory>
+                        <appendAssemblyId>false</appendAssemblyId>
+                        <descriptors>
+                            <descriptor>${project.basedir}/bin/package.xml</descriptor>
+                        </descriptors>
+                        <finalName>${project.artifactId}</finalName>
+                        <updateOnly>false</updateOnly>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>com.innospots</groupId>
+                <artifactId>nexmux-bom</artifactId>
+                <version>${revision}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+    <modules>
+        <module>nexmux-bom</module>
+        <module>nexmux-kernel</module>
+        <module>nexmux-spring</module>
+    </modules>
+</project>

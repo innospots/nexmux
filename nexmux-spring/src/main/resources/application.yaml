@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: nexmux-platform-console
+  jersey:
+    # Jersey 以 Servlet Filter 接入，与 Spring MVC 共用同一端口
+    type: filter
+  config:
+    import:
+      # 控制台配置（分项见 classpath:nexus/console-*.yaml）
+      - optional:classpath:nexus/console-auth.yaml
+      - optional:classpath:nexus/console-credential.yaml
+      - optional:classpath:nexus/console-web.yaml
+      - optional:classpath:nexus/console-openapi.yaml
+      - optional:classpath:nexus/console-plugins.yaml
+      # 本地覆盖：可选放置同名文件，例如 optional:file:./config/nexus/console-web.yaml
+  datasource:
+    url: jdbc:h2:mem:nexmux-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      mode: always
+      # plugin 安装表（本模块 resources）+ 目录索引（innospots-nexus-core JAR）
+      schema-locations: classpath:nexus/schema/plugin-installation-h2.sql,classpath:nexus/schema/console-catalog-h2.sql
+
+server:
+  port: 8082

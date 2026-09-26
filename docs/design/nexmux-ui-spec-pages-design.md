@@ -22,7 +22,8 @@ UiSpec 描述 **页面信息架构与数据绑定契约**；视觉与交互细�
 | 文件名 | `{pageKey}.yaml`，与 Entry 中 `UiSpecPageDeclaration.pageKey` **完全一致** |
 | `page.id` | 同 `pageKey` |
 | `page.name` | camelCase，由 pageKey 推导（如 `nexmux-provider-list` → `nexmuxProviderList`） |
-| API 基址 | `meta.apiBase: /console/nexmux/v1`（与 `nexmux.yaml` 一致） |
+| API 基址 | `meta.apiBase: /api/nexmux`（与 `nexmux.yaml` 一致） |
+| 页面路由 | `route.path` 以 **`/page`** 开头（不用 `/console`） |
 | 请求头 | 数据请求携带 `X-Nexus-Page-Key: ${page.id}` |
 
 ```text
@@ -71,7 +72,7 @@ page:          # id / title / type / layout / permission
 meta:          # apiBase, product, priority P0|P1, wireframeRef
 route:         # pagePath（与 Entry 一致，供文档与 SPA 对齐）
 state:         # 列表筛选、分页、选中主键、表单草稿
-dataSources:   # http → /console/nexmux/v1/...
+dataSources:   # http → /api/nexmux/...
 actions:       # search / save / publish / enable / testConnection ...
 regions:       # 声明式区域清单（对应线框区块名，body 可后补）
 lifecycle:     # onInit / onShow
@@ -98,7 +99,7 @@ regions:
 
 | pageKey | 方案 | pagePath | 线框 | regions（content） |
 |---------|------|----------|------|---------------------|
-| nexmux-provider-list | S-LIST | `/console/nexmux/provider` | [列表](../../../product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md) | 搜索、类型 Chip、卡片网格、添加卡 |
+| nexmux-provider-list | S-LIST | `/page/nexmux/provider` | [列表](../../../product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md) | 搜索、类型 Chip、卡片网格、添加卡 |
 | nexmux-provider-detail | S-DETAIL-TAB | `.../provider/{providerCode}` | [详情](../../../product-design/gateweave/prd-diagram/模型资产/Provider/02-Provider详情页.md) | Tab：概览、连接与凭证、能力扩展、关系、审计 |
 | nexmux-provider-edit | S-FORM | `.../provider/{providerCode}/edit` | [编辑](../../../product-design/gateweave/prd-diagram/模型资产/Provider/03-Provider新增编辑页.md) | 基本信息、连接与凭证、能力扩展；`providerCode` 新增可编辑 |
 
@@ -208,13 +209,13 @@ page:
   permission: nexmux.provider.view
 
 meta:
-  apiBase: /console/nexmux/v1
+  apiBase: /api/nexmux
   priority: P0
   layoutScheme: S-LIST
   wireframe: product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md
 
 route:
-  path: /console/nexmux/provider
+  path: /page/nexmux/provider
 
 state:
   page: 1

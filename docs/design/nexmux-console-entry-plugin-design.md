@@ -18,7 +18,7 @@
 |------|------|------|
 | **Entity**（`mux_*`） | `core.*.domain.entity` | 业务配置与运行只读数据；**不由插件定义** |
 | **Entry 插件** | `console.entry` | 向 Nexus 宿主注册 **模块 / 菜单 / 页面路由 / 权限资源**；同步到 `nx_console_catalog_resource` |
-| **管理 API** | `console.endpoint` | Jersey；路径 `/console/nexmux/v1/*` |
+| **管理 API** | `console.endpoint` | Jersey；路径 `/api/nexmux/*` |
 | **前端** | `nexmux-ui` | 消费菜单与 `pagePath`；列表/详情/编辑 UX 对齐线框 |
 
 ```text
@@ -51,9 +51,9 @@ PluginDefinition (com.innospots.nexmux.console)
 |------|------|------|
 | `menuKey` | kebab-case，前缀 `nexmux-` | `nexmux-asset-provider` |
 | `pageKey` | kebab-case，列表页 `{area}-{resource}-list` | `nexmux-provider-list` |
-| `pagePath` | 以 `/` 开头，无 query；与 **nexmux-ui** 路由一致 | `/console/nexmux/provider` |
+| `pagePath` | 以 **`/page`** 开头，无 query；与 **nexmux-ui** 路由一致 | `/page/nexmux/provider` |
 | `permission` | 与 page 或 action 绑定；前缀 `nexmux.` | `nexmux.provider.view` |
-| `datasourceKey` | 列表页代理 API 时用；`nexmux.{resource}` | `nexmux.providers` → `GET /console/nexmux/v1/providers` |
+| `datasourceKey` | 列表页代理 API 时用；`nexmux.{resource}` | `nexmux.providers` → `GET /api/nexmux/providers` |
 
 `resourceKey`（同步进 catalog）：`module:nexmux`、`page:nexmux.{pageKey}`、`menu:{menuKey}`（由 Nexus 同步规则生成，实现侧勿手写落库）。
 
@@ -92,24 +92,24 @@ nexmux（MODULE，不在侧栏单独显示时可作为根 module）
 
 | menuKey | pageKey | pagePath（SPA） | 线框 | 主要 Entity |
 |---------|---------|-----------------|------|-------------|
-| nexmux-asset-provider | nexmux-provider-list | `/console/nexmux/provider` | [Provider 列表](../../../product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md) | `ProviderEntity` |
-| — | nexmux-provider-detail | `/console/nexmux/provider/{providerCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型资产/Provider/02-Provider详情页.md) | 同上 |
-| — | nexmux-provider-edit | `/console/nexmux/provider/{providerCode}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/模型资产/Provider/03-Provider新增编辑页.md) | 同上 |
-| nexmux-asset-model | nexmux-model-list | `/console/nexmux/model` | [Model 列表](../../../product-design/gateweave/prd-diagram/模型资产/Model/01-Model列表页.md) | `ModelEntity` |
-| — | nexmux-model-detail | `/console/nexmux/model/{modelCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型资产/Model/02-Model详情页.md) | 同上（含 `pricing_spec` Tab） |
-| — | nexmux-model-edit | `/console/nexmux/model/{modelCode}/edit` | [03 编辑/导入](../../../product-design/gateweave/prd-diagram/模型资产/Model/03-Model新增编辑页.md) | 同上 |
-| nexmux-route | nexmux-route-list | `/console/nexmux/route` | [路由列表](../../../product-design/gateweave/prd-diagram/模型路由/01-路由列表页.md) | `RouteEntity` |
-| — | nexmux-route-detail | `/console/nexmux/route/{alias}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型路由/02-路由详情页.md) | 同上 |
-| — | nexmux-route-edit | `/console/nexmux/route/{alias}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/模型路由/03-路由新增编辑页.md) | 同上 |
-| nexmux-access-client | nexmux-client-list | `/console/nexmux/access/client` | [Client 列表](../../../product-design/gateweave/prd-diagram/访问治理/Client/01-客户端列表页.md) | `ClientEntity` |
-| — | nexmux-client-detail | `/console/nexmux/access/client/{clientCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/访问治理/Client/02-客户端详情页.md) | 同上 |
-| — | nexmux-client-edit | `/console/nexmux/access/client/{clientCode}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/访问治理/Client/03-客户端新增编辑页.md) | 同上 |
-| nexmux-ops-request-log | nexmux-request-log-list | `/console/nexmux/ops/request-log` | [调用日志](../../../product-design/gateweave/prd-diagram/运行管理/01-调用日志列表与详情.md) | `RequestLogEntity` |
-| — | nexmux-request-log-detail | `/console/nexmux/ops/request-log/{requestId}` | 同上 | 同上 |
-| nexmux-debug-client | nexmux-debug-client | `/console/nexmux/debug/client` | [客户端调试](../../../product-design/gateweave/prd-diagram/调试台/01-客户端调试.md) | —（调 API） |
-| nexmux-debug-model | nexmux-debug-model | `/console/nexmux/debug/model` | [模型调试](../../../product-design/gateweave/prd-diagram/调试台/02-模型调试.md) | — |
-| nexmux-system-audit | nexmux-audit-list | `/console/nexmux/system/audit` | [审计](../../../product-design/gateweave/prd-diagram/系统管理/02-审计.md) | `ConfigAuditLogEntity` |
-| — | nexmux-audit-detail | `/console/nexmux/system/audit/{auditId}` | 同上 | 同上 |
+| nexmux-asset-provider | nexmux-provider-list | `/page/nexmux/provider` | [Provider 列表](../../../product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md) | `ProviderEntity` |
+| — | nexmux-provider-detail | `/page/nexmux/provider/{providerCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型资产/Provider/02-Provider详情页.md) | 同上 |
+| — | nexmux-provider-edit | `/page/nexmux/provider/{providerCode}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/模型资产/Provider/03-Provider新增编辑页.md) | 同上 |
+| nexmux-asset-model | nexmux-model-list | `/page/nexmux/model` | [Model 列表](../../../product-design/gateweave/prd-diagram/模型资产/Model/01-Model列表页.md) | `ModelEntity` |
+| — | nexmux-model-detail | `/page/nexmux/model/{modelCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型资产/Model/02-Model详情页.md) | 同上（含 `pricing_spec` Tab） |
+| — | nexmux-model-edit | `/page/nexmux/model/{modelCode}/edit` | [03 编辑/导入](../../../product-design/gateweave/prd-diagram/模型资产/Model/03-Model新增编辑页.md) | 同上 |
+| nexmux-route | nexmux-route-list | `/page/nexmux/route` | [路由列表](../../../product-design/gateweave/prd-diagram/模型路由/01-路由列表页.md) | `RouteEntity` |
+| — | nexmux-route-detail | `/page/nexmux/route/{alias}` | [02 详情](../../../product-design/gateweave/prd-diagram/模型路由/02-路由详情页.md) | 同上 |
+| — | nexmux-route-edit | `/page/nexmux/route/{alias}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/模型路由/03-路由新增编辑页.md) | 同上 |
+| nexmux-access-client | nexmux-client-list | `/page/nexmux/access/client` | [Client 列表](../../../product-design/gateweave/prd-diagram/访问治理/Client/01-客户端列表页.md) | `ClientEntity` |
+| — | nexmux-client-detail | `/page/nexmux/access/client/{clientCode}` | [02 详情](../../../product-design/gateweave/prd-diagram/访问治理/Client/02-客户端详情页.md) | 同上 |
+| — | nexmux-client-edit | `/page/nexmux/access/client/{clientCode}/edit` | [03 编辑](../../../product-design/gateweave/prd-diagram/访问治理/Client/03-客户端新增编辑页.md) | 同上 |
+| nexmux-ops-request-log | nexmux-request-log-list | `/page/nexmux/ops/request-log` | [调用日志](../../../product-design/gateweave/prd-diagram/运行管理/01-调用日志列表与详情.md) | `RequestLogEntity` |
+| — | nexmux-request-log-detail | `/page/nexmux/ops/request-log/{requestId}` | 同上 | 同上 |
+| nexmux-debug-client | nexmux-debug-client | `/page/nexmux/debug/client` | [客户端调试](../../../product-design/gateweave/prd-diagram/调试台/01-客户端调试.md) | —（调 API） |
+| nexmux-debug-model | nexmux-debug-model | `/page/nexmux/debug/model` | [模型调试](../../../product-design/gateweave/prd-diagram/调试台/02-模型调试.md) | — |
+| nexmux-system-audit | nexmux-audit-list | `/page/nexmux/system/audit` | [审计](../../../product-design/gateweave/prd-diagram/系统管理/02-审计.md) | `ConfigAuditLogEntity` |
+| — | nexmux-audit-detail | `/page/nexmux/system/audit/{auditId}` | 同上 | 同上 |
 
 详情/编辑页 **不** 各占侧栏菜单项；仅声明 `UiSpecPageDeclaration` 供路由与 `ConsolePagePermissionFilter`（`X-Nexus-Page-Key`）使用。列表页 `pageKey` 作为默认菜单入口。
 
@@ -177,7 +177,7 @@ public final class NexmuxConsoleEntryPlugin implements Plugin {
 |------|------|
 | `NexmuxConsoleEntryPluginTest` | `definition()` 含 `ConsolePluginContribution`；`moduleKey=nexmux` |
 | `NexmuxConsoleCatalogMenuTest` | P0 menuKey 集合与 §5.1 一致；目录/页面互斥 |
-| `NexmuxConsolePagePathTest` | 所有 `pagePath` 以 `/console/nexmux` 开头且无 query |
+| `NexmuxConsolePagePathTest` | 所有 `pagePath` 以 `/page/nexmux` 开头且无 query |
 | `NexmuxEntityPageMappingTest` | §6 表每个 P0 Entity 至少一个 pageKey |
 
 ## 11. 开放问题

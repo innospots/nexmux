@@ -126,7 +126,7 @@ com.innospots.nexmux.inbound
 
 ### 6.1 管理 API 分组（P0 优先）
 
-统一前缀建议：`/console/nexmux/v1`（Jersey，与 Nexus Console Web 过滤器配合；具体前缀在实现前与 Nexus catalog 代理路径对齐）。
+管理 REST 统一前缀：`/api/nexmux`（Jersey，与 Nexus Console Web 过滤器配合；**路径不含** `/v1` 等 URL 版本段）。前端 SPA 路由统一前缀：`/page/nexmux/*`（与 `pagePath` / UiSpec `route.path` 一致，**不用** `/console` 段）。
 
 | 资源 | 方法意图 | 路径（示意） | 委托 |
 |------|----------|--------------|------|
@@ -213,7 +213,7 @@ public record ClientRotateAppKeyRequest(
 
 ## 9. 兼容与迁移
 
-- 对外 Ingress 协议版本独立演进；管理 API `/console/nexmux/v1` 通过 URL 版本兼容。
+- 对外 Ingress 协议版本独立演进；管理 API **不在 URL 中带版本号**，兼容性靠增量字段与配置快照内 `schemaVersion`。
 - 配置快照 JSON 带 `schemaVersion`；Runtime 拒绝未知主版本。
 - 无 legacy 数据迁移（greenfield）。
 
@@ -251,7 +251,7 @@ public record ClientRotateAppKeyRequest(
 | 领域事件总线（配置变更） | P0 用发布表 + 轮询足够；事件在 P1 评估 |
 | 通用 `AbstractCrudService` 代码生成 | 每聚合显式服务，避免隐藏规则 |
 | Console 内嵌 Runtime 转发 | ADR-0001 |
-| 双轨 REST（旧 `/api` + 新 `/console/nexmux`） | 单轨 v1 |
+| 双轨 REST（历史 `/console/*` + 产品 API） | 单轨 `/api/nexmux`（无 URL 版本段） |
 | Tenant/Workspace 字段「预留」 | 与 PRD 冲突 |
 
 ## 13. 架构约束自检

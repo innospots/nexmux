@@ -65,7 +65,7 @@
 
 ## 5. P0 API 契约附录
 
-基路径：`/console/nexmux/v1`。以下为核心端点；完整字段对齐线框「表单字段」章节。
+基路径：`/api/nexmux`。以下为核心端点；完整字段对齐线框「表单字段」章节。
 
 ### 5.1 Provider
 
@@ -150,7 +150,7 @@
 ```yaml
 nexmux:
   console:
-    api-base-path: /console/nexmux/v1
+    api-base-path: /api/nexmux
   client:
     app-key-grace-seconds: 300
   debug:

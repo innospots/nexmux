@@ -21,6 +21,7 @@ nexus:
       - com.innospots.nexus.console.permission
       - com.innospots.nexus.console.role
       - com.innospots.nexus.console.plugin-management
+      - com.innospots.nexmux.console
 
     # 永不自动启动的插件 ID
     # disabled: []

@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-provider-edit
+  name: nexmuxProviderEdit
+  title: Provider Edit
+  description: Nexmux console page (nexmux-provider-edit).
+  type: form
+  permission: nexmux.provider.manage
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/provider/{providerCode}/edit
+
+state: {}
+dataSources: {}
+actions: {}

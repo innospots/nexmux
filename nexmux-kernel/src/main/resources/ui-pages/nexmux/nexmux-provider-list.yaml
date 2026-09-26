@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-provider-list
+  name: nexmuxProviderList
+  title: Provider
+  description: Nexmux console page (nexmux-provider-list).
+  type: list
+  permission: nexmux.provider.view
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/provider
+
+state: {}
+dataSources: {}
+actions: {}

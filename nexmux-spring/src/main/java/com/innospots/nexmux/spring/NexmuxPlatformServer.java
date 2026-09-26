@@ -2,7 +2,9 @@ package com.innospots.nexmux.spring;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Import;
 
+import com.innospots.nexmux.spring.config.NexmuxKernelConfiguration;
 import com.innospots.nexus.spring.platform.EnableNexusPlatform;
 
 /**
@@ -10,6 +12,7 @@ import com.innospots.nexus.spring.platform.EnableNexusPlatform;
  */
 @SpringBootApplication
 @EnableNexusPlatform
+@Import(NexmuxKernelConfiguration.class)
 public class NexmuxPlatformServer {
 
     /**

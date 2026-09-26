@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-client-edit
+  name: nexmuxClientEdit
+  title: Client Edit
+  description: Nexmux console page (nexmux-client-edit).
+  type: form
+  permission: nexmux.client.secret
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/access/client/{clientCode}/edit
+
+state: {}
+dataSources: {}
+actions: {}

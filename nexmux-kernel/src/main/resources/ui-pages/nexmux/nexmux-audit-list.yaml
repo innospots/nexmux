@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-audit-list
+  name: nexmuxAuditList
+  title: Audit
+  description: Nexmux console page (nexmux-audit-list).
+  type: list
+  permission: nexmux.audit.view
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/system/audit
+
+state: {}
+dataSources: {}
+actions: {}

@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-route-edit
+  name: nexmuxRouteEdit
+  title: Route Edit
+  description: Nexmux console page (nexmux-route-edit).
+  type: form
+  permission: nexmux.route.publish
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/route/{alias}/edit
+
+state: {}
+dataSources: {}
+actions: {}

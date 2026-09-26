@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-debug-model
+  name: nexmuxDebugModel
+  title: Model Debug
+  description: Nexmux console page (nexmux-debug-model).
+  type: general
+  permission: nexmux.debug.execute
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/debug/model
+
+state: {}
+dataSources: {}
+actions: {}

@@ -1,0 +1,9 @@
+nexmux:
+  console:
+    api-base-path: /api/nexmux
+  client:
+    app-key-grace-seconds: 300
+  debug:
+    max-response-body-bytes: 65536
+  runtime:
+    snapshot-poll-interval-seconds: 30

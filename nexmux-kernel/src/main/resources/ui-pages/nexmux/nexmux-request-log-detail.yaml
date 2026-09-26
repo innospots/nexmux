@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-request-log-detail
+  name: nexmuxRequestLogDetail
+  title: Request Log Detail
+  description: Nexmux console page (nexmux-request-log-detail).
+  type: detail
+  permission: nexmux.ops.logs.view
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/ops/request-log/{requestId}
+
+state: {}
+dataSources: {}
+actions: {}

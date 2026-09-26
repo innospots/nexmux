@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-model-edit
+  name: nexmuxModelEdit
+  title: Model Edit
+  description: Nexmux console page (nexmux-model-edit).
+  type: form
+  permission: nexmux.model.manage
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/model/{modelCode}/edit
+
+state: {}
+dataSources: {}
+actions: {}

@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-client-detail
+  name: nexmuxClientDetail
+  title: Client Detail
+  description: Nexmux console page (nexmux-client-detail).
+  type: detail
+  permission: nexmux.provider.view
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/access/client/{clientCode}
+
+state: {}
+dataSources: {}
+actions: {}

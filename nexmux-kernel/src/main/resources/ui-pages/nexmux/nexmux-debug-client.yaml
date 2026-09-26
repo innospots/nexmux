@@ -1,0 +1,20 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-debug-client
+  name: nexmuxDebugClient
+  title: Client Debug
+  description: Nexmux console page (nexmux-debug-client).
+  type: general
+  permission: nexmux.debug.execute
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+
+route:
+  path: /page/nexmux/debug/client
+
+state: {}
+dataSources: {}
+actions: {}

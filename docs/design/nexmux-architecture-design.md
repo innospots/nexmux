@@ -188,7 +188,7 @@ public record ClientRotateAppKeyRequest(
 
 运行库表（`mux_request_log` 等）由 Runtime 写入；Console 只读 Dao 可落在 `core.ops`，连接只读数据源或同一库只读账号（部署决策见 P0 实施文档）。
 
-**配置**：`nexmux-spring` 的 `application.yaml` / `nexus/console-*.yaml` 仅放宿主与插件；Nexmux 业务配置使用 `nexus/nexmux.yaml`（计划新增，键前缀 `nexmux.`）。
+**配置**：分项 YAML 边界见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) — `application.yaml` 仅引导；`nexus/console-*.yaml` 为 Nexus 宿主；产品键在 `nexus/nexmux.yaml`（前缀 `nexmux.`）；PageDsl 在 `ui-pages/nexmux/{moduleKey}/*.yaml`（`domainKey=nexmux`，`moduleKey` 为 provider/model 等）。禁止新增业务 `*.properties`。
 
 ## 7. 失败与状态码
 

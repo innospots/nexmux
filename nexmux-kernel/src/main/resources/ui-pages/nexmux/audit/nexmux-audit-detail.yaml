@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-audit-detail
   name: nexmuxAuditDetail
-  title: Audit Detail
+  title: Nexmux
   description: Nexmux console page (nexmux-audit-detail).
-  type: detail
-  permission: nexmux.audit.view
+  type: general
+  permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/system/audit/{auditId}
+  routePath: /page/nexmux/audit/nexmux-audit-detail
 
 state: {}
 dataSources: {}

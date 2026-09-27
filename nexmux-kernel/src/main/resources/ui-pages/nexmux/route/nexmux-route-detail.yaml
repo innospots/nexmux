@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-route-detail
   name: nexmuxRouteDetail
-  title: Route Detail
+  title: Nexmux
   description: Nexmux console page (nexmux-route-detail).
-  type: detail
+  type: general
   permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/route/{alias}
+  routePath: /page/nexmux/route/nexmux-route-detail
 
 state: {}
 dataSources: {}

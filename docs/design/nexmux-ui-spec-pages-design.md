@@ -2,9 +2,9 @@
 
 ## 1. 文档定位
 
-- **状态**：草案
-- **日期**：2026-09-26
-- **归属**：`nexmux-kernel/src/main/resources/ui-pages/nexmux/`（与 Entry 插件 `moduleKey=nexmux` 对齐）
+- **状态**：已采纳（与 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) 同步）
+- **日期**：2026-09-27
+- **归属**：`nexmux-kernel/src/main/resources/ui-pages/nexmux/{moduleKey}/`（`domainKey=nexmux`；`moduleKey` 为 provider / model / …）
 - **关联**：
   - 产品统一详情 §17–§18：[管理控制台产品功能设计文档](../../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md)
   - 线框通用说明：[prd-diagram/README.md](../../../product-design/gateweave/prd-diagram/README.md)
@@ -16,24 +16,34 @@ UiSpec 描述 **页面信息架构与数据绑定契约**；视觉与交互细�
 
 ## 2. 文件与身份
 
+Classpath 路径由 Nexus `PageDslConfig` 固定为 **`ui-pages/{domainKey}/{moduleKey}/{pageKey}.yaml`**（详见 [YAML 规范 §6](./nexmux-yaml-configuration-design.md)）。
+
 | 项 | 约定 |
 |----|------|
-| 目录 | `ui-pages/nexmux/` |
+| `domainKey` | `nexmux`（产品领域；**不是**菜单「模块」、**不是**内置 `nexus`） |
+| `moduleKey` | `provider` / `model` / `route` / `client` / `ops` / `debug` / `audit`（与 `NexmuxConsoleCatalog.MODULE_*` 一致） |
+| 目录 | `ui-pages/nexmux/{moduleKey}/`（例：`ui-pages/nexmux/provider/`） |
 | 文件名 | `{pageKey}.yaml`，与 Entry 中 `UiSpecPageDeclaration.pageKey` **完全一致** |
-| `page.id` | 同 `pageKey` |
+| `page.id` | 同 `pageKey`（加载器校验失败即 CONFIG_ERROR） |
 | `page.name` | camelCase，由 pageKey 推导（如 `nexmux-provider-list` → `nexmuxProviderList`） |
-| API 基址 | `meta.apiBase: /api/nexmux`（与 `nexmux.yaml` 一致） |
-| 页面路由 | `route.path` 以 **`/page`** 开头（不用 `/console`） |
+| 后缀 | **仅** `.yaml`（本仓库不新增 `.yml` 页面） |
+| API 基址 | `meta.apiBase: /api/nexmux`（与 `nexus/nexmux.yaml` → `nexmux.console.api-base-path` 一致） |
+| 页面路由 | `meta.routePath` 与 Entry `pagePath` 一致（以 **`/page/nexmux`** 开头；**不用** `/console`） |
 | 请求头 | 数据请求携带 `X-Nexus-Page-Key: ${page.id}` |
 
 ```text
 nexmux-kernel/src/main/resources/ui-pages/nexmux/
-├── nexmux-provider-list.yaml
-├── nexmux-provider-detail.yaml
-├── nexmux-provider-edit.yaml
-├── nexmux-model-list.yaml
-├── …（见 §5 清单）
+├── provider/nexmux-provider-list.yaml
+├── provider/nexmux-provider-detail.yaml
+├── model/nexmux-model-list.yaml
+├── route/…
+├── client/…
+├── ops/…
+├── debug/…
+└── audit/…
 ```
+
+**禁止**：`ui-pages/nexmux/nexmux/`（误把产品名当 `moduleKey`）；`ui-pages/nexmux/{pageKey}.yaml`（缺少 `moduleKey` 段）。
 
 ## 3. 产品页面方案（布局模式）
 
@@ -70,7 +80,7 @@ dsl: '1.0'
 
 page:          # id / title / type / layout / permission
 meta:          # apiBase, product, priority P0|P1, wireframeRef
-route:         # pagePath（与 Entry 一致，供文档与 SPA 对齐）
+meta.routePath: # 与 Entry pagePath 一致（PageDsl 根对象无 route 段，勿写顶层 route:）
 state:         # 列表筛选、分页、选中主键、表单草稿
 dataSources:   # http → /api/nexmux/...
 actions:       # search / save / publish / enable / testConnection ...
@@ -195,7 +205,7 @@ Provider 详情 Tab：**概览 · 连接与凭证 · 能力扩展 · 关系 · �
 
 ## 9. 最小 PageDsl 壳（契约占位）
 
-P0 可先提交仅含 `page` + `meta` + `route`，`body` 为空，供 catalog/PageDsl 加载测试：
+P0 可先提交仅含 `page` + `meta`（含 `routePath`），`body` 为空，供 catalog/PageDsl 加载测试：
 
 ```yaml
 dsl: '1.0'
@@ -203,8 +213,8 @@ dsl: '1.0'
 page:
   id: nexmux-provider-list
   name: nexmuxProviderList
-  title: Provider
-  description: Nexmux provider catalog and connection management.
+  title: 提供商
+  description: 提供商目录与连接管理。
   type: list
   permission: nexmux.provider.view
 
@@ -214,8 +224,7 @@ meta:
   layoutScheme: S-LIST
   wireframe: product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md
 
-route:
-  path: /page/nexmux/provider
+  routePath: /page/nexmux/provider/nexmux-provider-list
 
 state:
   page: 1
@@ -232,19 +241,25 @@ body: null
 
 | 检查项 | 规则 |
 |--------|------|
+| classpath | `ui-pages/nexmux/{moduleKey}/{pageKey}.yaml` 可加载且 `page.id` 匹配 |
+| `domainKey` | 恒为 `nexmux` |
+| `moduleKey` | 与页面所属业务模块一致（见 §2 表），**非** `nexmux` |
 | pageKey 集合 | Entry §5.2 每个 P0 路由均有同名 yaml |
 | page.id | 等于 pageKey |
-| route.path | 等于 Entry `pagePath` |
+| meta.routePath | 等于 Entry `pagePath` |
 | 主键路由参数 | 与 Entity 稳定键名一致：`providerCode`、`modelCode`、`alias`、`clientCode`、`requestId`、`auditId` |
 | 写操作 permission | `actions` 内 `permission` 与 [P0 §6](./nexmux-p0-console-design.md) 一致 |
+| 字段命名 | 绑定 API 使用 camelCase；**禁止** `*_json` 键名（对齐 [domain-layer](./nexmux-domain-layer-design.md) G15） |
 
 ## 11. 测试与交付
 
 | 项 | 说明 |
 |----|------|
-| `NexmuxPageDslContractTest` | 加载每个 P0 yaml；`page.id`、dsl 版本、scheme 合法 |
+| `NexmuxPageDslClasspathTest` | `ClasspathPageDslLoader.load("nexmux", moduleKey, pageKey)`；`moduleKey` 与 §2 表一致 |
 | `NexmuxPageRouteAlignmentTest` | yaml `route.path` 与 Entry 表一致 |
 | 交付顺序 | 先 list + detail 壳 → 再接 dataSources → 最后 body 组件 |
+
+完整 YAML 分类与 Spring 分项约束见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md)。
 
 ## 12. 开放问题
 
@@ -252,4 +267,4 @@ body: null
 |---|------|------|
 | 1 | `regions` 是否进入 PageDsl 正式 schema | P0 仅文档约定；实现用注释块亦可 |
 | 2 | 卡片列表 vs 表格 | Provider/Model 用卡片（线框）；Route/Client 用表格 |
-| 3 | nexmux-ui 纯 React 是否仍维护 yaml | 至少保留壳 yaml 满足 Nexus catalog 与契约测试 |
+| 3 | nexmux-ui 纯 React 是否仍维护 yaml | **是** — 至少保留壳 yaml 满足 catalog 同步与 PageDsl 契约测试 |

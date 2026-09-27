@@ -1,0 +1,18 @@
+dsl: '1.0'
+
+page:
+  id: nexmux-provider-edit
+  name: nexmuxProviderEdit
+  title: 提供商编辑
+  description: 新增或编辑提供商配置。
+  type: form
+  permission: nexmux.provider.view
+
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+  routePath: /page/nexmux/provider/nexmux-provider-edit
+
+state: {}
+dataSources: {}
+actions: {}

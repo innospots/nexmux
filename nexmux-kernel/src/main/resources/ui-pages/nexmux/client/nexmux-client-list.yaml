@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-client-list
   name: nexmuxClientList
-  title: Client
+  title: Nexmux
   description: Nexmux console page (nexmux-client-list).
-  type: list
+  type: general
   permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/access/client
+  routePath: /page/nexmux/client/nexmux-client-list
 
 state: {}
 dataSources: {}

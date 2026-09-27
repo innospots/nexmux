@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-model-list
   name: nexmuxModelList
-  title: Model
+  title: Nexmux
   description: Nexmux console page (nexmux-model-list).
-  type: list
+  type: general
   permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/model
+  routePath: /page/nexmux/model/nexmux-model-list
 
 state: {}
 dataSources: {}

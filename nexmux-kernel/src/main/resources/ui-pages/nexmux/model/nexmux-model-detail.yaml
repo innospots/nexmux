@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-model-detail
   name: nexmuxModelDetail
-  title: Model Detail
+  title: Nexmux
   description: Nexmux console page (nexmux-model-detail).
-  type: detail
+  type: general
   permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/model/{modelCode}
+  routePath: /page/nexmux/model/nexmux-model-detail
 
 state: {}
 dataSources: {}

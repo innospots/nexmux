@@ -145,7 +145,9 @@
 
 菜单、`pageKey`、路由与 Entity 对照见 [nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)；权限 key 与上表一致。
 
-## 7. 配置项（计划 `config/nexus/nexmux.yaml`）
+## 7. 配置项（`nexus/nexmux.yaml`）
+
+源码：`nexmux-spring/src/main/resources/nexus/nexmux.yaml`；发行包建议 `config/nexus/nexmux.yaml`。键约束与禁止项见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) §5。
 
 ```yaml
 nexmux:

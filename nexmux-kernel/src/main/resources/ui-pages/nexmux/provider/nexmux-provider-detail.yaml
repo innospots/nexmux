@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-provider-detail
   name: nexmuxProviderDetail
-  title: Provider Detail
-  description: Nexmux console page (nexmux-provider-detail).
+  title: 提供商详情
+  description: 提供商连接、凭证与能力扩展。
   type: detail
   permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/provider/{providerCode}
+  routePath: /page/nexmux/provider/nexmux-provider-detail
 
 state: {}
 dataSources: {}

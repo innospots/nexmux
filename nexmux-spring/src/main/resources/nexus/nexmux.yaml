@@ -1,3 +1,11 @@
+# ---------------------------------------------------------------------------
+# Nexmux 产品业务配置（Model Console）
+#
+# 规范: docs/design/nexmux-yaml-configuration-design.md §5
+# 部署: 建议复制为 config/nexus/nexmux.yaml（application.yaml 已 optional import）
+#
+# 禁止: JDBC、nexus.plugins、控制台 Filter 开关（分别见 application.yaml / console-*.yaml）
+# ---------------------------------------------------------------------------
 nexmux:
   console:
     api-base-path: /api/nexmux

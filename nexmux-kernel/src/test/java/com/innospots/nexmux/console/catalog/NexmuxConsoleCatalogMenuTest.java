@@ -13,6 +13,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class NexmuxConsoleCatalogMenuTest {
 
     private static final Set<String> P0_MENU_KEYS = Set.of(
+            "nexmux-asset",
             "nexmux-asset-provider",
             "nexmux-asset-model",
             "nexmux-route",
@@ -24,8 +25,7 @@ class NexmuxConsoleCatalogMenuTest {
 
     @Test
     void includesP0MenuKeys() {
-        ConsoleModuleDeclaration module = NexmuxConsoleCatalog.contribution().modules().getFirst();
-        Set<String> keys = collectMenuKeys(module.menuTree());
+        Set<String> keys = collectMenuKeys(com.innospots.nexmux.console.entry.NexmuxConsoleEntryPlugin.allMenuTrees());
         assertThat(keys).containsAll(P0_MENU_KEYS);
     }
 

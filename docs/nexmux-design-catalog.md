@@ -23,6 +23,7 @@
 | L2 | [nexmux-architecture-design.md](./design/nexmux-architecture-design.md) | 控制面 / 数据面、模块归属、词汇、分阶段路线 |
 | L2 | [nexmux-domain-layer-design.md](./design/nexmux-domain-layer-design.md) | Entity / Request / Vo / Value 分包与 P0 类型骨架 |
 | L2 | [nexmux-console-entry-plugin-design.md](./design/nexmux-console-entry-plugin-design.md) | 控制台 Entry 插件、菜单/页面与 Entity 对照 |
+| L2 | [nexmux-yaml-configuration-design.md](./design/nexmux-yaml-configuration-design.md) | **YAML 总规范**：Spring 分项、`nexmux.yaml`、PageDsl 路径与禁止项 |
 | L2 | [nexmux-ui-spec-pages-design.md](./design/nexmux-ui-spec-pages-design.md) | UiSpec/PageDsl 页面方案结构（S-LIST / Tab / Stack 等） |
 | L1 | [nexmux-p0-console-design.md](./design/nexmux-p0-console-design.md) | P0 可调用闭环：域划分、表意契约、测试范围 |
 | L3 | [0001-console-runtime-configuration-boundary.md](./design/adr/0001-console-runtime-configuration-boundary.md) | Console 与 Runtime 配置边界 ADR |

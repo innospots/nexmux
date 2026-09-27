@@ -24,9 +24,9 @@
 ```text
 PluginDefinition (com.innospots.nexmux.console)
     → ConsolePluginContribution (console@1)
-        → ConsoleModuleDeclaration (moduleKey = nexmux)
-            → UiSpecPageDeclaration[]   # 前端路由
-            → MenuDeclaration tree      # 侧栏，对齐产品 §5
+        → ConsoleModuleDeclaration[]   # domainKey=nexmux；moduleKey=provider|model|…
+            → UiSpecPageDeclaration[]    # 本模块页面
+            → MenuDeclaration[]        # 本模块菜单项（与 page 同 moduleKey）
     → 启动后 CatalogSync → nx_console_catalog_resource
 ```
 
@@ -37,21 +37,23 @@ PluginDefinition (com.innospots.nexmux.console)
 | 项 | 值 |
 |----|-----|
 | `pluginId` | `com.innospots.nexmux.console` |
-| `moduleKey` | `nexmux`（kebab：`[a-z][a-z0-9-]*`） |
+| `domainKey` | `nexmux`（**产品领域**；PageDsl `ui-pages/nexmux/...`；与内置 `nexus` 区分） |
+| `moduleKey` | `provider` / `model` / `route` / `client` / `ops` / `debug` / `audit`（**菜单业务模块**；kebab：`[a-z][a-z0-9-]*`；**不是** `nexmux`） |
 | `securityRealm` | `PLATFORM`（平台级；与「无 Tenant/Workspace 配置隔离」一致） |
 | Java 类 | `com.innospots.nexmux.console.entry.NexmuxConsoleEntryPlugin` implements `Plugin` |
 | SPI | `nexmux-kernel/src/main/resources/META-INF/services/com.innospots.nexus.core.plugin.contract.Plugin` 登记上述类 |
 | 宿主必选插件 | `nexmux-spring` 的 `nexus/console-plugins.yaml` 在现有 `com.innospots.nexus.console.*` 之外 **增加** `com.innospots.nexmux.console`（与 kernel 同 classpath） |
 
-实现方式：在 `NexmuxConsoleEntryPlugin#definition()` 中构建 `ConsolePluginContribution`（多页面 + 目录菜单），**不**使用仅支持单页的 `ConsoleModuleEntrySupport` 默认形态；可抽取 `NexmuxConsoleCatalog` 静态工厂集中维护菜单与 page 声明。
+实现方式：单类 `NexmuxConsoleEntryPlugin` — `ConsoleModuleDescriptor` 声明页面键，`ConsoleModuleDescriptor.pagePath` 生成路由，目录菜单用 `MenuDeclaration`；与 `ui-pages/nexmux/{moduleKey}/` 对齐。
 
 ## 4. 命名约定
 
 | 类型 | 规则 | 示例 |
 |------|------|------|
 | `menuKey` | kebab-case，前缀 `nexmux-` | `nexmux-asset-provider` |
-| `pageKey` | kebab-case，列表页 `{area}-{resource}-list` | `nexmux-provider-list` |
-| `pagePath` | 以 **`/page`** 开头，无 query；与 **nexmux-ui** 路由一致 | `/page/nexmux/provider` |
+| `pageKey` | kebab-case，前缀 `nexmux-`；列表类默认菜单入口 `nexmux-{resourceKey}-list`（见 `NexmuxConsolePageConvention`）；调试台 `nexmux-debug-{client\|model}` | `nexmux-provider-list` |
+| 默认菜单入口 | 每模块 `entryPageKey` = 菜单叶子绑定的 `pageKey`，且为 `ConsoleModuleDeclaration.pages` **第一项** | `nexmux-provider-list` |
+| `pagePath` | 与 Nexus 一致：`/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） | `/page/nexmux/provider/nexmux-provider-list` |
 | `permission` | 与 page 或 action 绑定；前缀 `nexmux.` | `nexmux.provider.view` |
 | `datasourceKey` | 列表页代理 API 时用；`nexmux.{resource}` | `nexmux.providers` → `GET /api/nexmux/providers` |
 
@@ -133,7 +135,7 @@ nexmux（MODULE，不在侧栏单独显示时可作为根 module）
 
 页面方案结构、布局模式（列表 / Tab 详情 / 纵向区块 / 表单 / 调试台）、P0 yaml 清单与最小壳模板见 **[nexmux-ui-spec-pages-design.md](./nexmux-ui-spec-pages-design.md)**。
 
-与 [ConsoleModuleEntryPluginsTest](../../../../innospots-nexus/innospots-nexus-console/src/test/java/com/innospots/nexus/console/entry/ConsoleModuleEntryPluginsTest.java) 对齐：每个 `pageKey` 须在 `ui-pages/nexmux/{pageKey}.yaml` 存在且 `page.id` 一致。
+与 Nexus `ClasspathPageDslLoader` 对齐：每个页面须在 **`ui-pages/nexmux/{moduleKey}/{pageKey}.yaml`** 存在且 `page.id` 一致（见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) §6）。
 
 ## 8. 契约骨架（Entry 插件）
 
@@ -141,7 +143,8 @@ nexmux（MODULE，不在侧栏单独显示时可作为根 module）
 public final class NexmuxConsoleEntryPlugin implements Plugin {
 
     public static final String PLUGIN_ID = "com.innospots.nexmux.console";
-    public static final String MODULE_KEY = "nexmux";
+    public static final String DOMAIN_KEY = "nexmux";
+    public static final String MODULE_PROVIDER = "provider";
 
     @Override
     public PluginDefinition definition() {
@@ -150,13 +153,13 @@ public final class NexmuxConsoleEntryPlugin implements Plugin {
                 .description(I18nObject.of("en", "Model console for Nexmux.", "zh", "Nexmux 模型管理控制台。"))
                 .version("1.0.0")
                 .tags(Tags.from(Map.of("scope", "console", "product", "nexmux")))
-                .contribute(NexmuxConsoleCatalog.contribution())
+                .contribute(NexmuxConsoleContribution.get())
                 .build();
     }
 }
 ```
 
-`NexmuxConsoleCatalog.contribution()` 返回单个 `ConsoleModuleDeclaration`，内含 §5 全部 `UiSpecPageDeclaration` 与 `MenuDeclaration.directory` 树。
+`NexmuxConsoleContribution.get()` 返回多个 `ConsoleModuleDeclaration`（`domainKey=nexmux`，`moduleKey=provider|model|…`），各模块含本域页面与菜单目录片段。
 
 ## 9. 与领域实体设计的关系
 
@@ -175,7 +178,8 @@ public final class NexmuxConsoleEntryPlugin implements Plugin {
 
 | 测试 | 断言 |
 |------|------|
-| `NexmuxConsoleEntryPluginTest` | `definition()` 含 `ConsolePluginContribution`；`moduleKey=nexmux` |
+| `NexmuxConsoleEntryPluginTest` | `definition()` 含 `ConsolePluginContribution`；`domainKey=nexmux`；含 `provider`/`model` 等 `moduleKey` |
+| `NexmuxConsoleModuleEntryContractTest` | 每模块 `entryPageKey` 为 `pages` 首项；菜单叶子 `pageKey` 属于本模块；列表入口命名符合 `NexmuxConsolePageConvention` |
 | `NexmuxConsoleCatalogMenuTest` | P0 menuKey 集合与 §5.1 一致；目录/页面互斥 |
 | `NexmuxConsolePagePathTest` | 所有 `pagePath` 以 `/page/nexmux` 开头且无 query |
 | `NexmuxEntityPageMappingTest` | §6 表每个 P0 Entity 至少一个 pageKey |

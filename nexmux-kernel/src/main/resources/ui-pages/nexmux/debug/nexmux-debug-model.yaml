@@ -3,17 +3,15 @@ dsl: '1.0'
 page:
   id: nexmux-debug-model
   name: nexmuxDebugModel
-  title: Model Debug
+  title: Nexmux
   description: Nexmux console page (nexmux-debug-model).
   type: general
-  permission: nexmux.debug.execute
+  permission: nexmux.provider.view
 
 meta:
   apiBase: /api/nexmux
   priority: P0
-
-route:
-  path: /page/nexmux/debug/model
+  routePath: /page/nexmux/debug/nexmux-debug-model
 
 state: {}
 dataSources: {}

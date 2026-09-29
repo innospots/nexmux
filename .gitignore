@@ -28,6 +28,8 @@ target/
 .flattened-pom.xml
 node_modules/
 build/
+.next/
+.playwright-cli/
 coverage/
 .DS_Store
 logs

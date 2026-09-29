@@ -1,0 +1,230 @@
+dsl: "1.0"
+page:
+  id: audit-detail
+  title: 审计详情
+  name: auditDetail
+  description: 系统管理 / 审计详情：变更前 / 变更后 / Diff / 操作上下文（敏感数据脱敏显示）
+dataSources:
+  detail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/audit/${route.params.id}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 审计
+            href: /audit
+          - label: 详情
+    - type: Flex
+      when: ${data.detail != null}
+      props:
+        direction: vertical
+        gap: middle
+        align: stretch
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: small
+                align: start
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Typography
+                      props:
+                        variant: h3
+                        text: 审计详情 ${data.detail.id}
+                    - type: Text
+                      props:
+                        text: ${data.detail.operation}
+                        strong: true
+                - type: Text
+                  props:
+                    text: ${data.detail.resourceType} / ${data.detail.resourceId}
+                    type: secondary
+                    className: text-sm
+        - type: Card
+          props:
+            title: 基本信息
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 操作人
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.operator}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 时间
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.timeUtc}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: Request ID
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.requestId}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: IP
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.ip}
+        - type: Alert
+          props:
+            showIcon: true
+            variant: info
+            message: 敏感数据（AppKey Secret、上游 API Key 等）已脱敏显示。
+        - type: Card
+          children:
+            - type: Tabs
+              props:
+                variant: line
+                items:
+                  - key: before
+                    label: 变更前
+                    className: p-2
+                    children:
+                      - type: Text
+                        when: ${data.detail.beforeJson != null}
+                        props:
+                          text: ${data.detail.beforeJson}
+                          className: block whitespace-pre-wrap font-mono text-xs leading-relaxed
+                            rounded-md bg-muted p-3
+                      - type: Empty
+                        when: ${data.detail.beforeJson == null}
+                        props:
+                          title: 该操作为创建，无变更前快照
+                  - key: after
+                    label: 变更后
+                    className: p-2
+                    children:
+                      - type: Text
+                        when: ${data.detail.afterJson != null}
+                        props:
+                          text: ${data.detail.afterJson}
+                          className: block whitespace-pre-wrap font-mono text-xs leading-relaxed
+                            rounded-md bg-muted p-3
+                      - type: Empty
+                        when: ${data.detail.afterJson == null}
+                        props:
+                          title: 该操作为删除，无变更后快照
+                  - key: diff
+                    label: Diff
+                    className: p-2
+                    children:
+                      - type: Table
+                        props:
+                          dataSource: ${data.detail.diffLines}
+                          rowKey: text
+                          pagination: false
+                          columns:
+                            - title: 变更差异（- 变更前 / + 变更后）
+                              cell:
+                                type: Flex
+                                props:
+                                  direction: vertical
+                                  align: start
+                                children:
+                                  - type: Text
+                                    when: ${row.type == 'add'}
+                                    props:
+                                      text: ${row.text}
+                                      className: font-mono text-xs text-green-600
+                                  - type: Text
+                                    when: ${row.type == 'remove'}
+                                    props:
+                                      text: ${row.text}
+                                      className: font-mono text-xs text-red-600
+                                  - type: Text
+                                    when: ${row.type == 'same'}
+                                    props:
+                                      text: ${row.text}
+                                      className: font-mono text-xs text-muted-foreground
+                  - key: context
+                    label: 操作上下文
+                    className: p-2
+                    children:
+                      - type: Table
+                        props:
+                          dataSource: ${data.detail.context}
+                          rowKey: label
+                          pagination: false
+                          columns:
+                            - title: 项
+                              cell:
+                                type: Text
+                                props:
+                                  text: ${row.label}
+                                  type: secondary
+                            - title: 值
+                              dataIndex: value
+    - type: Empty
+      when: ${data.detail == null}
+      props:
+        title: 未找到审计记录
+        description: 记录不存在或已超期清理
+      children:
+        - type: Button
+          props:
+            text: 返回审计列表
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /audit

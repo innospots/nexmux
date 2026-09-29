@@ -1,0 +1,409 @@
+dsl: "1.0"
+page:
+  id: cost-detail
+  title: 成本明细详情
+  name: costDetail
+  description: 运行管理 / 成本明细详情：成本证据链（定价快照、用量与费用拆分）
+dataSources:
+  detail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/costs/${route.params.id}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运行管理
+          - label: 成本明细
+            href: /costs
+          - label: ${route.params.id}
+    - type: Flex
+      when: ${data.detail != null}
+      props:
+        direction: vertical
+        gap: middle
+        align: stretch
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: middle
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        className: size-12 shrink-0 rounded-full bg-(--muted)
+                      children:
+                        - type: Icon
+                          props:
+                            name: credit-card
+                            size: 24
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 2
+                      children:
+                        - type: Typography
+                          props:
+                            variant: h3
+                            text: "Cost Record: ${data.detail.id}"
+                        - type: Text
+                          props:
+                            text: ${data.detail.contextSummary}
+                            type: secondary
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 0
+                    align: end
+                  children:
+                    - type: Text
+                      props:
+                        text: Total
+                        type: secondary
+                        size: small
+                    - type: Text
+                      props:
+                        text: ${data.detail.totalCost}
+                        strong: true
+                        className: text-2xl tabular-nums
+                    - type: Text
+                      props:
+                        text: ${data.detail.currency}
+                        type: secondary
+                        size: small
+        - type: Card
+          props:
+            title: 证据链
+          children:
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                style:
+                  flexWrap: wrap
+              children:
+                - type: Text
+                  props:
+                    text: Cost
+                    strong: true
+                - type: Icon
+                  props:
+                    name: chevron-right
+                    size: 16
+                    className: text-muted-foreground shrink-0
+                - type: Text
+                  props:
+                    text: Pricing Snapshot
+                    type: secondary
+                - type: Icon
+                  props:
+                    name: chevron-right
+                    size: 16
+                    className: text-muted-foreground shrink-0
+                - type: Text
+                  props:
+                    text: 调用日志（用量 Tab）
+                    type: secondary
+                - type: Icon
+                  props:
+                    name: chevron-right
+                    size: 16
+                    className: text-muted-foreground shrink-0
+                - type: Text
+                  props:
+                    text: 路由追踪
+                    type: secondary
+                - type: Icon
+                  props:
+                    name: chevron-right
+                    size: 16
+                    className: text-muted-foreground shrink-0
+                - type: Text
+                  props:
+                    text: Model 定价
+                    type: secondary
+            - type: Text
+              props:
+                text: 自本条成本记录出发，可逐级下钻定价快照、调用日志用量、路由决策链与 Model 定价。
+                type: secondary
+                size: small
+                className: mt-2
+        - type: Card
+          props:
+            title: 定价快照（只读）
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: price_version
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.priceVersion}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 命中档位
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.tierDetail}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 档位单价
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.tierPriceText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 时段倍率
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.multiplier}（${data.detail.multiplierRule}）
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 生效时间
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.priceEffective}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: Currency
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.currency}
+                - type: Text
+                  props:
+                    text: 快照保存完整 pricing_snapshot，历史 Cost 不受后续改价影响。
+                    type: secondary
+                    size: small
+        - type: Card
+          props:
+            title: 用量与费用拆分
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: input_tokens
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.inputTokensText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: input_cost
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.inputCalcText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: output_tokens
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.outputTokensText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: output_cost
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.outputCalcText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: cache_read_tokens
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.cacheReadTokensText}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: cache_cost
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.cacheCalcText}
+                - type: Separator
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: Total
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.totalCost} ${data.detail.currency}
+                - type: Text
+                  props:
+                    text: 计算过程：actual_price = tier_price × multiplier；Cost = Σ(usage × actual_price
+                      / 1M)。
+                    type: secondary
+                    size: small
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+          children:
+            - type: Button
+              props:
+                text: 查看调用日志
+                icon: list
+                variant: primary
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /call-logs/${route.params.id}
+            - type: Button
+              props:
+                text: 查看 Model 定价 / 版本历史
+                icon: tag
+              events:
+                onClick:
+                  - action: navigate
+                    params:
+                      to: /models/${data.detail.modelCode}
+    - type: Empty
+      when: ${data.detail == null && !dataStatus.detail.loading}
+      props:
+        title: 未找到成本记录
+        description: 请求「${route.params.id}」不存在或成本记录已过期
+      children:
+        - type: Button
+          props:
+            text: 返回列表
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /costs

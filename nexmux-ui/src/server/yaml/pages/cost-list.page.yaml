@@ -1,0 +1,300 @@
+dsl: "1.0"
+page:
+  id: cost-list
+  title: 成本明细
+  name: costList
+  description: 运行管理 / 成本明细：按单次请求展示实际成本与定价快照（命中档位 + 时段倍率）
+state:
+  applicationKeyword: ""
+  appKeyKeyword: ""
+  aliasKeyword: ""
+  modelFilter: all
+  providerFilter: all
+  range:
+    start: 2026-09-22
+    end: 2026-09-28
+dataSources:
+  costs:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/costs
+      params:
+        application: ${state.applicationKeyword}
+        appKey: ${state.appKeyKeyword}
+        alias: ${state.aliasKeyword}
+        model: ${state.modelFilter}
+        provider: ${state.providerFilter}
+        start: ${state.range.start}
+        end: ${state.range.end}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运行管理
+          - label: 成本明细
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 成本明细
+        - type: Typography
+          props:
+            variant: muted
+            text: 按单次请求的实际成本与定价快照（命中档位 + 时段倍率）。
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+          children:
+            - type: Text
+              props:
+                text: 时间范围
+                strong: true
+                className: w-14 shrink-0
+            - type: DatePicker
+              props:
+                mode: range
+                value: ${state.range}
+                placeholder: 选择时间范围
+                presets:
+                  - label: 今天
+                    days: 1
+                  - key: thisWeek
+                  - key: thisMonth
+                  - label: 近3天
+                    days: 3
+                  - label: 近7天
+                    days: 7
+                  - label: 近14天
+                    days: 14
+                  - label: 近30天
+                    days: 30
+                style:
+                  width: 280
+              events:
+                onChange:
+                  - action: setState
+                    condition: ${event}
+                    params:
+                      range: ${event}
+                  - action: reload
+                    condition: ${event}
+                    params:
+                      dataSource: costs
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+            className: mt-2
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 筛选
+                strong: true
+                className: w-14 shrink-0
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.applicationKeyword}
+                    placeholder: Application（模糊）
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          applicationKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: costs
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.appKeyKeyword}
+                    placeholder: AppKey ID（模糊）
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          appKeyKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: costs
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.aliasKeyword}
+                    placeholder: Alias（模糊）
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          aliasKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: costs
+            - type: Select
+              props:
+                value: ${state.modelFilter}
+                options:
+                  - value: all
+                    label: 全部模型
+                  - value: qwen3-vl-plus
+                    label: Qwen3-VL Plus
+                  - value: qwen3.5-flash
+                    label: Qwen3.5 Flash
+                  - value: text-embedding-3-large
+                    label: Text Embedding 3 Large
+                  - value: gpt-5
+                    label: GPT-5
+                  - value: gemini-3-flash
+                    label: Gemini 3 Flash
+                className: w-40 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      modelFilter: ${event}
+                  - action: reload
+                    params:
+                      dataSource: costs
+            - type: Select
+              props:
+                value: ${state.providerFilter}
+                options:
+                  - value: all
+                    label: 全部供应商
+                  - value: dashscope
+                    label: 阿里云百炼
+                  - value: openai
+                    label: OpenAI
+                  - value: gemini
+                    label: Google Gemini
+                className: w-40 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      providerFilter: ${event}
+                  - action: reload
+                    params:
+                      dataSource: costs
+            - type: Text
+              props:
+                text: 显示 ${data.costs.items.length} / ${data.costs.total}
+                type: secondary
+                className: tabular-nums text-sm shrink-0
+    - type: Card
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.costs.items}
+            rowKey: id
+            loading: ${dataStatus.costs.loading}
+            pagination: false
+            columns:
+              - title: Request ID
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.id}
+                    variant: link
+                    size: small
+                    className: p-0 h-auto font-mono
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /costs/${row.id}
+              - title: Time
+                dataIndex: shortTime
+              - title: Model
+                dataIndex: modelName
+              - title: In Cost
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.inputCost}
+                    className: tabular-nums
+              - title: Out Cost
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.outputCost}
+                    className: tabular-nums
+              - title: Cache
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.cacheCost}
+                    className: tabular-nums
+              - title: Total
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.totalCost}
+                    strong: true
+                    className: tabular-nums
+              - title: 档位
+                dataIndex: tierLabel
+              - title: 倍率
+                dataIndex: multiplierText
+              - title: Currency
+                dataIndex: currency
+    - type: Empty
+      when: ${data.costs.items != null && data.costs.items.length == 0}
+      props:
+        title: 无数据
+        description: 当前时间范围与筛选条件下没有成本记录，调整筛选后重试

@@ -7,10 +7,7 @@ page:
 state:
   keyword: ""
   statusChip: all
-  type_openai: false
-  type_anthropic: false
-  type_gemini: false
-  type_dashscope: false
+  typeChips: []
 dataSources:
   providers:
     type: http
@@ -21,10 +18,7 @@ dataSources:
       params:
         keyword: ${state.keyword}
         status: ${state.statusChip}
-        openai: ${state.type_openai}
-        anthropic: ${state.type_anthropic}
-        gemini: ${state.type_gemini}
-        dashscope: ${state.type_dashscope}
+        types: ${state.typeChips}
 body:
   type: Page
   children:
@@ -93,123 +87,29 @@ body:
               flexWrap: wrap
             className: mt-2
           children:
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.providers.counts.all.enabled}/${data.providers.counts.all.total}
-                selected: ${state.statusChip == 'all'}
+                mode: single
+                value: ${state.statusChip}
+                items: ${data.providers.filters.status}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      statusChip: all
+                      statusChip: ${event}
                   - action: reload
                     params:
                       dataSource: providers
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 已启用 ${data.providers.counts.status.enabled}
-                selected: ${state.statusChip == 'enabled'}
-                dot: "#22c55e"
+                mode: multi
+                value: ${state.typeChips}
+                items: ${data.providers.filters.types}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      statusChip: "${state.statusChip == 'enabled' ? 'all' : 'enabled'}"
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: 已停用 ${data.providers.counts.status.disabled}
-                selected: ${state.statusChip == 'disabled'}
-                dot: "#9ca3af"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'disabled' ? 'all' : 'disabled'}"
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: 待填密钥 ${data.providers.counts.status.pending}
-                selected: ${state.statusChip == 'pending'}
-                dot: "#f59e0b"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'pending' ? 'all' : 'pending'}"
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: 无密钥 ${data.providers.counts.status.none}
-                selected: ${state.statusChip == 'none'}
-                dot: "#ef4444"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'none' ? 'all' : 'none'}"
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: OpenAI
-                  ${data.providers.counts.types.openai.enabled}/${data.providers.counts.types.openai.total}
-                selected: ${state.type_openai}
-                dot: "#3b82f6"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      type_openai: ${!state.type_openai}
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: Anthropic
-                  ${data.providers.counts.types.anthropic.enabled}/${data.providers.counts.types.anthropic.total}
-                selected: ${state.type_anthropic}
-                dot: "#b45309"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      type_anthropic: ${!state.type_anthropic}
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: Gemini
-                  ${data.providers.counts.types.gemini.enabled}/${data.providers.counts.types.gemini.total}
-                selected: ${state.type_gemini}
-                dot: "#1d4ed8"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      type_gemini: ${!state.type_gemini}
-                  - action: reload
-                    params:
-                      dataSource: providers
-            - type: ChipNode
-              props:
-                text: DashScope
-                  ${data.providers.counts.types.dashscope.enabled}/${data.providers.counts.types.dashscope.total}
-                selected: ${state.type_dashscope}
-                dot: "#8b5cf6"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      type_dashscope: ${!state.type_dashscope}
+                      typeChips: ${event}
                   - action: reload
                     params:
                       dataSource: providers

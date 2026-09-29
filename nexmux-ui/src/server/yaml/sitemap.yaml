@@ -13,7 +13,6 @@ resourceType: sitemap
 version: 1
 dslVersion: "1.0"
 app: { name: Model Console }
-layout: admin
 auth: { loginPath: /login }
 
 pages:

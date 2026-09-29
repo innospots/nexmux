@@ -37,6 +37,7 @@ const SERVICE_URLS = {
   "cost.detail": "/api/data/costs/${route.params.id}",
   "audit.list": "/api/data/audit",
   "audit.detail": "/api/data/audit/${route.params.id}",
+  "audit.operators": "/api/data/audit-operators",
   "ops.modelUsage": "/api/data/ops/model-usage",
   "ops.providerUsage": "/api/data/ops/provider-usage",
   "ops.clientUsage": "/api/data/ops/client-usage",

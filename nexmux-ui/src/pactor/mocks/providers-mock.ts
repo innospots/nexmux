@@ -67,11 +67,28 @@ export interface ProviderCounts {
   types: Record<string, { enabled: number; total: number }>;
 }
 
+/** 快筛 Chip 选项（ChipFilter 组件入项；文案在接口侧预计算） */
+export interface ProviderChipOption {
+  value: string;
+  text: string;
+  dot?: string;
+}
+
 export interface ProviderListResult {
   items: ProviderRecord[];
   total: number;
   counts: ProviderCounts;
+  /** 快筛 Chip 组：status 单选（含「全部」）/ types 多选（无「全部」，不选即全部） */
+  filters: { status: ProviderChipOption[]; types: ProviderChipOption[] };
 }
+
+/** 类型快筛的展示元数据（label / 色点），聚合键与 ProviderRecord.family 一致 */
+const TYPE_CHIP_META: { value: string; label: string; dot: string }[] = [
+  { value: "openai", label: "OpenAI", dot: "#3b82f6" },
+  { value: "anthropic", label: "Anthropic", dot: "#b45309" },
+  { value: "gemini", label: "Gemini", dot: "#1d4ed8" },
+  { value: "dashscope", label: "DashScope", dot: "#8b5cf6" },
+];
 
 const PROVIDERS: ProviderRecord[] = [
   {
@@ -331,7 +348,7 @@ function computeCounts(): ProviderCounts {
       pending: PROVIDERS.filter((p) => p.keyStatus === "pending").length,
       none: PROVIDERS.filter((p) => p.keyStatus === "none").length,
     },
-    types: ["openai", "anthropic", "gemini", "dashscope"].reduce<
+    types: TYPE_CHIP_META.map((m) => m.value).reduce<
       Record<string, { enabled: number; total: number }>
     >((acc, family) => {
       const inFamily = PROVIDERS.filter((p) => p.family === family);
@@ -341,6 +358,26 @@ function computeCounts(): ProviderCounts {
       };
       return acc;
     }, {}),
+  };
+}
+
+/** 快筛 Chip 选项：由计数派生，文案在此预计算（表达式不支持字符串拼接以外的复合逻辑） */
+function computeFilters(
+  counts: ProviderCounts,
+): ProviderListResult["filters"] {
+  return {
+    status: [
+      { value: "all", text: `全部 ${counts.all.enabled}/${counts.all.total}` },
+      { value: "enabled", text: `已启用 ${counts.status.enabled}`, dot: "#22c55e" },
+      { value: "disabled", text: `已停用 ${counts.status.disabled}`, dot: "#9ca3af" },
+      { value: "pending", text: `待填密钥 ${counts.status.pending}`, dot: "#f59e0b" },
+      { value: "none", text: `无密钥 ${counts.status.none}`, dot: "#ef4444" },
+    ],
+    types: TYPE_CHIP_META.map((m) => ({
+      value: m.value,
+      text: `${m.label} ${counts.types[m.value].enabled}/${counts.types[m.value].total}`,
+      dot: m.dot,
+    })),
   };
 }
 
@@ -363,7 +400,8 @@ export function queryProviders(params: ProviderListParams = {}): ProviderListRes
       matchesStatus(p, status) &&
       (types.length === 0 || types.includes(p.family)),
   ).map(withEnabledModelCount);
-  return { items, total: PROVIDERS.length, counts: computeCounts() };
+  const counts = computeCounts();
+  return { items, total: PROVIDERS.length, counts, filters: computeFilters(counts) };
 }
 
 /** provider.detail：按 Provider Code 取详情；未命中返回 undefined（页面做空态） */

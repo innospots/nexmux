@@ -27,7 +27,7 @@ import {
 } from "./mocks/client-templates-mock";
 import { getCallLog, queryCallLogs } from "./mocks/call-logs-mock";
 import { getCost, queryCosts } from "./mocks/costs-mock";
-import { getAudit, queryAudits } from "./mocks/audit-mock";
+import { getAudit, listAuditOperators, queryAudits } from "./mocks/audit-mock";
 import {
   queryAvailability,
   queryClientUsage,
@@ -46,18 +46,30 @@ function opt(value: unknown): string | undefined {
 /** 标签 state 键：连字符转下划线（如 team-default → tag_team_default） */
 const tagKey = (value: string) => `tag_${value.replace(/-/g, "_")}`;
 
+/** 快筛值数组：service 直调为数组，http query 序列化后为逗号串；空值返回 undefined */
+function strList(value: unknown): string[] | undefined {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === "string" && v !== "");
+  }
+  if (typeof value === "string") return value.split(",").filter(Boolean);
+  return undefined;
+}
+
 export const pactorServices: Record<string, ServiceHandler> = {
   "dashboard.query": (params) =>
     queryDashboard(str(params.start), str(params.end)),
 
-  // DSL 侧类型多选是一族一个布尔参数，这里还原为 family 数组
+  // 类型多选：ChipFilter 以 types 数组（http 侧序列化为逗号串）提交；
+  // 旧版 DSL 一族一个布尔参数的写法保留兼容，这里还原为 family 数组
   "provider.list": (params) =>
     queryProviders({
       keyword: str(params.keyword),
       status: str(params.status) || "all",
-      types: ["openai", "anthropic", "gemini", "dashscope"].filter(
-        (f) => params[f] === true,
-      ),
+      types:
+        strList(params.types) ??
+        ["openai", "anthropic", "gemini", "dashscope"].filter(
+          (f) => params[f] === true,
+        ),
     }),
   "provider.detail": (params) => getProvider(str(params.code)),
   "provider.pullModels": (params) => pullProviderModels(str(params.code)),
@@ -151,6 +163,7 @@ export const pactorServices: Record<string, ServiceHandler> = {
       resourceId: str(params.resourceId),
     }),
   "audit.detail": (params) => getAudit(str(params.id)) ?? null,
+  "audit.operators": () => listAuditOperators(),
 
   "ops.modelUsage": (params) =>
     queryModelUsage({ start: opt(params.start), end: opt(params.end) }),

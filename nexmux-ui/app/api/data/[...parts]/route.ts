@@ -26,6 +26,7 @@ const ROUTE_TABLE: Record<string, string> = {
   "call-logs": "callLog.list",
   costs: "cost.list",
   audit: "audit.list",
+  "audit-operators": "audit.operators",
   "ops/model-usage": "ops.modelUsage",
   "ops/provider-usage": "ops.providerUsage",
   "ops/client-usage": "ops.clientUsage",

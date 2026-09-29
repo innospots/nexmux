@@ -5,6 +5,7 @@
  * `components={{...}}`），经 SitemapApp 的 `components` prop 全局注册。
  */
 import { ChipNode } from "./chip-node";
+import { ChipFilter } from "./chip-filter";
 import { StatusBadge } from "./status-badge";
 import { LogStatus } from "./log-status";
 import { DebugChat } from "./debug-chat";
@@ -13,6 +14,7 @@ import { ThemeSwitcher } from "./theme-switcher";
 
 export const pactorComponents: Record<string, unknown> = {
   ChipNode,
+  ChipFilter,
   StatusBadge,
   LogStatus,
   DebugChat,

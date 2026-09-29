@@ -392,3 +392,12 @@ export function queryAudits(q: AuditQuery): {
 export function getAudit(id: string): AuditRecord | undefined {
   return AUDITS.find((r) => r.id === id);
 }
+
+/** 操作人筛选项（Select options）：「全部」+ 记录中去重的操作人 */
+export function listAuditOperators(): { label: string; value: string }[] {
+  const names = [...new Set(AUDITS.map((r) => r.operator))];
+  return [
+    { label: "全部操作人", value: "all" },
+    ...names.map((name) => ({ label: name, value: name })),
+  ];
+}

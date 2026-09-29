@@ -27,6 +27,13 @@ dataSources:
         operation: ${state.operation}
         resourceType: ${state.resourceType}
         resourceId: ${state.resourceIdKeyword}
+  # 操作人筛选项经接口获取（Select options 绑定 ${data.operators}）
+  operators:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/audit-operators
 body:
   type: Page
   children:
@@ -105,17 +112,7 @@ body:
             - type: Select
               props:
                 value: ${state.operator}
-                options:
-                  - label: 全部操作人
-                    value: all
-                  - label: 张三
-                    value: 张三
-                  - label: 李四
-                    value: 李四
-                  - label: 王五
-                    value: 王五
-                  - label: 管理员
-                    value: 管理员
+                options: ${data.operators}
                 className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
               events:
                 onChange:

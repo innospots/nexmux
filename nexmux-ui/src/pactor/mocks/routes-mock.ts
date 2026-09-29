@@ -92,10 +92,23 @@ export interface RouteCounts {
   tags: Record<string, number>;
 }
 
+/** 快筛 Chip 选项（ChipFilter 组件入项；文案在接口侧预计算） */
+export interface RouteChipOption {
+  value: string;
+  text: string;
+  dot?: string;
+}
+
 export interface RouteListResult {
   items: RouteRecord[];
   total: number;
   counts: RouteCounts;
+  /** 快筛 Chip 组：status / type 单选（含「全部」），tags 多选（含「全部」，点击清空） */
+  filters: {
+    status: RouteChipOption[];
+    type: RouteChipOption[];
+    tags: RouteChipOption[];
+  };
 }
 
 export const TYPE_LABELS: Record<RouteType, string> = {
@@ -541,6 +554,32 @@ function computeCounts(): RouteCounts {
   };
 }
 
+/** 快筛 Chip 选项：由计数派生，文案在此预计算（表达式不支持复合文案拼接） */
+function computeFilters(counts: RouteCounts): RouteListResult["filters"] {
+  return {
+    status: [
+      { value: "all", text: `全部 ${counts.all.enabled}/${counts.all.total}` },
+      { value: "enabled", text: `已启用 ${counts.status.enabled}` },
+      { value: "disabled", text: `已停用 ${counts.status.disabled}` },
+      { value: "draft", text: `草稿 ${counts.status.draft}` },
+    ],
+    type: [
+      { value: "all", text: `全部 ${counts.all.enabled}/${counts.all.total}` },
+      ...ROUTE_TYPE_OPTIONS.filter((o) => o.value !== "all").map((o) => ({
+        value: o.value,
+        text: `${o.label} ${counts.types[o.value as RouteType].enabled}/${counts.types[o.value as RouteType].total}`,
+      })),
+    ],
+    tags: [
+      { value: "all", text: `全部 ${counts.all.total}` },
+      ...ROUTE_TAG_FILTERS.map((t) => ({
+        value: t.value,
+        text: `${t.label} ${counts.tags[t.value.replace(/-/g, "_")]}`,
+      })),
+    ],
+  };
+}
+
 /** route.list：状态/类型单选 + 标签多选取交集，按 Updated At 降序（「新建路由」卡置顶由页面保证） */
 export function queryRoutes(params: RouteListParams = {}): RouteListResult {
   const status = params.status ?? "all";
@@ -552,7 +591,8 @@ export function queryRoutes(params: RouteListParams = {}): RouteListResult {
       (type === "all" || r.type === type) &&
       (tags.length === 0 || tags.every((t) => r.tags.includes(t))),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  return { items, total: ROUTES.length, counts: computeCounts() };
+  const counts = computeCounts();
+  return { items, total: ROUTES.length, counts, filters: computeFilters(counts) };
 }
 
 /** route.detail：按路由标识取详情；未命中返回 undefined（页面做空态） */

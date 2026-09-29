@@ -7,10 +7,7 @@ page:
 state:
   keyword: ""
   statusChip: all
-  tag_agent: false
-  tag_team_default: false
-  tag_web: false
-  tag_partner: false
+  tagChips: []
 dataSources:
   templates:
     type: http
@@ -21,10 +18,7 @@ dataSources:
       params:
         status: ${state.statusChip}
         keyword: ${state.keyword}
-        tag_agent: ${state.tag_agent}
-        tag_team_default: ${state.tag_team_default}
-        tag_web: ${state.tag_web}
-        tag_partner: ${state.tag_partner}
+        tags: ${state.tagChips}
 body:
   type: Page
   children:
@@ -60,41 +54,16 @@ body:
                 text: 状态
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.templates.counts.all.enabled}/${data.templates.counts.all.total}
-                selected: ${state.statusChip == 'all'}
+                mode: single
+                value: ${state.statusChip}
+                items: ${data.templates.filters.status}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      statusChip: all
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: 已启用 ${data.templates.counts.status.enabled}
-                selected: ${state.statusChip == 'enabled'}
-                dot: "#22c55e"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'enabled' ? 'all' : 'enabled'}"
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: 已停用 ${data.templates.counts.status.disabled}
-                selected: ${state.statusChip == 'disabled'}
-                dot: "#9ca3af"
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'disabled' ? 'all' : 'disabled'}"
+                      statusChip: ${event}
                   - action: reload
                     params:
                       dataSource: templates
@@ -111,73 +80,16 @@ body:
                 text: 标签
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.templates.counts.all.total}
-                selected: ${!state.tag_agent && !state.tag_team_default && !state.tag_web &&
-                  !state.tag_partner}
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.templates.filters.tags}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      tag_agent: false
-                  - action: setState
-                    params:
-                      tag_team_default: false
-                  - action: setState
-                    params:
-                      tag_web: false
-                  - action: setState
-                    params:
-                      tag_partner: false
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: agent ${data.templates.counts.tags.agent}
-                selected: ${state.tag_agent}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_agent: ${!state.tag_agent}
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: team-default ${data.templates.counts.tags.team_default}
-                selected: ${state.tag_team_default}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_team_default: ${!state.tag_team_default}
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: web ${data.templates.counts.tags.web}
-                selected: ${state.tag_web}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_web: ${!state.tag_web}
-                  - action: reload
-                    params:
-                      dataSource: templates
-            - type: ChipNode
-              props:
-                text: partner ${data.templates.counts.tags.partner}
-                selected: ${state.tag_partner}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_partner: ${!state.tag_partner}
+                      tagChips: ${event}
                   - action: reload
                     params:
                       dataSource: templates

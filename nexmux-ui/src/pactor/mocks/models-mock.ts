@@ -156,10 +156,19 @@ export interface ModelCounts {
   providers: Record<string, number>;
 }
 
+/** 快筛 Chip 选项（ChipFilter 组件入项；文案在接口侧预计算） */
+export interface ModelChipOption {
+  value: string;
+  text: string;
+  dot?: string;
+}
+
 export interface ModelListResult {
   items: ModelRecord[];
   total: number;
   counts: ModelCounts;
+  /** 快筛 Chip 组：type 单选（含「全部」），providers 多选（含「全部」，点击清空） */
+  filters: { type: ModelChipOption[]; providers: ModelChipOption[] };
 }
 
 const TYPE_LABELS: Record<ModelType, string> = {
@@ -748,6 +757,26 @@ function computeCounts(): ModelCounts {
   };
 }
 
+/** 快筛 Chip 选项：由计数派生，文案在此预计算（表达式不支持复合文案拼接） */
+function computeFilters(counts: ModelCounts): ModelListResult["filters"] {
+  return {
+    type: [
+      { value: "all", text: `全部 ${counts.all.total}` },
+      ...MODEL_TYPE_OPTIONS.filter((o) => o.value !== "all").map((o) => ({
+        value: o.value,
+        text: `${o.label} ${counts.types[o.value as ModelType]}`,
+      })),
+    ],
+    providers: [
+      { value: "all", text: `全部 ${counts.all.total}` },
+      ...MODEL_PROVIDER_FILTERS.map((p) => ({
+        value: p.value,
+        text: `${p.label} ${counts.providers[p.value]}`,
+      })),
+    ],
+  };
+}
+
 /** model.list：类型单选 + 厂商多选取交集，按 Updated At 降序（「添加模型」卡置顶由页面保证） */
 export function queryModels(params: ModelListParams = {}): ModelListResult {
   const type = params.type ?? "all";
@@ -757,7 +786,8 @@ export function queryModels(params: ModelListParams = {}): ModelListResult {
       (type === "all" || m.type === type) &&
       (providers.length === 0 || providers.includes(m.providerCode)),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  return { items, total: MODELS.length, counts: computeCounts() };
+  const counts = computeCounts();
+  return { items, total: MODELS.length, counts, filters: computeFilters(counts) };
 }
 
 /** model.detail：按 Model Code 取详情；未命中返回 undefined（页面做空态） */

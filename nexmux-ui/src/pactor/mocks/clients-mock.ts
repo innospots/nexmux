@@ -82,10 +82,19 @@ export interface ClientCounts {
   tags: Record<string, number>;
 }
 
+/** 快筛 Chip 选项（ChipFilter 组件入项；文案在接口侧预计算） */
+export interface ClientChipOption {
+  value: string;
+  text: string;
+  dot?: string;
+}
+
 export interface ClientListResult {
   items: ClientRecord[];
   total: number;
   counts: ClientCounts;
+  /** 快筛 Chip 组：tags 多选（含「全部」，点击清空） */
+  filters: { tags: ClientChipOption[] };
 }
 
 export const CLIENT_STATUS_LABELS: Record<ClientStatus, string> = {
@@ -428,6 +437,19 @@ function computeCounts(): ClientCounts {
   };
 }
 
+/** 快筛 Chip 选项：由计数派生，文案在此预计算（表达式不支持复合文案拼接） */
+function computeFilters(counts: ClientCounts): ClientListResult["filters"] {
+  return {
+    tags: [
+      { value: "all", text: `全部 ${counts.all.total}` },
+      ...CLIENT_TAG_FILTERS.map((t) => ({
+        value: t.value,
+        text: `${t.label} ${counts.tags[t.value.replace(/-/g, "_")]}`,
+      })),
+    ],
+  };
+}
+
 /** client.list：状态单选 + 名称/标识模糊 + 标签多选取交集，按 Updated At 降序 */
 export function queryClients(params: ClientListParams = {}): ClientListResult {
   const status = params.status ?? "all";
@@ -441,7 +463,8 @@ export function queryClients(params: ClientListParams = {}): ClientListResult {
       (code === "" || c.code.toLowerCase().includes(code)) &&
       (tags.length === 0 || tags.every((t) => c.tags.includes(t))),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  return { items, total: CLIENTS.length, counts: computeCounts() };
+  const counts = computeCounts();
+  return { items, total: CLIENTS.length, counts, filters: computeFilters(counts) };
 }
 
 /** client.detail：按客户端标识取详情；未命中返回 undefined（页面做空态） */

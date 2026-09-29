@@ -7,14 +7,7 @@ page:
 state:
   statusChip: all
   typeChip: all
-  tag_reasoning: false
-  tag_premium: false
-  tag_general: false
-  tag_coding: false
-  tag_low_cost: false
-  tag_mobile: false
-  tag_vision: false
-  tag_embedding: false
+  tagChips: []
 dataSources:
   routes:
     type: http
@@ -25,14 +18,7 @@ dataSources:
       params:
         status: ${state.statusChip}
         type: ${state.typeChip}
-        tag_reasoning: ${state.tag_reasoning}
-        tag_premium: ${state.tag_premium}
-        tag_general: ${state.tag_general}
-        tag_coding: ${state.tag_coding}
-        tag_low_cost: ${state.tag_low_cost}
-        tag_mobile: ${state.tag_mobile}
-        tag_vision: ${state.tag_vision}
-        tag_embedding: ${state.tag_embedding}
+        tags: ${state.tagChips}
 body:
   type: Page
   children:
@@ -68,51 +54,16 @@ body:
                 text: 状态
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.routes.counts.all.enabled}/${data.routes.counts.all.total}
-                selected: ${state.statusChip == 'all'}
+                mode: single
+                value: ${state.statusChip}
+                items: ${data.routes.filters.status}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      statusChip: all
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 已启用 ${data.routes.counts.status.enabled}
-                selected: ${state.statusChip == 'enabled'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'enabled' ? 'all' : 'enabled'}"
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 已停用 ${data.routes.counts.status.disabled}
-                selected: ${state.statusChip == 'disabled'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'disabled' ? 'all' : 'disabled'}"
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 草稿 ${data.routes.counts.status.draft}
-                selected: ${state.statusChip == 'draft'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      statusChip: "${state.statusChip == 'draft' ? 'all' : 'draft'}"
+                      statusChip: ${event}
                   - action: reload
                     params:
                       dataSource: routes
@@ -129,54 +80,16 @@ body:
                 text: 类型
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.routes.counts.all.enabled}/${data.routes.counts.all.total}
-                selected: ${state.typeChip == 'all'}
+                mode: single
+                value: ${state.typeChip}
+                items: ${data.routes.filters.type}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      typeChip: all
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 单模型
-                  ${data.routes.counts.types.single.enabled}/${data.routes.counts.types.single.total}
-                selected: ${state.typeChip == 'single'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'single' ? 'all' : 'single'}"
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 多模型池
-                  ${data.routes.counts.types.pool.enabled}/${data.routes.counts.types.pool.total}
-                selected: ${state.typeChip == 'pool'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'pool' ? 'all' : 'pool'}"
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: 条件路由
-                  ${data.routes.counts.types.conditional.enabled}/${data.routes.counts.types.conditional.total}
-                selected: ${state.typeChip == 'conditional'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'conditional' ? 'all' : 'conditional'}"
+                      typeChip: ${event}
                   - action: reload
                     params:
                       dataSource: routes
@@ -193,134 +106,16 @@ body:
                 text: 标签
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.routes.counts.all.total}
-                selected: ${!state.tag_reasoning && !state.tag_premium && !state.tag_general &&
-                  !state.tag_coding && !state.tag_low_cost && !state.tag_mobile
-                  && !state.tag_vision && !state.tag_embedding}
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.routes.filters.tags}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      tag_reasoning: false
-                  - action: setState
-                    params:
-                      tag_premium: false
-                  - action: setState
-                    params:
-                      tag_general: false
-                  - action: setState
-                    params:
-                      tag_coding: false
-                  - action: setState
-                    params:
-                      tag_low_cost: false
-                  - action: setState
-                    params:
-                      tag_mobile: false
-                  - action: setState
-                    params:
-                      tag_vision: false
-                  - action: setState
-                    params:
-                      tag_embedding: false
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: reasoning ${data.routes.counts.tags.reasoning}
-                selected: ${state.tag_reasoning}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_reasoning: ${!state.tag_reasoning}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: premium ${data.routes.counts.tags.premium}
-                selected: ${state.tag_premium}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_premium: ${!state.tag_premium}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: general ${data.routes.counts.tags.general}
-                selected: ${state.tag_general}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_general: ${!state.tag_general}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: coding ${data.routes.counts.tags.coding}
-                selected: ${state.tag_coding}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_coding: ${!state.tag_coding}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: low-cost ${data.routes.counts.tags.low_cost}
-                selected: ${state.tag_low_cost}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_low_cost: ${!state.tag_low_cost}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: mobile ${data.routes.counts.tags.mobile}
-                selected: ${state.tag_mobile}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_mobile: ${!state.tag_mobile}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: vision ${data.routes.counts.tags.vision}
-                selected: ${state.tag_vision}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_vision: ${!state.tag_vision}
-                  - action: reload
-                    params:
-                      dataSource: routes
-            - type: ChipNode
-              props:
-                text: embedding ${data.routes.counts.tags.embedding}
-                selected: ${state.tag_embedding}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_embedding: ${!state.tag_embedding}
+                      tagChips: ${event}
                   - action: reload
                     params:
                       dataSource: routes

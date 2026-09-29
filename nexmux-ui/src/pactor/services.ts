@@ -74,33 +74,37 @@ export const pactorServices: Record<string, ServiceHandler> = {
   "provider.detail": (params) => getProvider(str(params.code)),
   "provider.pullModels": (params) => pullProviderModels(str(params.code)),
 
-  // DSL 侧厂商多选是一个 Provider 一个布尔参数，这里还原为 Provider Code 数组
+  // 厂商多选：ChipFilter 以 providers 数组（http 侧序列化为逗号串）提交；
+  // 旧版 DSL 一个 Provider 一个布尔参数的写法保留兼容
   "model.list": (params) =>
     queryModels({
       type: str(params.type) || "all",
-      providers: ["dashscope", "gemini", "openai"].filter(
-        (p) => params[p] === true,
-      ),
+      providers:
+        strList(params.providers) ??
+        ["dashscope", "gemini", "openai"].filter((p) => params[p] === true),
     }),
   "model.detail": (params) => getModel(str(params.code)),
 
-  // DSL 侧标签多选是一个标签一个布尔参数（连字符转下划线），这里还原为标签数组
+  // 标签多选：ChipFilter 以 tags 数组（http 侧序列化为逗号串）提交；
+  // 旧版 DSL 一个标签一个布尔参数（连字符转下划线）的写法保留兼容
   "route.list": (params) =>
     queryRoutes({
       status: str(params.status) || "all",
       type: str(params.type) || "all",
-      tags: [
-        ["reasoning", "tag_reasoning"],
-        ["premium", "tag_premium"],
-        ["general", "tag_general"],
-        ["coding", "tag_coding"],
-        ["low-cost", "tag_low_cost"],
-        ["mobile", "tag_mobile"],
-        ["vision", "tag_vision"],
-        ["embedding", "tag_embedding"],
-      ]
-        .filter(([, k]) => params[k] === true)
-        .map(([t]) => t),
+      tags:
+        strList(params.tags) ??
+        [
+          ["reasoning", "tag_reasoning"],
+          ["premium", "tag_premium"],
+          ["general", "tag_general"],
+          ["coding", "tag_coding"],
+          ["low-cost", "tag_low_cost"],
+          ["mobile", "tag_mobile"],
+          ["vision", "tag_vision"],
+          ["embedding", "tag_embedding"],
+        ]
+          .filter(([, k]) => params[k] === true)
+          .map(([t]) => t),
     }),
   "route.detail": (params) => getRoute(str(params.code)),
 
@@ -109,9 +113,12 @@ export const pactorServices: Record<string, ServiceHandler> = {
       status: str(params.status) || "all",
       name: str(params.name),
       code: str(params.code),
-      tags: CLIENT_TAG_FILTERS.filter(
-        (t) => params[tagKey(t.value)] === true,
-      ).map((t) => t.value),
+      // ChipFilter 以 tags 数组（http 侧为逗号串）提交；旧布尔族写法保留兼容
+      tags:
+        strList(params.tags) ??
+        CLIENT_TAG_FILTERS.filter((t) => params[tagKey(t.value)] === true).map(
+          (t) => t.value,
+        ),
     }),
   "client.detail": (params) => getClient(str(params.code)),
 
@@ -119,9 +126,11 @@ export const pactorServices: Record<string, ServiceHandler> = {
     queryClientTemplates({
       status: str(params.status) || "all",
       keyword: str(params.keyword),
-      tags: CLIENT_TEMPLATE_TAG_FILTERS.filter(
-        (t) => params[tagKey(t.value)] === true,
-      ).map((t) => t.value),
+      tags:
+        strList(params.tags) ??
+        CLIENT_TEMPLATE_TAG_FILTERS.filter(
+          (t) => params[tagKey(t.value)] === true,
+        ).map((t) => t.value),
     }),
   "clientTemplate.detail": (params) => getClientTemplate(str(params.code)),
   "clientTemplate.createdClients": (params) =>

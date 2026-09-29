@@ -8,14 +8,7 @@ state:
   statusFilter: all
   nameKeyword: ""
   codeKeyword: ""
-  tag_agent: false
-  tag_prod: false
-  tag_web: false
-  tag_batch: false
-  tag_internal: false
-  tag_mobile: false
-  tag_legacy: false
-  tag_trial: false
+  tagChips: []
 dataSources:
   clients:
     type: http
@@ -27,14 +20,7 @@ dataSources:
         status: ${state.statusFilter}
         name: ${state.nameKeyword}
         code: ${state.codeKeyword}
-        tag_agent: ${state.tag_agent}
-        tag_prod: ${state.tag_prod}
-        tag_web: ${state.tag_web}
-        tag_batch: ${state.tag_batch}
-        tag_internal: ${state.tag_internal}
-        tag_mobile: ${state.tag_mobile}
-        tag_legacy: ${state.tag_legacy}
-        tag_trial: ${state.tag_trial}
+        tags: ${state.tagChips}
 body:
   type: Page
   children:
@@ -102,134 +88,16 @@ body:
                 text: 标签
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.clients.counts.all.total}
-                selected: ${!state.tag_agent && !state.tag_prod && !state.tag_web &&
-                  !state.tag_batch && !state.tag_internal && !state.tag_mobile
-                  && !state.tag_legacy && !state.tag_trial}
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.clients.filters.tags}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      tag_agent: false
-                  - action: setState
-                    params:
-                      tag_prod: false
-                  - action: setState
-                    params:
-                      tag_web: false
-                  - action: setState
-                    params:
-                      tag_batch: false
-                  - action: setState
-                    params:
-                      tag_internal: false
-                  - action: setState
-                    params:
-                      tag_mobile: false
-                  - action: setState
-                    params:
-                      tag_legacy: false
-                  - action: setState
-                    params:
-                      tag_trial: false
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: agent ${data.clients.counts.tags.tag_agent}
-                selected: ${state.tag_agent}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_agent: ${!state.tag_agent}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: prod ${data.clients.counts.tags.tag_prod}
-                selected: ${state.tag_prod}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_prod: ${!state.tag_prod}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: web ${data.clients.counts.tags.tag_web}
-                selected: ${state.tag_web}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_web: ${!state.tag_web}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: batch ${data.clients.counts.tags.tag_batch}
-                selected: ${state.tag_batch}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_batch: ${!state.tag_batch}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: internal ${data.clients.counts.tags.tag_internal}
-                selected: ${state.tag_internal}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_internal: ${!state.tag_internal}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: mobile ${data.clients.counts.tags.tag_mobile}
-                selected: ${state.tag_mobile}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_mobile: ${!state.tag_mobile}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: legacy ${data.clients.counts.tags.tag_legacy}
-                selected: ${state.tag_legacy}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_legacy: ${!state.tag_legacy}
-                  - action: reload
-                    params:
-                      dataSource: clients
-            - type: ChipNode
-              props:
-                text: trial ${data.clients.counts.tags.tag_trial}
-                selected: ${state.tag_trial}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      tag_trial: ${!state.tag_trial}
+                      tagChips: ${event}
                   - action: reload
                     params:
                       dataSource: clients

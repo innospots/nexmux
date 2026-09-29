@@ -6,9 +6,7 @@ page:
   description: 模型资产 / 模型：对客户端暴露的模型管理（卡片式列表）
 state:
   typeChip: all
-  prov_dashscope: false
-  prov_gemini: false
-  prov_openai: false
+  provChips: []
 dataSources:
   models:
     type: http
@@ -18,9 +16,7 @@ dataSources:
       url: /api/data/models
       params:
         type: ${state.typeChip}
-        dashscope: ${state.prov_dashscope}
-        gemini: ${state.prov_gemini}
-        openai: ${state.prov_openai}
+        providers: ${state.provChips}
 body:
   type: Page
   children:
@@ -56,63 +52,16 @@ body:
                 text: 类型
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.models.counts.all.total}
-                selected: ${state.typeChip == 'all'}
+                mode: single
+                value: ${state.typeChip}
+                items: ${data.models.filters.type}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      typeChip: all
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: 大语言模型 ${data.models.counts.types.LLM}
-                selected: ${state.typeChip == 'LLM'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'LLM' ? 'all' : 'LLM'}"
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: 文生图 ${data.models.counts.types.Image}
-                selected: ${state.typeChip == 'Image'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'Image' ? 'all' : 'Image'}"
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: 音频 ${data.models.counts.types.Audio}
-                selected: ${state.typeChip == 'Audio'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'Audio' ? 'all' : 'Audio'}"
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: Embedding ${data.models.counts.types.Embedding}
-                selected: ${state.typeChip == 'Embedding'}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      typeChip: "${state.typeChip == 'Embedding' ? 'all' : 'Embedding'}"
+                      typeChip: ${event}
                   - action: reload
                     params:
                       dataSource: models
@@ -129,57 +78,16 @@ body:
                 text: 厂商
                 strong: true
                 className: w-10
-            - type: ChipNode
+            - type: ChipFilter
               props:
-                text: 全部 ${data.models.counts.all.total}
-                selected: ${!state.prov_dashscope && !state.prov_gemini && !state.prov_openai}
+                mode: multi
+                value: ${state.provChips}
+                items: ${data.models.filters.providers}
               events:
-                onClick:
+                onChange:
                   - action: setState
                     params:
-                      prov_dashscope: false
-                  - action: setState
-                    params:
-                      prov_gemini: false
-                  - action: setState
-                    params:
-                      prov_openai: false
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: 阿里云百炼 ${data.models.counts.providers.dashscope}
-                selected: ${state.prov_dashscope}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      prov_dashscope: ${!state.prov_dashscope}
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: Google Gemini ${data.models.counts.providers.gemini}
-                selected: ${state.prov_gemini}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      prov_gemini: ${!state.prov_gemini}
-                  - action: reload
-                    params:
-                      dataSource: models
-            - type: ChipNode
-              props:
-                text: OpenAI ${data.models.counts.providers.openai}
-                selected: ${state.prov_openai}
-              events:
-                onClick:
-                  - action: setState
-                    params:
-                      prov_openai: ${!state.prov_openai}
+                      provChips: ${event}
                   - action: reload
                     params:
                       dataSource: models

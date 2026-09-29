@@ -19,118 +19,519 @@ pages:
   - { id: login, path: /login, title: 登录, version: 1, public: true }
   - { id: dashboard, path: /, title: 仪表盘, version: 1, lazy: true }
   # 模型资产
-  - { id: provider-list, path: /providers, title: 供应商, version: 1, lazy: true }
-  - { id: provider-create, path: /providers/new, title: 新增 Provider, version: 1, lazy: true }
-  - { id: provider-detail, path: /providers/:code, title: Provider 详情, version: 1, lazy: true }
-  - { id: provider-edit, path: /providers/:code/edit, title: 编辑 Provider, version: 1, lazy: true }
+  - {
+      id: provider-list,
+      path: /providers,
+      title: 供应商,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-create,
+      path: /providers/new,
+      title: 新增 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-detail,
+      path: /providers/:code,
+      title: Provider 详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-edit,
+      path: /providers/:code/edit,
+      title: 编辑 Provider,
+      version: 1,
+      lazy: true,
+    }
   - { id: model-list, path: /models, title: 模型, version: 1, lazy: true }
-  - { id: model-create, path: /models/new, title: 新增模型, version: 1, lazy: true }
-  - { id: model-detail, path: /models/:code, title: 模型详情, version: 1, lazy: true }
-  - { id: model-edit, path: /models/:code/edit, title: 编辑模型, version: 1, lazy: true }
+  - {
+      id: model-create,
+      path: /models/new,
+      title: 新增模型,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-detail,
+      path: /models/:code,
+      title: 模型详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-edit,
+      path: /models/:code/edit,
+      title: 编辑模型,
+      version: 1,
+      lazy: true,
+    }
   # 模型路由
   - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true }
-  - { id: route-create, path: /routes/new, title: 新增路由, version: 1, lazy: true }
-  - { id: route-detail, path: /routes/:code, title: 路由详情, version: 1, lazy: true }
-  - { id: route-edit, path: /routes/:code/edit, title: 编辑路由, version: 1, lazy: true }
+  - {
+      id: route-create,
+      path: /routes/new,
+      title: 新增路由,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-detail,
+      path: /routes/:code,
+      title: 路由详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-edit,
+      path: /routes/:code/edit,
+      title: 编辑路由,
+      version: 1,
+      lazy: true,
+    }
   # 访问治理
   - { id: client-list, path: /clients, title: 客户端, version: 1, lazy: true }
-  - { id: client-create, path: /clients/new, title: 新建客户端, version: 1, lazy: true }
-  - { id: client-detail, path: /clients/:code, title: 客户端详情, version: 1, lazy: true }
-  - { id: client-edit, path: /clients/:code/edit, title: 编辑客户端, version: 1, lazy: true }
-  - { id: client-template-list, path: /client-templates, title: 客户端模板, version: 1, lazy: true }
-  - { id: client-template-create, path: /client-templates/new, title: 新建客户端模板, version: 1, lazy: true }
-  - { id: client-template-detail, path: /client-templates/:code, title: 客户端模板详情, version: 1, lazy: true }
-  - { id: client-template-edit, path: /client-templates/:code/edit, title: 编辑客户端模板, version: 1, lazy: true }
+  - {
+      id: client-create,
+      path: /clients/new,
+      title: 新建客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-detail,
+      path: /clients/:code,
+      title: 客户端详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-edit,
+      path: /clients/:code/edit,
+      title: 编辑客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-list,
+      path: /client-templates,
+      title: 客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-create,
+      path: /client-templates/new,
+      title: 新建客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-detail,
+      path: /client-templates/:code,
+      title: 客户端模板详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-edit,
+      path: /client-templates/:code/edit,
+      title: 编辑客户端模板,
+      version: 1,
+      lazy: true,
+    }
   # 运行管理
-  - { id: call-log-list, path: /call-logs, title: 调用日志, version: 1, lazy: true }
-  - { id: call-log-detail, path: /call-logs/:id, title: 调用日志详情, version: 1, lazy: true }
-  - { id: model-usage, path: /model-usage, title: 模型用量, version: 1, lazy: true }
-  - { id: provider-usage, path: /provider-usage, title: 供应商用量, version: 1, lazy: true }
-  - { id: client-usage, path: /client-usage, title: 客户端用量, version: 1, lazy: true }
-  - { id: provider-availability, path: /provider-availability, title: 供应商可用性, version: 1, lazy: true }
+  - {
+      id: call-log-list,
+      path: /call-logs,
+      title: 调用日志,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: call-log-detail,
+      path: /call-logs/:id,
+      title: 调用日志详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-usage,
+      path: /model-usage,
+      title: 模型用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-usage,
+      path: /provider-usage,
+      title: 供应商用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-usage,
+      path: /client-usage,
+      title: 客户端用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-availability,
+      path: /provider-availability,
+      title: 供应商可用性,
+      version: 1,
+      lazy: true,
+    }
   - { id: cost-list, path: /costs, title: 成本明细, version: 1, lazy: true }
-  - { id: cost-detail, path: /costs/:id, title: 成本明细详情, version: 1, lazy: true }
+  - {
+      id: cost-detail,
+      path: /costs/:id,
+      title: 成本明细详情,
+      version: 1,
+      lazy: true,
+    }
   # 调试台
-  - { id: client-debug, path: /client-debug, title: 客户端调试, version: 1, lazy: true }
-  - { id: model-debug, path: /model-debug, title: 模型调试, version: 1, lazy: true }
+  - {
+      id: client-debug,
+      path: /client-debug,
+      title: 客户端调试,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-debug,
+      path: /model-debug,
+      title: 模型调试,
+      version: 1,
+      lazy: true,
+    }
   # 系统管理
-  - { id: service-settings, path: /service-settings, title: 服务设置, version: 1, lazy: true }
+  - {
+      id: service-settings,
+      path: /service-settings,
+      title: 服务设置,
+      version: 1,
+      lazy: true,
+    }
   - { id: audit-list, path: /audit, title: 审计, version: 1, lazy: true }
-  - { id: audit-detail, path: /audit/:id, title: 审计详情, version: 1, lazy: true }
+  - {
+      id: audit-detail,
+      path: /audit/:id,
+      title: 审计详情,
+      version: 1,
+      lazy: true,
+    }
 
 menus:
-  - { id: login, type: page, pageId: login, title: 登录, layout: login, public: true, hidden: true }
-  - { id: home, type: page, pageId: dashboard, title: 首页, icon: home, layout: admin, order: 1 }
+  - {
+      id: login,
+      type: page,
+      pageId: login,
+      title: 登录,
+      layout: login,
+      public: true,
+      hidden: true,
+    }
+  - {
+      id: home,
+      type: page,
+      pageId: dashboard,
+      title: 首页,
+      icon: home,
+      layout: admin,
+      order: 1,
+    }
   - id: assets
     type: group
     title: 模型资产
     icon: package
     order: 2
     children:
-      - { id: providers, type: page, pageId: provider-list, title: 供应商, layout: admin }
-      - { id: models, type: page, pageId: model-list, title: 模型, layout: admin }
+      - {
+          id: providers,
+          type: page,
+          pageId: provider-list,
+          title: 供应商,
+          layout: admin,
+        }
+      - {
+          id: models,
+          type: page,
+          pageId: model-list,
+          title: 模型,
+          layout: admin,
+        }
   - id: routing
     type: group
     title: 模型路由
     icon: share
     order: 3
     children:
-      - { id: routes, type: page, pageId: route-list, title: 路由, layout: admin }
+      - {
+          id: routes,
+          type: page,
+          pageId: route-list,
+          title: 路由,
+          layout: admin,
+        }
   - id: governance
     type: group
     title: 访问治理
     icon: shield
     order: 4
     children:
-      - { id: clients, type: page, pageId: client-list, title: 客户端, layout: admin }
-      - { id: client-templates, type: page, pageId: client-template-list, title: 客户端模板, layout: admin }
+      - {
+          id: clients,
+          type: page,
+          pageId: client-list,
+          title: 客户端,
+          layout: admin,
+        }
+      - {
+          id: client-templates,
+          type: page,
+          pageId: client-template-list,
+          title: 客户端模板,
+          layout: admin,
+        }
   - id: operations
     type: group
     title: 运行管理
     icon: eye
     order: 5
     children:
-      - { id: call-logs, type: page, pageId: call-log-list, title: 调用日志, layout: admin }
-      - { id: model-usage, type: page, pageId: model-usage, title: 模型用量, layout: admin }
-      - { id: provider-usage, type: page, pageId: provider-usage, title: 供应商用量, layout: admin }
-      - { id: client-usage, type: page, pageId: client-usage, title: 客户端用量, layout: admin }
-      - { id: provider-availability, type: page, pageId: provider-availability, title: 供应商可用性, layout: admin }
+      - {
+          id: call-logs,
+          type: page,
+          pageId: call-log-list,
+          title: 调用日志,
+          layout: admin,
+        }
+      - {
+          id: model-usage,
+          type: page,
+          pageId: model-usage,
+          title: 模型用量,
+          layout: admin,
+        }
+      - {
+          id: provider-usage,
+          type: page,
+          pageId: provider-usage,
+          title: 供应商用量,
+          layout: admin,
+        }
+      - {
+          id: client-usage,
+          type: page,
+          pageId: client-usage,
+          title: 客户端用量,
+          layout: admin,
+        }
+      - {
+          id: provider-availability,
+          type: page,
+          pageId: provider-availability,
+          title: 供应商可用性,
+          layout: admin,
+        }
   - id: debug
     type: group
     title: 调试台
     icon: terminal
     order: 6
     children:
-      - { id: client-debug, type: page, pageId: client-debug, title: 客户端调试, layout: admin }
-      - { id: model-debug, type: page, pageId: model-debug, title: 模型调试, layout: admin }
+      - {
+          id: client-debug,
+          type: page,
+          pageId: client-debug,
+          title: 客户端调试,
+          layout: admin,
+        }
+      - {
+          id: model-debug,
+          type: page,
+          pageId: model-debug,
+          title: 模型调试,
+          layout: admin,
+        }
   - id: system
     type: group
     title: 系统管理
     icon: settings
     order: 7
     children:
-      - { id: service-settings, type: page, pageId: service-settings, title: 服务设置, layout: admin }
-      - { id: audit, type: page, pageId: audit-list, title: 审计, layout: admin }
+      - {
+          id: service-settings,
+          type: page,
+          pageId: service-settings,
+          title: 服务设置,
+          layout: admin,
+        }
+      - {
+          id: audit,
+          type: page,
+          pageId: audit-list,
+          title: 审计,
+          layout: admin,
+        }
   # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
-  - { id: provider-create, type: page, pageId: provider-create, layout: admin, hidden: true, activeMenu: providers }
-  - { id: provider-detail, type: page, pageId: provider-detail, layout: admin, hidden: true, activeMenu: providers }
-  - { id: provider-edit, type: page, pageId: provider-edit, layout: admin, hidden: true, activeMenu: providers }
-  - { id: model-create, type: page, pageId: model-create, layout: admin, hidden: true, activeMenu: models }
-  - { id: model-detail, type: page, pageId: model-detail, layout: admin, hidden: true, activeMenu: models }
-  - { id: model-edit, type: page, pageId: model-edit, layout: admin, hidden: true, activeMenu: models }
-  - { id: route-create, type: page, pageId: route-create, layout: admin, hidden: true, activeMenu: routes }
-  - { id: route-detail, type: page, pageId: route-detail, layout: admin, hidden: true, activeMenu: routes }
-  - { id: route-edit, type: page, pageId: route-edit, layout: admin, hidden: true, activeMenu: routes }
-  - { id: client-create, type: page, pageId: client-create, layout: admin, hidden: true, activeMenu: clients }
-  - { id: client-detail, type: page, pageId: client-detail, layout: admin, hidden: true, activeMenu: clients }
-  - { id: client-edit, type: page, pageId: client-edit, layout: admin, hidden: true, activeMenu: clients }
-  - { id: client-template-create, type: page, pageId: client-template-create, layout: admin, hidden: true, activeMenu: client-templates }
-  - { id: client-template-detail, type: page, pageId: client-template-detail, layout: admin, hidden: true, activeMenu: client-templates }
-  - { id: client-template-edit, type: page, pageId: client-template-edit, layout: admin, hidden: true, activeMenu: client-templates }
-  - { id: call-log-detail, type: page, pageId: call-log-detail, layout: admin, hidden: true, activeMenu: call-logs }
-  - { id: cost-list, type: page, pageId: cost-list, layout: admin, hidden: true, activeMenu: model-usage }
-  - { id: cost-detail, type: page, pageId: cost-detail, layout: admin, hidden: true, activeMenu: model-usage }
-  - { id: audit-detail, type: page, pageId: audit-detail, layout: admin, hidden: true, activeMenu: audit }
+  - {
+      id: provider-create,
+      type: page,
+      pageId: provider-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: provider-detail,
+      type: page,
+      pageId: provider-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: provider-edit,
+      type: page,
+      pageId: provider-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: providers,
+    }
+  - {
+      id: model-create,
+      type: page,
+      pageId: model-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: models,
+    }
+  - {
+      id: model-detail,
+      type: page,
+      pageId: model-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: models,
+    }
+  - {
+      id: model-edit,
+      type: page,
+      pageId: model-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: models,
+    }
+  - {
+      id: route-create,
+      type: page,
+      pageId: route-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+  - {
+      id: route-detail,
+      type: page,
+      pageId: route-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+  - {
+      id: route-edit,
+      type: page,
+      pageId: route-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: routes,
+    }
+  - {
+      id: client-create,
+      type: page,
+      pageId: client-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: clients,
+    }
+  - {
+      id: client-detail,
+      type: page,
+      pageId: client-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: clients,
+    }
+  - {
+      id: client-edit,
+      type: page,
+      pageId: client-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: clients,
+    }
+  - {
+      id: client-template-create,
+      type: page,
+      pageId: client-template-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: client-templates,
+    }
+  - {
+      id: client-template-detail,
+      type: page,
+      pageId: client-template-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: client-templates,
+    }
+  - {
+      id: client-template-edit,
+      type: page,
+      pageId: client-template-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: client-templates,
+    }
+  - {
+      id: call-log-detail,
+      type: page,
+      pageId: call-log-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: call-logs,
+    }
+  - {
+      id: cost-list,
+      type: page,
+      pageId: cost-list,
+      layout: admin,
+      hidden: true,
+      activeMenu: model-usage,
+    }
+  - {
+      id: cost-detail,
+      type: page,
+      pageId: cost-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: model-usage,
+    }
+  - {
+      id: audit-detail,
+      type: page,
+      pageId: audit-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: audit,
+    }
 
 # 布局 DSL（PageOutlet 为页面内容出口）。
 # 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供

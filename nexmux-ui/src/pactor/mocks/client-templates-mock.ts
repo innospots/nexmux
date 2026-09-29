@@ -126,10 +126,22 @@ export interface ClientTemplateCounts {
   tags: Record<string, number>;
 }
 
+/** 快筛 Chip 选项（ChipFilter 组件入项；文案在接口侧预计算） */
+export interface ClientTemplateChipOption {
+  value: string;
+  text: string;
+  dot?: string;
+}
+
 export interface ClientTemplateListResult {
   items: ClientTemplateRecord[];
   total: number;
   counts: ClientTemplateCounts;
+  /** 快筛 Chip 组：status 单选（含「全部」），tags 多选（含「全部」，点击清空） */
+  filters: {
+    status: ClientTemplateChipOption[];
+    tags: ClientTemplateChipOption[];
+  };
 }
 
 export const TEMPLATE_STATUS_LABELS: Record<ClientTemplateStatus, string> = {
@@ -435,6 +447,26 @@ function computeCounts(): ClientTemplateCounts {
   };
 }
 
+/** 快筛 Chip 选项：由计数派生，文案在此预计算（表达式不支持复合文案拼接） */
+function computeFilters(
+  counts: ClientTemplateCounts,
+): ClientTemplateListResult["filters"] {
+  return {
+    status: [
+      { value: "all", text: `全部 ${counts.all.enabled}/${counts.all.total}` },
+      { value: "enabled", text: `已启用 ${counts.status.enabled}`, dot: "#22c55e" },
+      { value: "disabled", text: `已停用 ${counts.status.disabled}`, dot: "#9ca3af" },
+    ],
+    tags: [
+      { value: "all", text: `全部 ${counts.all.total}` },
+      ...CLIENT_TEMPLATE_TAG_FILTERS.map((t) => ({
+        value: t.value,
+        text: `${t.label} ${counts.tags[t.value.replace(/-/g, "_")]}`,
+      })),
+    ],
+  };
+}
+
 /** clientTemplate.list：状态单选 + 关键字模糊 + 标签多选取交集，按 Updated At 降序 */
 export function queryClientTemplates(
   params: ClientTemplateListParams = {},
@@ -450,7 +482,8 @@ export function queryClientTemplates(
         t.code.toLowerCase().includes(keyword)) &&
       (tags.length === 0 || tags.every((tag) => t.tags.includes(tag))),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
-  return { items, total: TEMPLATES.length, counts: computeCounts() };
+  const counts = computeCounts();
+  return { items, total: TEMPLATES.length, counts, filters: computeFilters(counts) };
 }
 
 /** clientTemplate.detail：按模板标识取详情；未命中返回 undefined（页面做空态） */

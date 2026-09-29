@@ -32,3 +32,5 @@ coverage/
 .DS_Store
 logs
 *.log
+out/
+logs

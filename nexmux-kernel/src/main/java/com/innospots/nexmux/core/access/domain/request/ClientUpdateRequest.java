@@ -1,4 +1,20 @@
 package com.innospots.nexmux.core.access.domain.request;
 
-public record ClientUpdateRequest(String displayName, String quotaSpec, String rateLimitSpec) {
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+
+/**
+ * 更新接入客户端。
+ *
+ * @param displayName    显示名称
+ * @param quotaSpec      配额规格（JSON 或 DSL）
+ * @param rateLimitSpec  限流规格（JSON 或 DSL）
+ */
+@Schema(name = "ClientUpdateRequest", description = "更新接入客户端")
+public record ClientUpdateRequest(
+        @Schema(description = "显示名称")
+        String displayName,
+        @Schema(description = "配额规格")
+        String quotaSpec,
+        @Schema(description = "限流规格")
+        String rateLimitSpec) {
 }

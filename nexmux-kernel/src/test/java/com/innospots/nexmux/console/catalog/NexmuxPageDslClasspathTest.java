@@ -2,10 +2,10 @@ package com.innospots.nexmux.console.catalog;
 
 import com.innospots.nexmux.console.entry.NexmuxConsoleEntryPlugin;
 import com.innospots.nexus.core.plugin.contribution.console.ConsoleModuleDeclaration;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.PageDsl;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.config.PageDslConfig;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.loader.ClasspathPageDslLoader;
-import com.innospots.nexus.core.plugin.contribution.console.ui.spec.parser.JacksonPageDslParser;
+import com.innospots.nexus.console.ui.spec.PageDsl;
+import com.innospots.nexus.console.ui.spec.config.PageDslConfig;
+import com.innospots.nexus.console.ui.spec.loader.ClasspathPageDslLoader;
+import com.innospots.nexus.console.ui.spec.parser.JacksonPageDslParser;
 import org.junit.jupiter.api.Test;
 
 import static org.assertj.core.api.Assertions.assertThat;

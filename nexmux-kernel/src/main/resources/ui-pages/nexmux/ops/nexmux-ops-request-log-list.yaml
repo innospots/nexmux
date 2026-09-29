@@ -1,0 +1,464 @@
+dsl: "1.0"
+page:
+  id: nexmux-ops-request-log-list
+  title: 请求日志
+  name: nexmuxOpsRequestLogList
+  description: 运行管理 / 调用日志：Gateway 每次模型请求的完整运行记录（状态 + 路由 + 用量/成本）
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+  routePath: /page/nexmux/ops/nexmux-ops-request-log-list
+state:
+  range:
+    start: 2026-09-22
+    end: 2026-09-28
+  status: all
+  model: all
+  provider: all
+  protocol: all
+  routeGroup: all
+  emailKeyword: ""
+  appKeyKeyword: ""
+dataSources:
+  logs:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /request-logs
+      params:
+        start: ${state.range.start}
+        end: ${state.range.end}
+        status: ${state.status}
+        model: ${state.model}
+        provider: ${state.provider}
+        protocol: ${state.protocol}
+        routeGroup: ${state.routeGroup}
+        email: ${state.emailKeyword}
+        appKey: ${state.appKeyKeyword}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运行管理
+          - label: 调用日志
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 请求日志
+        - type: Typography
+          props:
+            variant: muted
+            text: 查看 Gateway 请求历史
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+            className: mb-2
+          children:
+            - type: Text
+              props:
+                text: 时间范围 (UTC)
+                strong: true
+            - type: DatePicker
+              props:
+                mode: range
+                value: ${state.range}
+                placeholder: 选择时间范围
+                presets:
+                  - label: 今天
+                    days: 1
+                  - key: thisWeek
+                  - key: thisMonth
+                  - label: 近3天
+                    days: 3
+                  - label: 近7天
+                    days: 7
+                  - label: 近14天
+                    days: 14
+                  - label: 近30天
+                    days: 30
+                style:
+                  width: 280
+              events:
+                onChange:
+                  - action: setState
+                    condition: ${event}
+                    params:
+                      range: ${event}
+                  - action: reload
+                    condition: ${event}
+                    params:
+                      dataSource: logs
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 状态
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.status}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: success
+                    label: 成功
+                  - value: error
+                    label: 错误
+                  - value: unfinished
+                    label: 未完成
+                  - value: cancelled
+                    label: 已取消
+                  - value: other
+                    label: 其他
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      status: ${event}
+                  - action: reload
+                    params:
+                      dataSource: logs
+            - type: Text
+              props:
+                text: 模型
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.model}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: qwen3-vl-plus
+                    label: Qwen3-VL Plus
+                  - value: text-embedding-3-large
+                    label: Text Embedding 3 Large
+                  - value: gpt-5
+                    label: GPT-5
+                  - value: qwen3.5-flash
+                    label: Qwen3.5 Flash
+                  - value: gemini-3-flash
+                    label: Gemini 3 Flash
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      model: ${event}
+                  - action: reload
+                    params:
+                      dataSource: logs
+            - type: Text
+              props:
+                text: 供应商
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.provider}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: dashscope
+                    label: 阿里云百炼
+                  - value: openai
+                    label: OpenAI
+                  - value: gemini
+                    label: Google Gemini
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      provider: ${event}
+                  - action: reload
+                    params:
+                      dataSource: logs
+            - type: Text
+              props:
+                text: 协议
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.protocol}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: OpenAI / Chat Completions
+                    label: OpenAI / Chat Completions
+                  - value: OpenAI / Embeddings
+                    label: OpenAI / Embeddings
+                  - value: OpenAI / Responses
+                    label: OpenAI / Responses
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      protocol: ${event}
+                  - action: reload
+                    params:
+                      dataSource: logs
+            - type: Text
+              props:
+                text: 路由组
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.routeGroup}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: premium
+                    label: premium
+                  - value: batch
+                    label: batch
+                  - value: default
+                    label: default
+                  - value: edge
+                    label: edge
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      routeGroup: ${event}
+                  - action: reload
+                    params:
+                      dataSource: logs
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+            className: mt-2
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 用户 Email
+                strong: true
+                className: shrink-0
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.emailKeyword}
+                    placeholder: 按 Email 筛选...
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          emailKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: logs
+            - type: Text
+              props:
+                text: AppKey ID
+                strong: true
+                className: shrink-0
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.appKeyKeyword}
+                    placeholder: 按 AppKey 筛选...
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          appKeyKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: logs
+            - type: Button
+              props:
+                text: 清除筛选
+                icon: x-circle
+                size: small
+              events:
+                onClick:
+                  - action: setState
+                    params:
+                      status: all
+                      model: all
+                      provider: all
+                      protocol: all
+                      routeGroup: all
+                      emailKeyword: ""
+                      appKeyKeyword: ""
+                  - action: reload
+                    params:
+                      dataSource: logs
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        style:
+          flexWrap: wrap
+      children:
+        - type: Text
+          props:
+            text: "总计: ${data.logs.filteredText} 个请求"
+            strong: true
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+          children:
+            - type: LogStatus
+              props:
+                status: success
+            - type: LogStatus
+              props:
+                status: error
+            - type: LogStatus
+              props:
+                status: unfinished
+            - type: LogStatus
+              props:
+                status: cancelled
+            - type: LogStatus
+              props:
+                status: other
+    - type: Card
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.logs.items}
+            rowKey: id
+            loading: ${dataStatus.logs.loading}
+            pagination: false
+            columns:
+              - title: 状态 · 时间
+                cell:
+                  type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Button
+                      props:
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /call-logs/${row.id}
+                      children:
+                        - type: LogStatus
+                          props:
+                            status: ${row.status}
+                    - type: Text
+                      props:
+                        text: ${row.timeShort}
+                        type: secondary
+                        className: text-xs tabular-nums
+              - title: 用户 · 系统
+                cell:
+                  type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${row.userEmail}
+                    - type: Text
+                      props:
+                        text: ${row.clientName}
+                        type: secondary
+                        className: text-xs
+              - title: 路由
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.routeCode}
+                    className: font-mono
+              - title: 标签
+                dataIndex: tagsText
+              - title: 用量
+                cell:
+                  type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${row.usageText}
+                        className: tabular-nums
+                    - type: Text
+                      props:
+                        text: in/out
+                        type: secondary
+                        className: text-xs
+              - title: 成本 ($)
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.costText}
+                    className: tabular-nums
+              - title: 毛利 ($)
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.marginText}
+                    className: tabular-nums
+    - type: Empty
+      when: ${data.logs.items != null && data.logs.items.length == 0}
+      props:
+        title: 未找到日志
+        description: 调整时间范围或筛选条件后重试

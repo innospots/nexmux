@@ -1,0 +1,620 @@
+# Sitemap 入口数据（design/dynamic-page.md 方案 B）：元数据 + 布局 + 页面 + 菜单全量。
+# 本文件是会话无关的超集；可见性由 src/server/sitemap.ts 按会话裁剪：
+#   public: true   → 匿名可见（登录页）
+#   permission: x  → 需登录且具备对应权限
+#   无标记         → 需登录
+# 页面 DSL 按 id 约定从 pages/<id>.page.yaml 加载（由 model-console 的
+# public/dsl/*.json 经 scripts/convert-dsl.mjs 转换）；lazy: true 不随 sitemap
+# 内联下发，客户端经 /api/pages/{id} 懒加载。updatedAt / user / permissions
+# 为会话动态字段，由服务端在响应时注入。
+
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Model Console }
+auth: { loginPath: /login }
+
+pages:
+  - { id: nexmux-client-login, path: /login, title: 登录, version: 1, public: true }
+  - { id: nexmux-ops-home, path: /, title: 仪表盘, version: 1, lazy: true }
+  # 模型资产
+  - {
+      id: nexmux-provider-list,
+      path: /providers,
+      title: 供应商,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-provider-create,
+      path: /providers/new,
+      title: 新增 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-provider-detail,
+      path: /providers/:code,
+      title: Provider 详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-provider-edit,
+      path: /providers/:code/edit,
+      title: 编辑 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - { id: nexmux-model-list, path: /models, title: 模型, version: 1, lazy: true }
+  - {
+      id: nexmux-model-create,
+      path: /models/new,
+      title: 新增模型,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-model-detail,
+      path: /models/:code,
+      title: 模型详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-model-edit,
+      path: /models/:code/edit,
+      title: 编辑模型,
+      version: 1,
+      lazy: true,
+    }
+  # 模型路由
+  - { id: nexmux-route-list, path: /routes, title: 路由, version: 1, lazy: true }
+  - {
+      id: nexmux-route-create,
+      path: /routes/new,
+      title: 新增路由,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-route-detail,
+      path: /routes/:code,
+      title: 路由详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-route-edit,
+      path: /routes/:code/edit,
+      title: 编辑路由,
+      version: 1,
+      lazy: true,
+    }
+  # 访问治理
+  - { id: nexmux-client-list, path: /clients, title: 客户端, version: 1, lazy: true }
+  - {
+      id: nexmux-client-create,
+      path: /clients/new,
+      title: 新建客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-detail,
+      path: /clients/:code,
+      title: 客户端详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-edit,
+      path: /clients/:code/edit,
+      title: 编辑客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-template-list,
+      path: /client-templates,
+      title: 客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-template-create,
+      path: /client-templates/new,
+      title: 新建客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-template-detail,
+      path: /client-templates/:code,
+      title: 客户端模板详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-client-template-edit,
+      path: /client-templates/:code/edit,
+      title: 编辑客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  # 运行管理
+  - {
+      id: nexmux-ops-request-log-list,
+      path: /call-logs,
+      title: 调用日志,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-ops-request-log-detail,
+      path: /call-logs/:id,
+      title: 调用日志详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-ops-model-usage,
+      path: /model-usage,
+      title: 模型用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-ops-provider-usage,
+      path: /provider-usage,
+      title: 供应商用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-ops-client-usage,
+      path: /client-usage,
+      title: 客户端用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-ops-provider-availability,
+      path: /provider-availability,
+      title: 供应商可用性,
+      version: 1,
+      lazy: true,
+    }
+  - { id: nexmux-ops-cost-list, path: /costs, title: 成本明细, version: 1, lazy: true }
+  - {
+      id: nexmux-ops-cost-detail,
+      path: /costs/:id,
+      title: 成本明细详情,
+      version: 1,
+      lazy: true,
+    }
+  # 调试台
+  - {
+      id: nexmux-debug-client,
+      path: /client-debug,
+      title: 客户端调试,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: nexmux-debug-model,
+      path: /model-debug,
+      title: 模型调试,
+      version: 1,
+      lazy: true,
+    }
+  # 系统管理
+  - {
+      id: nexmux-audit-service-settings,
+      path: /service-settings,
+      title: 服务设置,
+      version: 1,
+      lazy: true,
+    }
+  - { id: nexmux-audit-list, path: /audit, title: 审计, version: 1, lazy: true }
+  - {
+      id: nexmux-audit-detail,
+      path: /audit/:id,
+      title: 审计详情,
+      version: 1,
+      lazy: true,
+    }
+
+menus:
+
+  - {
+      id: nexmux-client-login,
+      type: page,
+      pageId: nexmux-client-login,
+      title: 登录,
+      layout: login,
+      public: true,
+      hidden: true,
+    }
+  - {
+      id: nexmux-ops-home,
+      type: page,
+      pageId: nexmux-ops-home,
+      title: 首页,
+      icon: home,
+      layout: admin,
+      order: 1,
+    }
+  - id: assets
+    type: group
+    title: 模型资产
+    icon: package
+    order: 2
+    children:
+      - {
+          id: nexmux-provider-list,
+          type: page,
+          pageId: nexmux-provider-list,
+          title: 供应商,
+          layout: admin,
+        }
+      - {
+          id: nexmux-model-list,
+          type: page,
+          pageId: nexmux-model-list,
+          title: 模型,
+          layout: admin,
+        }
+  - id: routing
+    type: group
+    title: 模型路由
+    icon: share
+    order: 3
+    children:
+      - {
+          id: nexmux-route-list,
+          type: page,
+          pageId: nexmux-route-list,
+          title: 路由,
+          layout: admin,
+        }
+  - id: governance
+    type: group
+    title: 访问治理
+    icon: shield
+    order: 4
+    children:
+      - {
+          id: nexmux-client-list,
+          type: page,
+          pageId: nexmux-client-list,
+          title: 客户端,
+          layout: admin,
+        }
+      - {
+          id: nexmux-client-template-list,
+          type: page,
+          pageId: nexmux-client-template-list,
+          title: 客户端模板,
+          layout: admin,
+        }
+  - id: operations
+    type: group
+    title: 运行管理
+    icon: eye
+    order: 5
+    children:
+      - {
+          id: nexmux-ops-request-log-list,
+          type: page,
+          pageId: nexmux-ops-request-log-list,
+          title: 调用日志,
+          layout: admin,
+        }
+      - {
+          id: nexmux-ops-model-usage,
+          type: page,
+          pageId: nexmux-ops-model-usage,
+          title: 模型用量,
+          layout: admin,
+        }
+      - {
+          id: nexmux-ops-provider-usage,
+          type: page,
+          pageId: nexmux-ops-provider-usage,
+          title: 供应商用量,
+          layout: admin,
+        }
+      - {
+          id: nexmux-ops-client-usage,
+          type: page,
+          pageId: nexmux-ops-client-usage,
+          title: 客户端用量,
+          layout: admin,
+        }
+      - {
+          id: nexmux-ops-provider-availability,
+          type: page,
+          pageId: nexmux-ops-provider-availability,
+          title: 供应商可用性,
+          layout: admin,
+        }
+  - id: debug
+    type: group
+    title: 调试台
+    icon: terminal
+    order: 6
+    children:
+      - {
+          id: nexmux-debug-client,
+          type: page,
+          pageId: nexmux-debug-client,
+          title: 客户端调试,
+          layout: admin,
+        }
+      - {
+          id: nexmux-debug-model,
+          type: page,
+          pageId: nexmux-debug-model,
+          title: 模型调试,
+          layout: admin,
+        }
+  - id: system
+    type: group
+    title: 系统管理
+    icon: settings
+    order: 7
+    children:
+      - {
+          id: nexmux-audit-service-settings,
+          type: page,
+          pageId: nexmux-audit-service-settings,
+          title: 服务设置,
+          layout: admin,
+        }
+      - {
+          id: nexmux-audit-list,
+          type: page,
+          pageId: nexmux-audit-list,
+          title: 审计,
+          layout: admin,
+        }
+  # 隐藏页（不出现在菜单，经列表页跳转进入；activeMenu 保持所属菜单高亮）
+  - {
+      id: nexmux-provider-create,
+      type: page,
+      pageId: nexmux-provider-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-provider-list,
+    }
+  - {
+      id: nexmux-provider-detail,
+      type: page,
+      pageId: nexmux-provider-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-provider-list,
+    }
+  - {
+      id: nexmux-provider-edit,
+      type: page,
+      pageId: nexmux-provider-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-provider-list,
+    }
+  - {
+      id: nexmux-model-create,
+      type: page,
+      pageId: nexmux-model-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-model-list,
+    }
+  - {
+      id: nexmux-model-detail,
+      type: page,
+      pageId: nexmux-model-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-model-list,
+    }
+  - {
+      id: nexmux-model-edit,
+      type: page,
+      pageId: nexmux-model-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-model-list,
+    }
+  - {
+      id: nexmux-route-create,
+      type: page,
+      pageId: nexmux-route-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-route-list,
+    }
+  - {
+      id: nexmux-route-detail,
+      type: page,
+      pageId: nexmux-route-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-route-list,
+    }
+  - {
+      id: nexmux-route-edit,
+      type: page,
+      pageId: nexmux-route-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-route-list,
+    }
+  - {
+      id: nexmux-client-create,
+      type: page,
+      pageId: nexmux-client-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-list,
+    }
+  - {
+      id: nexmux-client-detail,
+      type: page,
+      pageId: nexmux-client-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-list,
+    }
+  - {
+      id: nexmux-client-edit,
+      type: page,
+      pageId: nexmux-client-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-list,
+    }
+  - {
+      id: nexmux-client-template-create,
+      type: page,
+      pageId: nexmux-client-template-create,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-template-list,
+    }
+  - {
+      id: nexmux-client-template-detail,
+      type: page,
+      pageId: nexmux-client-template-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-template-list,
+    }
+  - {
+      id: nexmux-client-template-edit,
+      type: page,
+      pageId: nexmux-client-template-edit,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-client-template-list,
+    }
+  - {
+      id: nexmux-ops-request-log-detail,
+      type: page,
+      pageId: nexmux-ops-request-log-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-ops-request-log-list,
+    }
+  - {
+      id: nexmux-ops-cost-list,
+      type: page,
+      pageId: nexmux-ops-cost-list,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-ops-model-usage,
+    }
+  - {
+      id: nexmux-ops-cost-detail,
+      type: page,
+      pageId: nexmux-ops-cost-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-ops-model-usage,
+    }
+  - {
+      id: nexmux-audit-detail,
+      type: page,
+      pageId: nexmux-audit-detail,
+      layout: admin,
+      hidden: true,
+      activeMenu: nexmux-audit-list,
+    }
+
+# 布局 DSL（PageOutlet 为页面内容出口）。
+# 布局 body 内 ${data.session.*} 由客户端注入的 session dataSource 提供
+#（user / app / menus）。登录 / 登出是普通 HTTP 调用，DSL 用内置 request
+# 动作表达（跨域绝对地址，客户端 httpHooks 自动改写进项目内代理前缀）。
+layouts:
+  # 管理端外壳（完整对齐 model-console shell.json）：Sidebar（品牌 +
+  # SitemapMenu 导航）> Header（ThemeSwitcher 换肤 + 语言 + 用户菜单）+
+  # Content（PageOutlet 页面出口）
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Model Console, logo: /next.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                locales:
+                  - { label: 中文, value: zh-CN }
+                  - { label: English, value: en-US }
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 个人中心, value: profile, icon: user }
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: request
+                          params:
+                            method: POST
+                            url: http://localhost:9011/api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: 打开个人中心（演示）
+                onLocaleChange:
+                  - action: message
+                    params:
+                      messageType: info
+                      text: 语言切换为 ${event}（演示：应用层桥接后整页生效）
+              children:
+                - type: ThemeSwitcher
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  # 登录页外壳：login-page 全屏渐变容器（model-console 中由宿主 div 提供，
+  # 此处由布局承担），样式见 app/login.css
+  login:
+    dsl: "1.0"
+    body:
+      type: Flex
+      props:
+        className: login-page
+      children:
+        - type: PageOutlet
+  # 裸布局：无外壳，页面铺满
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

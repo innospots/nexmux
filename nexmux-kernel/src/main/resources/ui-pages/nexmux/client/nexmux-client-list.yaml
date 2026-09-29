@@ -1,18 +1,410 @@
-dsl: '1.0'
-
+dsl: "1.0"
 page:
   id: nexmux-client-list
+  title: 客户端
   name: nexmuxClientList
-  title: Nexmux
-  description: Nexmux console page (nexmux-client-list).
-  type: general
-  permission: nexmux.provider.view
-
+  description: 访问治理 / 客户端：调用实例（含 AppKey）的表格列表，支持空白新建或从模板创建
 meta:
   apiBase: /api/nexmux
   priority: P0
   routePath: /page/nexmux/client/nexmux-client-list
-
-state: {}
-dataSources: {}
-actions: {}
+state:
+  statusFilter: all
+  nameKeyword: ""
+  codeKeyword: ""
+  tagChips: []
+dataSources:
+  clients:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /clients
+      params:
+        status: ${state.statusFilter}
+        name: ${state.nameKeyword}
+        code: ${state.codeKeyword}
+        tags: ${state.tagChips}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 访问治理
+          - label: 客户端
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 客户端
+        - type: Typography
+          props:
+            variant: muted
+            text: 单页配置：名称、有效期、路由、配额、限流；客户端另含 AppKey。
+    - type: Flex
+      props:
+        align: center
+        gap: middle
+      children:
+        - type: Button
+          props:
+            text: 新建客户端
+            icon: plus
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /clients/new
+        - type: DropdownMenu
+          props:
+            items:
+              - label: agent-default
+                value: agent-default
+              - label: web-portal-base
+                value: web-portal-base
+          events:
+            onSelect:
+              - action: navigate
+                params:
+                  to: /client-templates/${event}
+          children:
+            - type: Button
+              props:
+                text: 从模板创建
+                icon: chevron-down
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 标签
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.clients.filters.tags}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      tagChips: ${event}
+                  - action: reload
+                    params:
+                      dataSource: clients
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+            className: mt-2
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 筛选
+                strong: true
+                className: w-10
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.nameKeyword}
+                    placeholder: 客户端名称（模糊）
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          nameKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: clients
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.codeKeyword}
+                    placeholder: 标识（模糊）
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          codeKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: clients
+            - type: Select
+              props:
+                value: ${state.statusFilter}
+                options:
+                  - value: all
+                    label: 全部
+                  - value: enabled
+                    label: 启用
+                  - value: disabled
+                    label: 停用
+                  - value: expired
+                    label: 已过期
+                className: w-40 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      statusFilter: ${event}
+                  - action: reload
+                    params:
+                      dataSource: clients
+            - type: Text
+              props:
+                text: 显示 ${data.clients.items.length} / ${data.clients.total}
+                type: secondary
+                className: tabular-nums text-sm shrink-0
+    - type: Card
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.clients.items}
+            rowKey: code
+            loading: ${dataStatus.clients.loading}
+            pagination: false
+            columns:
+              - title: 名称
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.name}
+                    variant: link
+                    size: small
+                    className: p-0 h-auto font-semibold
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /clients/${row.code}
+              - title: 标识
+                dataIndex: code
+              - title: 标签
+                dataIndex: tagsText
+              - title: 授权路由
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.routeCount}
+                    className: tabular-nums
+              - title: 配额
+                dataIndex: quotaSummary
+              - title: 限流
+                dataIndex: rateLimitSummary
+              - title: 状态
+                cell:
+                  type: StatusBadge
+                  props:
+                    status: ${row.status}
+              - title: 操作
+                align: center
+                cell:
+                  type: Flex
+                  props:
+                    align: center
+                    justify: center
+                    gap: middle
+                  children:
+                    - type: Button
+                      props:
+                        text: 查看
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /clients/${row.code}
+                    - type: Button
+                      props:
+                        text: 编辑
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /clients/${row.code}/edit
+                    - type: Button
+                      props:
+                        text: "${row.status == 'enabled' ? '停用' : '启用'}"
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - id: clientStatusCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: "${row.status == 'enabled' ? '确认停用客户端' : '确认启用客户端'}"
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: "${row.status == 'enabled' ? '停用后，该客户端的 AppKey 调用将被拒绝，Runtime 不再为其匹配任何路由。'
+                                          : '启用后，该客户端恢复使用 AppKey 调用授权路由。'}"
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: small
+                                      children:
+                                        - type: Text
+                                          props:
+                                            text: 影响范围：
+                                            strong: true
+                                        - type: Text
+                                          props:
+                                            text: · AppKey：${row.appKeyId}
+                                            type: secondary
+                                        - type: Text
+                                          props:
+                                            text: · 授权路由：${row.routeCount} 个
+                                            type: secondary
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: "${row.status == 'enabled' ? '确认停用' : '确认启用'}"
+                                            variant: primary
+                                            danger: ${row.status == 'enabled'}
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.clientStatusCfm.ok}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: "${row.status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                    - type: Button
+                      props:
+                        text: Rotate Secret
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - id: rotateSecretCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 确认 Rotate Secret
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: 将为 AppKey ${row.appKeyId} 轮换 Secret。
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: ⚠ 轮换后旧 Secret 立即失效，新 Secret 仅展示一次，请妥善保存。
+                                        type: warning
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认轮换
+                                            variant: primary
+                                            danger: true
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.rotateSecretCfm.ok}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 轮换成功，新 Secret：gw-sk-demo-7f3a······（仅此一次展示，请妥善保存）（演示：静态页面不落库）
+    - type: Empty
+      when: ${data.clients.items != null && data.clients.items.length == 0}
+      props:
+        title: 无匹配客户端
+        description: 调整标签、名称、标识或状态筛选后重试；也可以新建客户端

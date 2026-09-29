@@ -33,7 +33,7 @@
     </dependencies>
 
     <build>
-        <!-- 与 sample 一致：资源进 classpath，供 IDE / spring-boot:run；发行包 config/ 仍由 assembly 从源码目录拷贝 -->
+        <!-- 与 sample 一致：资源进 classpath，供 IDE 运行 main；发行包 config/ 仍由 assembly 从源码目录拷贝 -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

@@ -6,6 +6,10 @@ import com.innospots.nexmux.console.endpoint.model.ModelEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsEndpoint;
 import com.innospots.nexmux.console.endpoint.provider.ProviderEndpoint;
 import com.innospots.nexmux.console.endpoint.route.RouteEndpoint;
+import com.innospots.nexmux.console.sitemap.endpoint.NexmuxSitemapEndpoint;
+import com.innospots.nexmux.console.sitemap.service.NexmuxSitemapService;
+import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
+import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexmux.core.audit.dao.ConfigAuditLogDao;
@@ -115,5 +119,16 @@ public class NexmuxKernelConfiguration {
     @Lazy
     DebugEndpoint debugEndpoint(DebugService debugService) {
         return new DebugEndpoint(debugService);
+    }
+
+    @Bean
+    NexmuxSitemapService nexmuxSitemapService(SitemapConfigLoader sitemapConfigLoader) {
+        return new NexmuxSitemapService(sitemapConfigLoader, new SitemapMapper());
+    }
+
+    @Bean
+    @Lazy
+    NexmuxSitemapEndpoint nexmuxSitemapEndpoint(NexmuxSitemapService nexmuxSitemapService) {
+        return new NexmuxSitemapEndpoint(nexmuxSitemapService);
     }
 }

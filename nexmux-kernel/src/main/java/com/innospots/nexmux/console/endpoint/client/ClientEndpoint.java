@@ -12,6 +12,10 @@ import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.GET;
@@ -26,6 +30,7 @@ import lombok.RequiredArgsConstructor;
 @Path("/api/nexmux/clients")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
+@Tag(name = "NexmuxClient", description = "接入客户端与授权")
 @NexusAuthenticatedApi
 @RequiredArgsConstructor
 public class ClientEndpoint {
@@ -33,38 +38,53 @@ public class ClientEndpoint {
     private final ClientService clientService;
 
     @GET
+    @Operation(operationId = "nexmuxClientPage", summary = "分页查询客户端")
     public R<PageResult<ClientVo>> page(
+            @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
+            @Parameter(description = "每页条数", example = "20")
             @QueryParam("pageSize") @DefaultValue("20") Long pageSize) {
         return R.ok(clientService.page(new ClientPageRequest(pageNo, pageSize)));
     }
 
     @GET
     @Path("/{clientId}")
-    public R<ClientVo> get(@PathParam("clientId") String clientId) {
+    @Operation(operationId = "nexmuxClientGet", summary = "查询客户端详情")
+    public R<ClientVo> get(
+            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.get(clientId));
     }
 
     @POST
-    public R<ClientCreateResultVo> create(ClientCreateRequest request) {
+    @Operation(operationId = "nexmuxClientCreate", summary = "创建客户端")
+    public R<ClientCreateResultVo> create(
+            @RequestBody(description = "创建客户端", required = true) ClientCreateRequest request) {
         return R.ok(clientService.create(request));
     }
 
     @PUT
     @Path("/{clientId}")
-    public R<ClientVo> update(@PathParam("clientId") String clientId, ClientUpdateRequest request) {
+    @Operation(operationId = "nexmuxClientUpdate", summary = "更新客户端")
+    public R<ClientVo> update(
+            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId,
+            @RequestBody(description = "更新客户端", required = true) ClientUpdateRequest request) {
         return R.ok(clientService.update(clientId, request));
     }
 
     @POST
     @Path("/{clientId}/rotate-app-key")
-    public R<ClientRotateResultVo> rotateAppKey(@PathParam("clientId") String clientId) {
+    @Operation(operationId = "nexmuxClientRotateAppKey", summary = "轮换客户端 AppKey")
+    public R<ClientRotateResultVo> rotateAppKey(
+            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.rotateAppKey(clientId));
     }
 
     @PUT
     @Path("/{clientId}/route-grants")
-    public R<ClientVo> routeGrants(@PathParam("clientId") String clientId, ClientRouteGrantsRequest request) {
+    @Operation(operationId = "nexmuxClientRouteGrants", summary = "更新客户端路由授权")
+    public R<ClientVo> routeGrants(
+            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId,
+            @RequestBody(description = "路由授权", required = true) ClientRouteGrantsRequest request) {
         return R.ok(clientService.updateRouteGrants(clientId, request));
     }
 }

@@ -1,18 +1,475 @@
-dsl: '1.0'
-
+dsl: "1.0"
 page:
   id: nexmux-debug-client
+  title: 客户端调试
   name: nexmuxDebugClient
-  title: Nexmux
-  description: Nexmux console page (nexmux-debug-client).
-  type: general
-  permission: nexmux.provider.view
-
+  description: 调试台 / 客户端调试：模拟业务侧真实调用，验证鉴权、路由与配额（Chat 对话式）
 meta:
   apiBase: /api/nexmux
   priority: P0
   routePath: /page/nexmux/debug/nexmux-debug-client
-
-state: {}
-dataSources: {}
-actions: {}
+state:
+  clientCode: ""
+  appKeyId: ""
+  routeCode: ""
+  channel: WEB
+  routeTag: ""
+  user: test-user
+  appKeyOptions: []
+  routeOptions: []
+  tagOptions: []
+  messages: []
+  selectedRound: null
+  selectedRoundId: ""
+  tab: request
+  pretty: true
+  streaming: false
+  roundCount: 0
+body:
+  type: Page
+  props:
+    className: debug-page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 调试台
+          - label: 客户端调试
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 客户端调试
+        - type: Typography
+          props:
+            variant: muted
+            text: 模拟业务侧真实调用，验证鉴权、路由与配额
+    - type: Flex
+      props:
+        className: debug-split
+      children:
+        - type: Flex
+          props:
+            direction: vertical
+            className: debug-split-main
+          children:
+            - type: Card
+              props:
+                title: 对话记录
+                className: debug-chat-card
+              children:
+                - type: DebugChat
+                  props:
+                    messages: ${state.messages}
+                    sendDisabled: ${!state.clientCode || !state.appKeyId || !state.routeCode}
+                    placeholder: "${state.clientCode && state.appKeyId && state.routeCode ?
+                      '输入消息...' : '请先在右侧选择客户端、AppKey 与授权路由'}"
+                    streaming: ${state.streaming}
+                    selectedRoundId: ${state.selectedRoundId}
+                    emptyHint: 选择右侧调用身份后发送消息，验证鉴权、路由与配额
+                  events:
+                    onSend:
+                      - action: clientDebug.send
+                        params:
+                          text: ${event}
+                    onStop:
+                      - action: clientDebug.stop
+                    onClear:
+                      - action: clientDebug.clear
+                    onSelectRound:
+                      - action: setState
+                        params:
+                          selectedRound: ${event}
+                          selectedRoundId: ${event.id}
+        - type: Flex
+          props:
+            direction: vertical
+            gap: middle
+            className: debug-split-side
+          children:
+            - type: Card
+              props:
+                title: 调用身份
+                className: overflow-auto
+              children:
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: 客户端
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Select
+                          props:
+                            value: ${state.clientCode}
+                            options:
+                              - value: agent-app
+                                label: agent-app（agent-app）
+                              - value: web-portal
+                                label: web-portal（web-portal）
+                              - value: internal-batch
+                                label: internal-batch（internal-batch）
+                            placeholder: 选择客户端
+                            className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                          events:
+                            onChange:
+                              - action: clientDebug.selectClient
+                                params:
+                                  clientCode: ${event}
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: AppKey
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Select
+                          props:
+                            value: ${state.appKeyId}
+                            options: ${state.appKeyOptions}
+                            placeholder: 选择 AppKey
+                            disabled: ${!state.clientCode}
+                            className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                          events:
+                            onChange:
+                              - action: setState
+                                params:
+                                  appKeyId: ${event}
+                    - type: Text
+                      props:
+                        text: Secret 仅会话内使用，不持久化
+                        type: secondary
+                        className: block pl-[88px] text-xs
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: 授权路由
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Select
+                          props:
+                            value: ${state.routeCode}
+                            options: ${state.routeOptions}
+                            placeholder: 选择授权路由
+                            disabled: ${!state.clientCode}
+                            className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                          events:
+                            onChange:
+                              - action: clientDebug.selectRoute
+                                params:
+                                  routeCode: ${event}
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: Channel
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Select
+                          props:
+                            value: ${state.channel}
+                            options:
+                              - value: WEB
+                                label: WEB
+                              - value: APP
+                                label: APP
+                              - value: SERVER
+                                label: SERVER
+                            className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                          events:
+                            onChange:
+                              - action: setState
+                                params:
+                                  channel: ${event}
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: RouteTag
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Select
+                          props:
+                            value: ${state.routeTag}
+                            options: ${state.tagOptions}
+                            placeholder: （可选）路由标签
+                            disabled: ${!state.routeCode}
+                            allowClear: true
+                            className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+                          events:
+                            onChange:
+                              - action: setState
+                                params:
+                                  routeTag: ${event}
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: User
+                            strong: true
+                            className: w-20 shrink-0 text-sm
+                        - type: Input
+                          props:
+                            value: ${state.user}
+                            placeholder: 计量归属用户标识
+                            className: flex-1 w-full
+                          events:
+                            onChange:
+                              - action: setState
+                                params:
+                                  user: ${event}
+            - type: Card
+              props:
+                title: 执行明细
+                className: overflow-auto
+              children:
+                - type: Text
+                  when: ${!state.streaming && state.selectedRound == null}
+                  props:
+                    text: 发送消息后在此查看请求 / 返回报文与运行摘要
+                    type: secondary
+                    className: block py-8 text-center text-sm
+                - type: Text
+                  when: ${state.streaming && state.selectedRound == null}
+                  props:
+                    text: 生成中…流结束后展示完整返回报文
+                    type: secondary
+                    className: block py-8 text-center text-sm
+                - type: Flex
+                  when: ${state.selectedRound != null}
+                  props:
+                    direction: vertical
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: 第 ${state.selectedRound.seq} 轮
+                            strong: true
+                            className: text-sm
+                        - type: Button
+                          props:
+                            text: 请求报文
+                            size: small
+                            variant: "${state.tab == 'request' ? 'primary' : 'default'}"
+                          events:
+                            onClick:
+                              - action: setState
+                                params:
+                                  tab: request
+                        - type: Button
+                          props:
+                            text: 返回报文
+                            size: small
+                            variant: "${state.tab == 'response' ? 'primary' : 'default'}"
+                          events:
+                            onClick:
+                              - action: setState
+                                params:
+                                  tab: response
+                        - type: Flex
+                          props:
+                            gap: small
+                            className: ml-auto
+                          children:
+                            - type: Button
+                              props:
+                                text: "${state.pretty ? '压缩' : '格式化'}"
+                                size: small
+                                variant: text
+                              events:
+                                onClick:
+                                  - action: setState
+                                    params:
+                                      pretty: ${!state.pretty}
+                            - type: Button
+                              props:
+                                text: 复制
+                                size: small
+                                variant: text
+                              events:
+                                onClick:
+                                  - action: clientDebug.copy
+                                    params:
+                                      text: "${state.tab == 'request' ? (state.pretty ?
+                                        state.selectedRound.requestJson :
+                                        state.selectedRound.requestCompact) :
+                                        (state.pretty ?
+                                        state.selectedRound.responseJson :
+                                        state.selectedRound.responseCompact)}"
+                                  - action: message
+                                    params:
+                                      messageType: success
+                                      text: 已复制到剪贴板
+                    - type: Flex
+                      props:
+                        className: max-h-64 overflow-auto rounded-md bg-muted p-3
+                      children:
+                        - type: Text
+                          props:
+                            text: "${state.tab == 'request' ? (state.pretty ?
+                              state.selectedRound.requestJson :
+                              state.selectedRound.requestCompact) :
+                              (state.pretty ? state.selectedRound.responseJson :
+                              state.selectedRound.responseCompact)}"
+                            className: font-mono text-xs whitespace-pre
+                    - type: Separator
+                    - type: Grid
+                      props:
+                        columns: 3
+                        gap: 12
+                      children:
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: 状态
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.status}
+                                strong: true
+                                className: text-sm tabular-nums
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: 延迟
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.latencyMs}ms
+                                strong: true
+                                className: text-sm tabular-nums
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: TTFT
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.ttftMs}ms
+                                strong: true
+                                className: text-sm tabular-nums
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: 命中路由组
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.routeGroup}
+                                strong: true
+                                className: text-sm tabular-nums
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: Token (in/out)
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.tokensIn}/${state.selectedRound.tokensOut}
+                                strong: true
+                                className: text-sm tabular-nums
+                        - type: Flex
+                          props:
+                            direction: vertical
+                            gap: 2
+                          children:
+                            - type: Text
+                              props:
+                                text: Target
+                                type: secondary
+                                className: text-xs
+                            - type: Text
+                              props:
+                                text: ${state.selectedRound.target}
+                                strong: true
+                                className: text-sm tabular-nums
+                    - type: Separator
+                    - type: Text
+                      props:
+                        text: 配额扣减预览：${state.selectedRound.quotaPreview}
+                        type: secondary
+                        className: block text-xs
+                    - type: Text
+                      props:
+                        text: 限流：${state.selectedRound.rateLimitResult}
+                        type: secondary
+                        className: block text-xs
+                    - type: Separator
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: small
+                      children:
+                        - type: Text
+                          props:
+                            text: ${state.selectedRound.requestId}
+                            type: secondary
+                            className: font-mono text-xs
+                        - type: Button
+                          props:
+                            text: 查看调用日志
+                            size: small
+                            variant: link
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /call-logs

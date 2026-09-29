@@ -17,7 +17,7 @@ class NexmuxEntityPageMappingTest {
                 "nexmux-model-list",
                 "nexmux-route-list",
                 "nexmux-client-list",
-                "nexmux-request-log-list",
+                "nexmux-ops-request-log-list",
                 "nexmux-audit-list");
     }
 }

@@ -1,0 +1,1677 @@
+dsl: "1.0"
+page:
+  id: nexmux-ops-request-log-detail
+  title: 调用日志详情
+  name: nexmuxOpsRequestLogDetail
+  description: 运行管理 /
+    调用日志详情：基本信息、调用主体、Ingress、路由结果、Upstream、性能、用量、成本、错误、路由追踪、Prompt/Response
+meta:
+  apiBase: /api/nexmux
+  priority: P0
+  routePath: /page/nexmux/ops/nexmux-ops-request-log-detail
+dataSources:
+  detail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /request-logs/${route.params.id}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运行管理
+          - label: 调用日志
+            href: /call-logs
+          - label: ${route.params.id}
+    - type: Flex
+      when: ${data.detail != null}
+      props:
+        direction: vertical
+        gap: middle
+        align: stretch
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: middle
+              children:
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: small
+                    align: start
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        gap: middle
+                      children:
+                        - type: Typography
+                          props:
+                            variant: h3
+                            text: "Request: ${data.detail.id}"
+                        - type: LogStatus
+                          props:
+                            status: ${data.detail.status}
+                        - type: Text
+                          props:
+                            text: ${data.detail.latencyText}
+                            strong: true
+                            className: tabular-nums
+                        - type: Text
+                          props:
+                            text: ${data.detail.timeUtc}
+                            type: secondary
+                            className: tabular-nums
+                    - type: Text
+                      props:
+                        text: ${data.detail.routeName} · ${data.detail.modelName} ·
+                          ${data.detail.providerName}
+                        type: secondary
+                        className: text-sm
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 在客户端调试复现
+                        icon: zap
+                        variant: primary
+                        size: small
+                      events:
+                        onClick:
+                          - action: message
+                            params:
+                              messageType: info
+                              text: 已将该请求上下文带入客户端调试台（演示）
+                    - type: Button
+                      props:
+                        text: 跳转客户端用量
+                        icon: chart
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /client-usage
+                    - type: Button
+                      when: ${data.detail.costUsd > 0}
+                      props:
+                        text: 跳转成本明细
+                        icon: credit-card
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /costs/${route.params.id}
+        - type: Card
+          children:
+            - type: Tabs
+              props:
+                variant: line
+                items:
+                  - key: basic
+                    label: 基本信息
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: request_id
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.id}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: trace_id
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.traceId}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 时间 (UTC)
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.timeUtc}
+                          - type: Flex
+                            props:
+                              align: center
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 状态
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: LogStatus
+                                props:
+                                  status: ${data.detail.status}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: HTTP 状态码
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.httpStatusText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 协议
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.protocol}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Route
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.routeCode}（${data.detail.routeName}）
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Model
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.modelCode}（${data.detail.modelName}）
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Provider
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.providerName}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 端到端延迟
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.latencyText}
+                  - key: caller
+                    label: 调用主体
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Client
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.clientName}（${data.detail.clientCode}）
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: AppKey ID
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.appKeyId}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: User Email
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.userEmail}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Channel
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.channel}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: RouteTag
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.routeTag}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Application
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.application}
+                  - key: ingress
+                    label: Ingress
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 入口协议
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.protocol}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 请求路径
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.ingressMethod} ${data.detail.ingressPath}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 客户端 IP
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.clientIp}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 鉴权结果
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.authResult}
+                  - key: route
+                    label: 路由结果
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 命中 Alias
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.alias}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Route
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.routeCode}（${data.detail.routeName}）
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 路由组
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.routeGroup}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 策略
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.strategyText}
+                  - key: upstream
+                    label: Upstream
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游 Provider
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.providerName}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Endpoint
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.upstreamEndpoint}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游模型
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.upstreamModel}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游状态码
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.upstreamStatusText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游耗时
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.upstreamLatencyText}
+                  - key: perf
+                    label: 性能
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 端到端延迟
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.latencyText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: TTFT
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.ttftText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游延迟
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.upstreamLatencyText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 重试次数
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.retriesText}
+                  - key: usage
+                    label: 用量
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Input Tokens
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.inputTokensText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Output Tokens
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.outputTokensText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Cache Read Tokens
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.cacheReadText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Cache Write Tokens
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.cacheWriteText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Total Tokens
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.totalTokensText}
+                  - key: cost
+                    label: 成本
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 标准价 ($)
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.standardPriceText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 计费价 ($)
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.billingText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 成本 ($)
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.costText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 毛利 ($)
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.marginText}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: Pricing Snapshot
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.pricingSnapshot}
+                      - type: Flex
+                        props:
+                          justify: end
+                          className: mt-4
+                        children:
+                          - type: Button
+                            props:
+                              text: 查看成本明细
+                              icon: external-link
+                            events:
+                              onClick:
+                                - action: navigate
+                                  params:
+                                    to: /costs/${route.params.id}
+                  - key: error
+                    label: 错误
+                    className: p-2
+                    children:
+                      - type: Flex
+                        when: ${data.detail.error != null}
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 错误码
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.error.code}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 错误类型
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.error.type}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 上游 message
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.error.message}
+                      - type: Empty
+                        when: ${data.detail.error == null}
+                        props:
+                          title: 该请求未发生错误
+                          description: 错误码、错误类型与上游 message 仅在请求失败时记录
+                  - key: trace
+                    label: 路由追踪
+                    className: p-2
+                    children:
+                      - type: Card
+                        when: ${data.detail.trace[0] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[0].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[0].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[0].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[0].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[0].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[0].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[1] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[1].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[1].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[1].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[1].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[1].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[1].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[2] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[2].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[2].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[2].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[2].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[2].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[2].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[3] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[3].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[3].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[3].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[3].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[3].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[3].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[4] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[4].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[4].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[4].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[4].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[4].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[4].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[5] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[5].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[5].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[5].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[5].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[5].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[5].reason}
+                      - type: Flex
+                        props:
+                          justify: center
+                          className: py-1
+                        children:
+                          - type: Icon
+                            props:
+                              name: arrow-down
+                              className: text-muted-foreground
+                      - type: Card
+                        when: ${data.detail.trace[6] != null}
+                        props:
+                          className: gap-3 py-4 [&_[data-slot=card-header]]:px-4
+                            [&_[data-slot=card-content]]:px-4
+                          title: ${data.detail.trace[6].name}
+                        children:
+                          - type: Flex
+                            props:
+                              direction: vertical
+                              gap: middle
+                              align: stretch
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输入
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[6].input}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 判断
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[6].decision}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 输出
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[6].output}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 耗时
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[6].duration}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 原因
+                                      type: secondary
+                                      style:
+                                        width: 140
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.trace[6].reason}
+                  - key: prompt
+                    label: Prompt/Response
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: middle
+                          align: stretch
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 平台策略
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.pr.policy}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 策略说明
+                                  type: secondary
+                                  style:
+                                    width: 140
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.pr.policyNote}
+                      - type: Text
+                        when: ${data.detail.pr.prompt == null}
+                        props:
+                          text: 按平台策略，该请求未留存 Prompt/Response 内容。
+                          type: secondary
+                          className: text-sm mt-4
+                      - type: Text
+                        when: ${data.detail.pr.prompt != null}
+                        props:
+                          text: Prompt
+                          strong: true
+                          className: mt-4
+                      - type: Text
+                        when: ${data.detail.pr.prompt != null}
+                        props:
+                          text: ${data.detail.pr.prompt}
+                          className: font-mono text-xs bg-muted rounded-md p-3 whitespace-pre-wrap block
+                      - type: Text
+                        when: ${data.detail.pr.response != null}
+                        props:
+                          text: Response
+                          strong: true
+                          className: mt-4
+                      - type: Text
+                        when: ${data.detail.pr.response != null}
+                        props:
+                          text: ${data.detail.pr.response}
+                          className: font-mono text-xs bg-muted rounded-md p-3 whitespace-pre-wrap block
+    - type: Empty
+      when: ${data.detail == null && !dataStatus.detail.loading}
+      props:
+        title: 未找到日志
+        description: 请求 ID「${route.params.id}」不存在或已超出留存期
+      children:
+        - type: Button
+          props:
+            text: 返回列表
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /call-logs

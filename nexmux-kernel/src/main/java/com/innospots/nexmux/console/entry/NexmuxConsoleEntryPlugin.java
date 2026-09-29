@@ -166,8 +166,8 @@ public final class NexmuxConsoleEntryPlugin implements Plugin {
         return module(
                 descriptor(
                         MODULE_OPS,
-                        "nexmux-request-log-list",
-                        List.of("nexmux-request-log-detail"),
+                        "nexmux-ops-request-log-list",
+                        List.of("nexmux-ops-request-log-detail"),
                         I18nObject.of("en", "Request logs", "zh", "调用日志"),
                         I18nObject.of("en", "Runtime request logs (read-only).", "zh", "运行调用日志（只读）。")),
                 List.of(MenuDeclaration.directory(
@@ -180,7 +180,7 @@ public final class NexmuxConsoleEntryPlugin implements Plugin {
                                 I18nObject.of("en", "Request logs", "zh", "调用日志"),
                                 "file-text",
                                 10,
-                                "nexmux-request-log-list")))));
+                                "nexmux-ops-request-log-list")))));
     }
 
     private static ConsoleModuleDeclaration debugModule() {

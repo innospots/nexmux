@@ -3,10 +3,11 @@
 #   public: true   → 匿名可见（登录页）
 #   permission: x  → 需登录且具备对应权限
 #   无标记         → 需登录
-# 页面 DSL 按 id 约定从 pages/<id>.page.yaml 加载（由 model-console 的
-# public/dsl/*.json 经 scripts/convert-dsl.mjs 转换）；lazy: true 不随 sitemap
-# 内联下发，客户端经 /api/pages/{id} 懒加载。updatedAt / user / permissions
-# 为会话动态字段，由服务端在响应时注入。
+# 页面 DSL 按 id 约定从 <域>/<id>.yaml 加载（域划分参考 kernel
+# ui-pages/nexmux：route / provider / audit / model / ops / client / debug；
+# 由 model-console 的 public/dsl/*.json 经 scripts/convert-dsl.mjs 转换）；
+# lazy: true 不随 sitemap 内联下发，客户端经 /api/pages/{id} 懒加载。
+# updatedAt / user / permissions 为会话动态字段，由服务端在响应时注入。
 
 id: site
 resourceType: sitemap

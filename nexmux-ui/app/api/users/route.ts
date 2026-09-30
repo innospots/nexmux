@@ -16,7 +16,7 @@ const MOCK_USERS = [
 ];
 
 /**
- * 用户列表：users.page.yaml 的 http 数据源。
+ * 用户列表：用户列表页的 http 数据源。
  * 支持 keyword（姓名 / 用户名模糊匹配）与 role（精确匹配）过滤。
  * 接口侧鉴权——前端隐藏菜单不等于安全。
  */

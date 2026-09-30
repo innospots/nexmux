@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 将 model-console 提取的静态页面 DSL（public/dsl/*.json）转换为本项目的
- * 页面 YAML（src/server/yaml/pages/<id>.page.yaml）。
+ * 页面 YAML（src/server/yaml/<域>/<id>.yaml，域划分参考 kernel ui-pages/nexmux）。
  *
  * 转换规则：
  * - 字符串中的路由参数占位 `:code` / `:id` → `${route.params.code}` / `${route.params.id}`
@@ -18,7 +18,27 @@ const projectRoot = resolve(fileURLToPath(import.meta.url), "../..");
 const modelConsole =
   process.argv[2] ?? resolve(projectRoot, "../../model-console");
 const SRC_DIR = join(modelConsole, "public/dsl");
-const OUT_DIR = join(projectRoot, "src/server/yaml/pages");
+const OUT_DIR = join(projectRoot, "src/server/yaml");
+
+/** 页面 id → 域子目录（route / provider / audit / model / ops / client / debug，
+ * 划分参考 kernel ui-pages/nexmux；ops 域页面无统一前缀，显式枚举） */
+function pageDir(id) {
+  const OPS = new Set([
+    "dashboard",
+    "call-log-list",
+    "call-log-detail",
+    "cost-list",
+    "cost-detail",
+    "model-usage",
+    "provider-usage",
+    "client-usage",
+    "provider-availability",
+  ]);
+  if (OPS.has(id)) return "ops";
+  if (id === "service-settings") return "audit";
+  if (id.endsWith("-debug")) return "debug";
+  return id.startsWith("client-template-") ? "client" : id.split("-")[0];
+}
 
 /** 页面 id → 路由路径（sitemap.yaml 的 pages 须与此一致）；login 用项目自带登录页，不转换 */
 export const PAGE_ROUTES = {
@@ -54,7 +74,7 @@ export const PAGE_ROUTES = {
 };
 
 /** 编辑页为运行时记录驱动（buildFormPage('edit', record)），无法静态转换，
- * 由 *-edit.page.yaml 手工维护（create 结构 + detail 数据源回填 initialValues）；
+ * 由 *-edit.yaml 手工维护（create 结构 + detail 数据源回填 initialValues）；
  * edit-404 的内容已内联进各编辑页的 notFound 分支，均不转换 */
 const SKIP = new Set(["login", "shell"]);
 
@@ -87,7 +107,9 @@ for (const file of readdirSync(SRC_DIR).filter((f) => f.endsWith(".json"))) {
     console.error(`未配置路由的页面: ${id}（${file}）`);
     process.exit(1);
   }
-  const out = join(OUT_DIR, `${id}.page.yaml`);
+  const dir = join(OUT_DIR, pageDir(id));
+  mkdirSync(dir, { recursive: true });
+  const out = join(dir, `${id}.yaml`);
   writeFileSync(out, stringify(walk(dsl)), "utf8");
   converted++;
 }

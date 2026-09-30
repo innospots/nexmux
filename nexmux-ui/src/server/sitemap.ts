@@ -1,5 +1,5 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
 
 import type { PageDsl, PermissionConfig } from "@pactor-app/core";
 import { parseDocument } from "yaml";
@@ -14,9 +14,10 @@ import type { DemoUser } from "./accounts";
  * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
  *
  * 入口数据（元数据 / layouts / pages / menus 全量）在 yaml/sitemap.yaml，
- * 页面 DSL 在 yaml/pages/<id>.page.yaml；本文件只负责：加载 YAML、
- * 按会话裁剪可见性（public / permission / 需登录）、注入会话动态字段
- * （updatedAt / user / permissions）。
+ * 页面 DSL 在 yaml/<域>/<id>.yaml（route / provider / audit / model /
+ * ops / client / debug，域划分参考 kernel ui-pages/nexmux）；本文件只负责：
+ * 加载 YAML、按会话裁剪可见性（public / permission / 需登录）、注入会话
+ * 动态字段（updatedAt / user / permissions）。
  */
 
 /* ---------------- YAML DSL 文件加载（src/server/yaml/，启动时读入内存） ---------------- */
@@ -61,12 +62,33 @@ interface SitemapFile {
 
 const site = loadYaml<SitemapFile>("sitemap.yaml");
 
-/** 页面 DSL：按 id 约定从 pages/<id>.page.yaml 加载；lazy 页不在此内联 */
+/** 递归收集 yaml 下所有页面 DSL（含 route / provider / ops 等域子目录；跳过 sitemap.yaml），按 id → 相对路径建索引 */
+function collectPageFiles(dir: string): Map<string, string> {
+  return new Map(
+    readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+      const path = join(dir, entry.name);
+      if (entry.isDirectory()) return [...collectPageFiles(path)];
+      if (!entry.name.endsWith(".yaml") || entry.name === "sitemap.yaml") return [];
+      const id = entry.name.slice(0, -".yaml".length);
+      return [[id, relative(YAML_DIR, path)]];
+    }),
+  );
+}
+
+const pageFiles = collectPageFiles(YAML_DIR);
+
+function loadPageDsl(id: string): PageDsl {
+  const file = pageFiles.get(id);
+  if (!file) throw new Error(`页面 DSL 缺失：${id}.yaml`);
+  return loadYaml<PageDsl>(file);
+}
+
+/** 页面 DSL：按 id 约定从 yaml/<域>/<id>.yaml 加载；lazy 页不在此内联 */
 const pageDsls = new Map(
-  site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
+  site.pages.filter((p) => !p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
 );
 const lazyPageDsls = new Map(
-  site.pages.filter((p) => p.lazy).map((p) => [p.id, loadYaml<PageDsl>(`pages/${p.id}.page.yaml`)]),
+  site.pages.filter((p) => p.lazy).map((p) => [p.id, loadPageDsl(p.id)]),
 );
 
 /* ---------------- 会话裁剪 ---------------- */

@@ -43,7 +43,7 @@ interface PageEntry {
   version: number;
   public?: boolean;
   permission?: string;
-  /** 不随 sitemap 内联 pageDsl，客户端经 /api/pages/{id} 懒加载 */
+  /** 不随 sitemap 内联 pageDsl，客户端经 /api/public/pages/{id} 懒加载 */
   lazy?: boolean;
 }
 
@@ -147,7 +147,7 @@ export function buildSitemap(user: DemoUser | null): SitemapResource {
       path: p.path,
       title: p.title,
       version: p.version,
-      // 懒加载页不下发 pageDsl，仅 id / path / version，经 /api/pages/{id} 按需获取
+      // 懒加载页不下发 pageDsl，仅 id / path / version，经 /api/public/pages/{id} 按需获取
       ...(p.lazy ? {} : { pageDsl: pageDsls.get(p.id) }),
     }));
 

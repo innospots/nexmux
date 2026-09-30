@@ -4,7 +4,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { SitemapApp } from "pactor-app";
 
-import { apiBaseUrl, sitemapSources } from "./config";
+import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
 
@@ -49,6 +49,7 @@ function PactorAppInner() {
       navigate={(to) => router.push(to)}
       components={pactorComponents}
       actions={pactorActions}
+      pageEndpoint={pageEndpoint}
     />
   );
 }

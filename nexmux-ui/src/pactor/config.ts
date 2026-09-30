@@ -11,6 +11,14 @@
 export const sitemapSources: string[] = ["/api/sitemap"];
 
 /**
+ * 懒加载页面端点（SitemapApp pageEndpoint）。
+ * 框架缺省为 /api/pages/{id}；本仓库服务端路由在 app/api/public/pages/[id]，
+ * 需显式覆盖，否则客户端仍会请求框架缺省路径。
+ */
+export const pageEndpoint = (pageId: string) =>
+  `/api/public/pages/${pageId}`;
+
+/**
  * 外部接口基准地址（SitemapApp baseUrl）。
  * 由 next.config.js 的 API_BASE_URLS 按构建环境（APP_ENV：
  * build / build:dev / build:test → production / development / test）

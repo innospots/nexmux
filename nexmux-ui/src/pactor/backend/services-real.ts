@@ -54,6 +54,14 @@ import {
 import { getCallLogById, listCallLogs } from "./adapters/call-log-adapter";
 import { getCostById, listCosts } from "./adapters/cost-adapter";
 import { getAuditById, listAuditOperators, listAudits } from "./adapters/audit-adapter";
+import {
+  queryAvailabilityReal,
+  queryClientUsageReal,
+  queryDashboardReal,
+  queryModelUsageReal,
+  queryProviderUsageReal,
+} from "./adapters/stats-adapter";
+import { invokeClientDebug, invokeModelDebug } from "./adapters/debug-adapter";
 import { fetchAll } from "./client";
 import type { ProviderVo } from "./types";
 

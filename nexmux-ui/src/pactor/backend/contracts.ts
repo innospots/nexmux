@@ -58,6 +58,10 @@ export interface ProviderListParams {
   /** all | enabled | disabled | pending | none */
   status?: string;
   types?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页 */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 export interface ProviderCounts {
   all: { enabled: number; total: number };
@@ -75,6 +79,10 @@ export interface ProviderListResult {
   counts: ProviderCounts;
   /** 快筛 Chip 组：status 单选（含「全部」）/ types 多选（无「全部」，不选即全部） */
   filters: { status: ProviderChipOption[]; types: ProviderChipOption[] };
+  /** 分页信息（分页请求时返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 export interface PullModelRow {
   id: string;
@@ -211,6 +219,10 @@ export interface ModelListParams {
   type?: string;
   /** 厂商多选（Provider Code 列表） */
   providers?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页 */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 export interface ModelCounts {
   all: { enabled: number; total: number };
@@ -228,6 +240,10 @@ export interface ModelListResult {
   counts: ModelCounts;
   /** 快筛 Chip 组：type 单选（含「全部」），providers 多选（含「全部」，点击清空） */
   filters: { type: ModelChipOption[]; providers: ModelChipOption[] };
+  /** 分页信息（分页请求时返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 // ── from routes-mock ──
 export type RouteStatus = "enabled" | "disabled" | "draft";
@@ -303,6 +319,10 @@ export interface RouteListParams {
   type?: string;
   /** 标签多选 */
   tags?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页 */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 export interface RouteCounts {
   all: { enabled: number; total: number };
@@ -326,6 +346,10 @@ export interface RouteListResult {
     type: RouteChipOption[];
     tags: RouteChipOption[];
   };
+  /** 分页信息（分页请求时返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 // ── from client-templates-mock ──
 export type ClientTemplateStatus = "enabled" | "disabled";
@@ -428,6 +452,10 @@ export interface ClientTemplateListParams {
   keyword?: string;
   /** 标签多选（取交集） */
   tags?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页 */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 export interface ClientTemplateCounts {
   all: { enabled: number; total: number };
@@ -449,6 +477,10 @@ export interface ClientTemplateListResult {
     status: ClientTemplateChipOption[];
     tags: ClientTemplateChipOption[];
   };
+  /** 分页信息（分页请求时返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 // ── from clients-mock ──
 export type ClientStatus = "enabled" | "disabled" | "expired";
@@ -504,6 +536,10 @@ export interface ClientListParams {
   code?: string;
   /** 标签多选（取交集） */
   tags?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页 */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 export interface ClientCounts {
   all: { enabled: number; total: number };
@@ -522,6 +558,10 @@ export interface ClientListResult {
   counts: ClientCounts;
   /** 快筛 Chip 组：tags 多选（含「全部」，点击清空） */
   filters: { tags: ClientChipOption[] };
+  /** 分页信息（分页请求时返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 // ── from call-logs-mock ──
 export type CallLogStatus =

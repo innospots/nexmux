@@ -147,6 +147,10 @@ export interface ModelListParams {
   type?: string;
   /** 厂商多选（Provider Code 列表） */
   providers?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页（未传保持全量返回） */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 
 /** 快筛 Chip 计数（数据构成口径，不随筛选变化） */
@@ -165,10 +169,15 @@ export interface ModelChipOption {
 
 export interface ModelListResult {
   items: ModelRecord[];
+  /** 分页请求时为筛选后总数；未分页时为全量总数（构成口径见 counts.all.total） */
   total: number;
   counts: ModelCounts;
   /** 快筛 Chip 组：type 单选（含「全部」），providers 多选（含「全部」，点击清空） */
   filters: { type: ModelChipOption[]; providers: ModelChipOption[] };
+  /** 分页信息（仅传 page/pageSize 的分页请求返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 
 const TYPE_LABELS: Record<ModelType, string> = {
@@ -777,7 +786,8 @@ function computeFilters(counts: ModelCounts): ModelListResult["filters"] {
   };
 }
 
-/** model.list：类型单选 + 厂商多选取交集，按 Updated At 降序（「添加模型」卡置顶由页面保证） */
+/** model.list：类型单选 + 厂商多选取交集，按 Updated At 降序（「添加模型」卡置顶由页面保证）；
+ *  传 page/pageSize 时分页（total 为筛选后总数），否则保持全量返回 */
 export function queryModels(params: ModelListParams = {}): ModelListResult {
   const type = params.type ?? "all";
   const providers = params.providers ?? [];
@@ -787,7 +797,21 @@ export function queryModels(params: ModelListParams = {}): ModelListResult {
       (providers.length === 0 || providers.includes(m.providerCode)),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const counts = computeCounts();
-  return { items, total: MODELS.length, counts, filters: computeFilters(counts) };
+  const filters = computeFilters(counts);
+  if (params.page !== undefined || params.pageSize !== undefined) {
+    const pageNo = params.page ?? 1;
+    const pageSize = params.pageSize ?? 50;
+    return {
+      items: items.slice((pageNo - 1) * pageSize, pageNo * pageSize),
+      total: items.length,
+      counts,
+      filters,
+      pageNo,
+      pageSize,
+      pages: Math.ceil(items.length / pageSize),
+    };
+  }
+  return { items, total: MODELS.length, counts, filters };
 }
 
 /** model.detail：按 Model Code 取详情；未命中返回 undefined（页面做空态） */

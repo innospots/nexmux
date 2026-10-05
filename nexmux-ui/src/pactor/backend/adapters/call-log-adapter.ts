@@ -18,50 +18,7 @@ import {
   shortTime,
   thousands,
 } from "./format-shared";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface RequestLogVo {
-  requestId: string;
-  clientId?: string;
-  routeId?: string;
-  modelCode?: string;
-  status: string;
-  latencyMs?: number;
-  errorCode?: string;
-  routeTrace?: string;
-  requestedAt?: string;
-  appKeyId?: string;
-  userEmail?: string;
-  providerCode?: string;
-  protocol?: string;
-  routeGroup?: string;
-  application?: string;
-  alias?: string;
-  httpStatus?: number;
-  inputTokens?: number;
-  outputTokens?: number;
-  cacheReadTokens?: number;
-  cacheWriteTokens?: number;
-  costUsd?: number;
-  billingUsd?: number;
-}
-
-interface RequestLogDetailVo extends RequestLogVo {
-  ttftMs?: number;
-  upstreamModel?: string;
-  upstreamEndpoint?: string;
-  upstreamStatus?: string;
-  upstreamLatencyMs?: number;
-  retries?: number;
-  clientIp?: string;
-  ingressMethod?: string;
-  ingressPath?: string;
-  traceId?: string;
-  errorType?: string;
-  pricingSnapshot?: string;
-  promptSnapshot?: string;
-}
+import type { RequestLogDetailVo, RequestLogVo } from "../types";
 
 interface PricingSnapshot {
   priceVersion?: string;
@@ -155,7 +112,7 @@ function toRecord(
   relations: LogRelations,
   detail?: RequestLogDetailVo,
 ): CallLogRecord {
-  const status = statusOf(vo.status);
+  const status = statusOf(vo.status ?? "");
   const input = vo.inputTokens ?? null;
   const output = vo.outputTokens ?? null;
   const total = (input ?? 0) + (output ?? 0);

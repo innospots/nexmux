@@ -18,43 +18,12 @@ import {
   rateLimitSummaryOf,
 } from "./quota-shared";
 import { getClientByCode } from "./client-adapter";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface TemplateVo {
-  templateId: string;
-  templateCode: string;
-  displayName: string;
-  status: string;
-  tags?: string;
-  validityType?: string;
-  validityDays?: number;
-  validTo?: string;
-  authorizedRouteIds: string[];
-  quotaSpec?: string;
-  rateLimitSpec?: string;
-  createdClientCount: number;
-}
-
-interface TemplateDetailVo extends Omit<TemplateVo, "tags"> {
-  description?: string;
-  tags: string[];
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-}
-
-interface RouteVo {
-  routeId: string;
-  routeCode: string;
-  alias: string;
-  displayName: string;
-  routeSpec?: { ingress?: string; candidates?: unknown[] };
-}
-
-interface ClientVo {
-  clientCode: string;
-}
+import type {
+  ClientTemplateDetailVo,
+  ClientTemplateVo,
+  ClientVo,
+  RouteVo,
+} from "../types";
 
 // ── 派生工具 ──────────────────────────────────────────────────
 
@@ -91,11 +60,11 @@ async function loadRelations(): Promise<TemplateRelations> {
 // ── VO → ClientTemplateRecord ─────────────────────────────────
 
 function toRecord(
-  vo: TemplateVo | TemplateDetailVo,
+  vo: ClientTemplateVo | ClientTemplateDetailVo,
   relations: TemplateRelations,
-  detail?: TemplateDetailVo,
+  detail?: ClientTemplateDetailVo,
 ): ClientTemplateRecord {
-  const authRoutes: AuthRoute[] = vo.authorizedRouteIds
+  const authRoutes: AuthRoute[] = (vo.authorizedRouteIds ?? [])
     .map((id) => relations.routesById.get(id))
     .filter((r): r is RouteVo => !!r)
     .map((r) => ({
@@ -132,7 +101,7 @@ function toRecord(
     authRoutes,
     quotas,
     rateLimits,
-    createdClientCount: vo.createdClientCount,
+    createdClientCount: vo.createdClientCount ?? 0,
     createdAt: timeText(detail?.createdAt),
     updatedAt: timeText(detail?.updatedAt),
     operator: detail?.updatedBy ?? "—",
@@ -199,18 +168,22 @@ export async function listClientTemplates(params: {
   status?: string;
   keyword?: string;
   tags?: string[];
+  page?: number;
+  pageSize?: number;
 }): Promise<ClientTemplateListResult> {
   const status = params.status && params.status !== "all" ? params.status : undefined;
+  const pageNo = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
   const [page, relations, allForCounts] = await Promise.all([
-    backendClient.get<PageResult<TemplateVo>>("/api/nexmux/client-templates", {
-      pageNo: 1,
-      pageSize: 5000,
+    backendClient.get<PageResult<ClientTemplateVo>>("/api/nexmux/client-templates", {
+      pageNo,
+      pageSize,
       status: status?.toUpperCase(),
       keyword: params.keyword || undefined,
       tags: params.tags?.length ? params.tags.join(",") : undefined,
     }),
     loadRelations(),
-    fetchAll<TemplateVo>("/api/nexmux/client-templates"),
+    fetchAll<ClientTemplateVo>("/api/nexmux/client-templates"),
   ]);
 
   const items = page.records.map((vo) => toRecord(vo, relations));
@@ -218,7 +191,11 @@ export async function listClientTemplates(params: {
   const counts = computeCounts(allItems);
   return {
     items,
-    total: allForCounts.length,
+    // total 为筛选后总数（后端 PageResult）；构成口径由 counts.all.total 承担
+    total: page.total,
+    pageNo,
+    pageSize,
+    pages: page.pages,
     counts,
     filters: computeFilters(counts, allItems),
   };
@@ -228,7 +205,7 @@ export async function getClientTemplateByCode(
   code: string,
 ): Promise<ClientTemplateRecord | null> {
   const [detail, relations] = await Promise.all([
-    backendClient.get<TemplateDetailVo>(
+    backendClient.get<ClientTemplateDetailVo>(
       `/api/nexmux/client-templates/by-code/${encodeURIComponent(code)}`,
     ),
     loadRelations(),
@@ -238,7 +215,7 @@ export async function getClientTemplateByCode(
 
 /** 基于模板创建的客户端（复用 client-adapter 的记录整形） */
 export async function clientsCreatedByTemplate(code: string): Promise<(ClientRecord | null)[]> {
-  const detail = await backendClient.get<TemplateDetailVo>(
+  const detail = await backendClient.get<ClientTemplateDetailVo>(
     `/api/nexmux/client-templates/by-code/${encodeURIComponent(code)}`,
   );
   const clients = await backendClient.get<ClientVo[]>(
@@ -250,21 +227,23 @@ export async function clientsCreatedByTemplate(code: string): Promise<(ClientRec
 // ── 写操作 ─────────────────────────────────────────────────────
 
 async function templateIdOf(code: string): Promise<string> {
-  const detail = await backendClient.get<TemplateDetailVo>(
+  const detail = await backendClient.get<ClientTemplateDetailVo>(
     `/api/nexmux/client-templates/by-code/${encodeURIComponent(code)}`,
   );
   return detail.templateId;
 }
 
-export async function createClientTemplate(body: Record<string, unknown>): Promise<TemplateVo> {
-  return backendClient.post<TemplateVo>("/api/nexmux/client-templates", body);
+export async function createClientTemplate(
+  body: Record<string, unknown>,
+): Promise<ClientTemplateVo> {
+  return backendClient.post<ClientTemplateVo>("/api/nexmux/client-templates", body);
 }
 
 export async function updateClientTemplate(
   code: string,
   body: Record<string, unknown>,
-): Promise<TemplateVo> {
-  return backendClient.put<TemplateVo>(
+): Promise<ClientTemplateVo> {
+  return backendClient.put<ClientTemplateVo>(
     `/api/nexmux/client-templates/${await templateIdOf(code)}`,
     body,
   );
@@ -273,9 +252,9 @@ export async function updateClientTemplate(
 export async function setClientTemplateEnabled(
   code: string,
   enabled: boolean,
-): Promise<TemplateVo> {
+): Promise<ClientTemplateVo> {
   const id = await templateIdOf(code);
-  return backendClient.post<TemplateVo>(
+  return backendClient.post<ClientTemplateVo>(
     `/api/nexmux/client-templates/${id}/${enabled ? "enable" : "disable"}`,
   );
 }

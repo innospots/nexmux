@@ -607,7 +607,7 @@ body:
                                     - type: Text
                                       props:
                                         size: small
-                                        text: 移除后，该主体对「${row.name}」（${row.path}）的调用将被拒绝；重新添加授权即可恢复。
+                                        text: 移除后，该主体对「${parent.row.name}」（${parent.row.path}）的调用将被拒绝；重新添加授权即可恢复。
                                     - type: Flex
                                       props:
                                         justify: end

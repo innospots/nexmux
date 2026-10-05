@@ -12,63 +12,13 @@ import type {
   RouteRecord,
 } from "../../mocks/routes-mock";
 import { backendClient, fetchAll, type PageResult } from "../client";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface RouteCandidateVo {
-  modelCode: string;
-  weight: number;
-  enabled?: boolean;
-  priority?: string;
-  costRate?: number | null;
-  billingRate?: number | null;
-}
-
-interface RouteSpecVo {
-  alias?: string;
-  ingress?: string;
-  strategyType?: string;
-  candidates?: RouteCandidateVo[];
-  filterUnhealthyBindings?: boolean;
-  schemaVersion?: number;
-  description?: string;
-  protocol?: string;
-  tags?: string[];
-  stickySession?: boolean;
-}
-
-interface RouteVo {
-  routeId: string;
-  routeCode: string;
-  alias: string;
-  displayName: string;
-  status: string;
-  routeSpec?: RouteSpecVo;
-  publishedAt?: string;
-}
-
-interface RouteDetailVo extends RouteVo {
-  publishedRouteSpec?: RouteSpecVo;
-  publishedBy?: string;
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-}
-
-interface ModelVo {
-  modelId: string;
-  modelCode: string;
-  displayName: string;
-  status: string;
-  primaryProviderId?: string;
-  primaryProviderModelId?: string;
-}
-
-interface ProviderVo {
-  providerId: string;
-  providerCode: string;
-  displayName: string;
-}
+import type {
+  ModelDetailVo,
+  ProviderVo,
+  RouteCandidate,
+  RouteDetailVo,
+  RouteVo,
+} from "../types";
 
 // ── 常量（与 routes-mock 逐字对齐） ────────────────────────────
 
@@ -111,7 +61,7 @@ function statusOf(backendStatus: string): "enabled" | "disabled" | "draft" {
   return "draft";
 }
 
-function typeOf(candidates: RouteCandidateVo[]): "single" | "pool" | "conditional" {
+function typeOf(candidates: RouteCandidate[]): "single" | "pool" | "conditional" {
   return candidates.length > 1 ? "pool" : "single";
 }
 
@@ -122,13 +72,13 @@ function timeText(iso?: string): string {
 // ── 关联数据（models + providers 全量内存 join） ───────────────
 
 interface RouteRelations {
-  modelsByCode: Map<string, ModelVo>;
+  modelsByCode: Map<string, ModelDetailVo>;
   providersById: Map<string, ProviderVo>;
 }
 
 async function loadRelations(): Promise<RouteRelations> {
   const [models, providers] = await Promise.all([
-    fetchAll<ModelVo>("/api/nexmux/models"),
+    fetchAll<ModelDetailVo>("/api/nexmux/models"),
     fetchAll<ProviderVo>("/api/nexmux/providers"),
   ]);
   return {
@@ -137,7 +87,7 @@ async function loadRelations(): Promise<RouteRelations> {
   };
 }
 
-function modelEntryOf(candidate: RouteCandidateVo, relations: RouteRelations): RouteModelEntry {
+function modelEntryOf(candidate: RouteCandidate, relations: RouteRelations): RouteModelEntry {
   const model = relations.modelsByCode.get(candidate.modelCode);
   const provider = relations.providersById.get(model?.primaryProviderId ?? "");
   return {
@@ -165,7 +115,7 @@ function toRecord(
   const candidates = spec.candidates ?? [];
   const models = candidates.map((c) => modelEntryOf(c, relations));
   const type = typeOf(candidates);
-  const status = statusOf(vo.status);
+  const status = statusOf(vo.status ?? "");
   const strategy = (spec.strategyType ?? "FIXED") as RouteRecord["strategy"];
   const strategyLabel = STRATEGY_LABELS[strategy] ?? strategy;
   const path = spec.ingress ?? "";
@@ -278,16 +228,21 @@ export async function listRoutes(params: {
   status?: string;
   type?: string;
   tags?: string[];
+  page?: number;
+  pageSize?: number;
 }): Promise<RouteListResult> {
   const status = params.status && params.status !== "all" ? params.status : undefined;
   const backendStatus =
     status === "enabled" ? "PUBLISHED" : status === "disabled" ? "DISABLED" : status === "draft" ? "DRAFT" : undefined;
+  const pageNo = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
 
   const [page, relations, allForCounts] = await Promise.all([
     backendClient.get<PageResult<RouteVo>>("/api/nexmux/routes", {
-      pageNo: 1,
-      pageSize: 5000,
+      pageNo,
+      pageSize,
       status: backendStatus,
+      // type/tags 由后端内存过滤（inventory §1：type 按候选数、tags 取交集），分页在过滤后
       type: params.type && params.type !== "all" ? params.type : undefined,
       tags: params.tags?.length ? params.tags.join(",") : undefined,
     }),
@@ -301,7 +256,11 @@ export async function listRoutes(params: {
   const counts = computeCounts(allItems);
   return {
     items,
-    total: allForCounts.length,
+    // total 为筛选后总数（后端 PageResult）；构成口径由 counts.all.total 承担
+    total: page.total,
+    pageNo,
+    pageSize,
+    pages: page.pages,
     counts,
     filters: computeFilters(counts, allItems),
   };

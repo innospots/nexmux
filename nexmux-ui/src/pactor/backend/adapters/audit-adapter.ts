@@ -13,22 +13,7 @@ import type {
 } from "../../mocks/audit-mock";
 import { backendClient, type PageResult } from "../client";
 import { minuteTime, parseJsonSafe } from "./format-shared";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface AuditLogVo {
-  auditId: string;
-  resourceType?: string;
-  resourceId?: string;
-  operation?: string;
-  changeSummary?: string;
-  changeDiff?: string;
-  operatorId?: string;
-  clientIp?: string;
-  requestId?: string;
-  userAgent?: string;
-  createdAt?: string;
-}
+import type { AuditLogVo } from "../types";
 
 // ── 常量（与 audit-mock 对齐；后端存储为大写操作码） ───────────
 

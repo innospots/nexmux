@@ -5,7 +5,7 @@ import { corsHeaders, corsPreflight } from "@/server/cors";
 import { pactorServices } from "@/pactor/services";
 import { backendConfig } from "@/pactor/backend/config";
 import { BackendError } from "@/pactor/backend/client";
-import { pactorMutations } from "@/pactor/backend/services-real";
+import { pactorMutations, stubMutations } from "@/pactor/backend/services-real";
 
 /**
  * 页面数据接口（mock）：页面 DSL 的 http 数据源统一入口。
@@ -22,6 +22,7 @@ import { pactorMutations } from "@/pactor/backend/services-real";
 const ROUTE_TABLE: Record<string, string> = {
   dashboard: "dashboard.query",
   providers: "provider.list",
+  "provider-options": "provider.options",
   models: "model.list",
   routes: "route.list",
   clients: "client.list",
@@ -121,7 +122,8 @@ export async function GET(
   }
 }
 
-/** 写通道（设计 §7.2）：POST/PUT /api/data/<res>[/<code>[/<sub>]] → pactorMutations */
+/** 写通道（设计 §7.2）：POST/PUT/DELETE /api/data/<res>[/<code>[/<sub>]] → pactorMutations；
+ * 无后端接口的操作落在 stubMutations 桩映射表（默认成功，豁免 mock 闸门） */
 async function handleMutation(
   request: Request,
   context: RouteContext<"/api/data/[...parts]">,
@@ -134,16 +136,28 @@ async function handleMutation(
       { status: 401, headers: corsHeaders(request) },
     );
   }
-  if (!backendConfig().enabled) {
-    return Response.json(
-      { error: "当前为演示模式（mock），写操作不可用" },
-      { status: 503, headers: corsHeaders(request) },
-    );
-  }
 
   const { parts } = await context.params;
   const [resource, id, sub] = parts;
   const key = `${request.method} ${sub ? `${resource}/${sub}` : resource}`;
+
+  // 桩操作不触碰真实后端，mock 演示模式下同样返回成功
+  const stub = stubMutations[key];
+  if (stub) {
+    const body = await request.json().catch(() => ({}));
+    const result = await stub({ id, body });
+    return Response.json(result ?? null, {
+      headers: { "cache-control": "no-store", ...corsHeaders(request) },
+    });
+  }
+
+  if (!backendConfig().enabled) {
+    return mutationErrorResponse(
+      request,
+      new BackendError("MOCK_READONLY", "当前为演示模式（mock），写操作不可用", 503),
+    );
+  }
+
   const handler = pactorMutations[key];
   if (!handler) {
     return Response.json(
@@ -163,22 +177,23 @@ async function handleMutation(
   }
 }
 
-/** 后端错误 → 页面 message 语义（设计 §8 错误映射） */
+/**
+ * 写通道错误 → 200 + { code, message, data } 信封：框架默认 HTTP 适配器在
+ * 非 2xx 时只抛出含状态码的通用错误（读不到响应体），信封经前端
+ * pactorHttpHooks 还原为真实错误文案（${actions.<id>.error.message}）。
+ */
 function mutationErrorResponse(request: Request, error: unknown) {
-  if (error instanceof BackendError) {
-    return Response.json(
-      { error: error.message, code: error.code },
-      { status: error.httpStatus, headers: corsHeaders(request) },
-    );
-  }
+  const code = error instanceof BackendError ? (error.code ?? error.httpStatus) : 500;
+  const message = error instanceof Error ? error.message : "服务内部错误";
   return Response.json(
-    { error: error instanceof Error ? error.message : "服务内部错误" },
-    { status: 500, headers: corsHeaders(request) },
+    { code, message, data: null },
+    { headers: { "cache-control": "no-store", ...corsHeaders(request) } },
   );
 }
 
 export const POST = handleMutation;
 export const PUT = handleMutation;
+export const DELETE = handleMutation;
 
 /** 预检（跨源带凭据 / 自定义头时） */
 export const OPTIONS = corsPreflight;

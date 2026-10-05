@@ -12,25 +12,7 @@ import {
   parseJsonSafe,
   thousands,
 } from "./format-shared";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface CostRecordVo {
-  requestId: string;
-  requestedAt?: string;
-  application?: string;
-  clientId?: string;
-  appKeyId?: string;
-  alias?: string;
-  modelCode?: string;
-  providerCode?: string;
-  inputTokens?: number;
-  outputTokens?: number;
-  cacheReadTokens?: number;
-  costUsd?: number;
-  billingUsd?: number;
-  pricingSnapshot?: string;
-}
+import type { CostRecordVo } from "../types";
 
 interface PricingSnapshot {
   currency?: string;

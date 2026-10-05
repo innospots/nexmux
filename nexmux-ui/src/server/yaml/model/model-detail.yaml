@@ -163,10 +163,35 @@ body:
                             params:
                               condition: ${actions.statusCfm.ok}
                               then:
-                                - action: message
+                                - id: toggleResult
+                                  action: request
                                   params:
-                                    messageType: success
-                                    text: 状态已切换（演示）
+                                    method: POST
+                                    url: "/api/data/models/${route.params.code}/${data.detail.status
+                                      == 'enabled' ? 'disable' : 'enable'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult == null || actions.toggleResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.toggleResult != null && actions.toggleResult.error
+                                            != null ? actions.toggleResult.error.message
+                                            : '操作失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult != null && actions.toggleResult.ok
+                                      != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${data.detail.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
                     - type: Button
                       props:
                         text: 模型调用测试
@@ -220,10 +245,31 @@ body:
                                           events:
                                             onClick:
                                               - action: overlay.close
-                                              - action: message
+                                              - id: invokeResult
+                                                action: request
                                                 params:
-                                                  messageType: success
-                                                  text: 调用测试成功：HTTP 200，首 Token 延迟 182ms（演示）
+                                                  method: POST
+                                                  url: /api/data/models/${route.params.code}/invoke-test
+                                              - action: if
+                                                params:
+                                                  condition: ${actions.invokeResult == null || actions.invokeResult.ok
+                                                    == false}
+                                                  then:
+                                                    - action: message
+                                                      params:
+                                                        messageType: error
+                                                        text: "${actions.invokeResult != null && actions.invokeResult.error
+                                                          != null ? actions.invokeResult.error.message
+                                                          : '调用测试失败'}"
+                                              - action: if
+                                                params:
+                                                  condition: ${actions.invokeResult != null && actions.invokeResult.ok
+                                                    != false}
+                                                  then:
+                                                    - action: message
+                                                      params:
+                                                        messageType: success
+                                                        text: 调用测试成功
                     - type: Button
                       props:
                         text: 查看路由

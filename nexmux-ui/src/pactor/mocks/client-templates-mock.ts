@@ -116,6 +116,10 @@ export interface ClientTemplateListParams {
   keyword?: string;
   /** 标签多选（取交集） */
   tags?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页（未传保持全量返回） */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 
 /** 快筛 Chip 计数（数据构成口径，不随筛选变化） */
@@ -135,6 +139,7 @@ export interface ClientTemplateChipOption {
 
 export interface ClientTemplateListResult {
   items: ClientTemplateRecord[];
+  /** 分页请求时为筛选后总数；未分页时为全量总数（构成口径见 counts.all.total） */
   total: number;
   counts: ClientTemplateCounts;
   /** 快筛 Chip 组：status 单选（含「全部」），tags 多选（含「全部」，点击清空） */
@@ -142,6 +147,10 @@ export interface ClientTemplateListResult {
     status: ClientTemplateChipOption[];
     tags: ClientTemplateChipOption[];
   };
+  /** 分页信息（仅传 page/pageSize 的分页请求返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 
 export const TEMPLATE_STATUS_LABELS: Record<ClientTemplateStatus, string> = {
@@ -467,7 +476,8 @@ function computeFilters(
   };
 }
 
-/** clientTemplate.list：状态单选 + 关键字模糊 + 标签多选取交集，按 Updated At 降序 */
+/** clientTemplate.list：状态单选 + 关键字模糊 + 标签多选取交集，按 Updated At 降序；
+ *  传 page/pageSize 时分页（total 为筛选后总数），否则保持全量返回 */
 export function queryClientTemplates(
   params: ClientTemplateListParams = {},
 ): ClientTemplateListResult {
@@ -483,7 +493,21 @@ export function queryClientTemplates(
       (tags.length === 0 || tags.every((tag) => t.tags.includes(tag))),
   ).sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
   const counts = computeCounts();
-  return { items, total: TEMPLATES.length, counts, filters: computeFilters(counts) };
+  const filters = computeFilters(counts);
+  if (params.page !== undefined || params.pageSize !== undefined) {
+    const pageNo = params.page ?? 1;
+    const pageSize = params.pageSize ?? 50;
+    return {
+      items: items.slice((pageNo - 1) * pageSize, pageNo * pageSize),
+      total: items.length,
+      counts,
+      filters,
+      pageNo,
+      pageSize,
+      pages: Math.ceil(items.length / pageSize),
+    };
+  }
+  return { items, total: TEMPLATES.length, counts, filters };
 }
 
 /** clientTemplate.detail：按模板标识取详情；未命中返回 undefined（页面做空态） */

@@ -20,7 +20,7 @@ import type { DemoUser } from "./accounts";
  * 动态字段（updatedAt / user / permissions）。
  */
 
-/* ---------------- YAML DSL 文件加载（src/server/yaml/，启动时读入内存） ---------------- */
+/* ---------------- YAML DSL 文件加载（src/server/yaml/，启动时读入内存;改 YAML 需触发本文件重编译） ---------------- */
 
 const YAML_DIR = join(process.cwd(), "src/server/yaml");
 
@@ -174,3 +174,4 @@ export function getLazyPage(
   }
   return { version: entry.version, pageDsl };
 }
+

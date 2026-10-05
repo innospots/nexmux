@@ -20,7 +20,7 @@ vi.mock("../client", () => ({
   BackendError: class BackendError extends Error {},
 }));
 
-import { getModelByCode, listModels } from "./model-adapter";
+import { createModel, getModelByCode, invokeModelTest, listModels, updateModel } from "./model-adapter";
 
 const PROVIDER_VO = {
   providerId: "pv-1",
@@ -80,7 +80,7 @@ describe("listModels", () => {
   it("组装 items/counts/filters（卡片派生字段齐全）", async () => {
     getMock.mockImplementation((path: string) => {
       if (path === "/api/nexmux/models") {
-        return Promise.resolve({ records: [MODEL_VO] });
+        return Promise.resolve({ records: [MODEL_VO], total: 1, pages: 1 });
       }
       if (path === "/api/nexmux/providers") return Promise.resolve({ records: [PROVIDER_VO] });
       if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
@@ -89,7 +89,11 @@ describe("listModels", () => {
 
     const result = await listModels({ type: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     const item = result.items[0];
     expect(item.code).toBe("qwen3.5-flash");
     expect(item.status).toBe("enabled");
@@ -106,6 +110,35 @@ describe("listModels", () => {
     ]);
     expect(result.filters.providers[0].text).toBe("全部 1");
     expect(result.filters.providers[1]).toEqual({ value: "dashscope", text: "阿里云百炼 1" });
+  });
+
+  it("分页透传：page/pageSize 下发后端，total/pages 取自 PageResult", async () => {
+    getMock.mockImplementation((path: string, params?: Record<string, unknown>) => {
+      if (path === "/api/nexmux/models" && params?.pageNo === 2) {
+        return Promise.resolve({ records: [MODEL_VO], total: 1616, pages: 1616 });
+      }
+      if (path === "/api/nexmux/models") {
+        return Promise.resolve({ records: [MODEL_VO], total: 1616, pages: 1616 });
+      }
+      if (path === "/api/nexmux/providers") return Promise.resolve({ records: [PROVIDER_VO] });
+      if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
+      return Promise.resolve({ records: [] });
+    });
+
+    const result = await listModels({ type: "all", page: 2, pageSize: 1 });
+
+    // fetchAll（counts 全量）由 mock 固定 pageSize 500，分页 items 请求 pageSize 1
+    const pageCall = getMock.mock.calls.find(
+      ([path, params]) =>
+        path === "/api/nexmux/models" &&
+        (params as Record<string, unknown>)?.pageSize === 1,
+    );
+    expect(pageCall?.[1]).toMatchObject({ pageNo: 2, pageSize: 1 });
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1616);
+    expect(result.pageNo).toBe(2);
+    expect(result.pageSize).toBe(1);
+    expect(result.pages).toBe(1616);
   });
 });
 
@@ -201,7 +234,7 @@ describe("getModelByCode", () => {
   it("组装 items/counts/filters（卡片派生字段齐全）", async () => {
     getMock.mockImplementation((path: string) => {
       if (path === "/api/nexmux/models") {
-        return Promise.resolve({ records: [MODEL_VO] });
+        return Promise.resolve({ records: [MODEL_VO], total: 1, pages: 1 });
       }
       if (path === "/api/nexmux/providers") return Promise.resolve({ records: [PROVIDER_VO] });
       if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
@@ -210,7 +243,11 @@ describe("getModelByCode", () => {
 
     const result = await listModels({ type: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     const item = result.items[0];
     expect(item.code).toBe("qwen3.5-flash");
     expect(item.status).toBe("enabled");
@@ -227,6 +264,35 @@ describe("getModelByCode", () => {
     ]);
     expect(result.filters.providers[0].text).toBe("全部 1");
     expect(result.filters.providers[1]).toEqual({ value: "dashscope", text: "阿里云百炼 1" });
+  });
+
+  it("分页透传：page/pageSize 下发后端，total/pages 取自 PageResult", async () => {
+    getMock.mockImplementation((path: string, params?: Record<string, unknown>) => {
+      if (path === "/api/nexmux/models" && params?.pageNo === 2) {
+        return Promise.resolve({ records: [MODEL_VO], total: 1616, pages: 1616 });
+      }
+      if (path === "/api/nexmux/models") {
+        return Promise.resolve({ records: [MODEL_VO], total: 1616, pages: 1616 });
+      }
+      if (path === "/api/nexmux/providers") return Promise.resolve({ records: [PROVIDER_VO] });
+      if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
+      return Promise.resolve({ records: [] });
+    });
+
+    const result = await listModels({ type: "all", page: 2, pageSize: 1 });
+
+    // fetchAll（counts 全量）由 mock 固定 pageSize 500，分页 items 请求 pageSize 1
+    const pageCall = getMock.mock.calls.find(
+      ([path, params]) =>
+        path === "/api/nexmux/models" &&
+        (params as Record<string, unknown>)?.pageSize === 1,
+    );
+    expect(pageCall?.[1]).toMatchObject({ pageNo: 2, pageSize: 1 });
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(1616);
+    expect(result.pageNo).toBe(2);
+    expect(result.pageSize).toBe(1);
+    expect(result.pages).toBe(1616);
   });
 });
 
@@ -315,5 +381,94 @@ describe("getModelByCode", () => {
       costRate: 1.1,
     });
     expect(record!.routeSummary).toBe("未关联路由");
+  });
+});
+
+describe("createModel", () => {
+  beforeEach(() => {
+    postMock.mockReset();
+    getMock.mockReset();
+  });
+
+  it("契约字段白名单 + CSV 拆数组 + status=enabled 补 enable", async () => {
+    postMock.mockResolvedValueOnce({ ...MODEL_VO, status: "DRAFT" });
+    // enable 路径：modelIdOf 的 by-code 查询 + enable 调用
+    getMock.mockResolvedValue({ modelId: "md-1" });
+    postMock.mockResolvedValueOnce({ ...MODEL_VO, status: "ENABLED" });
+
+    await createModel({
+      modelCode: "qwen3.5-flash",
+      displayName: "Qwen3.5 Flash",
+      modelType: "LLM",
+      primaryProviderCode: "dashscope",
+      primaryProviderModelId: "qwen3.5-flash",
+      contextLength: 256000,
+      inputModalities: "text, image",
+      tags: "free, lite",
+      status: "enabled",
+      // 契约外字段（默认参数/定价等）
+      temperature: 0.7,
+      releaseDate: "2026-01-01",
+    });
+
+    const createPayload = postMock.mock.calls[0][1] as Record<string, unknown>;
+    expect(postMock.mock.calls[0][0]).toBe("/api/nexmux/models");
+    expect(createPayload.inputModalities).toEqual(["text", "image"]);
+    expect(createPayload.tags).toEqual(["free", "lite"]);
+    expect(createPayload).not.toHaveProperty("temperature");
+    expect(createPayload).not.toHaveProperty("status");
+    // status=enabled → 创建后补 enable
+    expect(postMock.mock.calls[1][0]).toBe("/api/nexmux/models/md-1/enable");
+  });
+
+  it("status 非 enabled 时不补 enable", async () => {
+    postMock.mockResolvedValue({ ...MODEL_VO, status: "DRAFT" });
+
+    await createModel({ modelCode: "m", displayName: "M", primaryProviderCode: "dashscope" });
+
+    expect(postMock).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("updateModel", () => {
+  beforeEach(() => {
+    getMock.mockReset();
+    putMock.mockReset();
+  });
+
+  it("只转发 ModelUpdateRequest 契约字段", async () => {
+    getMock.mockResolvedValue({ modelId: "md-1" });
+    putMock.mockResolvedValue(MODEL_VO);
+
+    await updateModel("qwen3.5-flash", {
+      displayName: "新名字",
+      description: "desc",
+      contextLength: 128000,
+      inputModalities: "text",
+      status: "disabled",
+      apiKey: "x",
+    });
+
+    expect(putMock).toHaveBeenCalledWith("/api/nexmux/models/md-1", {
+      displayName: "新名字",
+      description: "desc",
+      contextLength: 128000,
+      maxOutputTokens: undefined,
+      inputModalities: ["text"],
+      outputModalities: undefined,
+      tags: undefined,
+    });
+  });
+});
+
+describe("invokeModelTest", () => {
+  it("按 code 解析 id 后调用 invoke-test", async () => {
+    getMock.mockResolvedValue({ modelId: "md-1" });
+    postMock.mockResolvedValue(true);
+
+    const ok = await invokeModelTest("qwen3.5-flash");
+
+    expect(ok).toBe(true);
+    expect(postMock).toHaveBeenCalledWith("/api/nexmux/models/md-1/invoke-test");
   });
 });

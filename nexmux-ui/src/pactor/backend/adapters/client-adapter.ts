@@ -22,45 +22,7 @@ import {
   quotaSummaryOf,
   rateLimitSummaryOf,
 } from "./quota-shared";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface ClientVo {
-  clientId: string;
-  clientCode: string;
-  displayName: string;
-  status: string;
-  authorizedRouteIds: string[];
-  quotaSpec?: string;
-  rateLimitSpec?: string;
-  appKeyVersion: number;
-  appKeyId: string;
-  tags?: string;
-  sourceTemplateId?: string;
-  expiresAt?: string;
-  appKeyRotatedAt?: string;
-}
-
-interface ClientDetailVo extends Omit<ClientVo, "tags"> {
-  tags: string[];
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-}
-
-interface RouteVo {
-  routeId: string;
-  routeCode: string;
-  alias: string;
-  displayName: string;
-  routeSpec?: { ingress?: string; candidates?: unknown[] };
-}
-
-interface TemplateVo {
-  templateId: string;
-  templateCode: string;
-  displayName: string;
-}
+import type { ClientDetailVo, ClientTemplateVo, ClientVo, RouteVo } from "../types";
 
 // ── 派生工具 ──────────────────────────────────────────────────
 
@@ -91,13 +53,13 @@ function parseTags(text?: string | string[]): string[] {
 
 interface ClientRelations {
   routesById: Map<string, RouteVo>;
-  templatesById: Map<string, TemplateVo>;
+  templatesById: Map<string, ClientTemplateVo>;
 }
 
 async function loadRelations(): Promise<ClientRelations> {
   const [routes, templates] = await Promise.all([
     fetchAll<RouteVo>("/api/nexmux/routes"),
-    fetchAll<TemplateVo>("/api/nexmux/client-templates"),
+    fetchAll<ClientTemplateVo>("/api/nexmux/client-templates"),
   ]);
   return {
     routesById: new Map(routes.map((r) => [r.routeId, r])),
@@ -123,7 +85,7 @@ function toRecord(
   relations: ClientRelations,
   detail?: ClientDetailVo,
 ): ClientRecord {
-  const authRoutes = vo.authorizedRouteIds
+  const authRoutes = (vo.authorizedRouteIds ?? [])
     .map((id) => relations.routesById.get(id))
     .filter((r): r is RouteVo => !!r)
     .map(authRouteOf);
@@ -141,7 +103,7 @@ function toRecord(
       .filter((n): n is string => !!n)),
   );
 
-  const status = statusOf(vo.status, vo.expiresAt);
+  const status = statusOf(vo.status ?? "", vo.expiresAt);
   const rateLimitSummary = rateLimitSummaryOf(rateLimits);
   const expiresAt = timeText(vo.expiresAt);
   const template = relations.templatesById.get(vo.sourceTemplateId ?? "");
@@ -154,7 +116,7 @@ function toRecord(
     status,
     statusLabel: STATUS_LABELS[status],
     expiresAt,
-    appKeyId: vo.appKeyId,
+    appKeyId: vo.appKeyId ?? "",
     secretLastRotatedAt: timeText(vo.appKeyRotatedAt),
     templateCode: template?.templateCode,
     templateName: template?.displayName,
@@ -226,16 +188,22 @@ export async function listClients(params: {
   name?: string;
   code?: string;
   tags?: string[];
+  page?: number;
+  pageSize?: number;
 }): Promise<ClientListResult> {
   const status = params.status && params.status !== "all" ? params.status : undefined;
   // expired 是展示态，ENABLED 全量下发后由 BFF 判定
   const backendStatus =
     status === "enabled" || status === "expired" ? "ENABLED" : status === "disabled" ? "DISABLED" : undefined;
+  const pageNo = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
+  // enabled/expired 为 BFF 展示态过滤：需拉全量 ENABLED 先过滤再切片，total = 过滤后长度
+  const localFilter = status === "enabled" || status === "expired";
 
   const [page, relations, allForCounts] = await Promise.all([
     backendClient.get<PageResult<ClientVo>>("/api/nexmux/clients", {
-      pageNo: 1,
-      pageSize: 5000,
+      pageNo: localFilter ? 1 : pageNo,
+      pageSize: localFilter ? 5000 : pageSize,
       status: backendStatus,
       name: params.name || undefined,
       code: params.code || undefined,
@@ -246,14 +214,25 @@ export async function listClients(params: {
   ]);
 
   let items = page.records.map((vo) => toRecord(vo, relations));
-  if (status === "expired") items = items.filter((c) => c.status === "expired");
-  if (status === "enabled") items = items.filter((c) => c.status === "enabled");
+  let total = page.total;
+  let pages = page.pages;
+  if (localFilter) {
+    if (status === "expired") items = items.filter((c) => c.status === "expired");
+    if (status === "enabled") items = items.filter((c) => c.status === "enabled");
+    total = items.length;
+    pages = Math.ceil(total / pageSize);
+    items = items.slice((pageNo - 1) * pageSize, pageNo * pageSize);
+  }
 
   const allItems = allForCounts.map((vo) => toRecord(vo, relations));
   const counts = computeCounts(allItems);
   return {
     items,
-    total: allForCounts.length,
+    // total 为筛选后总数；构成口径由 counts.all.total 承担
+    total,
+    pageNo,
+    pageSize,
+    pages,
     counts,
     filters: computeFilters(counts, allItems),
   };

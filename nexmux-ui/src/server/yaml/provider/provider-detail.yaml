@@ -163,10 +163,35 @@ body:
                             params:
                               condition: ${actions.statusCfm.ok}
                               then:
-                                - action: message
+                                - id: toggleResult
+                                  action: request
                                   params:
-                                    messageType: success
-                                    text: 状态已切换（演示）
+                                    method: POST
+                                    url: "/api/data/providers/${route.params.code}/${data.detail.status
+                                      == 'enabled' ? 'disable' : 'enable'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult == null || actions.toggleResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.toggleResult != null && actions.toggleResult.error
+                                            != null ? actions.toggleResult.error.message
+                                            : '操作失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult != null && actions.toggleResult.ok
+                                      != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${data.detail.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
                     - type: Button
                       props:
                         text: 查看模型
@@ -181,18 +206,99 @@ body:
                     - type: DropdownMenu
                       props:
                         items:
-                          - label: 导出
-                            value: export
-                            icon: download
-                          - label: 复制 Code
-                            value: copy
-                            icon: copy
+                          - label: 删除
+                            value: delete
+                            icon: trash
                       events:
                         onSelect:
-                          - action: message
+                          - id: deleteCfm
+                            action: overlay.open
                             params:
-                              messageType: info
-                              text: 操作：${event}（演示）
+                              overlay:
+                                type: modal
+                                title: 确认删除 Provider
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: 删除后不可恢复。（演示：后端删除接口未开放，代理层默认成功，数据未真正移除）
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: small
+                                      children:
+                                        - type: Text
+                                          props:
+                                            text: 影响范围：
+                                            strong: true
+                                        - type: Text
+                                          props:
+                                            text: · Model：${data.detail.modelCount} 个（${data.detail.enabledModelCount} 个启用）
+                                            type: secondary
+                                        - type: Text
+                                          props:
+                                            text: · Route Target 引用：${data.detail.routes.total} 个
+                                            type: secondary
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认删除
+                                            variant: primary
+                                            danger: true
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.deleteCfm.ok}
+                              then:
+                                - id: deleteResult
+                                  action: request
+                                  params:
+                                    method: DELETE
+                                    url: /api/data/providers/${route.params.code}
+                                - action: if
+                                  params:
+                                    condition: ${actions.deleteResult == null || actions.deleteResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.deleteResult != null && actions.deleteResult.error
+                                            != null ? actions.deleteResult.error.message
+                                            : '删除失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.deleteResult != null && actions.deleteResult.ok
+                                      != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: 已删除（演示：代理层默认成功，后端接口就绪后真正移除）
+                                      - action: navigate
+                                        params:
+                                          to: /providers
                       children:
                         - type: Button
                           props:
@@ -434,10 +540,40 @@ body:
                                   icon: zap
                                 events:
                                   onClick:
-                                    - action: message
+                                    - id: testResult
+                                      action: request
                                       params:
-                                        messageType: success
-                                        text: 连接测试成功：HTTP 200, 128ms（演示）
+                                        method: POST
+                                        url: /api/data/providers/${route.params.code}/connection-test
+                                    - action: if
+                                      params:
+                                        condition: ${actions.testResult == null || actions.testResult.error
+                                          != null}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: error
+                                              text: "${actions.testResult != null && actions.testResult.error
+                                                != null ? actions.testResult.error.message
+                                                : '连接测试请求失败'}"
+                                    - action: if
+                                      params:
+                                        condition: ${actions.testResult != null && actions.testResult.error
+                                          == null && actions.testResult.ok == false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: warning
+                                              text: 连接测试失败：${actions.testResult.detail}
+                                    - action: if
+                                      params:
+                                        condition: ${actions.testResult != null && actions.testResult.ok
+                                          == true}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: success
+                                              text: 连接测试成功：${actions.testResult.latencyMs}ms
                               - type: Button
                                 props:
                                   text: 编辑连接配置

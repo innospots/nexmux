@@ -32,9 +32,11 @@ vi.mock("../client", () => ({
 }));
 
 import {
+  createProvider,
   getProviderByCode,
   listProviders,
   pullProviderModels,
+  updateProvider,
 } from "./provider-adapter";
 
 const PROVIDER_VO = {
@@ -116,7 +118,7 @@ describe("listProviders", () => {
     getMock.mockImplementation((path: string, params?: Record<string, unknown>) => {
       if (path === "/api/nexmux/providers" && !params?.status && !params?.keyStatus) {
         // 筛选页与 fetchAll（counts 全量）同端点：均返回单条
-        return Promise.resolve({ records: [PROVIDER_VO], total: 1 });
+        return Promise.resolve({ records: [PROVIDER_VO], total: 1, pages: 1 });
       }
       if (path === "/api/nexmux/models") return Promise.resolve({ records: [] });
       if (path === "/api/nexmux/routes") return Promise.resolve({ records: [] });
@@ -125,7 +127,11 @@ describe("listProviders", () => {
 
     const result = await listProviders({ status: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     expect(result.items).toHaveLength(1);
     const item: ProviderRecord = result.items[0];
     expect(item.code).toBe("dashscope");
@@ -158,13 +164,39 @@ describe("listProviders", () => {
 
     await listProviders({ status: "pending" });
 
+    // 分页 items 请求（pageSize 50）；fetchAll 全量请求由 mock 固定 pageSize 500
     const pageCall = getMock.mock.calls.find(
       ([path, params]) =>
         path === "/api/nexmux/providers" &&
-        (params as Record<string, unknown>)?.pageSize === 5000,
+        (params as Record<string, unknown>)?.pageSize === 50,
     );
     expect(pageCall?.[1]).toMatchObject({ keyStatus: "pending" });
     expect((pageCall?.[1] as Record<string, unknown>).status).toBeUndefined();
+  });
+
+  it("分页透传：page/pageSize 下发后端，total/pages 取自 PageResult", async () => {
+    getMock.mockImplementation((path: string, params?: Record<string, unknown>) => {
+      if (path === "/api/nexmux/providers" && params?.pageNo === 2) {
+        return Promise.resolve({ records: [PROVIDER_VO], total: 42, pages: 42 });
+      }
+      if (path === "/api/nexmux/models") return Promise.resolve({ records: [] });
+      if (path === "/api/nexmux/routes") return Promise.resolve({ records: [] });
+      return Promise.resolve({ records: [], total: 0, pages: 0 });
+    });
+
+    const result = await listProviders({ status: "all", page: 2, pageSize: 1 });
+
+    const pageCall = getMock.mock.calls.find(
+      ([path, params]) =>
+        path === "/api/nexmux/providers" &&
+        (params as Record<string, unknown>)?.pageSize === 1,
+    );
+    expect(pageCall?.[1]).toMatchObject({ pageNo: 2, pageSize: 1 });
+    expect(result.items).toHaveLength(1);
+    expect(result.total).toBe(42);
+    expect(result.pageNo).toBe(2);
+    expect(result.pageSize).toBe(1);
+    expect(result.pages).toBe(42);
   });
 });
 
@@ -216,6 +248,88 @@ describe("getProviderByCode", () => {
     expect(record!.routeSummary).toBe("1 条路由 · 1 条启用");
     expect(record!.createdAt).toBe("2026-06-01 10:00");
     expect(record!.operator).toBe("zhangsan");
+  });
+});
+
+describe("createProvider", () => {
+  beforeEach(() => {
+    postMock.mockReset();
+  });
+
+  it("vendorCode 缺省回填 providerCode，契约外字段落桩忽略", async () => {
+    postMock.mockResolvedValue(PROVIDER_VO);
+
+    await createProvider({
+      providerCode: "dashscope",
+      displayName: "阿里云百炼",
+      providerType: "COMMERCIAL",
+      defaultProtocol: "openai-completions",
+      baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      timeoutMs: 60000,
+      // 契约外字段（表单整包提交带入）
+      apiKey: "sk-secret",
+      description: "不应转发",
+    });
+
+    expect(postMock).toHaveBeenCalledWith("/api/nexmux/providers", {
+      providerCode: "dashscope",
+      displayName: "阿里云百炼",
+      providerType: "COMMERCIAL",
+      defaultProtocol: "openai-completions",
+      vendorCode: "dashscope",
+      sourceVendorCode: "dashscope",
+      iconUri: undefined,
+      baseUrl: "https://dashscope.aliyuncs.com/compatible-mode/v1",
+      region: undefined,
+      timeoutMs: 60000,
+    });
+    const payload = postMock.mock.calls[0][1] as Record<string, unknown>;
+    expect(payload).not.toHaveProperty("apiKey");
+    expect(payload).not.toHaveProperty("description");
+  });
+
+  it("显式 vendorCode 不被回填覆盖", async () => {
+    postMock.mockResolvedValue(PROVIDER_VO);
+
+    await createProvider({
+      providerCode: "my-openai",
+      displayName: "My OpenAI",
+      vendorCode: "openai",
+    });
+
+    const payload = postMock.mock.calls[0][1] as Record<string, unknown>;
+    expect(payload.vendorCode).toBe("openai");
+    expect(payload.sourceVendorCode).toBe("openai");
+  });
+});
+
+describe("updateProvider", () => {
+  beforeEach(() => {
+    getMock.mockReset();
+    putMock.mockReset();
+  });
+
+  it("只转发 ProviderUpdateRequest 契约字段", async () => {
+    getMock.mockResolvedValue(DETAIL_VO);
+    putMock.mockResolvedValue(PROVIDER_VO);
+
+    await updateProvider("dashscope", {
+      displayName: "新名字",
+      baseUrl: "https://example.com",
+      region: "cn-hangzhou",
+      timeoutMs: 30000,
+      // 契约外字段
+      status: "disabled",
+      apiKey: "sk-secret",
+    } as Parameters<typeof updateProvider>[1]);
+
+    expect(getMock).toHaveBeenCalledWith("/api/nexmux/providers/by-code/dashscope");
+    expect(putMock).toHaveBeenCalledWith("/api/nexmux/providers/pv-1", {
+      displayName: "新名字",
+      baseUrl: "https://example.com",
+      region: "cn-hangzhou",
+      timeoutMs: 30000,
+    });
   });
 });
 

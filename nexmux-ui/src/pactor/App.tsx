@@ -7,6 +7,7 @@ import { SitemapApp } from "pactor-app";
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
 import { pactorActions } from "./actions";
 import { pactorComponents } from "./components";
+import { pactorHttpHooks } from "./http-hooks";
 
 /**
  * 动态页面应用（design/dynamic-page.md）：框架 SitemapApp + 宿主接线。
@@ -23,9 +24,8 @@ import { pactorComponents } from "./components";
  *
  * 挂载在 app/layout.tsx（Next layout 跨导航常驻，切换导航只刷新内容区）。
  *
- * HTTP 钩子用框架默认实现 createHttpHooks：{ code, data, message } 拆包；
- * 后端包裹协议不同 / 需公共头注入时传 options，需要代理改写时传
- * proxyPrefix，或自行实现 PactorHttpHooks。
+ * HTTP 钩子（pactorHttpHooks，见 http-hooks.ts）：识别 BFF 写通道的
+ * { code, message, data } 错误信封并抛出真实文案；其余响应直通。
  */
 
 export function PactorApp() {
@@ -50,6 +50,7 @@ function PactorAppInner() {
       components={pactorComponents}
       actions={pactorActions}
       pageEndpoint={pageEndpoint}
+      httpAdapter={pactorHttpHooks}
     />
   );
 }

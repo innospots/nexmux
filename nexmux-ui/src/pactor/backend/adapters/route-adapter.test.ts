@@ -81,7 +81,9 @@ const DETAIL_VO = {
 
 function stubAll() {
   getMock.mockImplementation((path: string) => {
-    if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO, DRAFT_ROUTE_VO] });
+    if (path === "/api/nexmux/routes") {
+      return Promise.resolve({ records: [ROUTE_VO, DRAFT_ROUTE_VO], total: 2, pages: 1 });
+    }
     if (path === "/api/nexmux/models") return Promise.resolve({ records: [MODEL_VO] });
     if (path === "/api/nexmux/providers") return Promise.resolve({ records: [PROVIDER_VO] });
     if (path === "/api/nexmux/routes/by-code/general-chat") return Promise.resolve(DETAIL_VO);
@@ -98,7 +100,11 @@ describe("listRoutes", () => {
   it("组装 items/counts/filters（卡片派生字段齐全）", async () => {
     const result = await listRoutes({ status: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(2);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     const item = result.items[0];
     expect(item.code).toBe("general-chat");
     expect(item.type).toBe("single");
@@ -140,12 +146,29 @@ describe("listRoutes", () => {
   it("status 快筛映射：enabled → PUBLISHED 下发后端", async () => {
     await listRoutes({ status: "enabled" });
 
+    // 分页 items 请求（pageSize 50）；fetchAll 全量请求由 mock 固定 pageSize 5000
     const pageCall = getMock.mock.calls.find(
       ([path, params]) =>
         path === "/api/nexmux/routes" &&
-        (params as Record<string, unknown>)?.pageSize === 5000,
+        (params as Record<string, unknown>)?.pageSize === 50,
     );
     expect(pageCall?.[1]).toMatchObject({ status: "PUBLISHED" });
+  });
+
+  it("分页透传：page/pageSize 下发后端，total/pages 取自 PageResult", async () => {
+    const result = await listRoutes({ status: "all", type: "pool", tags: ["general"], page: 2, pageSize: 1 });
+
+    const pageCall = getMock.mock.calls.find(
+      ([path, params]) =>
+        path === "/api/nexmux/routes" &&
+        (params as Record<string, unknown>)?.pageSize === 1,
+    );
+    // type/tags 一并下发（后端内存过滤后分页）
+    expect(pageCall?.[1]).toMatchObject({ pageNo: 2, pageSize: 1, type: "pool", tags: "general" });
+    expect(result.pageNo).toBe(2);
+    expect(result.pageSize).toBe(1);
+    expect(result.total).toBe(2);
+    expect(result.pages).toBe(1);
   });
 });
 

@@ -11,6 +11,12 @@ dataSources:
     request:
       method: GET
       url: /api/data/models/${route.params.code}
+  providerOptions:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/data/provider-options
 body:
   type: Page
   children:
@@ -43,14 +49,14 @@ body:
       props:
         layout: vertical
         initialValues:
-          code: ${data.detail.code}
-          name: ${data.detail.name}
-          providerCode: ${data.detail.providerCode}
-          providerModelId: ${data.detail.primaryUpstreamId}
-          type: ${data.detail.type}
+          modelCode: ${data.detail.code}
+          displayName: ${data.detail.name}
+          primaryProviderCode: ${data.detail.providerCode}
+          primaryProviderModelId: ${data.detail.primaryUpstreamId}
+          modelType: ${data.detail.type}
           releaseDate: ${data.detail.releaseDate}
-          contextWindow: ${data.detail.contextWindow}
-          maxTokens: "${data.detail.maxTokens > 0 ? data.detail.maxTokens : null}"
+          contextLength: ${data.detail.contextWindow}
+          maxOutputTokens: "${data.detail.maxTokens > 0 ? data.detail.maxTokens : null}"
           inputModalities: ${data.detail.inputModalitiesText}
           outputModalities: ${data.detail.outputModalitiesText}
           tags: ${data.detail.tagsText}
@@ -71,20 +77,29 @@ body:
           currency: ${data.detail.currency}
       events:
         onSubmit:
-          - id: cfm
-            action: confirm
-            condition: ${event.status == 'disabled'}
+          - id: saveResult
+            action: request
             params:
-              title: 确认停用 Model
-              content: 停用后，该模型将不再参与路由调度。⚠ 存在活跃路由引用时，建议先完成切换再停用。（演示）
+              method: PUT
+              url: /api/data/models/${route.params.code}
+              body: ${event}
           - action: if
             params:
-              condition: ${event.status != 'disabled' || actions.cfm}
+              condition: ${actions.saveResult == null || actions.saveResult.ok == false}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: "${actions.saveResult != null && actions.saveResult.error != null ? actions.saveResult.error.message
+                      : '保存失败'}"
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok != false}
               then:
                 - action: message
                   params:
                     messageType: success
-                    text: 模型已保存（演示：静态页面不落库）
+                    text: 模型已保存
                 - action: navigate
                   params:
                     to: /models/${route.params.code}
@@ -105,33 +120,14 @@ body:
                           gap: 16
                         children:
                           - type: Field
+                            props:
+                              label: Model Code
+                              required: true
+                              labelHint: Model Code 创建后不可修改
                             children:
-                              - type: Flex
-                                props:
-                                  justify: space-between
-                                  align: center
-                                  className: w-full
-                                children:
-                                  - type: Flex
-                                    props:
-                                      align: center
-                                      className: gap-0.5
-                                    children:
-                                      - type: Text
-                                        props:
-                                          text: "*"
-                                          className: text-destructive text-sm leading-none
-                                      - type: Label
-                                        props:
-                                          text: Model Code
-                                  - type: Text
-                                    props:
-                                      text: Model Code 创建后不可修改
-                                      type: secondary
-                                      className: text-xs leading-none
                               - type: Input
                                 props:
-                                  name: code
+                                  name: modelCode
                                   className: w-full
                                   placeholder: 小写 + 数字 + 连字符，如 qwen3-vl-plus
                                   disabled: true
@@ -145,7 +141,7 @@ body:
                             children:
                               - type: Input
                                 props:
-                                  name: name
+                                  name: displayName
                                   className: w-full
                                   placeholder: 展示名，如 Qwen3-VL Plus
                                   rules:
@@ -158,19 +154,9 @@ body:
                             children:
                               - type: Select
                                 props:
-                                  name: providerCode
+                                  name: primaryProviderCode
                                   className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
-                                  options:
-                                    - label: OpenAI
-                                      value: openai
-                                    - label: Azure OpenAI
-                                      value: azure-openai
-                                    - label: Anthropic
-                                      value: anthropic
-                                    - label: 阿里云百炼
-                                      value: dashscope
-                                    - label: DeepSeek (2)
-                                      value: deepseek
+                                  options: ${data.providerOptions}
                                   rules:
                                     - required: true
                                       message: 请选择 Provider
@@ -181,7 +167,7 @@ body:
                             children:
                               - type: Input
                                 props:
-                                  name: providerModelId
+                                  name: primaryProviderModelId
                                   className: w-full
                                   placeholder: 上游 API 实际调用的模型 ID
                                   rules:
@@ -194,7 +180,7 @@ body:
                             children:
                               - type: Select
                                 props:
-                                  name: type
+                                  name: modelType
                                   className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
                                   options:
                                     - label: 大语言模型 (LLM)
@@ -223,7 +209,7 @@ body:
                             children:
                               - type: NumberInput
                                 props:
-                                  name: contextWindow
+                                  name: contextLength
                                   className: w-full
                                   min: 1
                                   precision: 0
@@ -234,7 +220,7 @@ body:
                             children:
                               - type: NumberInput
                                 props:
-                                  name: maxTokens
+                                  name: maxOutputTokens
                                   className: w-full
                                   min: 1
                                   precision: 0

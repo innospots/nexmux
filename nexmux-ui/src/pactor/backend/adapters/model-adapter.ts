@@ -19,57 +19,7 @@ import type {
   TimeMultiplier,
 } from "../../mocks/models-mock";
 import { backendClient, fetchAll, type PageResult } from "../client";
-
-// ── 后端 VO 镜像 ──────────────────────────────────────────────
-
-interface ModelVo {
-  modelId: string;
-  modelCode: string;
-  displayName: string;
-  status: string;
-  modelType: string;
-  contextLength?: number;
-  maxOutputTokens?: number;
-  primaryProviderId?: string;
-  pricingSpec?: string;
-  extraBindings?: string;
-}
-
-interface ModelDetailVo extends ModelVo {
-  iconUri?: string;
-  releaseDate?: string;
-  inputModalities?: string;
-  outputModalities?: string;
-  capabilityTags?: string;
-  tags?: string;
-  description?: string;
-  metadataSpec?: string;
-  defaultParams?: string;
-  primaryProviderModelId?: string;
-  primaryUpstreamProtocol?: string;
-  primaryBindingWeight?: number;
-  primaryCostMultiplier?: number;
-  primaryReferenceMultiplier?: number;
-  primaryBindingEnabled?: boolean;
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-}
-
-interface ProviderVo {
-  providerId: string;
-  providerCode: string;
-  displayName: string;
-  vendorCode: string;
-  keyStatus: string;
-}
-
-interface RouteVo {
-  alias: string;
-  displayName: string;
-  status: string;
-  routeSpec?: { candidates?: { modelCode: string; weight: number }[] };
-}
+import type { ModelDetailVo, ModelVo, ProviderVo, RouteVo } from "../types";
 
 /** ModelBindingItem（domain-layer-design §5.1） */
 interface BindingItem {
@@ -329,7 +279,7 @@ function toRecord(
     providerName: primary?.providerName ?? "",
     providerIcon: primary?.providerIcon ?? "zap",
     type: (vo.modelType || "LLM") as ModelRecord["type"],
-    typeLabel: TYPE_LABELS[vo.modelType] ?? vo.modelType,
+    typeLabel: TYPE_LABELS[vo.modelType ?? ""] ?? vo.modelType ?? "",
     releaseDate: d?.releaseDate ?? "",
     contextWindow,
     maxTokens,
@@ -422,12 +372,16 @@ function computeFilters(
 export async function listModels(params: {
   type?: string;
   providers?: string[];
+  page?: number;
+  pageSize?: number;
 }): Promise<ModelListResult> {
   const type = params.type && params.type !== "all" ? params.type : undefined;
+  const pageNo = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
   const [page, relations, allForCounts] = await Promise.all([
     backendClient.get<PageResult<ModelVo>>("/api/nexmux/models", {
-      pageNo: 1,
-      pageSize: 5000,
+      pageNo,
+      pageSize,
       type,
       providers: params.providers?.length ? params.providers.join(",") : undefined,
     }),
@@ -441,7 +395,16 @@ export async function listModels(params: {
     allForCounts.map((vo) => toRecord(vo, relations)),
     providerList,
   );
-  return { items, total: allForCounts.length, counts, filters: computeFilters(counts, providerList) };
+  return {
+    items,
+    // total 为筛选后总数（后端 PageResult）；构成口径由 counts.all.total 承担
+    total: page.total,
+    pageNo,
+    pageSize,
+    pages: page.pages,
+    counts,
+    filters: computeFilters(counts, providerList),
+  };
 }
 
 export async function getModelByCode(code: string): Promise<ModelRecord | null> {
@@ -459,15 +422,68 @@ async function modelIdOf(uiCode: string): Promise<string> {
   return detail.modelId;
 }
 
+/** 表单的分隔文本 → 字符串数组（契约 inputModalities/outputModalities/tags 为 string[]）；
+ * 兼容编辑页回填的展示格式（" · " 分隔）与用户输入的逗号分隔 */
+function csvListOrUndef(value: unknown): string[] | undefined {
+  if (Array.isArray(value)) {
+    return value.filter((v): v is string => typeof v === "string" && v !== "");
+  }
+  if (typeof value === "string" && value.trim() !== "") {
+    return value.split(/[,·]/).map((s) => s.trim()).filter(Boolean);
+  }
+  return undefined;
+}
+
+function numOrUndef(value: unknown): number | undefined {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? n : undefined;
+}
+
 export async function createModel(body: Record<string, unknown>): Promise<ModelVo> {
-  return backendClient.post<ModelVo>("/api/nexmux/models", body);
+  // 只取契约字段（ModelCreateRequest）；契约外字段（默认参数/定价/releaseDate 等）落桩忽略
+  const payload: Record<string, unknown> = {
+    modelCode: body.modelCode,
+    displayName: body.displayName,
+    modelType: body.modelType,
+    primaryProviderCode: body.primaryProviderCode,
+    primaryProviderModelId: body.primaryProviderModelId,
+    primaryUpstreamProtocol: body.primaryUpstreamProtocol,
+    contextLength: numOrUndef(body.contextLength),
+    maxOutputTokens: numOrUndef(body.maxOutputTokens),
+    inputModalities: csvListOrUndef(body.inputModalities),
+    outputModalities: csvListOrUndef(body.outputModalities),
+    tags: csvListOrUndef(body.tags),
+    description: body.description,
+  };
+  const created = await backendClient.post<ModelVo>("/api/nexmux/models", payload);
+  // 契约初始 status=DRAFT；表单选择「启用」时补一次 enable
+  if (body.status === "enabled" && created.modelCode) {
+    return setModelEnabled(created.modelCode, true);
+  }
+  return created;
 }
 
 export async function updateModel(code: string, body: Record<string, unknown>): Promise<ModelVo> {
-  return backendClient.put<ModelVo>(`/api/nexmux/models/${await modelIdOf(code)}`, body);
+  // 只取契约字段（ModelUpdateRequest）
+  const payload: Record<string, unknown> = {
+    displayName: body.displayName,
+    description: body.description,
+    contextLength: numOrUndef(body.contextLength),
+    maxOutputTokens: numOrUndef(body.maxOutputTokens),
+    inputModalities: csvListOrUndef(body.inputModalities),
+    outputModalities: csvListOrUndef(body.outputModalities),
+    tags: csvListOrUndef(body.tags),
+  };
+  return backendClient.put<ModelVo>(`/api/nexmux/models/${await modelIdOf(code)}`, payload);
 }
 
 export async function setModelEnabled(code: string, enabled: boolean): Promise<ModelVo> {
   const id = await modelIdOf(code);
   return backendClient.post<ModelVo>(`/api/nexmux/models/${id}/${enabled ? "enable" : "disable"}`);
+}
+
+/** 调用测试（后端当前为占位实现，恒 true） */
+export async function invokeModelTest(code: string): Promise<boolean> {
+  const id = await modelIdOf(code);
+  return backendClient.post<boolean>(`/api/nexmux/models/${id}/invoke-test`);
 }

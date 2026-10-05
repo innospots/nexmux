@@ -45,6 +45,12 @@ function opt(value: unknown): string | undefined {
   return typeof value === "string" ? value : undefined;
 }
 
+/** 分页参数：字符串 query 转数字，非正整数落缺省（undefined → 不分页 / adapter 默认） */
+function num(value: unknown): number | undefined {
+  const n = typeof value === "string" ? Number(value) : typeof value === "number" ? value : NaN;
+  return Number.isInteger(n) && n >= 1 ? n : undefined;
+}
+
 /** 标签 state 键：连字符转下划线（如 team-default → tag_team_default） */
 const tagKey = (value: string) => `tag_${value.replace(/-/g, "_")}`;
 
@@ -77,6 +83,8 @@ export const pactorServices: Record<string, ServiceHandler> = {
             ["openai", "anthropic", "gemini", "dashscope"].filter(
               (f) => params[f] === true,
             ),
+          page: num(params.page),
+          pageSize: num(params.pageSize),
         }),
   "provider.detail": (params) =>
     realBackendEnabled()
@@ -86,6 +94,14 @@ export const pactorServices: Record<string, ServiceHandler> = {
     realBackendEnabled()
       ? realServices["provider.pullModels"](params)
       : pullProviderModels(str(params.code)),
+  /** 表单 Provider 下拉选项（模型新建/编辑页用）：{label, value}[] */
+  "provider.options": () =>
+    realBackendEnabled()
+      ? realServices["provider.options"]()
+      : queryProviders({ pageSize: 500 }).items.map((p) => ({
+          label: p.name,
+          value: p.code,
+        })),
 
   // 厂商多选：ChipFilter 以 providers 数组（http 侧序列化为逗号串）提交；
   // 旧版 DSL 一个 Provider 一个布尔参数的写法保留兼容
@@ -97,6 +113,8 @@ export const pactorServices: Record<string, ServiceHandler> = {
           providers:
             strList(params.providers) ??
             ["dashscope", "gemini", "openai"].filter((p) => params[p] === true),
+          page: num(params.page),
+          pageSize: num(params.pageSize),
         }),
   "model.detail": (params) =>
     realBackendEnabled()
@@ -125,6 +143,8 @@ export const pactorServices: Record<string, ServiceHandler> = {
             ]
               .filter(([, k]) => params[k] === true)
               .map(([t]) => t),
+          page: num(params.page),
+          pageSize: num(params.pageSize),
         }),
   "route.detail": (params) =>
     realBackendEnabled()
@@ -144,6 +164,8 @@ export const pactorServices: Record<string, ServiceHandler> = {
             CLIENT_TAG_FILTERS.filter((t) => params[tagKey(t.value)] === true).map(
               (t) => t.value,
             ),
+          page: num(params.page),
+          pageSize: num(params.pageSize),
         }),
   "client.detail": (params) =>
     realBackendEnabled()
@@ -161,6 +183,8 @@ export const pactorServices: Record<string, ServiceHandler> = {
             CLIENT_TEMPLATE_TAG_FILTERS.filter(
               (t) => params[tagKey(t.value)] === true,
             ).map((t) => t.value),
+          page: num(params.page),
+          pageSize: num(params.pageSize),
         }),
   "clientTemplate.detail": (params) =>
     realBackendEnabled()

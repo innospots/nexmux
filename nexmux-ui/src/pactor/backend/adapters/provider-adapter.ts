@@ -14,67 +14,16 @@ import type {
   PullModelRow,
 } from "../../mocks/providers-mock";
 import { backendClient, fetchAll, type PageResult } from "../client";
-
-// ── 后端 VO 镜像（仅适配所需字段） ────────────────────────────
-
-interface ProviderVo {
-  providerId: string;
-  providerCode: string;
-  displayName: string;
-  providerType: string;
-  defaultProtocol: string;
-  vendorCode: string;
-  sourceVendorCode: string;
-  iconUri?: string;
-  baseUrl: string;
-  region?: string;
-  timeoutMs?: number;
-  status: string;
-  keyStatus: string;
-  modelCount: number;
-}
-
-interface ProviderModelRowVo {
-  modelCode: string;
-  displayName: string;
-  modelType: string;
-  providerModelId: string;
-  status: string;
-}
-
-interface ProviderDetailVo extends Omit<ProviderVo, "modelCount"> {
-  proxy?: string;
-  description?: string;
-  capabilityExtension?: string;
-  keyVersion?: number;
-  rotatedAt?: string;
-  models: ProviderModelRowVo[];
-  createdAt?: string;
-  updatedAt?: string;
-  updatedBy?: string;
-}
-
-interface ModelVo {
-  modelCode: string;
-  primaryProviderId: string;
-  status: string;
-}
-
-interface RouteVo {
-  status: string;
-  routeSpec?: { candidates?: { modelCode: string }[] };
-}
-
-interface UpstreamModelVo {
-  providerModelId: string;
-  existsLocally: boolean;
-}
-
-interface ConnectionTestVo {
-  ok: boolean;
-  latencyMs: number;
-  detail: string;
-}
+import type {
+  ConnectionTestVo,
+  ModelVo,
+  ProviderCreateRequest,
+  ProviderDetailVo,
+  ProviderUpdateRequest,
+  ProviderVo,
+  RouteVo,
+  UpstreamModelVo,
+} from "../types";
 
 /** vendorCode → Icon 白名单图标名（前端 Icon 组件白名单取值） */
 const VENDOR_ICONS: Record<string, string> = {
@@ -150,13 +99,14 @@ async function loadRelations(): Promise<ProviderRelation> {
 
   const modelsByProvider = new Map<string, { code: string; enabled: boolean }[]>();
   for (const model of models) {
-    const list = modelsByProvider.get(model.primaryProviderId) ?? [];
+    const providerId = model.primaryProviderId ?? "";
+    const list = modelsByProvider.get(providerId) ?? [];
     list.push({ code: model.modelCode, enabled: model.status === "ENABLED" });
-    modelsByProvider.set(model.primaryProviderId, list);
+    modelsByProvider.set(providerId, list);
   }
 
   const modelToProviderId = new Map<string, string>();
-  for (const model of models) modelToProviderId.set(model.modelCode, model.primaryProviderId);
+  for (const model of models) modelToProviderId.set(model.modelCode, model.primaryProviderId ?? "");
 
   const routesByProviderId = new Map<string, { total: number; enabled: number }>();
   const routeCountByModel = new Map<string, number>();
@@ -199,8 +149,8 @@ function toRecord(
   const models: ProviderModel[] = (detailVo?.models ?? []).map((m) => ({
     code: m.modelCode,
     name: m.displayName,
-    type: m.modelType,
-    providerModelId: m.providerModelId,
+    type: m.modelType ?? "",
+    providerModelId: m.providerModelId ?? "",
     pricing: "—",
     status: m.status === "ENABLED" ? "ONLINE" : "OFFLINE",
     routes: relations.routeCountByModel.get(m.modelCode) ?? 0,
@@ -213,13 +163,13 @@ function toRecord(
     code: vo.providerCode,
     name: vo.displayName,
     displayName: vo.displayName,
-    icon: iconOf(vo.vendorCode),
-    providerType: vo.providerType,
-    protocol: vo.defaultProtocol,
-    family: vo.vendorCode as ProviderRecord["family"],
-    status: statusOf(vo.status),
+    icon: iconOf(vo.vendorCode ?? ""),
+    providerType: vo.providerType ?? "",
+    protocol: vo.defaultProtocol ?? "",
+    family: (vo.vendorCode ?? "") as ProviderRecord["family"],
+    status: statusOf(vo.status ?? ""),
     keyStatus: (vo.keyStatus ?? "none") as ProviderRecord["keyStatus"],
-    baseUrl: vo.baseUrl,
+    baseUrl: vo.baseUrl ?? "",
     region: vo.region ?? "",
     timeout: vo.timeoutMs ?? 0,
     proxy: detailVo?.proxy ?? "",
@@ -299,11 +249,13 @@ export async function listProviders(params: ProviderListParams): Promise<Provide
   const status = params.status ?? "all";
   const backendStatus = status === "enabled" || status === "disabled" ? status.toUpperCase() : undefined;
   const keyStatus = status === "pending" || status === "none" ? status : undefined;
+  const pageNo = params.page ?? 1;
+  const pageSize = params.pageSize ?? 50;
 
   const [page, relations, allForCounts] = await Promise.all([
     backendClient.get<PageResult<ProviderVo>>("/api/nexmux/providers", {
-      pageNo: 1,
-      pageSize: 5000,
+      pageNo,
+      pageSize,
       keyword: params.keyword || undefined,
       status: backendStatus,
       keyStatus,
@@ -319,7 +271,11 @@ export async function listProviders(params: ProviderListParams): Promise<Provide
   const counts = computeCounts(allItems);
   return {
     items,
-    total: allForCounts.length,
+    // total 为筛选后总数（后端 PageResult）；构成口径由 counts.all.total 承担
+    total: page.total,
+    pageNo,
+    pageSize,
+    pages: page.pages,
     counts,
     filters: computeFilters(counts, allItems),
   };
@@ -353,16 +309,13 @@ export async function testProviderConnection(
   const detail = await backendClient.get<ProviderDetailVo>(
     `/api/nexmux/providers/by-code/${encodeURIComponent(code)}`,
   );
-  return backendClient.post<ConnectionTestVo>(
+  const result = await backendClient.post<ConnectionTestVo>(
     `/api/nexmux/providers/${detail.providerId}/connection-test`,
   );
+  return { ok: result.ok, latencyMs: result.latencyMs, detail: result.detail ?? "" };
 }
 
 // ── 写操作（BFF 写通道；code → providerId 解析） ──────────────
-
-export interface ProviderWriteBody {
-  [key: string]: unknown;
-}
 
 async function providerIdOf(code: string): Promise<string> {
   const detail = await backendClient.get<ProviderDetailVo>(
@@ -371,12 +324,38 @@ async function providerIdOf(code: string): Promise<string> {
   return detail.providerId;
 }
 
-export async function createProvider(body: ProviderWriteBody): Promise<ProviderVo> {
-  return backendClient.post<ProviderVo>("/api/nexmux/providers", body);
+export async function createProvider(
+  body: ProviderCreateRequest & Record<string, unknown>,
+): Promise<ProviderVo> {
+  // 只取契约字段（表单整包提交时 apiKey 等契约外字段落桩忽略）；
+  // vendorCode 缺省回填 providerCode（文档标必填），sourceVendorCode 缺省同 vendorCode
+  const payload: ProviderCreateRequest = {
+    providerCode: body.providerCode,
+    displayName: body.displayName,
+    providerType: body.providerType,
+    defaultProtocol: body.defaultProtocol,
+    vendorCode: body.vendorCode || body.providerCode,
+    sourceVendorCode: body.sourceVendorCode || body.vendorCode || body.providerCode,
+    iconUri: body.iconUri,
+    baseUrl: body.baseUrl,
+    region: body.region,
+    timeoutMs: body.timeoutMs,
+  };
+  return backendClient.post<ProviderVo>("/api/nexmux/providers", payload);
 }
 
-export async function updateProvider(code: string, body: ProviderWriteBody): Promise<ProviderVo> {
-  return backendClient.put<ProviderVo>(`/api/nexmux/providers/${await providerIdOf(code)}`, body);
+export async function updateProvider(
+  code: string,
+  body: ProviderUpdateRequest & Record<string, unknown>,
+): Promise<ProviderVo> {
+  // 只取契约字段（ProviderUpdateRequest 仅支持 displayName/baseUrl/region/timeoutMs）
+  const payload: ProviderUpdateRequest = {
+    displayName: body.displayName,
+    baseUrl: body.baseUrl,
+    region: body.region,
+    timeoutMs: body.timeoutMs,
+  };
+  return backendClient.put<ProviderVo>(`/api/nexmux/providers/${await providerIdOf(code)}`, payload);
 }
 
 export async function setProviderEnabled(code: string, enabled: boolean): Promise<ProviderVo> {

@@ -43,34 +43,42 @@ body:
       props:
         layout: vertical
         initialValues:
-          code: ${data.detail.code}
-          name: ${data.detail.name}
+          providerCode: ${data.detail.code}
+          displayName: ${data.detail.name}
           providerType: ${data.detail.providerType}
-          protocol: ${data.detail.protocol}
+          defaultProtocol: ${data.detail.protocol}
           status: ${data.detail.status}
           description: ${data.detail.description}
           baseUrl: ${data.detail.baseUrl}
           region: ${data.detail.region}
-          timeout: ${data.detail.timeout}
+          timeoutMs: ${data.detail.timeout}
           proxy: ${data.detail.proxy}
           capabilityExtension: ${data.detail.capabilityExtension}
       events:
         onSubmit:
-          - id: cfm
-            action: confirm
-            condition: ${event.status == 'disabled'}
+          - id: saveResult
+            action: request
             params:
-              title: 确认停用 Provider
-              content: 停用后，该 Provider 将无法被新建 Model / Target 引用。⚠ 存在 ONLINE Target
-                引用时，建议先完成切换再停用。（演示）
+              method: PUT
+              url: /api/data/providers/${route.params.code}
+              body: ${event}
           - action: if
             params:
-              condition: ${event.status != 'disabled' || actions.cfm}
+              condition: ${actions.saveResult == null || actions.saveResult.ok == false}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: "${actions.saveResult != null && actions.saveResult.error != null ? actions.saveResult.error.message
+                      : '保存失败'}"
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok != false}
               then:
                 - action: message
                   params:
                     messageType: success
-                    text: Provider 已保存（演示：静态页面不落库）
+                    text: Provider 已保存
                 - action: navigate
                   params:
                     to: /providers/${route.params.code}
@@ -91,33 +99,14 @@ body:
                     className: "[&>[data-slot=grid-item]:last-child]:col-span-full"
                   children:
                     - type: Field
+                      props:
+                        label: Provider Code
+                        required: true
+                        labelHint: Provider Code 创建后不可修改
                       children:
-                        - type: Flex
-                          props:
-                            justify: space-between
-                            align: center
-                            className: w-full mb-3.5
-                          children:
-                            - type: Flex
-                              props:
-                                align: center
-                                className: gap-0.5
-                              children:
-                                - type: Text
-                                  props:
-                                    text: "*"
-                                    className: text-destructive text-sm leading-none
-                                - type: Label
-                                  props:
-                                    text: Provider Code
-                            - type: Text
-                              props:
-                                text: Provider Code 创建后不可修改
-                                type: secondary
-                                className: text-xs leading-none
                         - type: Input
                           props:
-                            name: code
+                            name: providerCode
                             className: w-full
                             placeholder: 小写 + 数字 + 连字符，如 openai
                             disabled: true
@@ -131,7 +120,7 @@ body:
                       children:
                         - type: Input
                           props:
-                            name: name
+                            name: displayName
                             className: w-full
                             placeholder: 1–64 字符
                             rules:
@@ -148,13 +137,13 @@ body:
                             className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
                             options:
                               - label: 商业
-                                value: 商业
+                                value: COMMERCIAL
                               - label: 云服务
-                                value: 云服务
+                                value: CLOUD
                               - label: 私有
-                                value: 私有
+                                value: PRIVATE
                               - label: 自定义
-                                value: 自定义
+                                value: CUSTOM
                             rules:
                               - required: true
                                 message: 请选择 Provider Type
@@ -165,19 +154,31 @@ body:
                       children:
                         - type: Select
                           props:
-                            name: protocol
+                            name: defaultProtocol
                             className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
                             options:
-                              - label: OpenAI Compatible
-                                value: OpenAI Compatible
-                              - label: Anthropic Messages
-                                value: Anthropic Messages
-                              - label: Gemini
-                                value: Gemini
-                              - label: DashScope
-                                value: DashScope
-                              - label: 自定义
-                                value: 自定义
+                              - label: OpenAI / Chat Completions
+                                value: openai-completions
+                              - label: OpenAI / Responses
+                                value: openai-responses
+                              - label: Anthropic / Messages
+                                value: anthropic-messages
+                              - label: Google / Generative AI (Gemini)
+                                value: google-generative-ai
+                              - label: Google / Vertex AI
+                                value: google-vertex
+                              - label: Azure OpenAI / Responses
+                                value: azure-openai-responses
+                              - label: AWS Bedrock / Converse Stream
+                                value: bedrock-converse-stream
+                              - label: Mistral / Conversations
+                                value: mistral-conversations
+                              - label: OpenAI Codex / Responses
+                                value: openai-codex-responses
+                              - label: Pi / Messages
+                                value: pi-messages
+                              - label: TypeSafe / System One
+                                value: typesafe-system-one
                             rules:
                               - required: true
                                 message: 请选择 Default Protocol
@@ -243,44 +244,25 @@ body:
                             className: w-full
                             placeholder: 如 us-east、cn-beijing
                     - type: Field
+                      props:
+                        label: API Key
+                        required: true
+                        labelHint: "当前状态：${data.detail.keyStatus == 'configured' ? '● 已配置（' +
+                          data.detail.maskedKey + '）' : '● 未配置'}"
                       children:
-                        - type: Flex
-                          props:
-                            justify: space-between
-                            align: center
-                            className: w-full mb-3.5
-                          children:
-                            - type: Flex
-                              props:
-                                align: center
-                                className: gap-0.5
-                              children:
-                                - type: Text
-                                  props:
-                                    text: "*"
-                                    className: text-destructive text-sm leading-none
-                                - type: Label
-                                  props:
-                                    text: API Key
-                            - type: Text
-                              props:
-                                text: "当前状态：${data.detail.keyStatus == 'configured' ? '● 已配置（' +
-                                  data.detail.maskedKey + '）' : '● 未配置'}"
-                                type: secondary
-                                className: text-xs leading-none
                         - type: Input
                           props:
                             name: apiKey
                             className: w-full
                             type: password
-                            placeholder: 留空表示不修改
+                            placeholder: 留空表示不修改（当前版本密钥不落库）
                     - type: Field
                       props:
                         label: Timeout (ms)
                       children:
                         - type: NumberInput
                           props:
-                            name: timeout
+                            name: timeoutMs
                             className: w-full
                             min: 0
                             precision: 0
@@ -303,7 +285,7 @@ body:
                         - type: Button
                           props:
                             text: 测试连接
-                            className: mt-[2px]
+                            className: mt-[10px]
                           events:
                             onClick:
                               - action: message

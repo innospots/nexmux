@@ -16,11 +16,12 @@ import {
   setProviderEnabled,
   testProviderConnection,
   updateProvider,
-  type ProviderWriteBody,
 } from "./adapters/provider-adapter";
+import type { ProviderCreateRequest, ProviderUpdateRequest } from "./types";
 import {
   createModel,
   getModelByCode,
+  invokeModelTest,
   listModels,
   setModelEnabled,
   updateModel,
@@ -53,6 +54,8 @@ import {
 import { getCallLogById, listCallLogs } from "./adapters/call-log-adapter";
 import { getCostById, listCosts } from "./adapters/cost-adapter";
 import { getAuditById, listAuditOperators, listAudits } from "./adapters/audit-adapter";
+import { fetchAll } from "./client";
+import type { ProviderVo } from "./types";
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -70,6 +73,12 @@ function opt(value: unknown): string | undefined {
   return typeof value === "string" && value !== "" ? value : undefined;
 }
 
+/** 分页参数：字符串 query 转数字，非正整数落缺省（undefined → adapter 默认 1/50） */
+function num(value: unknown): number | undefined {
+  const n = typeof value === "string" ? Number(value) : typeof value === "number" ? value : NaN;
+  return Number.isInteger(n) && n >= 1 ? n : undefined;
+}
+
 /** 读服务（与 mock handler 同签名） */
 export const realServices = {
   "provider.list": (params: Record<string, unknown>) =>
@@ -77,14 +86,23 @@ export const realServices = {
       keyword: str(params.keyword),
       status: str(params.status) || "all",
       types: strList(params.types),
+      page: num(params.page),
+      pageSize: num(params.pageSize),
     }),
   "provider.detail": (params: Record<string, unknown>) => getProviderByCode(str(params.code)),
   "provider.pullModels": (params: Record<string, unknown>) => pullProviderModels(str(params.code)),
+  /** 表单 Provider 下拉选项（模型新建/编辑页用）：{label, value}[] */
+  "provider.options": async () => {
+    const providers = await fetchAll<ProviderVo>("/api/nexmux/providers");
+    return providers.map((p) => ({ label: p.displayName, value: p.providerCode }));
+  },
 
   "model.list": (params: Record<string, unknown>) =>
     listModels({
       type: str(params.type) || "all",
       providers: strList(params.providers),
+      page: num(params.page),
+      pageSize: num(params.pageSize),
     }),
   "model.detail": (params: Record<string, unknown>) => getModelByCode(str(params.code)),
 
@@ -93,6 +111,8 @@ export const realServices = {
       status: str(params.status) || "all",
       type: str(params.type) || "all",
       tags: strList(params.tags),
+      page: num(params.page),
+      pageSize: num(params.pageSize),
     }),
   "route.detail": (params: Record<string, unknown>) => getRouteByCode(str(params.code)),
 
@@ -102,6 +122,8 @@ export const realServices = {
       name: str(params.name),
       code: str(params.code),
       tags: strList(params.tags),
+      page: num(params.page),
+      pageSize: num(params.pageSize),
     }),
   "client.detail": (params: Record<string, unknown>) => getClientByCode(str(params.code)),
 
@@ -110,6 +132,8 @@ export const realServices = {
       status: str(params.status) || "all",
       keyword: str(params.keyword),
       tags: strList(params.tags),
+      page: num(params.page),
+      pageSize: num(params.pageSize),
     }),
   "clientTemplate.detail": (params: Record<string, unknown>) =>
     getClientTemplateByCode(str(params.code)),
@@ -166,17 +190,53 @@ export const pactorMutations: Record<
   string,
   (ctx: MutationContext) => Promise<unknown>
 > = {
-  "POST providers": (ctx) => createProvider((ctx.body ?? {}) as ProviderWriteBody),
-  "PUT providers": (ctx) =>
-    updateProvider(str(ctx.id), (ctx.body ?? {}) as ProviderWriteBody),
+  "POST providers": (ctx) =>
+    createProvider((ctx.body ?? {}) as ProviderCreateRequest & Record<string, unknown>),
+  // 字段拆分（设计 D2）：契约字段 → 后端 PUT；status 变化 → enable/disable；
+  // 契约外字段（description/proxy/capabilityExtension/apiKey）落桩忽略
+  "PUT providers": async (ctx) => {
+    const body = (ctx.body ?? {}) as Record<string, unknown>;
+    const code = str(ctx.id);
+    const patch: ProviderUpdateRequest & Record<string, unknown> = {};
+    if (typeof body.displayName === "string" && body.displayName !== "") {
+      patch.displayName = body.displayName;
+    }
+    if (typeof body.baseUrl === "string" && body.baseUrl !== "") patch.baseUrl = body.baseUrl;
+    if (typeof body.region === "string") patch.region = body.region;
+    const timeoutMs = Number(body.timeoutMs);
+    if (Number.isFinite(timeoutMs) && timeoutMs > 0) patch.timeoutMs = timeoutMs;
+    const updated = await updateProvider(code, patch);
+    if (typeof body.status === "string" && body.status !== "") {
+      const targetEnabled = body.status === "enabled";
+      const currentEnabled = updated.status === "ENABLED";
+      if (targetEnabled !== currentEnabled) {
+        await setProviderEnabled(code, targetEnabled);
+      }
+    }
+    return updated;
+  },
   "POST providers/enable": (ctx) => setProviderEnabled(str(ctx.id), true),
   "POST providers/disable": (ctx) => setProviderEnabled(str(ctx.id), false),
   "POST providers/connection-test": (ctx) => testProviderConnection(str(ctx.id)),
 
   "POST models": (ctx) => createModel((ctx.body ?? {}) as Record<string, unknown>),
-  "PUT models": (ctx) => updateModel(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
+  // 字段拆分（同 provider）：契约字段 → updateModel；status 变化 → enable/disable；其余落桩
+  "PUT models": async (ctx) => {
+    const body = (ctx.body ?? {}) as Record<string, unknown>;
+    const code = str(ctx.id);
+    const updated = await updateModel(code, body);
+    if (typeof body.status === "string" && body.status !== "") {
+      const targetEnabled = body.status === "enabled";
+      const currentEnabled = updated.status === "ENABLED";
+      if (targetEnabled !== currentEnabled) {
+        await setModelEnabled(code, targetEnabled);
+      }
+    }
+    return updated;
+  },
   "POST models/enable": (ctx) => setModelEnabled(str(ctx.id), true),
   "POST models/disable": (ctx) => setModelEnabled(str(ctx.id), false),
+  "POST models/invoke-test": (ctx) => invokeModelTest(str(ctx.id)),
 
   "POST routes": (ctx) => createRoute((ctx.body ?? {}) as Record<string, unknown>),
   "PUT routes": (ctx) => updateRoute(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
@@ -199,4 +259,17 @@ export const pactorMutations: Record<
     updateClientTemplate(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
   "POST client-templates/enable": (ctx) => setClientTemplateEnabled(str(ctx.id), true),
   "POST client-templates/disable": (ctx) => setClientTemplateEnabled(str(ctx.id), false),
+};
+
+/**
+ * 无后端接口的写操作桩（设计 D4）：集中登记，默认返回成功并标注 stub: true，
+ * 不触碰真实后端（mock 演示模式下同样可用）。后端接口就绪后逐条移除、
+ * 改挂 pactorMutations 中的真实适配器调用。
+ */
+export const stubMutations: Record<
+  string,
+  (ctx: MutationContext) => Promise<unknown>
+> = {
+  // 后端无 DELETE /providers/{id}（OpenAPI 已核实）
+  "DELETE providers": async () => ({ stub: true, ok: true }),
 };

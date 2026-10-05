@@ -9,6 +9,7 @@ state:
   nameKeyword: ""
   codeKeyword: ""
   tagChips: []
+  page: 1
 dataSources:
   clients:
     type: http
@@ -21,6 +22,8 @@ dataSources:
         name: ${state.nameKeyword}
         code: ${state.codeKeyword}
         tags: ${state.tagChips}
+        page: ${state.page}
+        pageSize: 10
 body:
   type: Page
   children:
@@ -98,6 +101,9 @@ body:
                   - action: setState
                     params:
                       tagChips: ${event}
+                  - action: setState
+                    params:
+                      page: 1
                   - action: reload
                     params:
                       dataSource: clients
@@ -138,6 +144,9 @@ body:
                       - action: setState
                         params:
                           nameKeyword: ${event}
+                      - action: setState
+                        params:
+                          page: 1
                       - action: reload
                         params:
                           dataSource: clients
@@ -165,6 +174,9 @@ body:
                       - action: setState
                         params:
                           codeKeyword: ${event}
+                      - action: setState
+                        params:
+                          page: 1
                       - action: reload
                         params:
                           dataSource: clients
@@ -186,12 +198,15 @@ body:
                   - action: setState
                     params:
                       statusFilter: ${event}
+                  - action: setState
+                    params:
+                      page: 1
                   - action: reload
                     params:
                       dataSource: clients
             - type: Text
               props:
-                text: 显示 ${data.clients.items.length} / ${data.clients.total}
+                text: 共 ${data.clients.total} 条
                 type: secondary
                 className: tabular-nums text-sm shrink-0
     - type: Card
@@ -290,7 +305,7 @@ body:
                                     - type: Text
                                       props:
                                         size: small
-                                        text: "${row.status == 'enabled' ? '停用后，该客户端的 AppKey 调用将被拒绝，Runtime 不再为其匹配任何路由。'
+                                        text: "${parent.row.status == 'enabled' ? '停用后，该客户端的 AppKey 调用将被拒绝，Runtime 不再为其匹配任何路由。'
                                           : '启用后，该客户端恢复使用 AppKey 调用授权路由。'}"
                                     - type: Flex
                                       props:
@@ -303,11 +318,11 @@ body:
                                             strong: true
                                         - type: Text
                                           props:
-                                            text: · AppKey：${row.appKeyId}
+                                            text: · AppKey：${parent.row.appKeyId}
                                             type: secondary
                                         - type: Text
                                           props:
-                                            text: · 授权路由：${row.routeCount} 个
+                                            text: · 授权路由：${parent.row.routeCount} 个
                                             type: secondary
                                     - type: Flex
                                       props:
@@ -322,9 +337,9 @@ body:
                                               - action: overlay.close
                                         - type: Button
                                           props:
-                                            text: "${row.status == 'enabled' ? '确认停用' : '确认启用'}"
+                                            text: "${parent.row.status == 'enabled' ? '确认停用' : '确认启用'}"
                                             variant: primary
-                                            danger: ${row.status == 'enabled'}
+                                            danger: ${parent.row.status == 'enabled'}
                                           events:
                                             onClick:
                                               - action: overlay.close
@@ -363,7 +378,7 @@ body:
                                     - type: Text
                                       props:
                                         size: small
-                                        text: 将为 AppKey ${row.appKeyId} 轮换 Secret。
+                                        text: 将为 AppKey ${parent.row.appKeyId} 轮换 Secret。
                                     - type: Text
                                       props:
                                         size: small
@@ -399,6 +414,20 @@ body:
                                   params:
                                     messageType: success
                                     text: 轮换成功，新 Secret：gw-sk-demo-7f3a······（仅此一次展示，请妥善保存）（演示：静态页面不落库）
+    - type: Pagination
+      props:
+        total: ${data.clients.total}
+        pageSize: 10
+        page: ${state.page}
+        className: mt-4
+      events:
+        onChange:
+          - action: setState
+            params:
+              page: ${event}
+          - action: reload
+            params:
+              dataSource: clients
     - type: Empty
       when: ${data.clients.items != null && data.clients.items.length == 0}
       props:

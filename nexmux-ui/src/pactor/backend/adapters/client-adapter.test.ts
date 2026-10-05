@@ -77,8 +77,12 @@ const CLIENT_DETAIL = {
 
 function stubAll() {
   getMock.mockImplementation((path: string) => {
-    if (path === "/api/nexmux/clients") return Promise.resolve({ records: [CLIENT_VO] });
-    if (path === "/api/nexmux/client-templates") return Promise.resolve({ records: [TEMPLATE_VO] });
+    if (path === "/api/nexmux/clients") {
+      return Promise.resolve({ records: [CLIENT_VO], total: 1, pages: 1 });
+    }
+    if (path === "/api/nexmux/client-templates") {
+      return Promise.resolve({ records: [TEMPLATE_VO], total: 1, pages: 1 });
+    }
     if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
     if (path === "/api/nexmux/clients/by-code/mobile-app") return Promise.resolve(CLIENT_DETAIL);
     if (path === "/api/nexmux/client-templates/by-code/team-default") {
@@ -104,7 +108,11 @@ describe("listClients", () => {
   it("组装 ClientRecord（appKeySummary/配额摘要/模板关联）", async () => {
     const result = await listClients({ status: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     const item = result.items[0];
     expect(item.code).toBe("mobile-app");
     expect(item.status).toBe("enabled");
@@ -125,6 +133,43 @@ describe("listClients", () => {
     expect(result.filters.tags.map((f: { text: string }) => f.text)).toEqual([
       "全部 1", "mobile 1", "team 1",
     ]);
+  });
+
+  it("expired 展示态：BFF 拉全量 ENABLED 先过滤再切片，total 为过滤后总数", async () => {
+    const EXPIRED_CLIENT_VO = {
+      ...CLIENT_VO,
+      clientId: "cl-2",
+      clientCode: "old-app",
+      displayName: "旧应用",
+      expiresAt: "2020-01-01T00:00:00",
+    };
+    getMock.mockImplementation((path: string) => {
+      if (path === "/api/nexmux/clients") {
+        return Promise.resolve({ records: [CLIENT_VO, EXPIRED_CLIENT_VO], total: 2, pages: 1 });
+      }
+      if (path === "/api/nexmux/client-templates") {
+        return Promise.resolve({ records: [TEMPLATE_VO], total: 1, pages: 1 });
+      }
+      if (path === "/api/nexmux/routes") return Promise.resolve({ records: [ROUTE_VO] });
+      return Promise.resolve({ records: [] });
+    });
+
+    const result = await listClients({ status: "expired", page: 1, pageSize: 1 });
+
+    // BFF 内存过滤路径：向后台请求全量 ENABLED（pageSize 5000）
+    const pageCall = getMock.mock.calls.find(
+      ([path, params]) =>
+        path === "/api/nexmux/clients" &&
+        (params as Record<string, unknown>)?.pageSize === 5000,
+    );
+    expect(pageCall?.[1]).toMatchObject({ status: "ENABLED" });
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0].code).toBe("old-app");
+    expect(result.items[0].status).toBe("expired");
+    expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(1);
+    expect(result.pages).toBe(1);
   });
 });
 
@@ -165,7 +210,11 @@ describe("client-template-adapter", () => {
   it("列表：validityLabel/policySummary/filters", async () => {
     const result = await listClientTemplates({ status: "all" });
 
+    // total 为筛选后总数（后端 PageResult.total）
     expect(result.total).toBe(1);
+    expect(result.pageNo).toBe(1);
+    expect(result.pageSize).toBe(50);
+    expect(result.pages).toBe(1);
     const item = result.items[0];
     expect(item.validityLabel).toBe("创建后 365 天");
     expect(item.quotaSummary).toBe("总+日循环");

@@ -58,6 +58,10 @@ export interface ProviderListParams {
   /** all | enabled | disabled | pending | none */
   status?: string;
   types?: string[];
+  /** 页码（1 起）；与 pageSize 传任一即启用分页（未传保持全量返回） */
+  page?: number;
+  /** 每页条数（分页时缺省 50） */
+  pageSize?: number;
 }
 
 /** 快筛 Chip 计数（数据构成口径，不随搜索/筛选变化）：全部/类型 Chip 为「已启用/总数」，状态 Chip 仅对应数量 */
@@ -76,10 +80,15 @@ export interface ProviderChipOption {
 
 export interface ProviderListResult {
   items: ProviderRecord[];
+  /** 分页请求时为筛选后总数；未分页时为全量总数（构成口径见 counts.all.total） */
   total: number;
   counts: ProviderCounts;
   /** 快筛 Chip 组：status 单选（含「全部」）/ types 多选（无「全部」，不选即全部） */
   filters: { status: ProviderChipOption[]; types: ProviderChipOption[] };
+  /** 分页信息（仅传 page/pageSize 的分页请求返回） */
+  pageNo?: number;
+  pageSize?: number;
+  pages?: number;
 }
 
 /** 类型快筛的展示元数据（label / 色点），聚合键与 ProviderRecord.family 一致 */
@@ -389,7 +398,8 @@ function withEnabledModelCount(record: ProviderRecord): ProviderRecord {
   };
 }
 
-/** provider.list：搜索 + 状态/类型快筛取交集，即时过滤（防抖由调用侧控制） */
+/** provider.list：搜索 + 状态/类型快筛取交集，即时过滤（防抖由调用侧控制）；
+ *  传 page/pageSize 时分页（total 为筛选后总数），否则保持全量返回 */
 export function queryProviders(params: ProviderListParams = {}): ProviderListResult {
   const keyword = params.keyword ?? "";
   const status = params.status ?? "all";
@@ -401,7 +411,21 @@ export function queryProviders(params: ProviderListParams = {}): ProviderListRes
       (types.length === 0 || types.includes(p.family)),
   ).map(withEnabledModelCount);
   const counts = computeCounts();
-  return { items, total: PROVIDERS.length, counts, filters: computeFilters(counts) };
+  const filters = computeFilters(counts);
+  if (params.page !== undefined || params.pageSize !== undefined) {
+    const pageNo = params.page ?? 1;
+    const pageSize = params.pageSize ?? 50;
+    return {
+      items: items.slice((pageNo - 1) * pageSize, pageNo * pageSize),
+      total: items.length,
+      counts,
+      filters,
+      pageNo,
+      pageSize,
+      pages: Math.ceil(items.length / pageSize),
+    };
+  }
+  return { items, total: PROVIDERS.length, counts, filters };
 }
 
 /** provider.detail：按 Provider Code 取详情；未命中返回 undefined（页面做空态） */

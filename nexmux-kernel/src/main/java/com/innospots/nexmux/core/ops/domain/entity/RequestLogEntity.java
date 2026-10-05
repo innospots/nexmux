@@ -52,4 +52,77 @@ public class RequestLogEntity extends BaseEntity {
     private String routeTrace;
 
     private LocalDateTime requestedAt;
+
+    @Column(length = 64)
+    private String appKeyId;
+
+    @Column(length = 128)
+    private String userEmail;
+
+    @Column(length = 64)
+    private String providerCode;
+
+    @Column(length = 64)
+    private String protocol;
+
+    @Column(length = 64)
+    private String routeGroup;
+
+    @Column(length = 128)
+    private String application;
+
+    @Column(length = 64)
+    private String alias;
+
+    private Integer httpStatus;
+
+    private Long inputTokens;
+
+    private Long outputTokens;
+
+    private Long cacheReadTokens;
+
+    private Long cacheWriteTokens;
+
+    @Column(precision = 18, scale = 8)
+    private java.math.BigDecimal costUsd;
+
+    @Column(precision = 18, scale = 8)
+    private java.math.BigDecimal billingUsd;
+
+    private Long ttftMs;
+
+    @Column(length = 256)
+    private String upstreamModel;
+
+    @Column(length = 1024)
+    private String upstreamEndpoint;
+
+    @Column(length = 16)
+    private String upstreamStatus;
+
+    private Long upstreamLatencyMs;
+
+    private Integer retries;
+
+    @Column(length = 64)
+    private String clientIp;
+
+    @Column(length = 16)
+    private String ingressMethod;
+
+    @Column(length = 512)
+    private String ingressPath;
+
+    @Column(length = 64)
+    private String traceId;
+
+    @Column(length = 64)
+    private String errorType;
+
+    @Column(columnDefinition = "CLOB")
+    private String pricingSnapshot;
+
+    @Column(columnDefinition = "CLOB")
+    private String promptSnapshot;
 }

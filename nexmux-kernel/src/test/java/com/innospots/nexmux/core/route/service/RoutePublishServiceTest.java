@@ -44,6 +44,7 @@ class RoutePublishServiceTest {
 
         assertThat(result.status()).isEqualTo("PUBLISHED");
         assertThat(entity.getPublishedRouteSpec()).isEqualTo(entity.getRouteSpec());
-        verify(configAuditService).record("ROUTE", "rt-1", "PUBLISH", "publish", entity.getRouteSpec());
+        verify(configAuditService).record("ROUTE", "rt-1", "PUBLISH", "publish",
+                "{\"before\":null,\"after\":{\"alias\":\"a\"}}", "op-1");
     }
 }

@@ -1,6 +1,7 @@
 package com.innospots.nexmux.spring.config;
 
 import com.innospots.nexmux.console.endpoint.client.ClientEndpoint;
+import com.innospots.nexmux.console.endpoint.client.ClientTemplateEndpoint;
 import com.innospots.nexmux.console.endpoint.debug.DebugEndpoint;
 import com.innospots.nexmux.console.endpoint.model.ModelEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsEndpoint;
@@ -11,7 +12,9 @@ import com.innospots.nexmux.console.sitemap.service.NexmuxSitemapService;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
 import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexmux.core.access.dao.ClientDao;
+import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.service.ClientService;
+import com.innospots.nexmux.core.access.service.ClientTemplateService;
 import com.innospots.nexmux.core.audit.dao.ConfigAuditLogDao;
 import com.innospots.nexmux.core.audit.service.AuditQueryService;
 import com.innospots.nexmux.core.audit.service.ConfigAuditService;
@@ -19,6 +22,7 @@ import com.innospots.nexmux.core.debug.service.DebugService;
 import com.innospots.nexmux.core.model.dao.ModelDao;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.ops.dao.RequestLogDao;
+import com.innospots.nexmux.core.ops.service.CostQueryService;
 import com.innospots.nexmux.core.ops.service.RequestLogQueryService;
 import com.innospots.nexmux.core.provider.dao.ProviderCredentialDao;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
@@ -67,13 +71,23 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
-    ClientService clientService(ClientDao clientDao) {
-        return new ClientService(clientDao);
+    ClientService clientService(ClientDao clientDao, ClientTemplateDao clientTemplateDao) {
+        return new ClientService(clientDao, clientTemplateDao);
+    }
+
+    @Bean
+    ClientTemplateService clientTemplateService(ClientTemplateDao clientTemplateDao, ClientDao clientDao) {
+        return new ClientTemplateService(clientTemplateDao, clientDao);
     }
 
     @Bean
     RequestLogQueryService requestLogQueryService(RequestLogDao requestLogDao) {
         return new RequestLogQueryService(requestLogDao);
+    }
+
+    @Bean
+    CostQueryService costQueryService(RequestLogDao requestLogDao) {
+        return new CostQueryService(requestLogDao);
     }
 
     @Bean
@@ -112,8 +126,17 @@ public class NexmuxKernelConfiguration {
 
     @Bean
     @Lazy
-    OpsEndpoint opsEndpoint(RequestLogQueryService requestLogQueryService, AuditQueryService auditQueryService) {
-        return new OpsEndpoint(requestLogQueryService, auditQueryService);
+    ClientTemplateEndpoint clientTemplateEndpoint(ClientTemplateService clientTemplateService) {
+        return new ClientTemplateEndpoint(clientTemplateService);
+    }
+
+    @Bean
+    @Lazy
+    OpsEndpoint opsEndpoint(
+            RequestLogQueryService requestLogQueryService,
+            AuditQueryService auditQueryService,
+            CostQueryService costQueryService) {
+        return new OpsEndpoint(requestLogQueryService, auditQueryService, costQueryService);
     }
 
     @Bean

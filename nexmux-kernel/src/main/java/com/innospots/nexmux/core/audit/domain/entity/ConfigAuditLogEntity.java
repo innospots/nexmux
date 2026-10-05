@@ -47,4 +47,13 @@ public class ConfigAuditLogEntity extends BaseEntity {
 
     @Column(length = 64)
     private String operatorId;
+
+    @Column(length = 64)
+    private String clientIp;
+
+    @Column(length = 64)
+    private String requestId;
+
+    @Column(length = 512)
+    private String userAgent;
 }

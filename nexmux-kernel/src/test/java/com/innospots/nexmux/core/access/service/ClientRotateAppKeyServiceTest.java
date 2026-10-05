@@ -1,6 +1,7 @@
 package com.innospots.nexmux.core.access.service;
 
 import com.innospots.nexmux.core.access.dao.ClientDao;
+import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,7 +19,7 @@ class ClientRotateAppKeyServiceTest {
     @BeforeEach
     void setUp() {
         clientDao = Mockito.mock(ClientDao.class);
-        clientService = new ClientService(clientDao);
+        clientService = new ClientService(clientDao, Mockito.mock(ClientTemplateDao.class));
     }
 
     @Test

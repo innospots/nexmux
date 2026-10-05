@@ -25,6 +25,34 @@ import {
   setModelEnabled,
   updateModel,
 } from "./adapters/model-adapter";
+import {
+  createRoute,
+  getRouteByCode,
+  listRoutes,
+  publishRoute,
+  setRouteEnabled,
+  updateRoute,
+} from "./adapters/route-adapter";
+import {
+  createClient,
+  getClientByCode,
+  listClients,
+  rotateClientAppKey,
+  setClientEnabled,
+  updateClient,
+  updateClientRouteGrants,
+} from "./adapters/client-adapter";
+import {
+  clientsCreatedByTemplate,
+  createClientTemplate,
+  getClientTemplateByCode,
+  listClientTemplates,
+  setClientTemplateEnabled,
+  updateClientTemplate,
+} from "./adapters/client-template-adapter";
+import { getCallLogById, listCallLogs } from "./adapters/call-log-adapter";
+import { getCostById, listCosts } from "./adapters/cost-adapter";
+import { getAuditById, listAuditOperators, listAudits } from "./adapters/audit-adapter";
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -36,6 +64,10 @@ function strList(value: unknown): string[] | undefined {
   }
   if (typeof value === "string") return value.split(",").filter(Boolean);
   return undefined;
+}
+
+function opt(value: unknown): string | undefined {
+  return typeof value === "string" && value !== "" ? value : undefined;
 }
 
 /** 读服务（与 mock handler 同签名） */
@@ -55,6 +87,72 @@ export const realServices = {
       providers: strList(params.providers),
     }),
   "model.detail": (params: Record<string, unknown>) => getModelByCode(str(params.code)),
+
+  "route.list": (params: Record<string, unknown>) =>
+    listRoutes({
+      status: str(params.status) || "all",
+      type: str(params.type) || "all",
+      tags: strList(params.tags),
+    }),
+  "route.detail": (params: Record<string, unknown>) => getRouteByCode(str(params.code)),
+
+  "client.list": (params: Record<string, unknown>) =>
+    listClients({
+      status: str(params.status) || "all",
+      name: str(params.name),
+      code: str(params.code),
+      tags: strList(params.tags),
+    }),
+  "client.detail": (params: Record<string, unknown>) => getClientByCode(str(params.code)),
+
+  "clientTemplate.list": (params: Record<string, unknown>) =>
+    listClientTemplates({
+      status: str(params.status) || "all",
+      keyword: str(params.keyword),
+      tags: strList(params.tags),
+    }),
+  "clientTemplate.detail": (params: Record<string, unknown>) =>
+    getClientTemplateByCode(str(params.code)),
+  "clientTemplate.createdClients": (params: Record<string, unknown>) =>
+    clientsCreatedByTemplate(str(params.code)),
+
+  "callLog.list": (params: Record<string, unknown>) =>
+    listCallLogs({
+      start: opt(params.start),
+      end: opt(params.end),
+      status: str(params.status) || "all",
+      model: str(params.model) || "all",
+      provider: str(params.provider) || "all",
+      protocol: str(params.protocol) || "all",
+      routeGroup: str(params.routeGroup) || "all",
+      email: str(params.email),
+      appKey: str(params.appKey),
+    }),
+  "callLog.detail": (params: Record<string, unknown>) => getCallLogById(str(params.id)),
+
+  "cost.list": (params: Record<string, unknown>) =>
+    listCosts({
+      application: str(params.application),
+      appKey: str(params.appKey),
+      alias: str(params.alias),
+      model: str(params.model) || "all",
+      provider: str(params.provider) || "all",
+      start: opt(params.start),
+      end: opt(params.end),
+    }),
+  "cost.detail": (params: Record<string, unknown>) => getCostById(str(params.id)),
+
+  "audit.list": (params: Record<string, unknown>) =>
+    listAudits({
+      start: opt(params.start),
+      end: opt(params.end),
+      operator: str(params.operator) || "all",
+      operation: str(params.operation) || "all",
+      resourceType: str(params.resourceType) || "all",
+      resourceId: str(params.resourceId),
+    }),
+  "audit.detail": (params: Record<string, unknown>) => getAuditById(str(params.id)),
+  "audit.operators": () => listAuditOperators(),
 } as const;
 
 export interface MutationContext {
@@ -79,4 +177,26 @@ export const pactorMutations: Record<
   "PUT models": (ctx) => updateModel(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
   "POST models/enable": (ctx) => setModelEnabled(str(ctx.id), true),
   "POST models/disable": (ctx) => setModelEnabled(str(ctx.id), false),
+
+  "POST routes": (ctx) => createRoute((ctx.body ?? {}) as Record<string, unknown>),
+  "PUT routes": (ctx) => updateRoute(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
+  "POST routes/publish": (ctx) =>
+    publishRoute(str(ctx.id), (ctx.body ?? {}) as { changeSummary?: string; operatorId?: string }),
+  "POST routes/enable": (ctx) => setRouteEnabled(str(ctx.id), true),
+  "POST routes/disable": (ctx) => setRouteEnabled(str(ctx.id), false),
+
+  "POST clients": (ctx) => createClient((ctx.body ?? {}) as Record<string, unknown>),
+  "PUT clients": (ctx) => updateClient(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
+  "POST clients/enable": (ctx) => setClientEnabled(str(ctx.id), true),
+  "POST clients/disable": (ctx) => setClientEnabled(str(ctx.id), false),
+  "POST clients/rotate-app-key": (ctx) => rotateClientAppKey(str(ctx.id)),
+  "PUT clients/route-grants": (ctx) =>
+    updateClientRouteGrants(str(ctx.id), ((ctx.body ?? {}) as { routeIds?: string[] }).routeIds ?? []),
+
+  "POST client-templates": (ctx) =>
+    createClientTemplate((ctx.body ?? {}) as Record<string, unknown>),
+  "PUT client-templates": (ctx) =>
+    updateClientTemplate(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
+  "POST client-templates/enable": (ctx) => setClientTemplateEnabled(str(ctx.id), true),
+  "POST client-templates/disable": (ctx) => setClientTemplateEnabled(str(ctx.id), false),
 };

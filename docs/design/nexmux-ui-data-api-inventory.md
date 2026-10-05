@@ -2,7 +2,7 @@
 
 - **日期**：2026-10-05（随实现批次滚动更新）
 - **设计依据**：[nexmux-ui-data-api-design.md](./nexmux-ui-data-api-design.md)
-- **覆盖范围**：已切换真实后端的域——**Provider（B1）**、**Model**；其余域仍走 mock（见 §5）
+- **覆盖范围**：已切换真实后端的域——**Provider（B1）**、**Model**、**Route（B2）**、**Client + ClientTemplate（B4）**；其余域仍走 mock（见 §5）
 - **分层**：
 
 ```text
@@ -235,6 +235,257 @@
 
 ---
 
+### 1.3 Route（路由，B2）
+
+> 业务键：`route_code`（`uk_mux_route_code`，B2 新增列，存量行以 alias 回填）；`alias` 为对外逻辑模型名，与 code 语义分离。
+
+#### GET `/routes` — 分页查询路由
+
+| Query 参数 | 类型 | 必填 | 说明 |
+|-----------|------|------|------|
+| pageNo / pageSize | long | 否 | 默认 1 / 20 |
+| status | string | 否 | `PUBLISHED` / `DISABLED` / `DRAFT`（SQL） |
+| type | string | 否 | `single` / `pool`（按候选数内存过滤） |
+| tags | string | 否 | 标签，逗号分隔（取交集，内存过滤） |
+
+**响应** `R<PageResult<RouteVo>>`：
+
+```jsonc
+{
+  "routeId": "rt...",
+  "routeCode": "general-chat",       // 稳定业务键（URL 用）
+  "alias": "general",               // 对外逻辑模型名
+  "displayName": "通用对话路由",
+  "status": "PUBLISHED",            // DRAFT / PUBLISHED / DISABLED
+  "routeSpec": { /* RouteSpec，见下 */ },
+  "publishedAt": "2026-10-05T11:00:00"
+}
+```
+
+`RouteSpec`（schema v1，B2 扩展字段向后兼容）：
+
+```jsonc
+{
+  "alias": "general",
+  "ingress": "/v1/chat/completions",  // 请求路径
+  "strategyType": "FIXED",           // FIXED/WEIGHTED/ROUND_ROBIN/PRIORITY/HASH/RANDOM
+  "candidates": [{
+    "modelCode": "openai/o4-mini",
+    "weight": 100,
+    "enabled": true,                  // B2 新增，null = 启用
+    "priority": "P0",                 // B2 新增，P0/P1/P2
+    "costRate": 1.0,                  // B2 新增，null = 继承 Model
+    "billingRate": 1.2                // B2 新增
+  }],
+  "filterUnhealthyBindings": true,
+  "schemaVersion": 1,
+  "description": "...",               // B2 新增
+  "protocol": "OpenAI / Chat Completions",  // B2 新增
+  "tags": ["general"],                 // B2 新增
+  "stickySession": false                // B2 新增
+}
+```
+
+#### GET `/routes/{routeId}` — 按 ID 查询概要
+
+响应 `R<RouteVo>`。
+
+#### GET `/routes/by-code/{routeCode}` — 按编码查询详情
+
+**响应** `R<RouteDetailVo>`（RouteVo 全部字段，外加）：
+
+```jsonc
+{
+  "publishedRouteSpec": { /* 发布快照（RouteSpec），未发布为 null */ },
+  "publishedBy": "admin",
+  "createdAt": "...", "updatedAt": "...", "updatedBy": "..."
+}
+```
+
+#### POST `/routes` — 创建路由（单页表单一次建全）
+
+**请求体** `RouteCreateRequest`：
+
+```jsonc
+{
+  "routeCode": "general-chat",       // 必填，唯一；重复 → NMX070001
+  "alias": "general",                // 必填，唯一；重复 → NMX070001
+  "displayName": "通用对话路由",      // 必填
+  "description": "...",
+  "path": "/v1/chat/completions",    // 空 = /v1/chat/completions
+  "protocol": "OpenAI / Chat Completions",
+  "strategyType": "FIXED",           // 空 = FIXED
+  "stickySession": false,
+  "healthFilter": true,               // 空 = true
+  "tags": ["general"],
+  "models": [/* RouteCandidate 行 */]
+}
+```
+
+**响应** `R<RouteVo>`（初始 `status=DRAFT`）。
+
+#### PUT `/routes/{routeId}` — 更新路由草稿
+
+**请求体** `RouteUpdateRequest = { displayName?, routeSpec? }`；**响应** `R<RouteVo>`。
+
+#### POST `/routes/{routeId}/publish` — 发布路由
+
+**请求体** `RoutePublishRequest = { changeSummary?, operatorId? }`；草稿 `route_spec` 拷贝为 `published_route_spec`，`status=PUBLISHED`，写审计。**响应** `R<RouteVo>`。
+
+#### POST `/routes/{routeId}/enable` · `/disable` — 启停
+
+状态机：`DISABLED ↔ PUBLISHED`；**DRAFT 启停拒绝**（`NMX020001`，引导走发布）。disable 前经 `DependencyImpactAnalyzer` 影响分析并写审计。无请求体；**响应** `R<RouteVo>`。
+
+---
+
+### 1.4 Client（接入客户端，B4）
+
+#### GET `/clients` — 分页查询客户端
+
+| Query 参数 | 类型 | 必填 | 说明 |
+|-----------|------|------|------|
+| pageNo / pageSize | long | 否 | 默认 1 / 20 |
+| status | string | 否 | `ENABLED` / `DISABLED` |
+| name / code | string | 否 | 名称 / 编码模糊 |
+| tags | string | 否 | 标签，逗号分隔（取交集，内存过滤） |
+
+**响应** `R<PageResult<ClientVo>>`：
+
+```jsonc
+{
+  "clientId": "cl...",
+  "clientCode": "mobile-app",
+  "displayName": "移动 App",
+  "status": "ENABLED",
+  "authorizedRouteIds": ["rt..."],
+  "quotaSpec": "[...]",              // QuotaRule[] JSON 原文
+  "rateLimitSpec": "[...]",          // RateLimitRule[] JSON 原文
+  "appKeyVersion": 2,
+  "appKeyId": "gw-ak-VHJTyOxe",     // 展示 ID：gw-ak- + 哈希前 8 位（不含可逆信息）
+  "tags": "[\"mobile\"]",           // JSON 数组原文
+  "sourceTemplateId": "ct...",
+  "expiresAt": "2027-10-05T11:05:58",
+  "appKeyRotatedAt": "2026-10-05T11:09:00"
+}
+```
+
+#### GET `/clients/by-code/{clientCode}` — 按编码查询详情
+
+**响应** `R<ClientDetailVo>`（ClientVo 字段，`tags` 为解析后数组，外加 `createdAt/updatedAt/updatedBy`；**不含 AppKey 明文与完整哈希**）。
+
+#### POST `/clients` — 创建客户端
+
+**请求体** `ClientCreateRequest`：
+
+```jsonc
+{
+  "clientCode": "mobile-app",        // 必填，唯一；重复 → NMX070001
+  "displayName": "移动 App",         // 必填
+  "tags": ["mobile"],
+  "sourceTemplateCode": "team-default",  // 模板创建：复制授权/配额/限流，按有效期规则算到期；未知模板 → NMX130001
+  "routeIds": ["rt..."],             // 空白创建时（模板创建被模板覆盖）
+  "expiresAt": "2027-01-01 23:59:59"  // 空白创建时
+}
+```
+
+**响应** `R<ClientCreateResultVo>`：
+
+```jsonc
+{
+  "client": { /* ClientVo */ },
+  "appKeyPlaintext": "2ZPUBBK4..."   // 明文 AppKey，仅创建时返回一次
+}
+```
+
+#### PUT `/clients/{clientId}` — 更新客户端
+
+**请求体** `ClientUpdateRequest = { displayName?, quotaSpec?, rateLimitSpec?, tags? }`（null 不改）；**响应** `R<ClientVo>`。
+
+#### POST `/clients/{clientId}/enable` · `/disable` — 启停
+
+无请求体；**响应** `R<ClientVo>`。
+
+#### POST `/clients/{clientId}/rotate-app-key` — 轮换 AppKey
+
+无请求体；版本号 +1，回写 `app_key_rotated_at`。**响应** `R<ClientRotateResultVo>`：
+
+```jsonc
+{ "clientId": "cl...", "appKeyPlaintext": "...", "appKeyVersion": 2 }
+```
+
+#### PUT `/clients/{clientId}/route-grants` — 更新路由授权
+
+**请求体** `ClientRouteGrantsRequest = { routeIds: string[] }`；**响应** `R<ClientVo>`。
+
+---
+
+### 1.5 ClientTemplate（客户端模板，B4 新增）
+
+#### GET `/client-templates` — 分页查询模板
+
+| Query 参数 | 说明 |
+|-----------|------|
+| pageNo / pageSize | 默认 1 / 20 |
+| status | `ENABLED` / `DISABLED` |
+| keyword | 名称 / 编码模糊 |
+| tags | 标签，逗号分隔（取交集，内存过滤） |
+
+**响应** `R<PageResult<ClientTemplateVo>>`：
+
+```jsonc
+{
+  "templateId": "ct...",
+  "templateCode": "team-default",
+  "displayName": "团队默认",
+  "status": "ENABLED",
+  "tags": "[\"team-default\"]",
+  "validityType": "days",            // days / fixed / never
+  "validityDays": 365,
+  "validTo": null,                   // fixed 时的固定到期日
+  "authorizedRouteIds": ["rt..."],
+  "quotaSpec": "[...]", "rateLimitSpec": "[...]",
+  "createdClientCount": 1            // 按 source_template_id 实时统计
+}
+```
+
+#### GET `/client-templates/by-code/{templateCode}` — 按编码查询详情
+
+**响应** `R<ClientTemplateDetailVo>`（外加 `description`、`tags` 数组、审计字段）。
+
+#### POST `/client-templates` — 创建模板
+
+**请求体** `ClientTemplateCreateRequest`：
+
+```jsonc
+{
+  "templateCode": "team-default",    // 必填，唯一；重复 → NMX070001
+  "displayName": "团队默认",         // 必填
+  "description": "...",
+  "tags": ["team-default"],
+  "validityType": "days",
+  "validityDays": 365,               // days 时必填
+  "validityFixedDate": "2027-12-31", // fixed 时必填（ISO 日期）
+  "routeIds": ["rt..."],
+  "quotaSpec": "[...]", "rateLimitSpec": "[...]"
+}
+```
+
+**响应** `R<ClientTemplateVo>`（初始 `status=ENABLED`）。
+
+#### PUT `/client-templates/{templateId}` — 更新模板
+
+**请求体** `ClientTemplateUpdateRequest`（同创建字段，null 不改）；**响应** `R<ClientTemplateVo>`。
+
+#### POST `/client-templates/{templateId}/enable` · `/disable` — 启停
+
+无请求体；**响应** `R<ClientTemplateVo>`。
+
+#### GET `/client-templates/{templateId}/created-clients` — 基于模板创建的客户端
+
+**响应** `R<ClientVo[]>`（按创建时间降序）。
+
+---
+
 ## 2. BFF 接口（nexmux-ui，基路径 `/api/data`）
 
 ### 通用约定
@@ -397,6 +648,167 @@
 | `PUT /api/data/models/{code}` | `PUT /models/{id}` | `ModelUpdateRequest` |
 | `POST /api/data/models/{code}/enable` · `/disable` | 对应端点 | 无 |
 
+### 2.3 Route
+
+#### GET `/api/data/routes` — 路由列表
+
+| Query 参数 | 说明 |
+|-----------|------|
+| status | `all` / `enabled`（→PUBLISHED）/ `disabled`（→DISABLED）/ `draft`（→DRAFT） |
+| type | `all` / `single` / `pool` / `conditional`（conditional P0 无产出） |
+| tags | 标签多选，逗号串（交集） |
+
+**响应** `RouteListResult`：
+
+```jsonc
+{
+  "items": [/* RouteRecord（见下），全量 */],
+  "total": 2,
+  "counts": {
+    "all": { "enabled": 2, "total": 2 },
+    "status": { "enabled": 2, "disabled": 0, "draft": 0 },
+    "types": { "single": { "enabled": 1, "total": 1 }, "pool": { "enabled": 1, "total": 1 }, "conditional": { "enabled": 0, "total": 0 } },
+    "tags": { "general": 1 /* 键为连字符转下划线 */ }
+  },
+  "filters": {
+    "status": [ { "value": "all", "text": "全部 2/2" }, { "value": "enabled", "text": "已启用 2" }, { "value": "disabled", "text": "已停用 0" }, { "value": "draft", "text": "草稿 0" } ],
+    "type":   [ { "value": "all", "text": "全部 2/2" }, { "value": "single", "text": "单模型 1/1" }, { "value": "pool", "text": "多模型池 1/1" }, { "value": "conditional", "text": "条件路由 0/0" } ],
+    "tags":   [ { "value": "all", "text": "全部 2" }, { "value": "general", "text": "general 1" } /* 按数据出现顺序 */ ]
+  }
+}
+```
+
+`RouteRecord` 关键字段（type 由候选数派生；operation 由协议映射表派生）：
+
+```jsonc
+{
+  "code": "general-chat", "name": "通用对话路由",
+  "type": "single", "typeLabel": "单模型",
+  "alias": "general", "tags": ["general"], "tagsText": "general",
+  "description": "...",
+  "status": "enabled", "statusLabel": "启用",   // PUBLISHED→enabled / DISABLED→disabled / DRAFT→draft
+  "path": "/v1/chat/completions",               // ← spec.ingress
+  "protocol": "OpenAI / Chat Completions",
+  "operation": "chat.completions",               // 协议映射表；未知 → "—"
+  "strategy": "FIXED", "strategyLabel": "固定", "strategySummary": "固定 (FIXED)",
+  "stickySession": false, "healthFilter": true,
+  "models": [{
+    "modelCode": "openai/o4-mini", "modelName": "o4-mini",
+    "providerSummary": "OpenAI · o4-mini",        // 供应商名 · 上游模型ID（BFF join）
+    "weight": 100, "priority": "P0",
+    "costRate": null, "billingRate": null,        // null = 继承 Model
+    "status": "enabled"
+  }],
+  "entrySummary": "/v1/chat/completions · OpenAI / Chat Completions",
+  "policySummary": "1 模型 · 固定",
+  "enabledModelCount": 1, "weightTotal": 100,
+  "createdAt": "...", "updatedAt": "...", "shortDate": "10-05", "operator": "..."
+}
+```
+
+#### GET `/api/data/routes/{code}` — 路由详情
+
+**响应** `RouteRecord`；未命中 → 404。
+
+#### 写通道（POST/PUT）
+
+| 调用 | 后端端点 | 请求体 |
+|------|---------|--------|
+| `POST /api/data/routes` | `POST /routes` | `RouteCreateRequest` |
+| `PUT /api/data/routes/{code}` | `PUT /routes/{id}` | `RouteUpdateRequest` |
+| `POST /api/data/routes/{code}/publish` | `POST /routes/{id}/publish` | `{ changeSummary?, operatorId? }` |
+| `POST /api/data/routes/{code}/enable` · `/disable` | 对应端点 | 无（DRAFT → `NMX020001`） |
+
+### 2.4 Client
+
+#### GET `/api/data/clients` — 客户端列表
+
+| Query 参数 | 说明 |
+|-----------|------|
+| status | `all` / `enabled` / `disabled` / `expired`（expired 为 BFF 展示态：ENABLED 且已过期） |
+| name / code | 名称 / 编码模糊 |
+| tags | 标签多选，逗号串（交集） |
+
+**响应** `ClientListResult`（`{items, total, counts{all,status,tags}, filters{tags}}`）。`ClientRecord` 关键字段：
+
+```jsonc
+{
+  "code": "mobile-app", "name": "移动 App",
+  "tags": ["mobile","team"], "tagsText": "mobile · team",
+  "status": "enabled", "statusLabel": "启用",   // enabled/disabled/expired（展示派生）
+  "expiresAt": "2027-10-05 11:05",
+  "appKeyId": "gw-ak-VHJTyOxe",
+  "secretLastRotatedAt": "2026-10-05 11:09",
+  "templateCode": "team-default", "templateName": "团队默认",
+  "authRoutes": [{ "code":"general-chat","name":"通用对话路由","alias":"general","typeLabel":"单模型","path":"/v1/chat/completions" }],
+  "quotas": [/* QuotaRule + 展示标签（quotaTypeLabel/metricLabel/limitText/modeLabel/cycleLabel）；用量字段 usageUsed/usagePercent/nextResetAt 暂为 null */],
+  "rateLimits": [/* RateLimitRule + limitTypeLabel/limitText/scopeLabel */],
+  "routeCount": 1,
+  "quotaSummary": "总",                           // 总+日循环 / 总+周循环 / 月循环 …
+  "rateLimitSummary": "1000 RPM",                  // 或 "N 并发"
+  "appKeySummary": "gw-ak-VHJTyOxe · 到期 2027-10-05 · 1 路由 · 1000 RPM",
+  "createdAt": "...", "updatedAt": "...", "operator": "..."
+}
+```
+
+#### GET `/api/data/clients/{code}` — 客户端详情
+
+**响应** `ClientRecord`；未命中 → 404。
+
+#### 写通道（POST/PUT）
+
+| 调用 | 后端端点 | 请求体 / 响应 |
+|------|---------|--------------|
+| `POST /api/data/clients` | `POST /clients` | `ClientCreateRequest` → `{ client, appKeyPlaintext }` |
+| `PUT /api/data/clients/{code}` | `PUT /clients/{id}` | `ClientUpdateRequest` |
+| `POST /api/data/clients/{code}/enable` · `/disable` | 对应端点 | 无 |
+| `POST /api/data/clients/{code}/rotate-app-key` | 对应端点 | 无 → `{ clientId, appKeyPlaintext, appKeyVersion }` |
+| `PUT /api/data/clients/{code}/route-grants` | 对应端点 | `{ routeIds: string[] }` |
+
+### 2.5 ClientTemplate
+
+#### GET `/api/data/client-templates` — 模板列表
+
+| Query 参数 | 说明 |
+|-----------|------|
+| status | `all` / `enabled` / `disabled` |
+| keyword | 名称 / 编码模糊 |
+| tags | 标签多选，逗号串（交集） |
+
+**响应** `ClientTemplateListResult`（`{items, total, counts{all,status,tags}, filters{status,tags}}`）。`ClientTemplateRecord` 关键字段：
+
+```jsonc
+{
+  "code": "team-default", "name": "团队默认",
+  "status": "enabled", "statusLabel": "启用",
+  "validityType": "days", "validityDays": 365, "validityFixedDate": undefined,
+  "validityLabel": "创建后 365 天",               // 创建后 N 天 / 固定至 yyyy-MM-dd / 永不过期
+  "authRoutes": [/* 同 Client.authRoutes */],
+  "quotas": [/* 同 Client.quotas */], "rateLimits": [/* 同 Client.rateLimits */],
+  "createdClientCount": 1,
+  "routeCount": 1, "quotaSummary": "总", "rateLimitSummary": "1000 RPM",
+  "policySummary": "1 路由 · 总 · 1000 RPM",
+  "tagsText": "team-default", "description": "...",
+  "createdAt": "...", "updatedAt": "...", "operator": "..."
+}
+```
+
+#### GET `/api/data/client-templates/{code}` — 模板详情
+
+**响应** `ClientTemplateRecord`；未命中 → 404。
+
+#### GET `/api/data/client-templates/{code}/created-clients` — 基于模板创建的客户端
+
+**响应** `ClientRecord[]`。
+
+#### 写通道（POST/PUT）
+
+| 调用 | 后端端点 | 请求体 |
+|------|---------|--------|
+| `POST /api/data/client-templates` | `POST /client-templates` | `ClientTemplateCreateRequest` |
+| `PUT /api/data/client-templates/{code}` | `PUT /client-templates/{id}` | `ClientTemplateUpdateRequest` |
+| `POST /api/data/client-templates/{code}/enable` · `/disable` | 对应端点 | 无 |
+
 ---
 
 ## 3. 数据来源说明
@@ -405,20 +817,21 @@
 |------|------|
 | 42 供应商 + 1616 模型 | pi-ai catalog 种子（`nexmux-catalog-data-h2.sql`，**只插不更新**，重启保留用户修改；供应商 `DISABLED`、模型 `DRAFT`） |
 | keyStatus | 由 `mux_provider_credential` 实时派生（目前全部 `none`） |
-| routes/routeRefs | BFF 拉 `mux_route` 的 `route_spec.candidates` 内存关联（目前全空） |
+| 路由 / 客户端 / 模板 | 联调经写接口手工创建（`mux_route` 2 条、`mux_client_template` 1 条、`mux_client` 1 条） |
+| routes/routeRefs/authRoutes | BFF 拉 `mux_route` 的 `route_spec.candidates` / `authorized_route_ids` 内存关联 |
+| 客户端 expired 状态 | BFF 展示派生（ENABLED 且 expiresAt 已过）；后端无定时任务 |
+| 配额用量（usageUsed/Percent/nextResetAt） | Runtime 未建，统一 null |
 
 ## 4. 验证状态
 
-- 后端：`mvn test` 56 用例全绿（Provider 16 + Model 13 新增/扩展）
-- BFF：vitest 10 用例全绿（provider-adapter 4 + model-adapter 6 含黄金形状断言）
-- 端到端：双进程（:8082 + :9011）curl 验证通过，含重启后修改保留（`openai` ENABLED）
+- 后端：`mvn test` 90 用例全绿（Provider 16 + Model 13 + Route 14 + Client/Template 20 新增/扩展）
+- BFF：vitest 18 用例全绿（provider 4 + model 6 + route 4 + client/template 4 含黄金形状断言）
+- 端到端：双进程（:8082 + :9011）curl 验证通过，含：重启后修改保留（种子只插不更新）、`mux_route.route_code` 与 `mux_client(+template)` 扩列的不清库 ALTER 迁移、模板创建客户端的策略复制与到期计算、AppKey 轮换版本递增
 
 ## 5. 未实现（仍 mock，按批次推进）
 
 | 域 | 涉及 BFF 接口 | 批次 |
 |----|--------------|------|
-| Route | `/api/data/routes[...]` | B2 |
-| Client + 模板 | `/api/data/clients[...]`、`/client-templates[...]` | B4 |
 | 调用日志 / 审计 / 成本 | `/api/data/call-logs`、`/audit`、`/costs` | B5 |
 | Dashboard / 用量 / 可用性 | `/api/data/dashboard`、`/ops/*` | B6 |
 | 调试台 | `/api/data/debug/*-invoke` | B7 |

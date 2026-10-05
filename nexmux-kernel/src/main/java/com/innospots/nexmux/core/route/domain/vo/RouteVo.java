@@ -9,6 +9,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * 路由概要。
  *
  * @param routeId     路由 ID
+ * @param routeCode   路由编码（稳定业务键）
  * @param alias       路由别名
  * @param displayName 显示名称
  * @param status      状态
@@ -19,6 +20,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
 public record RouteVo(
         @Schema(description = "路由 ID", required = true)
         String routeId,
+        @Schema(description = "路由编码", required = true)
+        String routeCode,
         @Schema(description = "路由别名", required = true)
         String alias,
         @Schema(description = "显示名称", required = true)

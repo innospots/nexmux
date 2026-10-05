@@ -62,4 +62,11 @@ public class ClientEntity extends BaseEntity {
 
     @Column(length = 32)
     private String sourceTemplateId;
+
+    @Column(columnDefinition = "CLOB")
+    private String tags;
+
+    private java.time.LocalDateTime expiresAt;
+
+    private java.time.LocalDateTime appKeyRotatedAt;
 }

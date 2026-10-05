@@ -17,7 +17,8 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = RouteEntity.TABLE_NAME, indexes = {
-        @Index(name = "uk_mux_route_alias", columnList = "alias", unique = true)
+        @Index(name = "uk_mux_route_alias", columnList = "alias", unique = true),
+        @Index(name = "uk_mux_route_code", columnList = "route_code", unique = true)
 })
 @TableName(RouteEntity.TABLE_NAME)
 public class RouteEntity extends BaseEntity {
@@ -36,6 +37,9 @@ public class RouteEntity extends BaseEntity {
 
     @Column(length = 64, nullable = false)
     private String alias;
+
+    @Column(length = 64, nullable = false)
+    private String routeCode;
 
     @Column(length = 128, nullable = false)
     private String displayName;

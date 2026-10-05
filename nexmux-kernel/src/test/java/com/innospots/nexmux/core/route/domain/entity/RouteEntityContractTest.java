@@ -20,4 +20,11 @@ class RouteEntityContractTest {
         assertThat(RouteEntity.class.getAnnotation(jakarta.persistence.Table.class).indexes())
                 .anySatisfy(index -> assertThat(index.columnList()).contains("alias"));
     }
+
+    @Test
+    void declaresUniqueRouteCodeIndex() throws Exception {
+        assertThat(RouteEntity.class.getAnnotation(jakarta.persistence.Table.class).indexes())
+                .anySatisfy(index -> assertThat(index.columnList()).contains("route_code"));
+        assertThat(RouteEntity.class.getDeclaredField("routeCode")).isNotNull();
+    }
 }

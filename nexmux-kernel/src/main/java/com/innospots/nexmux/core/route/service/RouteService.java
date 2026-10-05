@@ -10,6 +10,7 @@ import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePageRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePublishRequest;
 import com.innospots.nexmux.core.route.domain.request.RouteUpdateRequest;
+import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.shared.analysis.DependencyImpactAnalyzer;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
@@ -24,6 +25,7 @@ public class RouteService {
 
     private static final String STATUS_DRAFT = "DRAFT";
     private static final String STATUS_PUBLISHED = "PUBLISHED";
+    private static final String STATUS_DISABLED = "DISABLED";
 
     private final RouteDao routeDao;
     private final ConfigAuditService configAuditService;
@@ -33,38 +35,74 @@ public class RouteService {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
         long pageSize = request.pageSize() == null ? 20L : request.pageSize();
         var wrapper = new LambdaQueryWrapper<RouteEntity>();
-        long total = routeDao.selectCount(wrapper);
-        var records = routeDao.selectList(wrapper.orderByDesc(RouteEntity::getCreatedAt)
-                        .last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
+        if (request.status() != null && !request.status().isBlank()) {
+            wrapper.eq(RouteEntity::getStatus, request.status());
+        }
+        // type（候选数）与 tags（JSON）在 route_spec CLOB 内，SQL 不可表达：
+        // P0 数据量小，内存过滤 + 内存分页（规格见 nexmux-ui-data-api-design §6.3）
+        List<RouteEntity> matched = routeDao.selectList(wrapper.orderByDesc(RouteEntity::getCreatedAt))
                 .stream()
-                .map(this::toVo)
+                .filter(e -> matchesType(e, request.type()))
+                .filter(e -> matchesTags(e, request.tags()))
                 .toList();
-        return PageResult.of(records, pageNo, pageSize, total);
+        long from = Math.min((pageNo - 1) * pageSize, matched.size());
+        long to = Math.min(from + pageSize, matched.size());
+        var records = matched.subList((int) from, (int) to).stream().map(this::toVo).toList();
+        return PageResult.of(records, pageNo, pageSize, matched.size());
     }
 
     public RouteVo get(String routeId) {
-        RouteEntity entity = require(routeId);
-        return toVo(entity);
+        return toVo(require(routeId));
+    }
+
+    /**
+     * 按稳定业务键查询详情（含草稿与发布快照对照）。
+     */
+    public RouteDetailVo getByCode(String routeCode) {
+        RouteEntity entity = routeDao.selectOne(new LambdaQueryWrapper<RouteEntity>()
+                .eq(RouteEntity::getRouteCode, routeCode));
+        if (entity == null) {
+            throw NexusException.build(NexmuxStatusCode.RESOURCE_NOT_FOUND, "route not found: " + routeCode);
+        }
+        return new RouteDetailVo(
+                entity.getRouteId(),
+                entity.getRouteCode(),
+                entity.getAlias(),
+                entity.getDisplayName(),
+                entity.getStatus(),
+                NexmuxJson.read(entity.getRouteSpec(), RouteSpec.class),
+                NexmuxJson.read(entity.getPublishedRouteSpec(), RouteSpec.class),
+                entity.getPublishedAt(),
+                entity.getPublishedBy(),
+                entity.getCreatedAt(),
+                entity.getUpdatedAt(),
+                entity.getUpdatedBy());
     }
 
     public RouteVo create(RouteCreateRequest request) {
+        if (routeDao.selectCount(new LambdaQueryWrapper<RouteEntity>()
+                .eq(RouteEntity::getRouteCode, request.routeCode())) > 0) {
+            throw NexusException.build(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY, "route code exists");
+        }
         if (routeDao.selectCount(new LambdaQueryWrapper<RouteEntity>()
                 .eq(RouteEntity::getAlias, request.alias())) > 0) {
             throw NexusException.build(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY, "route alias exists");
         }
         RouteEntity entity = new RouteEntity();
+        entity.setRouteCode(request.routeCode());
         entity.setAlias(request.alias());
         entity.setDisplayName(request.displayName());
         entity.setStatus(STATUS_DRAFT);
-        RouteSpec spec = defaultSpec(request.alias());
-        entity.setRouteSpec(NexmuxJson.write(spec));
+        entity.setRouteSpec(NexmuxJson.write(specOf(request)));
         routeDao.insert(entity);
         return toVo(entity);
     }
 
     public RouteVo updateDraft(String routeId, RouteUpdateRequest request) {
         RouteEntity entity = require(routeId);
-        entity.setDisplayName(request.displayName());
+        if (request.displayName() != null) {
+            entity.setDisplayName(request.displayName());
+        }
         if (request.routeSpec() != null) {
             entity.setRouteSpec(NexmuxJson.write(request.routeSpec()));
         }
@@ -72,10 +110,45 @@ public class RouteService {
         return toVo(entity);
     }
 
+    /**
+     * 启用：仅 DISABLED → PUBLISHED；草稿须先发布。
+     */
+    public RouteVo enable(String routeId) {
+        RouteEntity entity = require(routeId);
+        if (!STATUS_DISABLED.equals(entity.getStatus())) {
+            throw NexusException.build(
+                    NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "only a disabled route can be enabled; publish drafts instead");
+        }
+        entity.setStatus(STATUS_PUBLISHED);
+        routeDao.updateById(entity);
+        return toVo(entity);
+    }
+
+    /**
+     * 停用：仅 PUBLISHED → DISABLED；草稿无运行时流量，无需停用。
+     */
+    public RouteVo disable(String routeId) {
+        RouteEntity entity = require(routeId);
+        if (!STATUS_PUBLISHED.equals(entity.getStatus())) {
+            throw NexusException.build(
+                    NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "only a published route can be disabled");
+        }
+        dependencyImpactAnalyzer.requireSafe(
+                dependencyImpactAnalyzer.analyzeDisable("ROUTE", routeId));
+        entity.setStatus(STATUS_DISABLED);
+        routeDao.updateById(entity);
+        configAuditService.record("ROUTE", routeId, "DISABLE", null,
+                "{\"before\":" + entity.getPublishedRouteSpec() + ",\"after\":null}");
+        return toVo(entity);
+    }
+
     public RouteVo publish(String routeId, RoutePublishRequest request) {
         RouteEntity entity = require(routeId);
         dependencyImpactAnalyzer.requireSafe(
                 dependencyImpactAnalyzer.analyzeDisable("ROUTE", routeId));
+        String before = entity.getPublishedRouteSpec() == null ? "null" : entity.getPublishedRouteSpec();
         entity.setPublishedRouteSpec(entity.getRouteSpec());
         entity.setStatus(STATUS_PUBLISHED);
         entity.setPublishedAt(LocalDateTime.now());
@@ -86,8 +159,31 @@ public class RouteService {
                 routeId,
                 "PUBLISH",
                 request.changeSummary(),
-                entity.getPublishedRouteSpec());
+                "{\"before\":" + before + ",\"after\":" + entity.getPublishedRouteSpec() + "}",
+                request.operatorId());
         return toVo(entity);
+    }
+
+    private boolean matchesType(RouteEntity entity, String type) {
+        if (type == null || type.isBlank()) {
+            return true;
+        }
+        RouteSpec spec = NexmuxJson.read(entity.getRouteSpec(), RouteSpec.class);
+        int count = spec == null ? 0 : spec.candidates().size();
+        return switch (type) {
+            case "single" -> count == 1;
+            case "pool" -> count > 1;
+            default -> true; // conditional 等 P0 未产出类型不过滤
+        };
+    }
+
+    private boolean matchesTags(RouteEntity entity, List<String> tags) {
+        if (tags == null || tags.isEmpty()) {
+            return true;
+        }
+        RouteSpec spec = NexmuxJson.read(entity.getRouteSpec(), RouteSpec.class);
+        List<String> own = spec == null ? List.of() : spec.tags();
+        return tags.stream().allMatch(own::contains);
     }
 
     private RouteEntity require(String routeId) {
@@ -101,6 +197,7 @@ public class RouteService {
     private RouteVo toVo(RouteEntity entity) {
         return new RouteVo(
                 entity.getRouteId(),
+                entity.getRouteCode(),
                 entity.getAlias(),
                 entity.getDisplayName(),
                 entity.getStatus(),
@@ -108,7 +205,17 @@ public class RouteService {
                 entity.getPublishedAt());
     }
 
-    private static RouteSpec defaultSpec(String alias) {
-        return new RouteSpec(alias, "openai-compatible", "FIXED", List.of(), true, 1);
+    private static RouteSpec specOf(RouteCreateRequest request) {
+        return new RouteSpec(
+                request.alias(),
+                request.path() == null ? "/v1/chat/completions" : request.path(),
+                request.strategyType() == null ? "FIXED" : request.strategyType(),
+                request.models() == null ? List.of() : request.models(),
+                request.healthFilter() == null || request.healthFilter(),
+                1,
+                request.description(),
+                request.protocol(),
+                request.tags(),
+                request.stickySession());
     }
 }

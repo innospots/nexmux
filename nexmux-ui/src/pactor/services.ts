@@ -106,91 +106,126 @@ export const pactorServices: Record<string, ServiceHandler> = {
   // 标签多选：ChipFilter 以 tags 数组（http 侧序列化为逗号串）提交；
   // 旧版 DSL 一个标签一个布尔参数（连字符转下划线）的写法保留兼容
   "route.list": (params) =>
-    queryRoutes({
-      status: str(params.status) || "all",
-      type: str(params.type) || "all",
-      tags:
-        strList(params.tags) ??
-        [
-          ["reasoning", "tag_reasoning"],
-          ["premium", "tag_premium"],
-          ["general", "tag_general"],
-          ["coding", "tag_coding"],
-          ["low-cost", "tag_low_cost"],
-          ["mobile", "tag_mobile"],
-          ["vision", "tag_vision"],
-          ["embedding", "tag_embedding"],
-        ]
-          .filter(([, k]) => params[k] === true)
-          .map(([t]) => t),
-    }),
-  "route.detail": (params) => getRoute(str(params.code)),
+    realBackendEnabled()
+      ? realServices["route.list"](params)
+      : queryRoutes({
+          status: str(params.status) || "all",
+          type: str(params.type) || "all",
+          tags:
+            strList(params.tags) ??
+            [
+              ["reasoning", "tag_reasoning"],
+              ["premium", "tag_premium"],
+              ["general", "tag_general"],
+              ["coding", "tag_coding"],
+              ["low-cost", "tag_low_cost"],
+              ["mobile", "tag_mobile"],
+              ["vision", "tag_vision"],
+              ["embedding", "tag_embedding"],
+            ]
+              .filter(([, k]) => params[k] === true)
+              .map(([t]) => t),
+        }),
+  "route.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["route.detail"](params)
+      : getRoute(str(params.code)),
 
   "client.list": (params) =>
-    queryClients({
-      status: str(params.status) || "all",
-      name: str(params.name),
-      code: str(params.code),
-      // ChipFilter 以 tags 数组（http 侧为逗号串）提交；旧布尔族写法保留兼容
-      tags:
-        strList(params.tags) ??
-        CLIENT_TAG_FILTERS.filter((t) => params[tagKey(t.value)] === true).map(
-          (t) => t.value,
-        ),
-    }),
-  "client.detail": (params) => getClient(str(params.code)),
+    realBackendEnabled()
+      ? realServices["client.list"](params)
+      : queryClients({
+          status: str(params.status) || "all",
+          name: str(params.name),
+          code: str(params.code),
+          // ChipFilter 以 tags 数组（http 侧为逗号串）提交；旧布尔族写法保留兼容
+          tags:
+            strList(params.tags) ??
+            CLIENT_TAG_FILTERS.filter((t) => params[tagKey(t.value)] === true).map(
+              (t) => t.value,
+            ),
+        }),
+  "client.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["client.detail"](params)
+      : getClient(str(params.code)),
 
   "clientTemplate.list": (params) =>
-    queryClientTemplates({
-      status: str(params.status) || "all",
-      keyword: str(params.keyword),
-      tags:
-        strList(params.tags) ??
-        CLIENT_TEMPLATE_TAG_FILTERS.filter(
-          (t) => params[tagKey(t.value)] === true,
-        ).map((t) => t.value),
-    }),
-  "clientTemplate.detail": (params) => getClientTemplate(str(params.code)),
+    realBackendEnabled()
+      ? realServices["clientTemplate.list"](params)
+      : queryClientTemplates({
+          status: str(params.status) || "all",
+          keyword: str(params.keyword),
+          tags:
+            strList(params.tags) ??
+            CLIENT_TEMPLATE_TAG_FILTERS.filter(
+              (t) => params[tagKey(t.value)] === true,
+            ).map((t) => t.value),
+        }),
+  "clientTemplate.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["clientTemplate.detail"](params)
+      : getClientTemplate(str(params.code)),
   "clientTemplate.createdClients": (params) =>
-    clientsByTemplate(str(params.code)),
+    realBackendEnabled()
+      ? realServices["clientTemplate.createdClients"](params)
+      : clientsByTemplate(str(params.code)),
 
   "callLog.list": (params) =>
-    queryCallLogs({
-      start: opt(params.start),
-      end: opt(params.end),
-      status: str(params.status) || "all",
-      model: str(params.model) || "all",
-      provider: str(params.provider) || "all",
-      protocol: str(params.protocol) || "all",
-      routeGroup: str(params.routeGroup) || "all",
-      email: str(params.email),
-      appKey: str(params.appKey),
-    }),
-  "callLog.detail": (params) => getCallLog(str(params.id)),
+    realBackendEnabled()
+      ? realServices["callLog.list"](params)
+      : queryCallLogs({
+          start: opt(params.start),
+          end: opt(params.end),
+          status: str(params.status) || "all",
+          model: str(params.model) || "all",
+          provider: str(params.provider) || "all",
+          protocol: str(params.protocol) || "all",
+          routeGroup: str(params.routeGroup) || "all",
+          email: str(params.email),
+          appKey: str(params.appKey),
+        }),
+  "callLog.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["callLog.detail"](params)
+      : getCallLog(str(params.id)),
 
   "cost.list": (params) =>
-    queryCosts({
-      application: str(params.application),
-      appKey: str(params.appKey),
-      alias: str(params.alias),
-      model: str(params.model) || "all",
-      provider: str(params.provider) || "all",
-      start: opt(params.start),
-      end: opt(params.end),
-    }),
-  "cost.detail": (params) => getCost(str(params.id)),
+    realBackendEnabled()
+      ? realServices["cost.list"](params)
+      : queryCosts({
+          application: str(params.application),
+          appKey: str(params.appKey),
+          alias: str(params.alias),
+          model: str(params.model) || "all",
+          provider: str(params.provider) || "all",
+          start: opt(params.start),
+          end: opt(params.end),
+        }),
+  "cost.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["cost.detail"](params)
+      : getCost(str(params.id)),
 
   "audit.list": (params) =>
-    queryAudits({
-      start: opt(params.start),
-      end: opt(params.end),
-      operator: str(params.operator) || "all",
-      operation: str(params.operation) || "all",
-      resourceType: str(params.resourceType) || "all",
-      resourceId: str(params.resourceId),
-    }),
-  "audit.detail": (params) => getAudit(str(params.id)) ?? null,
-  "audit.operators": () => listAuditOperators(),
+    realBackendEnabled()
+      ? realServices["audit.list"](params)
+      : queryAudits({
+          start: opt(params.start),
+          end: opt(params.end),
+          operator: str(params.operator) || "all",
+          operation: str(params.operation) || "all",
+          resourceType: str(params.resourceType) || "all",
+          resourceId: str(params.resourceId),
+        }),
+  "audit.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["audit.detail"](params)
+      : (getAudit(str(params.id)) ?? null),
+  "audit.operators": () =>
+    realBackendEnabled()
+      ? realServices["audit.operators"]()
+      : listAuditOperators(),
 
   "ops.modelUsage": (params) =>
     queryModelUsage({ start: opt(params.start), end: opt(params.end) }),

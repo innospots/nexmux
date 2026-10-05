@@ -55,6 +55,14 @@ public class ClientTemplateEntity extends BaseEntity {
     @Column(columnDefinition = "CLOB")
     private String tags;
 
+    @Column(length = 2000)
+    private String description;
+
+    @Column(length = 16)
+    private String validityType;
+
+    private Integer validityDays;
+
     private LocalDateTime validFrom;
 
     private LocalDateTime validTo;

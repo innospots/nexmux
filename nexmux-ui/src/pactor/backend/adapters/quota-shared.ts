@@ -7,7 +7,7 @@ import type {
   CycleUnit,
   QuotaRule,
   RateLimitRule,
-} from "../../mocks/client-templates-mock";
+} from "../contracts";
 
 export const QUOTA_TYPE_LABELS: Record<string, string> = {
   lifetime: "总配额",

@@ -10,7 +10,7 @@ import type {
   RouteListResult,
   RouteModelEntry,
   RouteRecord,
-} from "../../mocks/routes-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import type {
   ModelDetailVo,

@@ -17,7 +17,7 @@ import type {
   SupplierModel,
   SupplierTimeRate,
   TimeMultiplier,
-} from "../../mocks/models-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import type { ModelDetailVo, ModelVo, ProviderVo, RouteVo } from "../types";
 

@@ -12,7 +12,7 @@ import type {
   ProviderModel,
   ProviderRecord,
   PullModelRow,
-} from "../../mocks/providers-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import type {
   ConnectionTestVo,

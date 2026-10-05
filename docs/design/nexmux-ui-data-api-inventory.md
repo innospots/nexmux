@@ -2,7 +2,7 @@
 
 - **日期**：2026-10-05（随实现批次滚动更新）
 - **设计依据**：[nexmux-ui-data-api-design.md](./nexmux-ui-data-api-design.md)
-- **覆盖范围**：已切换真实后端的域——**Provider（B1）**、**Model**、**Route（B2）**、**Client + ClientTemplate（B4）**；其余域仍走 mock（见 §5）
+- **覆盖范围**：**全部 7 个批次已完成（B1–B7），35 页全部真实，mock 已退役删除**。域：Provider（B1）、Model、Route（B2）、Client + ClientTemplate（B4）、调用日志/审计/成本（B5）、Dashboard/用量/可用性（B6）、调试台（B7）
 - **分层**：
 
 ```text
@@ -486,6 +486,188 @@
 
 ---
 
+### 1.6 Ops（请求日志 / 审计 / 成本，B5）
+
+> `mux_request_log` 已扩 27 列（tokens/成本/上游/快照等）+ 4 个聚合索引；`mux_config_audit_log` 加 `client_ip` / `request_id` / `user_agent`。
+
+#### GET `/request-logs` — 分页查询请求日志
+
+| Query 参数 | 说明 |
+|-----------|------|
+| pageNo / pageSize | 默认 1 / 20 |
+| start / end | 日期区间（yyyy-MM-dd，含端点） |
+| status | `SUCCESS` / `ERROR` / `UNFINISHED` / `CANCELLED` / `OTHER` |
+| model / provider / protocol / routeGroup | 精确匹配 |
+| email / appKey | 模糊匹配 |
+
+**响应** `R<PageResult<RequestLogVo>>`：
+
+```jsonc
+{
+  "requestId": "req-9f2a1c4d",
+  "clientId": "cl...", "routeId": "rt...",
+  "modelCode": "openai/o4-mini",
+  "status": "SUCCESS",
+  "latencyMs": 320,
+  "errorCode": null, "routeTrace": null,
+  "requestedAt": "2026-09-18T14:32:18",
+  "appKeyId": "gw-ak-VHJTyOxe", "userEmail": "dev@example.com",
+  "providerCode": "openai", "protocol": "OpenAI / Chat Completions",
+  "routeGroup": "默认分组", "application": "mobile-app", "alias": "general",
+  "httpStatus": 200,
+  "inputTokens": 2100, "outputTokens": 1800,
+  "cacheReadTokens": 0, "cacheWriteTokens": 0,
+  "costUsd": 0.0106, "billingUsd": 0.0127
+}
+```
+
+#### GET `/request-logs/{requestId}` — 请求日志详情
+
+**响应** `R<RequestLogDetailVo>`（列表全字段 + `ttftMs` / `upstreamModel` / `upstreamEndpoint` / `upstreamStatus` / `upstreamLatencyMs` / `retries` / `clientIp` / `ingressMethod` / `ingressPath` / `traceId` / `errorType` / `pricingSnapshot`(JSON 原文) / `promptSnapshot`(JSON 原文)）。未命中 → `NMX130001`。
+
+#### GET `/costs` — 分页查询成本明细
+
+成功且已计费日志的只读视图（`SUCCESS + cost_usd IS NOT NULL`，**无独立成本表**）。
+
+| Query 参数 | 说明 |
+|-----------|------|
+| pageNo / pageSize | 默认 1 / 20 |
+| application / appKey / alias | 模糊匹配 |
+| model / provider | 精确匹配 |
+| start / end | 日期区间 |
+
+**响应** `R<PageResult<CostRecordVo>>`：
+
+```jsonc
+{
+  "requestId": "req-9f2a1c4d",         // 与调用日志同 ID
+  "requestedAt": "...",
+  "application": "mobile-app", "clientId": "cl...",
+  "appKeyId": "gw-ak-...", "alias": "general",
+  "modelCode": "openai/o4-mini", "providerCode": "openai",
+  "inputTokens": 2100, "outputTokens": 1800, "cacheReadTokens": 0,
+  "costUsd": 0.0106, "billingUsd": 0.0127,
+  "pricingSnapshot": "{\"currency\":\"USD\",\"priceVersion\":\"pricing@v7\",\"tierInputPrice\":1.1,...}"
+}
+```
+
+#### GET `/costs/{requestId}` — 成本明细详情
+
+**响应** `R<CostRecordVo>`；非 SUCCESS 日志 → `NMX130001`。
+
+#### GET `/audit-logs` — 分页查询审计日志
+
+| Query 参数 | 说明 |
+|-----------|------|
+| pageNo / pageSize | 默认 1 / 20 |
+| start / end | 日期区间 |
+| operator / operation / resourceType | 精确匹配（大写操作码） |
+| resourceId | 模糊匹配 |
+
+**响应** `R<PageResult<AuditLogVo>>`：
+
+```jsonc
+{
+  "auditId": "au...",
+  "resourceType": "ROUTE", "resourceId": "rt...",
+  "operation": "PUBLISH",
+  "changeSummary": "首次发布",
+  "changeDiff": "{\"before\":null,\"after\":{...}}",  // 信封格式（旧单快照视为 after）
+  "operatorId": "admin",
+  "clientIp": null, "requestId": null, "userAgent": null,
+  "createdAt": "..."
+}
+```
+
+#### GET `/audit-logs/{auditId}` — 审计日志详情
+
+**响应** `R<AuditLogDetailVo>`（同列表字段）。
+
+#### GET `/audit-logs/operators` — 操作人去重列表
+
+**响应** `R<string[]>`（如 `["admin"]`）。
+
+---
+
+### 1.7 Stats（统计聚合，B6）
+
+> 基路径 `/api/nexmux/stats`；原始聚合数值（展示格式化在 BFF）；`start`/`end` 缺省近 7 天。
+
+| 方法 | 路径 | 响应 `R<T>` |
+|------|------|-------------|
+| GET | `/stats/dashboard` | `DashboardVo` |
+| GET | `/stats/model-usage` | `UsageRowVo[]` |
+| GET | `/stats/provider-usage` | `UsageRowVo[]` |
+| GET | `/stats/client-usage` | `UsageRowVo[]` |
+| GET | `/stats/provider-availability` | `AvailabilityVo` |
+
+`DashboardVo`：
+
+```jsonc
+{
+  "requests": 3, "tokens": 8700,
+  "costUsd": 0.0218, "billedUsd": 0.0261,
+  "successRate": 0.6667, "errorCount": 1,
+  "avgLatencyMs": 602.7, "activeClients": 1,
+  "trend": [{ "t": "2026-09-18", "requests": 2, "tokens": 8700, "cost": 0.0261, "avgLatencyMs": 303 }],
+  "modelDistribution": [{ "name": "openai/o4-mini", "requests": 3 }],
+  "clientDistribution": [{ "name": "cl-1", "requests": 3 }],
+  "realtimeRpm": 0, "realtimeTokens": 0     // 最近 60 秒窗口
+}
+```
+
+`UsageRowVo`：
+
+```jsonc
+{
+  "key": "openai/o4-mini",                  // 维度值（model/provider/client）
+  "requests": 3, "errorCount": 1,
+  "inputTokens": 4500, "outputTokens": 3600, "cacheReadTokens": 1200,
+  "standardUsd": 0.0218, "billedUsd": 0.0261, "costUsd": 0.0218,
+  "successRate": 0.6667,
+  "avgLatencyMs": 602.7, "avgTtftMs": 172.5, "avgUpstreamMs": 578.3,
+  "failoverRate": 0.3333, "avgAttempts": 1.67
+}
+```
+
+`AvailabilityVo`：
+
+```jsonc
+{
+  "providers": [/* QualityRow：key/requests/errorCount/successRate/avgLatencyMs/avgUpstreamMs/failoverRate/avgAttempts/billedUsd/costUsd */],
+  "compare":   [/* QualityRow，key = "modelCode@providerCode" */],
+  "recentErrors": [{ "requestId": "req-3d8a9c07", "requestedAt": "2026-09-17T22:41:55", "modelCode": "...", "providerCode": "...", "errorCode": "UPSTREAM_502" }]
+}
+```
+
+---
+
+### 1.8 Debug（调试台，B7）
+
+> 真实穿透调用；**失败以结果体返回**（httpStatus + 可读 body），不抛业务异常；每次调用写 `DEBUG` 类审计。
+
+#### POST `/debug/model-invoke` — 模型调试（直连主 Binding，不经 Route）
+
+**请求体** `ModelInvokeDebugRequest = { modelId, payload }`（payload = OpenAI chat/completions JSON 字符串；`model` 字段会被替换为上游模型 ID）。
+
+#### POST `/debug/client-invoke` — 客户端调试（模拟全链路）
+
+**请求体** `ClientInvokeDebugRequest = { clientId, routeAlias, payload }`。校验链：client 停用 → 403 结果体；路由未授权 → 403 结果体；路由未发布 → `NMX020002`；按发布快照取首个启用候选穿透。
+
+**响应** `R<DebugInvokeResultVo>`：
+
+```jsonc
+{
+  "requestId": "dbg-f8f8811e7ab6",
+  "auditClass": "TEST",
+  "httpStatus": 200,                  // 200 / 403 / 422 / 502
+  "body": "{\"choices\":[{\"message\":{\"content\":\"...\"}}],\"usage\":{...}}",
+  "latencyMs": 17
+}
+```
+
+---
+
 ## 2. BFF 接口（nexmux-ui，基路径 `/api/data`）
 
 ### 通用约定
@@ -809,6 +991,146 @@
 | `PUT /api/data/client-templates/{code}` | `PUT /client-templates/{id}` | `ClientTemplateUpdateRequest` |
 | `POST /api/data/client-templates/{code}/enable` · `/disable` | 对应端点 | 无 |
 
+### 2.6 调用日志（B5）
+
+#### GET `/api/data/call-logs` — 调用日志列表
+
+| Query 参数 | 说明 |
+|-----------|------|
+| start / end | 日期区间 |
+| status | `all` / `success` / `error` / `unfinished` / `cancelled` / `other`（BFF 转大写下发） |
+| model / provider / protocol / routeGroup | `all` 或精确值 |
+| email / appKey | 模糊 |
+
+**响应** `CallLogListResult = { items: CallLogRecord[], total, filteredText }`。`CallLogRecord` 关键字段（join：clientId→clientName、routeId→routeCode/Name/strategyText、modelCode/providerCode→名称）：
+
+```jsonc
+{
+  "id": "req-9f2a1c4d", "status": "success", "statusLabel": "成功",
+  "timeUtc": "2026-09-18 14:32:18 UTC", "timeShort": "09-18 14:32:18 UTC",
+  "latencyMs": 320, "latencyText": "320ms",
+  "userEmail": "dev@example.com", "clientName": "移动 App", "appKeyId": "gw-ak-...",
+  "application": "mobile-app", "tagsText": "mobile-app",
+  "routeCode": "general-chat", "routeName": "通用对话路由", "routeGroup": "默认分组",
+  "protocol": "OpenAI / Chat Completions",
+  "modelCode": "openai/o4-mini", "modelName": "o4-mini",
+  "providerCode": "openai", "providerName": "OpenAI",
+  "usageText": "2.1K/1.8K", "totalTokensText": "3,900",
+  "costText": "0.0106", "billingText": "0.0127", "marginText": "0.0021",
+  "httpStatusText": "200", "authResult": "通过（AppKey 有效）",
+  "strategyText": "固定", "upstreamLatencyText": "295ms", "ttftText": "180ms",
+  "retries": 0, "traceId": "trace-1c4d"
+}
+```
+
+#### GET `/api/data/call-logs/{id}` — 调用日志详情
+
+**响应** `CallLogRecord`（另含 `error{code,type,message}`、`trace: TraceStep[]`（route_trace 展开）、`pr{policy,policyNote,prompt,response}`（prompt_snapshot 展开）、`pricingSnapshot` 文案（如 `pricing@v7（2026-09-01 生效） · C=1 · M=1.2 · 无时段倍率`））。
+
+### 2.7 成本明细（B5）
+
+#### GET `/api/data/costs` — 成本列表
+
+参数：application / appKey / alias / model / provider / start / end。**响应** `CostListResult = { items, total }`。
+
+#### GET `/api/data/costs/{id}` — 成本详情
+
+**响应** `CostRecord` 关键字段：
+
+```jsonc
+{
+  "id": "req-9f2a1c4d", "time": "2026-09-18 14:32:18", "shortTime": "09-18 14:32",
+  "application": "mobile-app", "clientName": "移动 App", "appKeyId": "gw-ak-...",
+  "alias": "general", "modelName": "o4-mini", "providerName": "OpenAI",
+  "currency": "USD", "priceVersion": "pricing@v7", "priceEffective": "2026-09-01",
+  "tierUpto": null, "tierLabel": "∞", "tierDetail": "UPTO ∞（无上限档）",
+  "tierInputPrice": 1.1, "tierOutputPrice": 4.4, "tierCacheReadPrice": null,
+  "multiplier": 1.0, "multiplierText": "1x", "multiplierRule": "未命中时段倍率（按 1.0 计）",
+  "tierPriceText": "输入 $1.1/M · 输出 $4.4/M · 缓存读 —",
+  "inputCost": "0.0023", "outputCost": "0.0079", "cacheCost": "—", "totalCost": "0.0106",
+  "inputCalcText": "2,100 × $1.1 × 1 ÷ 1M = $0.0023",
+  "outputCalcText": "1,800 × $4.4 × 1 ÷ 1M = $0.0079",
+  "cacheCalcText": "无缓存用量",
+  "contextSummary": "09-18 14:32 · 移动 App（gw-ak-...）· o4-mini · OpenAI"
+}
+```
+
+### 2.8 审计（B5）
+
+#### GET `/api/data/audit` — 审计列表
+
+参数：start / end / operator / operation / resourceType / resourceId。**响应** `{ items: AuditRecord[], filteredText }`。`AuditRecord` 关键字段：
+
+```jsonc
+{
+  "id": "au...", "date": "2026-10-05",
+  "timeUtc": "2026-10-05 11:50:00 (UTC+8)", "timeShort": "10-05 11:50",
+  "operator": "admin",
+  "operation": "发布", "operationType": "publish",
+  "resourceType": "Route", "resourceTypeKey": "route",
+  "resourceId": "rt-...", "ip": "—", "requestId": "—", "userAgent": "—",
+  "beforeJson": null,                        // 信封 before（格式化 JSON）
+  "afterJson": "{ ... }",                     // 信封 after
+  "diffLines": [/* LCS 行级 diff：{type: add|remove|same, text} */],
+  "context": [ { "label": "操作 IP", "value": "—" }, { "label": "请求 ID", "value": "—" },
+              { "label": "终端", "value": "—" }, { "label": "变更摘要", "value": "..." } ]
+}
+```
+
+#### GET `/api/data/audit/{id}` — 审计详情
+
+**响应** `AuditRecord`。
+
+#### GET `/api/data/audit-operators` — 操作人列表
+
+**响应** `string[]`。
+
+### 2.9 统计（B6）
+
+#### GET `/api/data/dashboard?start&end` — 仪表盘
+
+**响应** `DashboardData`：
+
+```jsonc
+{
+  "realtime": { "rpm": 0, "tpm": "0" },
+  "metricKeys": { "requests": ["requests"], "tokens": ["tokens"], "cost": ["cost"], "latency": ["latency"] },
+  "stats": { "requests": "3", "activeClients": 1, "tokens": "0.0M",
+             "successRate": "66.7", "failures": "1", "errorRate": "33.33",
+             "avgLatency": 603, "cost": "$0.0218", "avgCost": "$0.0073" },
+  "trend": [{ "t": "09-18", "requests": 2, "tokens": 0.01, "cost": 0.0261, "latency": 303 }],
+  "models": [{ "name": "o4-mini", "percent": 100 }, { "name": "其他", "percent": 0 }],
+  "clients": [{ "name": "移动 App", "percent": 100 }, { "name": "其他", "percent": 0 }]
+}
+```
+
+#### GET `/api/data/ops/model-usage` · `/ops/provider-usage` · `/ops/client-usage`
+
+参数：start / end。**响应** `{ items, summary: {standard,billed,cost}, total }`；行为 `UsageDisplay`（17 个预计算文案：requests/inputCompact/inputRaw/outputCompact/outputRaw/cacheHit/standard/billed/cost/avgBilled/successRate/avgLatency/ttft/avgUpstream/tps/failoverRate/avgAttempts）+ 维度字段（model/route、provider、name/code/appKeyId/quotaUsage）。`quotaUsage` 按客户端 lifetime TOTAL_TOKEN 规则计算（如 `390.0K/1.0M`）。
+
+#### GET `/api/data/ops/provider-availability`
+
+**响应** `{ providers, compare, errors }`：`providers` = QualityRow + `errors`（失败数文案）；`compare` = 模型×供应商对照（key `model@provider` 拆分）；`errors` = 近期错误样本 `{id, time, target: "o4-mini / OpenAI", error}`。
+
+### 2.10 调试台（B7）
+
+#### POST `/api/data/debug/model-invoke` — 模型调试
+
+**请求体** `{ modelCode, systemPrompt?, text, chatParams?{temperature,topP,maxTokens,reasoningEffort} }`；**响应**：
+
+```jsonc
+{ "reply": "...", "tokensIn": 42, "tokensOut": 18,
+  "ttftMs": 17, "latencyMs": 17, "status": 200, "requestId": "dbg-..." }
+```
+
+失败时 `status>=400` 且 `reply` 以 `【调用失败 N】` 前缀（页面以错误消息展示）。
+
+#### POST `/api/data/debug/client-invoke` — 客户端调试
+
+**请求体** `{ clientCode, routeCode, text, routeTag? }`；**响应** = 上表字段 + `requestJson/requestCompact/responseJson/responseCompact/target/routeGroup/quotaPreview/rateLimitResult`。
+
+调试页的选项数据（供应商模型列表 / 模型能力与默认参数 / 客户端 AppKey 与授权路由 / 路由标签）直接复用 §2.1–§2.4 的详情读接口（浏览器侧 `src/pactor/debug-data.ts`）。
+
 ---
 
 ## 3. 数据来源说明
@@ -816,22 +1138,28 @@
 | 数据 | 来源 |
 |------|------|
 | 42 供应商 + 1616 模型 | pi-ai catalog 种子（`nexmux-catalog-data-h2.sql`，**只插不更新**，重启保留用户修改；供应商 `DISABLED`、模型 `DRAFT`） |
-| keyStatus | 由 `mux_provider_credential` 实时派生（目前全部 `none`） |
-| 路由 / 客户端 / 模板 | 联调经写接口手工创建（`mux_route` 2 条、`mux_client_template` 1 条、`mux_client` 1 条） |
-| routes/routeRefs/authRoutes | BFF 拉 `mux_route` 的 `route_spec.candidates` / `authorized_route_ids` 内存关联 |
+| keyStatus | 由 `mux_provider_credential` 实时派生（openai 已配置联调凭证，其余 `none`） |
+| 路由 / 客户端 / 模板 | 联调经写接口创建（`mux_route` 2 条已发布、`mux_client_template` 1 条、`mux_client` 1 条） |
+| 请求日志 | 联调种子 SQL（Runtime 写入链路属 inbound 建设范围） |
+| 统计聚合 | `mux_request_log` 实时聚合（B6 索引已建） |
+| 调试调用 | 真实穿透 OpenAI 兼容端点（联调使用本地假上游 :9123） |
 | 客户端 expired 状态 | BFF 展示派生（ENABLED 且 expiresAt 已过）；后端无定时任务 |
 | 配额用量（usageUsed/Percent/nextResetAt） | Runtime 未建，统一 null |
+| 审计操作 IP / 请求 ID | 端点未采集 HTTP 请求上下文，显示「—」（遗留） |
 
 ## 4. 验证状态
 
-- 后端：`mvn test` 90 用例全绿（Provider 16 + Model 13 + Route 14 + Client/Template 20 新增/扩展）
-- BFF：vitest 18 用例全绿（provider 4 + model 6 + route 4 + client/template 4 含黄金形状断言）
-- 端到端：双进程（:8082 + :9011）curl 验证通过，含：重启后修改保留（种子只插不更新）、`mux_route.route_code` 与 `mux_client(+template)` 扩列的不清库 ALTER 迁移、模板创建客户端的策略复制与到期计算、AppKey 轮换版本递增
+- 后端：`mvn test` **110 用例全绿**（Provider/Model/Route/Client/Template/Ops/Audit/Stats/Debug 全域）
+- BFF：vitest **27 用例全绿**（8 个 adapter 黄金形状断言 + 写通道）
+- 端到端：双进程（:8082 + :9011）+ 假上游（:9123）验证通过，含：种子只插不更新、不清库 ALTER 迁移（route_code / client / request_log 扩列）、模板策略复制、AppKey 轮换、成本视图 SUCCESS 过滤、LCS 审计 diff、聚合大小写、调试穿透与失败结果体
+- **mock 已按设计 §10 里程碑整体删除**（12 个 `src/pactor/mocks/*.ts` 移除，类型抽取至 `src/pactor/backend/contracts.ts`）
 
-## 5. 未实现（仍 mock，按批次推进）
+## 5. 遗留事项（非 mock，后续迭代）
 
-| 域 | 涉及 BFF 接口 | 批次 |
-|----|--------------|------|
-| 调用日志 / 审计 / 成本 | `/api/data/call-logs`、`/audit`、`/costs` | B5 |
-| Dashboard / 用量 / 可用性 | `/api/data/dashboard`、`/ops/*` | B6 |
-| 调试台 | `/api/data/debug/*-invoke` | B7 |
+| 项 | 说明 |
+|----|------|
+| Runtime（inbound）请求链路 | 日志写入、配额扣减、限流、健康探测回写（ADR-0001 边界） |
+| 审计操作上下文采集 | client_ip / request_id / user_agent 需 Console 拦截器补充 |
+| UI 登录切 Nexus Console 会话 | 设计 §15 开放问题 1（当前 BFF dev-session） |
+| sitemap 双轨归宿 | kernel `ui-pages/` vs UI 本地 YAML（设计 §15 开放问题 2） |
+| 42+ 厂商 chips 展示 | provider 列表 types chips 过多时的 UI 收敛方案 |

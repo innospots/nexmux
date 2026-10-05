@@ -177,6 +177,17 @@ export const realServices = {
     }),
   "audit.detail": (params: Record<string, unknown>) => getAuditById(str(params.id)),
   "audit.operators": () => listAuditOperators(),
+
+  "dashboard.query": (params: Record<string, unknown>) =>
+    queryDashboardReal(opt(params.start), opt(params.end)),
+  "ops.modelUsage": (params: Record<string, unknown>) =>
+    queryModelUsageReal(opt(params.start), opt(params.end)),
+  "ops.providerUsage": (params: Record<string, unknown>) =>
+    queryProviderUsageReal(opt(params.start), opt(params.end)),
+  "ops.clientUsage": (params: Record<string, unknown>) =>
+    queryClientUsageReal(opt(params.start), opt(params.end)),
+  "ops.availability": (params: Record<string, unknown>) =>
+    queryAvailabilityReal(opt(params.start), opt(params.end)),
 } as const;
 
 export interface MutationContext {
@@ -259,6 +270,35 @@ export const pactorMutations: Record<
     updateClientTemplate(str(ctx.id), (ctx.body ?? {}) as Record<string, unknown>),
   "POST client-templates/enable": (ctx) => setClientTemplateEnabled(str(ctx.id), true),
   "POST client-templates/disable": (ctx) => setClientTemplateEnabled(str(ctx.id), false),
+
+  "POST debug/model-invoke": (ctx) => {
+    const body = (ctx.body ?? {}) as {
+      modelCode: string;
+      systemPrompt?: string;
+      text: string;
+      chatParams?: Record<string, unknown>;
+    };
+    return invokeModelDebug({
+      modelCode: str(body.modelCode),
+      systemPrompt: body.systemPrompt,
+      text: str(body.text),
+      chatParams: body.chatParams,
+    });
+  },
+  "POST debug/client-invoke": (ctx) => {
+    const body = (ctx.body ?? {}) as {
+      clientCode: string;
+      routeCode: string;
+      text: string;
+      routeTag?: string;
+    };
+    return invokeClientDebug({
+      clientCode: str(body.clientCode),
+      routeCode: str(body.routeCode),
+      text: str(body.text),
+      routeTag: body.routeTag,
+    });
+  },
 };
 
 /**

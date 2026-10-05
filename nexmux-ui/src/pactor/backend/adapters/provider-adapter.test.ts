@@ -5,7 +5,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { ProviderRecord } from "../../mocks/providers-mock";
+import type { ProviderRecord } from "../contracts";
 
 const getMock = vi.fn();
 const postMock = vi.fn();

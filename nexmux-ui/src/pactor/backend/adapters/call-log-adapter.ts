@@ -9,7 +9,7 @@ import type {
   CallLogListResult,
   CallLogRecord,
   TraceStep,
-} from "../../mocks/call-logs-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import {
   compactTokens,

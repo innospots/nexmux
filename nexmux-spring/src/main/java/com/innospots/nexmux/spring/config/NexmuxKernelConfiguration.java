@@ -50,13 +50,14 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
-    ProviderService providerService(ProviderDao providerDao, ProviderCredentialDao providerCredentialDao) {
-        return new ProviderService(providerDao, providerCredentialDao);
+    ProviderService providerService(
+            ProviderDao providerDao, ProviderCredentialDao providerCredentialDao, ModelDao modelDao) {
+        return new ProviderService(providerDao, providerCredentialDao, modelDao);
     }
 
     @Bean
-    ModelService modelService(ModelDao modelDao) {
-        return new ModelService(modelDao);
+    ModelService modelService(ModelDao modelDao, ProviderDao providerDao) {
+        return new ModelService(modelDao, providerDao);
     }
 
     @Bean

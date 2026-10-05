@@ -5,10 +5,15 @@ import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.core.provider.domain.request.ProviderCreateRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderUpdateRequest;
+import com.innospots.nexmux.core.provider.domain.vo.ConnectionTestVo;
+import com.innospots.nexmux.core.provider.domain.vo.ProviderDetailVo;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
+import com.innospots.nexmux.core.provider.domain.vo.UpstreamModelVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
+import java.util.Arrays;
+import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
@@ -40,8 +45,28 @@ public class ProviderEndpoint {
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
             @Parameter(description = "每页条数", example = "20")
-            @QueryParam("pageSize") @DefaultValue("20") Long pageSize) {
-        return R.ok(providerService.page(new ProviderPageRequest(pageNo, pageSize)));
+            @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
+            @Parameter(description = "关键字（名称 / 编码 / baseUrl 模糊）")
+            @QueryParam("keyword") String keyword,
+            @Parameter(description = "启停状态（ENABLED / DISABLED）")
+            @QueryParam("status") String status,
+            @Parameter(description = "密钥状态（pending / none）")
+            @QueryParam("keyStatus") String keyStatus,
+            @Parameter(description = "厂商编码，逗号分隔")
+            @QueryParam("types") String types) {
+        List<String> typeList = types == null || types.isBlank()
+                ? List.of()
+                : Arrays.stream(types.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
+        return R.ok(providerService.page(
+                new ProviderPageRequest(pageNo, pageSize, keyword, status, keyStatus, typeList)));
+    }
+
+    @GET
+    @Path("/by-code/{providerCode}")
+    @Operation(operationId = "nexmuxProviderGetByCode", summary = "按编码查询提供方详情")
+    public R<ProviderDetailVo> getByCode(
+            @Parameter(description = "提供方编码", required = true) @PathParam("providerCode") String providerCode) {
+        return R.ok(providerService.getByCode(providerCode));
     }
 
     @GET
@@ -76,9 +101,25 @@ public class ProviderEndpoint {
     }
 
     @POST
+    @Path("/{providerId}/disable")
+    @Operation(operationId = "nexmuxProviderDisable", summary = "停用提供方")
+    public R<ProviderVo> disable(
+            @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
+        return R.ok(providerService.disable(providerId));
+    }
+
+    @POST
+    @Path("/{providerId}/pull-models")
+    @Operation(operationId = "nexmuxProviderPullModels", summary = "拉取上游模型清单")
+    public R<List<UpstreamModelVo>> pullModels(
+            @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
+        return R.ok(providerService.pullModels(providerId));
+    }
+
+    @POST
     @Path("/{providerId}/connection-test")
     @Operation(operationId = "nexmuxProviderConnectionTest", summary = "提供方连通性测试")
-    public R<Boolean> connectionTest(
+    public R<ConnectionTestVo> connectionTest(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
         return R.ok(providerService.connectionTest(providerId));
     }

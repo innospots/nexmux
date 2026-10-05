@@ -53,7 +53,7 @@ CREATE TABLE IF NOT EXISTS mux_model (
     capability_tags CLOB,
     tags CLOB,
     description VARCHAR(2000),
-    metadata CLOB,
+    metadata_spec CLOB,
     default_params CLOB,
     primary_provider_id VARCHAR(32),
     primary_provider_model_id VARCHAR(256),

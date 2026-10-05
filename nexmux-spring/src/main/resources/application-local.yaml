@@ -16,3 +16,8 @@ spring:
         - classpath:schema/nexus-plugin-h2.sql
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
+        # Nexmux 产品表（mux_*）
+        - classpath:nexus/schema/nexmux-h2.sql
+      # 种子数据：pi-ai 提供商/模型 catalog（MERGE 幂等，可重复执行）
+      data-locations:
+        - classpath:nexus/schema/nexmux-catalog-data-h2.sql

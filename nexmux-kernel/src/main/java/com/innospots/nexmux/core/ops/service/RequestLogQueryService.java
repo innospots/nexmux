@@ -18,9 +18,10 @@ public class RequestLogQueryService {
     public PageResult<RequestLogVo> page(RequestLogPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
         long pageSize = request.pageSize() == null ? 20L : request.pageSize();
-        var wrapper = new LambdaQueryWrapper<RequestLogEntity>().orderByDesc(RequestLogEntity::getRequestedAt);
+        var wrapper = new LambdaQueryWrapper<RequestLogEntity>();
         long total = requestLogDao.selectCount(wrapper);
-        var records = requestLogDao.selectList(wrapper.last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
+        var records = requestLogDao.selectList(wrapper.orderByDesc(RequestLogEntity::getRequestedAt)
+                        .last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
                 .stream()
                 .map(this::toVo)
                 .toList();

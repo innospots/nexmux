@@ -17,7 +17,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param region             区域
  * @param timeoutMs          超时（毫秒）
  * @param status             状态
- * @param hasCredential      是否已配置凭证
+ * @param keyStatus          密钥状态（configured / pending / none）
+ * @param modelCount         该提供方下的模型数
  */
 @Schema(name = "ProviderVo", description = "模型服务提供方概要")
 public record ProviderVo(
@@ -45,6 +46,8 @@ public record ProviderVo(
         Integer timeoutMs,
         @Schema(description = "状态", examples = {"ENABLED"})
         String status,
-        @Schema(description = "是否已配置凭证")
-        boolean hasCredential) {
+        @Schema(description = "密钥状态", examples = {"configured"})
+        String keyStatus,
+        @Schema(description = "该提供方下的模型数")
+        long modelCount) {
 }

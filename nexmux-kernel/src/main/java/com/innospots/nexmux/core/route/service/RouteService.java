@@ -32,9 +32,10 @@ public class RouteService {
     public PageResult<RouteVo> page(RoutePageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
         long pageSize = request.pageSize() == null ? 20L : request.pageSize();
-        var wrapper = new LambdaQueryWrapper<RouteEntity>().orderByDesc(RouteEntity::getCreatedAt);
+        var wrapper = new LambdaQueryWrapper<RouteEntity>();
         long total = routeDao.selectCount(wrapper);
-        var records = routeDao.selectList(wrapper.last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
+        var records = routeDao.selectList(wrapper.orderByDesc(RouteEntity::getCreatedAt)
+                        .last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
                 .stream()
                 .map(this::toVo)
                 .toList();

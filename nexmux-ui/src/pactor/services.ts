@@ -6,6 +6,8 @@
  */
 import type { ServiceHandler } from "@pactor-app/runtime";
 
+import { backendConfig } from "./backend/config";
+import { realServices } from "./backend/services-real";
 import { queryDashboard } from "./mocks/dashboard-mock";
 import {
   getProvider,
@@ -55,6 +57,9 @@ function strList(value: unknown): string[] | undefined {
   return undefined;
 }
 
+/** 真实后端切换：仅服务端且已配置后端（NEXMUX_BACKEND_BASE_URL 非 "mock"） */
+const realBackendEnabled = () => typeof window === "undefined" && backendConfig().enabled;
+
 export const pactorServices: Record<string, ServiceHandler> = {
   "dashboard.query": (params) =>
     queryDashboard(str(params.start), str(params.end)),
@@ -62,28 +67,41 @@ export const pactorServices: Record<string, ServiceHandler> = {
   // 类型多选：ChipFilter 以 types 数组（http 侧序列化为逗号串）提交；
   // 旧版 DSL 一族一个布尔参数的写法保留兼容，这里还原为 family 数组
   "provider.list": (params) =>
-    queryProviders({
-      keyword: str(params.keyword),
-      status: str(params.status) || "all",
-      types:
-        strList(params.types) ??
-        ["openai", "anthropic", "gemini", "dashscope"].filter(
-          (f) => params[f] === true,
-        ),
-    }),
-  "provider.detail": (params) => getProvider(str(params.code)),
-  "provider.pullModels": (params) => pullProviderModels(str(params.code)),
+    realBackendEnabled()
+      ? realServices["provider.list"](params)
+      : queryProviders({
+          keyword: str(params.keyword),
+          status: str(params.status) || "all",
+          types:
+            strList(params.types) ??
+            ["openai", "anthropic", "gemini", "dashscope"].filter(
+              (f) => params[f] === true,
+            ),
+        }),
+  "provider.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["provider.detail"](params)
+      : getProvider(str(params.code)),
+  "provider.pullModels": (params) =>
+    realBackendEnabled()
+      ? realServices["provider.pullModels"](params)
+      : pullProviderModels(str(params.code)),
 
   // 厂商多选：ChipFilter 以 providers 数组（http 侧序列化为逗号串）提交；
   // 旧版 DSL 一个 Provider 一个布尔参数的写法保留兼容
   "model.list": (params) =>
-    queryModels({
-      type: str(params.type) || "all",
-      providers:
-        strList(params.providers) ??
-        ["dashscope", "gemini", "openai"].filter((p) => params[p] === true),
-    }),
-  "model.detail": (params) => getModel(str(params.code)),
+    realBackendEnabled()
+      ? realServices["model.list"](params)
+      : queryModels({
+          type: str(params.type) || "all",
+          providers:
+            strList(params.providers) ??
+            ["dashscope", "gemini", "openai"].filter((p) => params[p] === true),
+        }),
+  "model.detail": (params) =>
+    realBackendEnabled()
+      ? realServices["model.detail"](params)
+      : getModel(str(params.code)),
 
   // 标签多选：ChipFilter 以 tags 数组（http 侧序列化为逗号串）提交；
   // 旧版 DSL 一个标签一个布尔参数（连字符转下划线）的写法保留兼容

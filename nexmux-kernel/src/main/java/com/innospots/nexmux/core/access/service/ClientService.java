@@ -26,9 +26,10 @@ public class ClientService {
     public PageResult<ClientVo> page(ClientPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
         long pageSize = request.pageSize() == null ? 20L : request.pageSize();
-        var wrapper = new LambdaQueryWrapper<ClientEntity>().orderByDesc(ClientEntity::getCreatedAt);
+        var wrapper = new LambdaQueryWrapper<ClientEntity>();
         long total = clientDao.selectCount(wrapper);
-        var records = clientDao.selectList(wrapper.last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
+        var records = clientDao.selectList(wrapper.orderByDesc(ClientEntity::getCreatedAt)
+                        .last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
                 .stream()
                 .map(this::toVo)
                 .toList();

@@ -18,10 +18,11 @@ public class AuditQueryService {
     public PageResult<AuditLogVo> page(AuditLogPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
         long pageSize = request.pageSize() == null ? 20L : request.pageSize();
-        var wrapper = new LambdaQueryWrapper<ConfigAuditLogEntity>().orderByDesc(ConfigAuditLogEntity::getCreatedAt);
+        var wrapper = new LambdaQueryWrapper<ConfigAuditLogEntity>();
         long total = configAuditLogDao.selectCount(wrapper);
         var records = configAuditLogDao
-                .selectList(wrapper.last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
+                .selectList(wrapper.orderByDesc(ConfigAuditLogEntity::getCreatedAt)
+                        .last("LIMIT " + pageSize + " OFFSET " + (pageNo - 1) * pageSize))
                 .stream()
                 .map(this::toVo)
                 .toList();

@@ -3,6 +3,9 @@ import { cookies } from "next/headers";
 import { findUserBySession, SESSION_COOKIE } from "@/server/accounts";
 import { corsHeaders, corsPreflight } from "@/server/cors";
 import { pactorServices } from "@/pactor/services";
+import { backendConfig } from "@/pactor/backend/config";
+import { BackendError } from "@/pactor/backend/client";
+import { pactorMutations } from "@/pactor/backend/services-real";
 
 /**
  * 页面数据接口（mock）：页面 DSL 的 http 数据源统一入口。
@@ -108,11 +111,74 @@ export async function GET(
     params[ID_PARAM[resolved.service] ?? "code"] = resolved.id;
   }
 
-  const result = await pactorServices[resolved.service](params);
-  return Response.json(result ?? null, {
-    headers: { "cache-control": "no-store", ...corsHeaders(request) },
-  });
+  try {
+    const result = await pactorServices[resolved.service](params);
+    return Response.json(result ?? null, {
+      headers: { "cache-control": "no-store", ...corsHeaders(request) },
+    });
+  } catch (error) {
+    return mutationErrorResponse(request, error);
+  }
 }
+
+/** 写通道（设计 §7.2）：POST/PUT /api/data/<res>[/<code>[/<sub>]] → pactorMutations */
+async function handleMutation(
+  request: Request,
+  context: RouteContext<"/api/data/[...parts]">,
+) {
+  const store = await cookies();
+  const user = findUserBySession(store.get(SESSION_COOKIE)?.value);
+  if (!user) {
+    return Response.json(
+      { error: "未登录" },
+      { status: 401, headers: corsHeaders(request) },
+    );
+  }
+  if (!backendConfig().enabled) {
+    return Response.json(
+      { error: "当前为演示模式（mock），写操作不可用" },
+      { status: 503, headers: corsHeaders(request) },
+    );
+  }
+
+  const { parts } = await context.params;
+  const [resource, id, sub] = parts;
+  const key = `${request.method} ${sub ? `${resource}/${sub}` : resource}`;
+  const handler = pactorMutations[key];
+  if (!handler) {
+    return Response.json(
+      { error: `未知写接口: ${request.method} /api/data/${parts.join("/")}` },
+      { status: 404, headers: corsHeaders(request) },
+    );
+  }
+
+  try {
+    const body = await request.json().catch(() => ({}));
+    const result = await handler({ id, body });
+    return Response.json(result ?? null, {
+      headers: { "cache-control": "no-store", ...corsHeaders(request) },
+    });
+  } catch (error) {
+    return mutationErrorResponse(request, error);
+  }
+}
+
+/** 后端错误 → 页面 message 语义（设计 §8 错误映射） */
+function mutationErrorResponse(request: Request, error: unknown) {
+  if (error instanceof BackendError) {
+    return Response.json(
+      { error: error.message, code: error.code },
+      { status: error.httpStatus, headers: corsHeaders(request) },
+    );
+  }
+  return Response.json(
+    { error: error instanceof Error ? error.message : "服务内部错误" },
+    { status: 500, headers: corsHeaders(request) },
+  );
+}
+
+export const POST = handleMutation;
+export const PUT = handleMutation;
 
 /** 预检（跨源带凭据 / 自定义头时） */
 export const OPTIONS = corsPreflight;

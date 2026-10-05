@@ -26,6 +26,8 @@
 | L2 | [nexmux-yaml-configuration-design.md](./design/nexmux-yaml-configuration-design.md) | **YAML 总规范**：Spring 分项、`nexmux.yaml`、PageDsl 路径与禁止项 |
 | L2 | [nexmux-ui-spec-pages-design.md](./design/nexmux-ui-spec-pages-design.md) | UiSpec/PageDsl 页面方案结构（S-LIST / Tab / Stack 等） |
 | L1 | [nexmux-p0-console-design.md](./design/nexmux-p0-console-design.md) | P0 可调用闭环：域划分、表意契约、测试范围 |
+| L2 | [nexmux-ui-data-api-design.md](./design/nexmux-ui-data-api-design.md) | UI 数据接口：BFF 适配层、后端端点补全、mux_request_log 扩列、实施批次 |
+| 参考 | [nexmux-ui-data-api-inventory.md](./design/nexmux-ui-data-api-inventory.md) | **已实现**数据接口清单（字段级输入输出；随批次滚动更新） |
 | L3 | [0001-console-runtime-configuration-boundary.md](./design/adr/0001-console-runtime-configuration-boundary.md) | Console 与 Runtime 配置边界 ADR |
 
 命名约定（`java:design`）：

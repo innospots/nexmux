@@ -7,6 +7,7 @@ import com.innospots.nexmux.console.endpoint.model.ModelEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsEndpoint;
 import com.innospots.nexmux.console.endpoint.provider.ProviderEndpoint;
 import com.innospots.nexmux.console.endpoint.route.RouteEndpoint;
+import com.innospots.nexmux.console.endpoint.stats.StatsEndpoint;
 import com.innospots.nexmux.console.sitemap.endpoint.NexmuxSitemapEndpoint;
 import com.innospots.nexmux.console.sitemap.service.NexmuxSitemapService;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
@@ -30,6 +31,10 @@ import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexmux.core.shared.analysis.DependencyImpactAnalyzer;
+import com.innospots.nexmux.core.stats.dao.StatsQueryDao;
+import com.innospots.nexmux.core.stats.service.AvailabilityService;
+import com.innospots.nexmux.core.stats.service.DashboardService;
+import com.innospots.nexmux.core.stats.service.UsageStatsService;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.context.annotation.Bean;
@@ -91,13 +96,35 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
+    DashboardService dashboardService(StatsQueryDao statsQueryDao) {
+        return new DashboardService(statsQueryDao);
+    }
+
+    @Bean
+    UsageStatsService usageStatsService(StatsQueryDao statsQueryDao) {
+        return new UsageStatsService(statsQueryDao);
+    }
+
+    @Bean
+    AvailabilityService availabilityService(StatsQueryDao statsQueryDao) {
+        return new AvailabilityService(statsQueryDao);
+    }
+
+    @Bean
     AuditQueryService auditQueryService(ConfigAuditLogDao configAuditLogDao) {
         return new AuditQueryService(configAuditLogDao);
     }
 
     @Bean
-    DebugService debugService() {
-        return new DebugService();
+    DebugService debugService(
+            ModelDao modelDao,
+            ProviderDao providerDao,
+            ProviderCredentialDao providerCredentialDao,
+            ClientDao clientDao,
+            RouteDao routeDao,
+            ConfigAuditService configAuditService) {
+        return new DebugService(
+                modelDao, providerDao, providerCredentialDao, clientDao, routeDao, configAuditService);
     }
 
     @Bean
@@ -143,6 +170,15 @@ public class NexmuxKernelConfiguration {
     @Lazy
     DebugEndpoint debugEndpoint(DebugService debugService) {
         return new DebugEndpoint(debugService);
+    }
+
+    @Bean
+    @Lazy
+    StatsEndpoint statsEndpoint(
+            DashboardService dashboardService,
+            UsageStatsService usageStatsService,
+            AvailabilityService availabilityService) {
+        return new StatsEndpoint(dashboardService, usageStatsService, availabilityService);
     }
 
     @Bean

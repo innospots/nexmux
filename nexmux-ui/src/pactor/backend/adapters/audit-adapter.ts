@@ -10,7 +10,7 @@ import type {
   AuditContextRow,
   AuditDiffLine,
   AuditRecord,
-} from "../../mocks/audit-mock";
+} from "../contracts";
 import { backendClient, type PageResult } from "../client";
 import { minuteTime, parseJsonSafe } from "./format-shared";
 

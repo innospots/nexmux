@@ -8,12 +8,12 @@
  * - appKeySummary / quotaSummary / rateLimitSummary 等派生文案在 BFF。
  */
 
-import type { AuthRoute, QuotaRule, RateLimitRule } from "../../mocks/client-templates-mock";
+import type { AuthRoute, QuotaRule, RateLimitRule } from "../contracts";
 import type {
   ClientListResult,
   ClientQuotaRule,
   ClientRecord,
-} from "../../mocks/clients-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import {
   deriveQuota,

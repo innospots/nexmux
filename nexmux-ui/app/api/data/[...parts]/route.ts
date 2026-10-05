@@ -143,8 +143,15 @@ async function handleMutation(
 
   const { parts } = await context.params;
   const [resource, id, sub] = parts;
-  const key = `${request.method} ${sub ? `${resource}/${sub}` : resource}`;
-  const handler = pactorMutations[key];
+  // 候选 key：3 段 = METHOD resource/sub；2 段先试 METHOD resource/{id字面}（子操作）
+  // 再回退 METHOD resource；1 段 = METHOD resource
+  const candidates = sub
+    ? [`${request.method} ${resource}/${sub}`]
+    : id
+      ? [`${request.method} ${resource}/${id}`, `${request.method} ${resource}`]
+      : [`${request.method} ${resource}`];
+  const key = candidates.find((candidate) => pactorMutations[candidate]);
+  const handler = key ? pactorMutations[key] : undefined;
   if (!handler) {
     return Response.json(
       { error: `未知写接口: ${request.method} /api/data/${parts.join("/")}` },

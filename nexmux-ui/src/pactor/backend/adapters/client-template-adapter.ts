@@ -3,12 +3,12 @@
  * 派生（validityLabel / quotaSummary / policySummary 等）与 client-templates-mock 逐字对齐。
  */
 
-import type { AuthRoute, QuotaRule, RateLimitRule } from "../../mocks/client-templates-mock";
+import type { AuthRoute, QuotaRule, RateLimitRule } from "../contracts";
 import type {
   ClientTemplateListResult,
   ClientTemplateRecord,
-} from "../../mocks/client-templates-mock";
-import type { ClientRecord } from "../../mocks/clients-mock";
+} from "../contracts";
+import type { ClientRecord } from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import {
   deriveQuota,

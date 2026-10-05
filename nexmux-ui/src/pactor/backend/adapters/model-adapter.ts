@@ -17,7 +17,7 @@ import type {
   SupplierModel,
   SupplierTimeRate,
   TimeMultiplier,
-} from "../../mocks/models-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 
 // ── 后端 VO 镜像 ──────────────────────────────────────────────

@@ -3,7 +3,7 @@
  * 定价明细（档位/倍率/计算过程文案）从 pricing_snapshot JSON 展开。
  */
 
-import type { CostListResult, CostRecord } from "../../mocks/costs-mock";
+import type { CostListResult, CostRecord } from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 import {
   compactTokens,

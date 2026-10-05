@@ -12,7 +12,7 @@ import type {
   ProviderModel,
   ProviderRecord,
   PullModelRow,
-} from "../../mocks/providers-mock";
+} from "../contracts";
 import { backendClient, fetchAll, type PageResult } from "../client";
 
 // ── 后端 VO 镜像（仅适配所需字段） ────────────────────────────

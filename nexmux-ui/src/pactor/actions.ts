@@ -18,18 +18,17 @@ import {
   appKeyOptionsOf,
   routeOptionsOf,
   routeTagOptionsOf,
-  simulateClientCall,
-  type ClientDebugRound,
-} from "./mocks/client-debug-mock";
-import { getProvider } from "./mocks/providers-mock";
+  simulateClientCallReal,
+} from "./debug-data";
+import type { ClientDebugRound } from "./backend/contracts";
 import {
   capabilitiesOf,
   modelOptionsOf,
   paramDefaultsOf,
-  simulateModelCall,
+  simulateModelCallReal,
   supportsReasoning,
-  testConnection,
-} from "./mocks/model-debug-mock";
+  testConnectionReal,
+} from "./debug-data";
 import { streamText, type DebugChatMessage } from "./components/debug-chat";
 
 /** SitemapApp actions 选项 handler 的结构化最小契约（ActionHandler 子集） */
@@ -45,7 +44,7 @@ export interface DebugActionContext {
 export type DebugAction = (
   action: { params?: Record<string, unknown> },
   ctx: DebugActionContext,
-) => { ok: boolean };
+) => { ok: boolean } | Promise<{ ok: boolean }>;
 
 function str(value: unknown): string {
   return typeof value === "string" ? value : "";
@@ -90,14 +89,17 @@ export function createClientDebugActions(): Record<string, DebugAction> {
 
   return {
     /** 切换客户端：联动 AppKey（取该客户端唯一一把）、授权路由与上下文 */
-    "clientDebug.selectClient": (action, ctx) => {
+    "clientDebug.selectClient": async (action, ctx) => {
       const clientCode = str(action.params?.clientCode);
-      const appKeys = appKeyOptionsOf(clientCode);
+      const [appKeys, routes] = await Promise.all([
+        appKeyOptionsOf(clientCode),
+        routeOptionsOf(clientCode),
+      ]);
       ctx.context.state.set({
         clientCode,
         appKeyOptions: appKeys,
         appKeyId: appKeys[0]?.value ?? "",
-        routeOptions: routeOptionsOf(clientCode),
+        routeOptions: routes,
         routeCode: "",
         tagOptions: [],
         routeTag: "",
@@ -106,18 +108,18 @@ export function createClientDebugActions(): Record<string, DebugAction> {
     },
 
     /** 切换授权路由：联动 RouteTag 选项 */
-    "clientDebug.selectRoute": (action, ctx) => {
+    "clientDebug.selectRoute": async (action, ctx) => {
       const routeCode = str(action.params?.routeCode);
       ctx.context.state.set({
         routeCode,
-        tagOptions: routeTagOptionsOf(routeCode),
+        tagOptions: await routeTagOptionsOf(routeCode),
         routeTag: "",
       });
       return { ok: true };
     },
 
     /** 发送：模拟完整链路调用，流式渲染 assistant 回复 */
-    "clientDebug.send": (action, ctx) => {
+    "clientDebug.send": async (action, ctx) => {
       const state = ctx.context.state;
       if (state.get("streaming")) return { ok: false };
       const clientCode = str(state.get("clientCode"));
@@ -129,7 +131,7 @@ export function createClientDebugActions(): Record<string, DebugAction> {
       }
 
       const roundCount = Number(state.get("roundCount") ?? 0);
-      const round = simulateClientCall(
+      const round = await simulateClientCallReal(
         {
           clientCode,
           appKeyId,
@@ -238,11 +240,11 @@ export function createModelDebugActions(): Record<string, DebugAction> {
 
   return {
     /** 切换供应商：联动刷新模型列表并清空已选模型与连接状态 */
-    "modelDebug.selectProvider": (action, ctx) => {
+    "modelDebug.selectProvider": async (action, ctx) => {
       const providerCode = str(action.params?.providerCode);
       ctx.context.state.set({
         providerCode,
-        modelOptions: modelOptionsOf(providerCode),
+        modelOptions: await modelOptionsOf(providerCode),
         modelCode: "",
         conn: null,
         showReasoning: false,
@@ -258,10 +260,13 @@ export function createModelDebugActions(): Record<string, DebugAction> {
     },
 
     /** 切换模型：回填默认参数 + 按 Capability 计算参数显隐/开关可用性 */
-    "modelDebug.selectModel": (action, ctx) => {
+    "modelDebug.selectModel": async (action, ctx) => {
       const modelCode = str(action.params?.modelCode);
-      const caps = capabilitiesOf(modelCode);
-      const defaults = paramDefaultsOf(modelCode);
+      const [caps, defaults, reasoning] = await Promise.all([
+        capabilitiesOf(modelCode),
+        paramDefaultsOf(modelCode),
+        supportsReasoning(modelCode),
+      ]);
       ctx.context.state.set({
         modelCode,
         conn: null,
@@ -269,7 +274,7 @@ export function createModelDebugActions(): Record<string, DebugAction> {
         topP: defaults.topP,
         maxTokens: defaults.maxTokens,
         reasoningEffort: defaults.reasoningEffort ?? "medium",
-        showReasoning: supportsReasoning(modelCode),
+        showReasoning: reasoning,
         canStream: caps.length === 0 || caps.includes("Streaming"),
         canTools: caps.includes("Tool Calling"),
         streamingOn: caps.includes("Streaming"),
@@ -278,25 +283,32 @@ export function createModelDebugActions(): Record<string, DebugAction> {
       return { ok: true };
     },
 
-    /** 连接测试：不发对话，仅探测凭证与 Endpoint 可达性（模拟 600ms 探测延迟） */
-    "modelDebug.testConnection": (_action, ctx) => {
+    /** 连接测试：不发对话，仅探测凭证与 Endpoint 可达性（真实 BFF；演示模式回退模拟） */
+    "modelDebug.testConnection": async (_action, ctx) => {
       const state = ctx.context.state;
       const providerCode = str(state.get("providerCode"));
       if (!providerCode || !str(state.get("modelCode")) || state.get("testing")) {
         return { ok: false };
       }
       state.set({ testing: true, conn: null });
-      setTimeout(() => {
+      try {
+        const conn = await testConnectionReal(providerCode);
+        ctx.context.state.set({ conn, testing: false });
+      } catch (error) {
         ctx.context.state.set({
-          conn: testConnection(providerCode),
+          conn: {
+            ok: false,
+            latencyMs: 0,
+            detail: error instanceof Error ? error.message : "连接测试失败",
+          },
           testing: false,
         });
-      }, 600);
+      }
       return { ok: true };
     },
 
-    /** 发送：直连供应商模型（不经过 AppKey / Route 业务链路） */
-    "modelDebug.send": (action, ctx) => {
+    /** 发送：直连供应商模型（真实 BFF 穿透；演示模式回退本地模拟） */
+    "modelDebug.send": async (action, ctx) => {
       const state = ctx.context.state;
       if (state.get("streaming")) return { ok: false };
       const providerCode = str(state.get("providerCode"));
@@ -313,30 +325,9 @@ export function createModelDebugActions(): Record<string, DebugAction> {
         content: text,
       };
 
-      // 上游/网关失败（凭证未配置）：对话区以错误消息展示摘要（PRD 交互规则 3）
-      const provider = getProvider(providerCode);
-      if (provider && provider.keyStatus !== "configured") {
-        state.set({
-          messages: [
-            ...messages,
-            userMsg,
-            {
-              id: `${msgId}-e`,
-              role: "error",
-              content: `请求失败：Provider「${provider.displayName}」${
-                provider.keyStatus === "pending"
-                  ? "API Key 待配置"
-                  : "未配置 API Key"
-              }，请先在 Provider 页完成凭证配置。`,
-            },
-          ],
-        });
-        return { ok: true };
-      }
-
       const streamingOn =
         state.get("streamingOn") === true && state.get("canStream") !== false;
-      const result = simulateModelCall(
+      const result = await simulateModelCallReal(
         providerCode,
         modelCode,
         str(state.get("systemPrompt")),
@@ -355,6 +346,18 @@ export function createModelDebugActions(): Record<string, DebugAction> {
         text,
       );
       const meta = `Token ${result.tokensIn}/${result.tokensOut} · TTFT ${result.ttftMs}ms · 延迟 ${result.latencyMs}ms · 上游 ${result.status}`;
+
+      // 调用失败（凭证缺失 / 上游错误）：对话区以错误消息展示摘要（PRD 交互规则 3）
+      if (result.status >= 400 || result.reply.startsWith("【调用失败")) {
+        state.set({
+          messages: [
+            ...messages,
+            userMsg,
+            { id: `${msgId}-e`, role: "error", content: result.reply },
+          ],
+        });
+        return { ok: true };
+      }
 
       // 非流式：直接落定完整回复
       if (!streamingOn) {

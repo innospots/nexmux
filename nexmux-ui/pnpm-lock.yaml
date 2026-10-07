@@ -9,14 +9,14 @@ importers:
   .:
     dependencies:
       '@pactor-app/core':
-        specifier: ^1.26.0
-        version: 1.26.0
+        specifier: ^1.34.0
+        version: 1.34.0
       '@pactor-app/runtime':
-        specifier: ^1.26.0
-        version: 1.26.0(react@19.2.8)
+        specifier: ^1.34.0
+        version: 1.34.0(react@19.2.8)
       '@pactor-app/ui':
-        specifier: ^1.26.0
-        version: 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+        specifier: ^1.34.0
+        version: 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       lucide-react:
         specifier: 1.45.0
         version: 1.45.0(react@19.2.8)
@@ -24,8 +24,8 @@ importers:
         specifier: 16.3.5
         version: 16.3.5(@babel/core@7.29.7)(@types/node@20.19.43)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       pactor-app:
-        specifier: ^1.26.0
-        version: 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
+        specifier: ^1.34.0
+        version: 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       react:
         specifier: 19.2.8
         version: 19.2.8
@@ -501,76 +501,76 @@ packages:
     resolution: {integrity: sha512-nn5ozdjYQpUCZlWGuxcJY/KpxkWQs4DcbMCmKojjyrYDEAGy4Ce19NN4v5MduafTwJlbKc99UA8YhSVqq9yPZA==}
     engines: {node: '>=12.4.0'}
 
-  '@oxc-project/types@0.151.0':
-    resolution: {integrity: sha512-J1yXrIlNDZVzE3ada310xeAw7nH8yCAyLPuUIsjKatFPmfn5bS1oW+cM+QsGOtVWd5nhSpbwZWx/rue+r5Z+PA==}
+  '@oxc-project/types@0.152.0':
+    resolution: {integrity: sha512-oM/5rLBm2tPkg0iBgkH/FOeR3PCDpY19GTgAZjMFM8h9WI9VW7cLgzp6nwtarYKmovavIQZ+Fe/RKX/8C8O/Rw==}
 
-  '@pactor-app/app@1.26.0':
-    resolution: {integrity: sha512-CACzTf0jtt3sJ63QlGn/PpUiI+ygj/x7J7+e/sr7v1ggQsInx8m4efCFvP0NluDDzXOYyaPtulXpb4zJqsri1g==}
+  '@pactor-app/app@1.34.0':
+    resolution: {integrity: sha512-R2AqfNx1HnwF1pHPGHsGJpaHUlbCPfqUflsFaw7dkqDjTc5TuyWzl7MRHaZD1oFbIPaX+qy0fNDp9oob8E029Q==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/chat@1.26.0':
-    resolution: {integrity: sha512-ZBj7dUR/Abfnr6+RS2Ij3HAutItZBkXTZ5yZaNZCi4nHiPiiFK0itC3AVNQTiVynrL6aJa32/pwH5j8rPhcRXg==}
+  '@pactor-app/chat@1.34.0':
+    resolution: {integrity: sha512-0I7enCfIbU7C0wuOQ/rUDmFKHYcVnbOjoy7Y22nn0pz8DAmqesFU5GFZc2cCf8Mt2ZKgSDB1J5TQI/bN2Qsafw==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/cli@1.26.0':
-    resolution: {integrity: sha512-pvq7N9TiSu811/g407r0++77D4pi/ih3OxAI7ojZ+mUC86Fz7NDJ6IPQ53YhqEVnMsYViDxs1e2+R2B3ASL0AQ==}
+  '@pactor-app/cli@1.34.0':
+    resolution: {integrity: sha512-IZC8jlGbozZ2IKEkwo7JzKfIW0OEVkoklSZptwKaG3SuHLKw3Iw7eFNeLwvBvswciPFoDajYQS+36/YoqC7o8Q==}
     engines: {node: '>=18'}
     hasBin: true
 
-  '@pactor-app/core@1.26.0':
-    resolution: {integrity: sha512-FZitC9P9NnD19c1HeS3ZOQgMkGbSMO1YWnXpNXtyd6oFOrgQjQyKvZG4x28eZDCj0rtj7wqSBbDCEE3nsgFNqw==}
+  '@pactor-app/core@1.34.0':
+    resolution: {integrity: sha512-ldHZIghOq3f9MIUc6764U+RdmhXp2HKUMpnjz90OfZ4I1YOgj8F3g2jZjw699kARSmLUgLj0PVonqjIUsm6k9A==}
     engines: {node: '>=18'}
 
-  '@pactor-app/expression@1.26.0':
-    resolution: {integrity: sha512-4Zj0YIX1IkhJlHvRbJCCF4D84XJwi/3iBPCnMx4rEVA0/hG5IU3/8mq9N9Qg7SEIGxOxaC+KydetBZIHxCocBw==}
+  '@pactor-app/expression@1.34.0':
+    resolution: {integrity: sha512-Na7rYU3PZGvQOe83OMeFcneWkLP6IkhfheB6miGvX+1L6iTh1VyuFi1fbgtsyUScSllrPA8JJYpXGMCGX+zVCg==}
     engines: {node: '>=18'}
 
-  '@pactor-app/markdown@1.26.0':
-    resolution: {integrity: sha512-Gr9NokvbankDKRVVzRVixFUWtKgX69dmoydyod4Z2rvYQW4Jq+9pV9ITBx2GH4gahnbU6wF2AFZ1iF7T+flZFg==}
+  '@pactor-app/markdown@1.34.0':
+    resolution: {integrity: sha512-dU2Z0uvj62/0S16H3J3AQld6DFzN+wV5uVkvYcFeqHN8KiUsP7ppdov9cSGVxo/3Zhk4HbReSBpihEOKyeLzgg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/permission@1.26.0':
-    resolution: {integrity: sha512-wTPVGn+i9kIf5/W1X7vAJldd8UEKDeRc6Jm5Z72ulE9TPCNt77tAsT4HO4/BDCQFwY0k1V5ms3IumHRhUCoj9g==}
+  '@pactor-app/permission@1.34.0':
+    resolution: {integrity: sha512-Bf4A7BTrtArg9gEnDG25xmzvDC95ffotIhZmRSt6unDj5hu1iaFJbT+TBWqERJ2/TmpIDhx4ipeSN+SOK0jvRQ==}
     engines: {node: '>=18'}
 
-  '@pactor-app/resource@1.26.0':
-    resolution: {integrity: sha512-rJkJfMl0B3b3Y2MkOqdhGLO5OMRQ1ZmpjnrSdAqc2P/OJ2GgLxQk6zNtchsZZm2r/2fTj/gK6OxnuAAN5GIC6Q==}
+  '@pactor-app/resource@1.34.0':
+    resolution: {integrity: sha512-VNxjZqynNrETgcj2Q9z5PlHlayZXKyXmBhH1iM6ZzzoFy2cn1uoAYURCYtxS7onMotilsSt54CtthybaZHPOyw==}
     engines: {node: '>=18'}
 
-  '@pactor-app/router@1.26.0':
-    resolution: {integrity: sha512-0egqrpiBYRSlKGBKMf6XyBdSoipb54lmPV6SN5xAr8Z6MPsrlDWMrHrTHiQurnYF+TaovpdchRRZsWd1Obgilw==}
+  '@pactor-app/router@1.34.0':
+    resolution: {integrity: sha512-+0jWfZOKIZv2DUQrtES5zuQxRqRleJpNqKqo288hBLA2SP4k/Qj/GG8Yq4yy4wv9XIbjz6cxtu+Bi0g4iBmK4g==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-router-dom: '>=6'
 
-  '@pactor-app/runtime@1.26.0':
-    resolution: {integrity: sha512-6NxLTFVlCPiT5q04guuGodBHVhxMumduEJBsmDnuV4Jbkm9JMMGXdwNO0Y3ADHPJ/KsXQurvaLgB+owaUVoLgw==}
+  '@pactor-app/runtime@1.34.0':
+    resolution: {integrity: sha512-lHia4xqPvKfl4/K/aklc8abfIIW1fBDnGB5L94/p21QAkZoZwO6Bs70l3zuWuc1vYL/eyQgXrmAJERCdhiNUXg==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
 
-  '@pactor-app/schema@1.26.0':
-    resolution: {integrity: sha512-+ozpK7Vjryb2z9cIZfE2x2kUvZC6XKuw0n0wrvuUv4uzYjwvAOxd1Vw/radRoEwz0ohBGnq4TR+DEzYYwSA1aw==}
+  '@pactor-app/schema@1.34.0':
+    resolution: {integrity: sha512-2EZCgAvct7CbefmYVJHJtL6LCBoehePUPVoY1vStKQkJxzOUSESH3FCKcss8eNC0aJfa0nueu+Hnpjrgee9rEw==}
     engines: {node: '>=18'}
 
-  '@pactor-app/ui@1.26.0':
-    resolution: {integrity: sha512-RhI6EIAaXGoIoz98JpZzA5IhCJIV93Mfhae+rkRFpn3UJFM3IVHMAKBBFhFPsPmuDcmRkoAli5oEJ0IA5Pk4bQ==}
+  '@pactor-app/ui@1.34.0':
+    resolution: {integrity: sha512-JDg1STA/Q37o89UmWAoZ4QgiAAisJtr9cpeFZ+WJaH+WSqBtOZr89e3urCQduebCjLr1Z+F44tHy4b1uL0/SYw==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
       react-dom: '>=18'
 
-  '@pactor-app/vite-plugin@1.26.0':
-    resolution: {integrity: sha512-ClU5gBcamDM+NT4HirlIt+p+TNanCYpbDregJK/YqlUN7O+Ngp7pNCS9TBQq1hYYpoQX4mGGQIAKGseVNjqasQ==}
+  '@pactor-app/vite-plugin@1.34.0':
+    resolution: {integrity: sha512-C7lZ3VemtSyRhOqmihpoGZkJnzCJ/WBiyJ5X1mcI7PYVgyh0iqaV+L7vu9V58itKuVYLo1d6XdNSVT6bUYE+Rg==}
     engines: {node: '>=18'}
     peerDependencies:
       vite: '>=5'
@@ -737,92 +737,92 @@ packages:
       '@types/react':
         optional: true
 
-  '@rolldown/binding-android-arm-eabi@1.2.11':
-    resolution: {integrity: sha512-A5kXfGKvKWWZE0TtPrfsvT+q4Y5d1QG8gGUzpYjGydM+fARM9MuX90PrXYXe0XbsDVgyxxNzHo6giCj90bsFNw==}
+  '@rolldown/binding-android-arm-eabi@1.2.12':
+    resolution: {integrity: sha512-dB/a1214qKfHMXCpgqR4OZT+jS4kTyEXbQGJPqzobt5EwH5rX080pxE37alt3RzvR1bf1Yz/yGqRfrYAxuPw0A==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm]
     os: [android]
 
-  '@rolldown/binding-android-arm64@1.2.11':
-    resolution: {integrity: sha512-z6cTycz+iJ4PVkuL4HHW4DfTfoeU/2nqYYuSOrTmH7yHK5Y0LCOnA03V4ZNxavyVaU1oOqUgIg2klN/s+USGOA==}
+  '@rolldown/binding-android-arm64@1.2.12':
+    resolution: {integrity: sha512-7KHFgQ5VJxIHcLlrwrc3Xbds7oTNQT7Pgi9gQCJKrd2VGab/UksIOYp6VD8MzCstGxOKMgNamPwUCfxPdP1OHg==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [android]
 
-  '@rolldown/binding-darwin-arm64@1.2.11':
-    resolution: {integrity: sha512-jShvqNtP6vDC6/A5JOAzbVV+DkgHqhl/ScVCJEbt+TUY6QYz7YnXcrg3sLtFBniro0f/Ld50ZwCWA6f7KYD1nQ==}
+  '@rolldown/binding-darwin-arm64@1.2.12':
+    resolution: {integrity: sha512-3YIhqHD96nA5SaYNRBR16HnGv4oavZvXfD/ayHM+oYZ0WD/8lBAtf6zQua4kEyAvpqrluKXl0lnOBoiNby7x9w==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [darwin]
 
-  '@rolldown/binding-darwin-x64@1.2.11':
-    resolution: {integrity: sha512-f2i2xiNWq1Z1l2++q2fuhZRdLAT3aqxD6vRNm1RAxpUoBcdqNB3C0s1Bt+K+PbEx2F5F4gQp6hqKkphCY/xF9w==}
+  '@rolldown/binding-darwin-x64@1.2.12':
+    resolution: {integrity: sha512-UuuJ35MFw4gmFOrE9pEqIV+K3syIKveph+Qc1/ljHZVdoDW4pz/JHR/eMVom+TZGl/5OOvGJOWaOCVt3ZfqhxA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [darwin]
 
-  '@rolldown/binding-freebsd-x64@1.2.11':
-    resolution: {integrity: sha512-4Ir5FSOKIAMr4r0kExpt1s3bMgzJU3rA45AYOHtQpls0oNeqcYBKrWMlckrYH4KCfGLfkfn1tN1dmZPMVsdXow==}
+  '@rolldown/binding-freebsd-x64@1.2.12':
+    resolution: {integrity: sha512-uMvssit0a4W+/7D8CbHUvG719mH3R2jwXAlh/XcPvuHTE0g++LymF88DCGNX0HM2rBOn0xrzgXktIB6fLSJBTQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [freebsd]
 
-  '@rolldown/binding-linux-arm-gnueabihf@1.2.11':
-    resolution: {integrity: sha512-/gnRDM+39BROzAN/k1OZjDPnDMcZxB/0EUxKjONO5yVkNEvlsoMDrxGNKgZi/ttFriS2gwlDNzB65pvNbFOXIQ==}
+  '@rolldown/binding-linux-arm-gnueabihf@1.2.12':
+    resolution: {integrity: sha512-XcFu0R0xWnwzSf4IQgFH1rJIckPN1pLy2R+4r9IDB7Yfu/ys9cVqfa4pBrMHj7a3gl8mIR4nRNPg0e5IvEVs6g==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm]
     os: [linux]
 
-  '@rolldown/binding-linux-arm64-gnu@1.2.11':
-    resolution: {integrity: sha512-PFaK8HwvAHbaKbBcDNQihjMKYvFnA5hiENx/l5tphTDz1E0WFp32l0A7aq7lyUwGsRw/xSrNIy/gIK4thrSCrw==}
+  '@rolldown/binding-linux-arm64-gnu@1.2.12':
+    resolution: {integrity: sha512-260UrKgn8tz39ak+SMDOirKzr7V04M9dWPw5llW00SwBivCZoWcRBKV1d8cXnRkUmSZA3BdiUmBHWk7734Ulpw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [linux]
 
-  '@rolldown/binding-linux-arm64-musl@1.2.11':
-    resolution: {integrity: sha512-AskzJUIKRLPxkruR1wLKewGbOw+EYfU/9lOrBFj4AFrEA8hPpKFnODWNu2WLaNs0QNkEb9QIJufmVZZIL/bJlg==}
+  '@rolldown/binding-linux-arm64-musl@1.2.12':
+    resolution: {integrity: sha512-5YK1I9SqDkbPgc1IA8BgDl34suqUS2q0KWnBrirm0E51YjOs6eo6dV6jbQfNE/argHRSvd0QUGgtpIoYx+WWpw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [linux]
 
-  '@rolldown/binding-linux-ppc64-gnu@1.2.11':
-    resolution: {integrity: sha512-qlUGAheh2yh8afH7QBgx0PrRHN85hKnNd78x8MeMhXivuevgd8vgf6/CstOzmNKY/lLTHvNTrPy98cLnAugzJw==}
+  '@rolldown/binding-linux-ppc64-gnu@1.2.12':
+    resolution: {integrity: sha512-Rkcrmp7eFRg74yL5fXEU91JEWbdEPLevWwGtXpmhbjlD1StScbWTmO94Bhly+Mo+ketKYkdmM1vNUKeWSlx8cQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [ppc64]
     os: [linux]
 
-  '@rolldown/binding-linux-s390x-gnu@1.2.11':
-    resolution: {integrity: sha512-secpEad+0vCbSfn8upFySkDskv+bGPk3THSDS9Y89yc4rb4kzqHp8Dmyd9BkQW4SnhNXBZCl/6CrO//hZahNJQ==}
+  '@rolldown/binding-linux-s390x-gnu@1.2.12':
+    resolution: {integrity: sha512-qvK4DuAsQc2BSjlx+Xr+IzOIvvxbGZqxFwdWfG6F518Erj0GGISyQbJ6pIappnOxlNPzNHvo/L0BwB30GZ+zVw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [s390x]
     os: [linux]
 
-  '@rolldown/binding-linux-x64-gnu@1.2.11':
-    resolution: {integrity: sha512-mOVBT3dPpkWm8XBWPmU4bf+U6dYDLeMo/9ojUmis4N0L5uu10qra5vOyngZ7/PSdoE4G9KvRt4bloRxNjLas7A==}
+  '@rolldown/binding-linux-x64-gnu@1.2.12':
+    resolution: {integrity: sha512-Q9uLBO53Xd4QIq1WOycVQyPP1O4HhraEV2qqb3uTrnVw6QZih9duY4vNXOivL1xoUS1/z+W8eF4NMfl2a8Sdjw==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [linux]
 
-  '@rolldown/binding-linux-x64-musl@1.2.11':
-    resolution: {integrity: sha512-Is78i9A8Ui4SqcxUwFJ9uMmjDn58IbVTjFWYdQestFEgeuEmHMLGNriXnVJKkwG2YiZjw8cP0zCTyDMdDGtOOg==}
+  '@rolldown/binding-linux-x64-musl@1.2.12':
+    resolution: {integrity: sha512-3IBxWFMjbOZskDPKv8Lf9BCnahlKuHthWkYnyIxOH/QcJrFcS4EmcenthApkwr/5+nEqZlLzeYbxeMaX7A5u4g==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [linux]
 
-  '@rolldown/binding-openharmony-arm64@1.2.11':
-    resolution: {integrity: sha512-dUCXneZ87INUMyQ0D+C0HrEBNUPNXHaPmU5GTjyKTJEiussw9Kaj5Ln8UztPe4epV/ffvgNBEadksdYhmW6xJA==}
+  '@rolldown/binding-openharmony-arm64@1.2.12':
+    resolution: {integrity: sha512-xtX61xg4LKPkPWilZU1ynKClz5Gj4bf74LML4r3eVLWumKnGjoEr1OSHQhMdbBDoYTi+yjrujvpZe2pUnqCrrA==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [openharmony]
 
-  '@rolldown/binding-win32-arm64-msvc@1.2.11':
-    resolution: {integrity: sha512-jByxb6qfd+bH1xUd0qnfFnb17i9sWBPY2tOavJ0l3tdr3OTu+Kvtm8cd/JV5nFt657b1VqGltxg9olOEfofXWw==}
+  '@rolldown/binding-win32-arm64-msvc@1.2.12':
+    resolution: {integrity: sha512-At7fPB6PCaIjzgIhEZFxuT+BBFqiQibJDT4d3PhiR3f4E7bbMZF4aKblbFfEM3sETRDd1YiQx/+U/g/B/ou5Ew==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [arm64]
     os: [win32]
 
-  '@rolldown/binding-win32-x64-msvc@1.2.11':
-    resolution: {integrity: sha512-/PzKqzAJ03i19oy2ItPvyvaVjOjBCNnfaJs8yvUdGBKmiESgnrJSQ2awd81QzFbbnAmu7YO9ZnJrDCb9VSJPRA==}
+  '@rolldown/binding-win32-x64-msvc@1.2.12':
+    resolution: {integrity: sha512-WIw2haVKwjuYdXkHaoC0mF8Le71TuCBxjrdKqLbJGctbBABj+ClfmNvtbOnzpq3RokNo5+V1qhtSzJyXorsklQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
@@ -2112,8 +2112,8 @@ packages:
     resolution: {integrity: sha512-Eeo8Ys1doU1z+x8AZsPpQu+p/QcZBI5PeOo7QGQdy2x2m0MU/hYagBbGOmXwr5KVbEfVuWv9LpnQWeehogurjg==}
     hasBin: true
 
-  katex@0.18.9:
-    resolution: {integrity: sha512-8ad9RyoKsb/g8/yLFE+KAlP+DhbCTRUNi/V9XGsxn0R+trJJltNwzcDNo0q/DEkOy5fQUQTAQyCXCYSE+OakTQ==}
+  katex@0.18.10:
+    resolution: {integrity: sha512-/B6p9eY9DX7aHBfpkHdpirDTZ5QH9xTwL9y837PWuzuv41O5jFdqNQwVQEQsimY0/iVNkwBY4+4hMfhQ7d4Dbw==}
     hasBin: true
 
   keyv@4.5.4:
@@ -2312,11 +2312,11 @@ packages:
     resolution: {integrity: sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g==}
     engines: {node: '>= 0.4'}
 
-  mdast-util-find-and-replace@3.0.2:
-    resolution: {integrity: sha512-Tmd1Vg/m3Xz43afeNxDIhWRtFZgM2VLyaf4vSTYwudTyeuTneoL3qtWMA5jeLyz/O1vDJmmV4QuScFCA2tBPwg==}
+  mdast-util-find-and-replace@3.0.3:
+    resolution: {integrity: sha512-xPgpDNl0/OXHsI7TlaIs22lWnH3KlpvZdXG1ET/m/YT2Hhdkx8lJV4kLphE6l9simyM4KPDFBwas08BgEob6Jw==}
 
-  mdast-util-from-markdown@2.0.3:
-    resolution: {integrity: sha512-W4mAWTvSlKvf8L6J+VN9yLSqQ9AOAAvHuoDAmPkz4dHf553m5gVj2ejadHJhoJmcmxEnOv6Pa8XJhpxE93kb8Q==}
+  mdast-util-from-markdown@2.1.0:
+    resolution: {integrity: sha512-KRLgmPaP2H1ul2bpoJkOS+9pAcDAAj9Nu1mqLnh8NLeJG5tlvj42TH80PIGBpROWlRXLk0lDrWNuZCFy/tsB4A==}
 
   mdast-util-gfm-autolink-literal@2.0.1:
     resolution: {integrity: sha512-5HVP2MKaP6L+G6YaxPNjuL0BPrq9orG3TsrZ9YXbA3vDw/ACI4MEsnoDpn6ZNm7GnZgtAcONJyPhOP8tNJQavQ==}
@@ -2354,8 +2354,8 @@ packages:
   mdast-util-to-hast@13.2.1:
     resolution: {integrity: sha512-cctsq2wp5vTsLIcaymblUriiTcZd0CwWtCbLvrOzYCDZoWyMNV8sZ7krj09FSnsiJi3WVsHLM4k6Dq/yaPyCXA==}
 
-  mdast-util-to-markdown@2.1.3:
-    resolution: {integrity: sha512-wgyJtgUkUcdU7zci7uuwc/tzoAhm0TswWhaXuvnWolqug+8jY7bgNkBBL0dYBnHgc/tHL7lCzRdPsdUxUKKBqw==}
+  mdast-util-to-markdown@2.2.0:
+    resolution: {integrity: sha512-2Jn/ADrHFFyyniBMi0bncTbJqU78K3/TEYvzvwrWWzD9MYPUa/Gm4r3nOeKFQg/PDM5BsbDYdc8ackW4NTY6NA==}
 
   mdast-util-to-string@4.0.0:
     resolution: {integrity: sha512-0H44vDimn51F0YwvxSJSm0eCDOJTRlmN0R1yBh4HLj9wiV1Dn0QoXGbvFAWj2hSItVTlCmBF1hqKlIyUBVFLPg==}
@@ -2476,6 +2476,11 @@ packages:
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
     hasBin: true
 
+  nanoid@3.3.20:
+    resolution: {integrity: sha512-uKdg2G3GNCKQn9byYOpxbGqrT2fGO5KRt5J/8b3pok8rT6qxGWF6hxMyJiEYtAf+FVyYuD9hRaDqX5uPFYJ4ZQ==}
+    engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
+    hasBin: true
+
   napi-postinstall@0.3.4:
     resolution: {integrity: sha512-PHI5f1O0EP5xJ9gQmFGMS6IZcrVvTjpXjz7Na41gTE7eE2hK11lg04CECCYEEjdc17EV4DO+fkGEtt7TpTaTiQ==}
     engines: {node: ^12.20.0 || ^14.18.0 || >=16.0.0}
@@ -2577,8 +2582,8 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  pactor-app@1.26.0:
-    resolution: {integrity: sha512-5BWDz8PFCBvf5wadQrs84E6cW0fCjkWYpwl0HfVLgDcR98zQtTIo2A3g0YAXuGJQxI1IXeuBv3SqDfrcWxBEzA==}
+  pactor-app@1.34.0:
+    resolution: {integrity: sha512-wSJPXxRipLUbUvu+4CZJeeU6jTB1mSihSWlHMxOg8d+qvYj1W6PCydYxu9SkGPHGC2gNWMAmHA172VYZ1gHwnQ==}
     engines: {node: '>=18'}
     peerDependencies:
       react: '>=18'
@@ -2631,6 +2636,10 @@ packages:
 
   postcss@8.5.28:
     resolution: {integrity: sha512-RRuzqDtt5Y9h3quz5hWhK+TPnsmVs6WwSU6LkJMeY4HstUEDuYTG8UJSdawMRzmzAtV+KEoG8N3Qg2qLy5vM/A==}
+    engines: {node: ^10 || ^12 || >=14}
+
+  postcss@8.5.29:
+    resolution: {integrity: sha512-49cGhUbXj8Qenv0iTMxA1cFBzxXoctpC9Ujd77t1WcbJIr6nF/eI7g/8MgxrYldFRuAXvja7xQRwavoW7kgrxQ==}
     engines: {node: ^10 || ^12 || >=14}
 
   prelude-ls@1.2.1:
@@ -2805,8 +2814,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rolldown@1.2.11:
-    resolution: {integrity: sha512-qpSwIyz0jHQq5qXBTNxFmE6664rJ7O+4TvPFOiOaBSrz8IOHc1koKKSqTM2H6u1UG1+TveuC6vaDHKXFOvb1Kw==}
+  rolldown@1.2.12:
+    resolution: {integrity: sha512-8wafseiaG80xmXSfqidUNqZcylTlhmPZZt+za2m+js2sFZ8dTNlhIOV2WcbIPx2hgwPBJpEUGFAMZ9bgBBLTSQ==}
     engines: {node: ^20.19.0 || >=22.12.0}
     hasBin: true
 
@@ -2890,6 +2899,10 @@ packages:
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
+    engines: {node: '>=0.10.0'}
+
+  source-map-js@1.2.2:
+    resolution: {integrity: sha512-KGj/8Y43x35aZVDtt+J4mK1hoLGHULMYfSkODJNQjNDC3oW1PqPoxMwo0pLUsWM/UEGzON/NxeHywEfNXNP3Vw==}
     engines: {node: '>=0.10.0'}
 
   space-separated-tokens@2.0.2:
@@ -3716,18 +3729,18 @@ snapshots:
 
   '@nolyfill/is-core-module@1.0.39': {}
 
-  '@oxc-project/types@0.151.0': {}
+  '@oxc-project/types@0.152.0': {}
 
-  '@pactor-app/app@1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/app@1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/expression': 1.26.0
-      '@pactor-app/permission': 1.26.0
-      '@pactor-app/resource': 1.26.0
-      '@pactor-app/router': 1.26.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.26.0(react@19.2.8)
-      '@pactor-app/schema': 1.26.0
-      '@pactor-app/ui': 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/expression': 1.34.0
+      '@pactor-app/permission': 1.34.0
+      '@pactor-app/resource': 1.34.0
+      '@pactor-app/router': 1.34.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.34.0(react@19.2.8)
+      '@pactor-app/schema': 1.34.0
+      '@pactor-app/ui': 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3737,13 +3750,13 @@ snapshots:
       - '@types/react-dom'
       - supports-color
 
-  '@pactor-app/chat@1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/chat@1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/markdown': 1.26.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.26.0
-      '@pactor-app/runtime': 1.26.0(react@19.2.8)
-      '@pactor-app/ui': 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/markdown': 1.34.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.34.0
+      '@pactor-app/runtime': 1.34.0(react@19.2.8)
+      '@pactor-app/ui': 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
       react: 19.2.8
     transitivePeerDependencies:
       - '@date-fns/tz'
@@ -3753,23 +3766,23 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/cli@1.26.0':
+  '@pactor-app/cli@1.34.0':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/expression': 1.26.0
-      '@pactor-app/schema': 1.26.0
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/expression': 1.34.0
+      '@pactor-app/schema': 1.34.0
       yaml: 2.9.1
 
-  '@pactor-app/core@1.26.0': {}
+  '@pactor-app/core@1.34.0': {}
 
-  '@pactor-app/expression@1.26.0':
+  '@pactor-app/expression@1.34.0':
     dependencies:
-      '@pactor-app/core': 1.26.0
+      '@pactor-app/core': 1.34.0
 
-  '@pactor-app/markdown@1.26.0(@types/react@19.3.0)(react@19.2.8)':
+  '@pactor-app/markdown@1.34.0(@types/react@19.3.0)(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      katex: 0.18.9
+      '@pactor-app/core': 1.34.0
+      katex: 0.18.10
       react: 19.2.8
       react-markdown: 10.1.0(@types/react@19.3.0)(react@19.2.8)
       react-syntax-highlighter: 16.1.1(react@19.2.8)
@@ -3780,41 +3793,41 @@ snapshots:
       - '@types/react'
       - supports-color
 
-  '@pactor-app/permission@1.26.0':
+  '@pactor-app/permission@1.34.0':
     dependencies:
-      '@pactor-app/core': 1.26.0
+      '@pactor-app/core': 1.34.0
 
-  '@pactor-app/resource@1.26.0':
+  '@pactor-app/resource@1.34.0':
     dependencies:
-      '@pactor-app/core': 1.26.0
+      '@pactor-app/core': 1.34.0
 
-  '@pactor-app/router@1.26.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/router@1.34.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/permission': 1.26.0
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/permission': 1.34.0
       react: 19.2.8
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
 
-  '@pactor-app/runtime@1.26.0(react@19.2.8)':
+  '@pactor-app/runtime@1.34.0(react@19.2.8)':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/expression': 1.26.0
-      '@pactor-app/schema': 1.26.0
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/expression': 1.34.0
+      '@pactor-app/schema': 1.34.0
       react: 19.2.8
 
-  '@pactor-app/schema@1.26.0':
+  '@pactor-app/schema@1.34.0':
     dependencies:
-      '@pactor-app/core': 1.26.0
+      '@pactor-app/core': 1.34.0
       ajv: 8.20.0
 
-  '@pactor-app/ui@1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
+  '@pactor-app/ui@1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)':
     dependencies:
       '@base-ui/react': 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/markdown': 1.26.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.26.0
-      '@pactor-app/router': 1.26.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.26.0(react@19.2.8)
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/markdown': 1.34.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.34.0
+      '@pactor-app/router': 1.34.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.34.0(react@19.2.8)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
       cmdk: 1.1.1(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3839,10 +3852,10 @@ snapshots:
       - react-router-dom
       - supports-color
 
-  '@pactor-app/vite-plugin@1.26.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
+  '@pactor-app/vite-plugin@1.34.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))':
     dependencies:
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/schema': 1.26.0
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/schema': 1.34.0
       vite: 8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)
       yaml: 2.9.1
 
@@ -3983,49 +3996,49 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.3.0
 
-  '@rolldown/binding-android-arm-eabi@1.2.11':
+  '@rolldown/binding-android-arm-eabi@1.2.12':
     optional: true
 
-  '@rolldown/binding-android-arm64@1.2.11':
+  '@rolldown/binding-android-arm64@1.2.12':
     optional: true
 
-  '@rolldown/binding-darwin-arm64@1.2.11':
+  '@rolldown/binding-darwin-arm64@1.2.12':
     optional: true
 
-  '@rolldown/binding-darwin-x64@1.2.11':
+  '@rolldown/binding-darwin-x64@1.2.12':
     optional: true
 
-  '@rolldown/binding-freebsd-x64@1.2.11':
+  '@rolldown/binding-freebsd-x64@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-arm-gnueabihf@1.2.11':
+  '@rolldown/binding-linux-arm-gnueabihf@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-arm64-gnu@1.2.11':
+  '@rolldown/binding-linux-arm64-gnu@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-arm64-musl@1.2.11':
+  '@rolldown/binding-linux-arm64-musl@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-ppc64-gnu@1.2.11':
+  '@rolldown/binding-linux-ppc64-gnu@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-s390x-gnu@1.2.11':
+  '@rolldown/binding-linux-s390x-gnu@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-x64-gnu@1.2.11':
+  '@rolldown/binding-linux-x64-gnu@1.2.12':
     optional: true
 
-  '@rolldown/binding-linux-x64-musl@1.2.11':
+  '@rolldown/binding-linux-x64-musl@1.2.12':
     optional: true
 
-  '@rolldown/binding-openharmony-arm64@1.2.11':
+  '@rolldown/binding-openharmony-arm64@1.2.12':
     optional: true
 
-  '@rolldown/binding-win32-arm64-msvc@1.2.11':
+  '@rolldown/binding-win32-arm64-msvc@1.2.12':
     optional: true
 
-  '@rolldown/binding-win32-x64-msvc@1.2.11':
+  '@rolldown/binding-win32-x64-msvc@1.2.12':
     optional: true
 
   '@rolldown/pluginutils@1.0.1': {}
@@ -5468,7 +5481,7 @@ snapshots:
     dependencies:
       commander: 8.3.0
 
-  katex@0.18.9:
+  katex@0.18.10:
     dependencies:
       commander: 15.0.0
 
@@ -5626,14 +5639,14 @@ snapshots:
 
   math-intrinsics@1.1.0: {}
 
-  mdast-util-find-and-replace@3.0.2:
+  mdast-util-find-and-replace@3.0.3:
     dependencies:
       '@types/mdast': 4.0.4
       escape-string-regexp: 5.0.0
       unist-util-is: 6.0.1
       unist-util-visit-parents: 6.0.2
 
-  mdast-util-from-markdown@2.0.3:
+  mdast-util-from-markdown@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
@@ -5655,15 +5668,15 @@ snapshots:
       '@types/mdast': 4.0.4
       ccount: 2.0.1
       devlop: 1.1.0
-      mdast-util-find-and-replace: 3.0.2
+      mdast-util-find-and-replace: 3.0.3
       micromark-util-character: 2.1.1
 
   mdast-util-gfm-footnote@2.1.0:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
       micromark-util-normalize-identifier: 2.0.1
     transitivePeerDependencies:
       - supports-color
@@ -5671,8 +5684,8 @@ snapshots:
   mdast-util-gfm-strikethrough@2.0.1:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5681,8 +5694,8 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       markdown-table: 3.0.4
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5690,20 +5703,20 @@ snapshots:
     dependencies:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
   mdast-util-gfm@3.1.0:
     dependencies:
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.1.0
       mdast-util-gfm-autolink-literal: 2.0.1
       mdast-util-gfm-footnote: 2.1.0
       mdast-util-gfm-strikethrough: 2.0.1
       mdast-util-gfm-table: 2.0.0
       mdast-util-gfm-task-list-item: 2.0.0
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5713,8 +5726,8 @@ snapshots:
       '@types/mdast': 4.0.4
       devlop: 1.1.0
       longest-streak: 3.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
       unist-util-remove-position: 5.0.0
     transitivePeerDependencies:
       - supports-color
@@ -5725,8 +5738,8 @@ snapshots:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5738,8 +5751,8 @@ snapshots:
       '@types/unist': 3.0.3
       ccount: 2.0.1
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
       parse-entities: 4.0.2
       stringify-entities: 4.0.4
       unist-util-stringify-position: 4.0.0
@@ -5753,8 +5766,8 @@ snapshots:
       '@types/hast': 3.0.5
       '@types/mdast': 4.0.4
       devlop: 1.1.0
-      mdast-util-from-markdown: 2.0.3
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-from-markdown: 2.1.0
+      mdast-util-to-markdown: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
@@ -5775,7 +5788,7 @@ snapshots:
       unist-util-visit: 5.1.0
       vfile: 6.0.3
 
-  mdast-util-to-markdown@2.1.3:
+  mdast-util-to-markdown@2.2.0:
     dependencies:
       '@types/mdast': 4.0.4
       '@types/unist': 3.0.3
@@ -6021,6 +6034,8 @@ snapshots:
 
   nanoid@3.3.19: {}
 
+  nanoid@3.3.20: {}
+
   napi-postinstall@0.3.4: {}
 
   natural-compare@1.4.0: {}
@@ -6137,21 +6152,21 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  pactor-app@1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)):
+  pactor-app@1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1)):
     dependencies:
-      '@pactor-app/app': 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/chat': 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/cli': 1.26.0
-      '@pactor-app/core': 1.26.0
-      '@pactor-app/expression': 1.26.0
-      '@pactor-app/markdown': 1.26.0(@types/react@19.3.0)(react@19.2.8)
-      '@pactor-app/permission': 1.26.0
-      '@pactor-app/resource': 1.26.0
-      '@pactor-app/router': 1.26.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/runtime': 1.26.0(react@19.2.8)
-      '@pactor-app/schema': 1.26.0
-      '@pactor-app/ui': 1.26.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
-      '@pactor-app/vite-plugin': 1.26.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
+      '@pactor-app/app': 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/chat': 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/cli': 1.34.0
+      '@pactor-app/core': 1.34.0
+      '@pactor-app/expression': 1.34.0
+      '@pactor-app/markdown': 1.34.0(@types/react@19.3.0)(react@19.2.8)
+      '@pactor-app/permission': 1.34.0
+      '@pactor-app/resource': 1.34.0
+      '@pactor-app/router': 1.34.0(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/runtime': 1.34.0(react@19.2.8)
+      '@pactor-app/schema': 1.34.0
+      '@pactor-app/ui': 1.34.0(@date-fns/tz@1.5.0)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.2.8(react@19.2.8))(react-router-dom@7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8))(react@19.2.8)
+      '@pactor-app/vite-plugin': 1.34.0(vite@8.3.1(@types/node@20.19.43)(jiti@2.7.0)(yaml@2.9.1))
       react: 19.2.8
       react-dom: 19.2.8(react@19.2.8)
       react-router-dom: 7.18.4(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -6207,6 +6222,12 @@ snapshots:
       nanoid: 3.3.19
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postcss@8.5.29:
+    dependencies:
+      nanoid: 3.3.20
+      picocolors: 1.1.1
+      source-map-js: 1.2.2
 
   prelude-ls@1.2.1: {}
 
@@ -6381,7 +6402,7 @@ snapshots:
   remark-parse@11.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-from-markdown: 2.0.3
+      mdast-util-from-markdown: 2.1.0
       micromark-util-types: 2.0.3
       unified: 11.0.5
     transitivePeerDependencies:
@@ -6398,7 +6419,7 @@ snapshots:
   remark-stringify@11.0.0:
     dependencies:
       '@types/mdast': 4.0.4
-      mdast-util-to-markdown: 2.1.3
+      mdast-util-to-markdown: 2.2.0
       unified: 11.0.5
 
   require-directory@2.1.1: {}
@@ -6424,26 +6445,26 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rolldown@1.2.11:
+  rolldown@1.2.12:
     dependencies:
-      '@oxc-project/types': 0.151.0
+      '@oxc-project/types': 0.152.0
       '@rolldown/pluginutils': 1.0.1
     optionalDependencies:
-      '@rolldown/binding-android-arm-eabi': 1.2.11
-      '@rolldown/binding-android-arm64': 1.2.11
-      '@rolldown/binding-darwin-arm64': 1.2.11
-      '@rolldown/binding-darwin-x64': 1.2.11
-      '@rolldown/binding-freebsd-x64': 1.2.11
-      '@rolldown/binding-linux-arm-gnueabihf': 1.2.11
-      '@rolldown/binding-linux-arm64-gnu': 1.2.11
-      '@rolldown/binding-linux-arm64-musl': 1.2.11
-      '@rolldown/binding-linux-ppc64-gnu': 1.2.11
-      '@rolldown/binding-linux-s390x-gnu': 1.2.11
-      '@rolldown/binding-linux-x64-gnu': 1.2.11
-      '@rolldown/binding-linux-x64-musl': 1.2.11
-      '@rolldown/binding-openharmony-arm64': 1.2.11
-      '@rolldown/binding-win32-arm64-msvc': 1.2.11
-      '@rolldown/binding-win32-x64-msvc': 1.2.11
+      '@rolldown/binding-android-arm-eabi': 1.2.12
+      '@rolldown/binding-android-arm64': 1.2.12
+      '@rolldown/binding-darwin-arm64': 1.2.12
+      '@rolldown/binding-darwin-x64': 1.2.12
+      '@rolldown/binding-freebsd-x64': 1.2.12
+      '@rolldown/binding-linux-arm-gnueabihf': 1.2.12
+      '@rolldown/binding-linux-arm64-gnu': 1.2.12
+      '@rolldown/binding-linux-arm64-musl': 1.2.12
+      '@rolldown/binding-linux-ppc64-gnu': 1.2.12
+      '@rolldown/binding-linux-s390x-gnu': 1.2.12
+      '@rolldown/binding-linux-x64-gnu': 1.2.12
+      '@rolldown/binding-linux-x64-musl': 1.2.12
+      '@rolldown/binding-openharmony-arm64': 1.2.12
+      '@rolldown/binding-win32-arm64-msvc': 1.2.12
+      '@rolldown/binding-win32-x64-msvc': 1.2.12
 
   run-parallel@1.2.0:
     dependencies:
@@ -6569,6 +6590,8 @@ snapshots:
       side-channel-weakmap: 1.0.2
 
   source-map-js@1.2.1: {}
+
+  source-map-js@1.2.2: {}
 
   space-separated-tokens@2.0.2: {}
 
@@ -6895,8 +6918,8 @@ snapshots:
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.7
-      postcss: 8.5.28
-      rolldown: 1.2.11
+      postcss: 8.5.29
+      rolldown: 1.2.12
       tinyglobby: 0.2.17
     optionalDependencies:
       '@types/node': 20.19.43

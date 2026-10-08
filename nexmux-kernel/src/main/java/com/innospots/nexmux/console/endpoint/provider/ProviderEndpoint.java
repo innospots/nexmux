@@ -1,14 +1,16 @@
 package com.innospots.nexmux.console.endpoint.provider;
 
-import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.provider.ProviderOption;
+import com.innospots.nexmux.console.provider.ProviderListResult;
+import com.innospots.nexmux.console.provider.ProviderRecord;
+import com.innospots.nexmux.console.provider.ProviderViewAssembler;
+import com.innospots.nexmux.console.provider.PullModelRow;
 import com.innospots.nexmux.core.provider.domain.request.ProviderCreateRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderUpdateRequest;
 import com.innospots.nexmux.core.provider.domain.vo.ConnectionTestVo;
-import com.innospots.nexmux.core.provider.domain.vo.ProviderDetailVo;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
-import com.innospots.nexmux.core.provider.domain.vo.UpstreamModelVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
@@ -38,43 +40,60 @@ import lombok.RequiredArgsConstructor;
 public class ProviderEndpoint {
 
     private final ProviderService providerService;
+    private final ProviderViewAssembler providerViewAssembler;
 
+    /**
+     * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
+     * UI 快筛 status 跨两维：enabled/disabled → 启停状态；pending/none → 密钥状态。
+     */
     @GET
     @Operation(operationId = "nexmuxProviderPage", summary = "分页查询提供方")
-    public R<PageResult<ProviderVo>> page(
+    public ProviderListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
+            @QueryParam("page") @DefaultValue("1") Long page,
             @Parameter(description = "每页条数", example = "20")
             @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
             @Parameter(description = "关键字（名称 / 编码 / baseUrl 模糊）")
             @QueryParam("keyword") String keyword,
-            @Parameter(description = "启停状态（ENABLED / DISABLED）")
-            @QueryParam("status") String status,
-            @Parameter(description = "密钥状态（pending / none）")
-            @QueryParam("keyStatus") String keyStatus,
+            @Parameter(description = "快筛（all / enabled / disabled / pending / none）")
+            @QueryParam("status") @DefaultValue("all") String status,
             @Parameter(description = "厂商编码，逗号分隔")
             @QueryParam("types") String types) {
         List<String> typeList = types == null || types.isBlank()
                 ? List.of()
                 : Arrays.stream(types.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        return R.ok(providerService.page(
-                new ProviderPageRequest(pageNo, pageSize, keyword, status, keyStatus, typeList)));
+        String backendStatus = switch (status) {
+            case "enabled" -> "ENABLED";
+            case "disabled" -> "DISABLED";
+            default -> null;
+        };
+        String keyStatus = "pending".equals(status) || "none".equals(status) ? status : null;
+        return providerViewAssembler.assemble(
+                new ProviderPageRequest(page, pageSize, keyword, backendStatus, keyStatus, typeList));
     }
 
+    /**
+     * 按稳定业务键查询详情（UI 契约：展示记录直出，不包 R）。
+     */
     @GET
-    @Path("/by-code/{providerCode}")
+    @Path("/{providerCode}")
     @Operation(operationId = "nexmuxProviderGetByCode", summary = "按编码查询提供方详情")
-    public R<ProviderDetailVo> getByCode(
-            @Parameter(description = "提供方编码", required = true) @PathParam("providerCode") String providerCode) {
-        return R.ok(providerService.getByCode(providerCode));
+    public ProviderRecord detail(
+            @Parameter(description = "提供方编码", required = true)
+            @PathParam("providerCode") String providerCode) {
+        return providerViewAssembler.detail(providerCode);
     }
 
+    /**
+     * 拉取上游模型清单（UI 契约：行数组直出；code → providerId 由装配层解析）。
+     */
     @GET
-    @Path("/{providerId}")
-    @Operation(operationId = "nexmuxProviderGet", summary = "查询提供方详情")
-    public R<ProviderVo> get(
-            @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
-        return R.ok(providerService.get(providerId));
+    @Path("/{providerCode}/pull-models")
+    @Operation(operationId = "nexmuxProviderPullModels", summary = "拉取上游模型清单")
+    public List<PullModelRow> pullModels(
+            @Parameter(description = "提供方编码", required = true)
+            @PathParam("providerCode") String providerCode) {
+        return providerViewAssembler.pullModels(providerCode);
     }
 
     @POST
@@ -106,14 +125,6 @@ public class ProviderEndpoint {
     public R<ProviderVo> disable(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
         return R.ok(providerService.disable(providerId));
-    }
-
-    @POST
-    @Path("/{providerId}/pull-models")
-    @Operation(operationId = "nexmuxProviderPullModels", summary = "拉取上游模型清单")
-    public R<List<UpstreamModelVo>> pullModels(
-            @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
-        return R.ok(providerService.pullModels(providerId));
     }
 
     @POST

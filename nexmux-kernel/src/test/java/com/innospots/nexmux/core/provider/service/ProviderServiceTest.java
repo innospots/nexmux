@@ -133,6 +133,33 @@ class ProviderServiceTest {
         Mockito.verify(providerDao).updateById(entity);
     }
 
+    // ── delete ──────────────────────────────────────────────
+
+    @Test
+    void deleteRemovesCredentialAndProvider() {
+        ProviderEntity entity = provider("pv-1", "dashscope");
+        when(providerDao.selectById("pv-1")).thenReturn(entity);
+        when(modelDao.selectCount(any())).thenReturn(0L);
+        ProviderCredentialEntity credential = credential("pv-1", "cipher");
+        when(providerCredentialDao.selectOne(any())).thenReturn(credential);
+
+        providerService.delete("pv-1");
+
+        Mockito.verify(providerCredentialDao).deleteById(credential);
+        Mockito.verify(providerDao).deleteById(entity);
+    }
+
+    @Test
+    void deleteRejectsWhenModelsReference() {
+        when(providerDao.selectById("pv-1")).thenReturn(provider("pv-1", "dashscope"));
+        when(modelDao.selectCount(any())).thenReturn(3L);
+
+        assertThatThrownBy(() -> providerService.delete("pv-1"))
+                .isInstanceOf(NexusException.class)
+                .hasMessageContaining("3");
+        Mockito.verify(providerDao, Mockito.never()).deleteById(any(ProviderEntity.class));
+    }
+
     // ── pullModels ────────────────────────────────────────────
 
     @Test

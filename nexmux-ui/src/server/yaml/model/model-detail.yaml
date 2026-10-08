@@ -279,7 +279,7 @@ body:
                         onClick:
                           - action: navigate
                             params:
-                              to: /routes
+                              to: /routes?model=${route.params.code}
                     - type: DropdownMenu
                       props:
                         items:

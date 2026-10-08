@@ -52,6 +52,17 @@ public class ClientService {
         return PageResult.of(records, pageNo, pageSize, matched.size());
     }
 
+    /**
+     * 全量查询（Console 列表页构成口径与关联统计用；P0 数据量小，不分页）。
+     */
+    public List<ClientVo> listAll() {
+        return clientDao.selectList(new LambdaQueryWrapper<ClientEntity>()
+                        .orderByAsc(ClientEntity::getCreatedAt))
+                .stream()
+                .map(this::toVo)
+                .toList();
+    }
+
     public ClientVo get(String clientId) {
         return toVo(require(clientId));
     }

@@ -162,10 +162,30 @@ body:
                             params:
                               condition: ${actions.statusCfm.ok}
                               then:
-                                - action: message
+                                - id: toggleResult
+                                  action: request
                                   params:
-                                    messageType: success
-                                    text: 状态已切换（演示）
+                                    method: POST
+                                    url: "${data.detail.status == 'enabled' ? '/api/d/ops/route-disable' : data.detail.status == 'draft' ? '/api/d/ops/route-publish' : '/api/d/ops/route-enable'}?code=${route.params.code}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult == null || actions.toggleResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: 操作失败
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult != null && actions.toggleResult.ok != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${data.detail.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
                     - type: Button
                       props:
                         text: 模拟调用

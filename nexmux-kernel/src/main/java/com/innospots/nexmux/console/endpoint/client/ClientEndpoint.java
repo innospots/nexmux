@@ -1,13 +1,14 @@
 package com.innospots.nexmux.console.endpoint.client;
 
-import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.access.ClientListResult;
+import com.innospots.nexmux.console.access.ClientRecord;
+import com.innospots.nexmux.console.access.ClientViewAssembler;
 import com.innospots.nexmux.core.access.domain.request.ClientCreateRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientPageRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientRouteGrantsRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientUpdateRequest;
 import com.innospots.nexmux.core.access.domain.vo.ClientCreateResultVo;
-import com.innospots.nexmux.core.access.domain.vo.ClientDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientRotateResultVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -39,16 +40,21 @@ import lombok.RequiredArgsConstructor;
 public class ClientEndpoint {
 
     private final ClientService clientService;
+    private final ClientViewAssembler clientViewAssembler;
 
+    /**
+     * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
+     * expired 为展示态：enabled/expired 快筛映射 ENABLED 后由装配层本地过滤。
+     */
     @GET
     @Operation(operationId = "nexmuxClientPage", summary = "分页查询客户端")
-    public R<PageResult<ClientVo>> page(
+    public ClientListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
+            @QueryParam("page") @DefaultValue("1") Long page,
             @Parameter(description = "每页条数", example = "20")
             @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
-            @Parameter(description = "状态（ENABLED / DISABLED）")
-            @QueryParam("status") String status,
+            @Parameter(description = "快筛（all / enabled / disabled / expired）")
+            @QueryParam("status") @DefaultValue("all") String status,
             @Parameter(description = "名称模糊")
             @QueryParam("name") String name,
             @Parameter(description = "编码模糊")
@@ -58,24 +64,24 @@ public class ClientEndpoint {
         List<String> tagList = tags == null || tags.isBlank()
                 ? List.of()
                 : Arrays.stream(tags.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        return R.ok(clientService.page(
-                new ClientPageRequest(pageNo, pageSize, status, name, code, tagList)));
+        String backendStatus = switch (status) {
+            case "enabled", "expired" -> "ENABLED";
+            case "disabled" -> "DISABLED";
+            default -> null;
+        };
+        return clientViewAssembler.assemble(
+                new ClientPageRequest(page, pageSize, backendStatus, name, code, tagList), status);
     }
 
+    /**
+     * 按稳定业务键查询详情（UI 契约：展示记录直出，不包 R）。
+     */
     @GET
-    @Path("/by-code/{clientCode}")
+    @Path("/{clientCode}")
     @Operation(operationId = "nexmuxClientGetByCode", summary = "按编码查询客户端详情")
-    public R<ClientDetailVo> getByCode(
+    public ClientRecord detail(
             @Parameter(description = "客户端编码", required = true) @PathParam("clientCode") String clientCode) {
-        return R.ok(clientService.getByCode(clientCode));
-    }
-
-    @GET
-    @Path("/{clientId}")
-    @Operation(operationId = "nexmuxClientGet", summary = "查询客户端详情")
-    public R<ClientVo> get(
-            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
-        return R.ok(clientService.get(clientId));
+        return clientViewAssembler.detail(clientCode);
     }
 
     @POST

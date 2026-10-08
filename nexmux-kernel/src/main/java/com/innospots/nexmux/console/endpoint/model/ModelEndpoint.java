@@ -1,11 +1,12 @@
 package com.innospots.nexmux.console.endpoint.model;
 
-import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.model.ModelListResult;
+import com.innospots.nexmux.console.model.ModelRecord;
+import com.innospots.nexmux.console.model.ModelViewAssembler;
 import com.innospots.nexmux.core.model.domain.request.ModelCreateRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelPageRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelUpdateRequest;
-import com.innospots.nexmux.core.model.domain.vo.ModelDetailVo;
 import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -36,39 +37,39 @@ import lombok.RequiredArgsConstructor;
 public class ModelEndpoint {
 
     private final ModelService modelService;
+    private final ModelViewAssembler modelViewAssembler;
 
+    /**
+     * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
+     */
     @GET
     @Operation(operationId = "nexmuxModelPage", summary = "分页查询模型")
-    public R<PageResult<ModelVo>> page(
+    public ModelListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
+            @QueryParam("page") @DefaultValue("1") Long page,
             @Parameter(description = "每页条数", example = "20")
             @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
-            @Parameter(description = "模型类型（LLM / Embedding / Image / Audio）")
-            @QueryParam("type") String type,
-            @Parameter(description = "厂商编码，逗号分隔")
+            @Parameter(description = "模型类型（all / LLM / Embedding / Image / Audio）")
+            @QueryParam("type") @DefaultValue("all") String type,
+            @Parameter(description = "提供方编码，逗号分隔")
             @QueryParam("providers") String providers) {
         List<String> providerList = providers == null || providers.isBlank()
                 ? List.of()
                 : Arrays.stream(providers.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        return R.ok(modelService.page(new ModelPageRequest(pageNo, pageSize, type, providerList)));
+        return modelViewAssembler.assemble(new ModelPageRequest(
+                page, pageSize, "all".equals(type) ? null : type, providerList));
     }
 
+    /**
+     * 按稳定业务键查询详情（UI 契约：展示记录直出，不包 R；~ 还原为 /）。
+     */
     @GET
-    @Path("/by-code/{modelCode: .+}")
+    @Path("/{modelCode}")
     @Operation(operationId = "nexmuxModelGetByCode", summary = "按编码查询模型详情")
-    public R<ModelDetailVo> getByCode(
-            @Parameter(description = "模型编码（可含 /，如 openai/o4-mini）", required = true)
+    public ModelRecord detail(
+            @Parameter(description = "模型编码（/ 以 ~ 替代）", required = true)
             @PathParam("modelCode") String modelCode) {
-        return R.ok(modelService.getByCode(modelCode));
-    }
-
-    @GET
-    @Path("/{modelId}")
-    @Operation(operationId = "nexmuxModelGet", summary = "查询模型详情")
-    public R<ModelVo> get(
-            @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
-        return R.ok(modelService.get(modelId));
+        return modelViewAssembler.detail(modelCode);
     }
 
     @POST

@@ -24,19 +24,25 @@ class ModelEndpointContractTest {
     }
 
     @Test
-    void pageAcceptsFilters() throws Exception {
+    void pageReturnsUiListContract() throws Exception {
+        // /api/d 列表契约：{items,total,filters} 直出，不包 R（nexmux-ui-missing-api 对接约定）
         Method page = ModelEndpoint.class.getMethod(
                 "page", Long.class, Long.class, String.class, String.class);
         assertThat(page.getAnnotation(GET.class)).isNotNull();
         assertThat(page.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxModelPage");
+        assertThat(page.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.model.ModelListResult.class);
     }
 
     @Test
-    void declaresGetByCode() throws Exception {
-        Method get = ModelEndpoint.class.getMethod("getByCode", String.class);
-        assertThat(get.getAnnotation(GET.class)).isNotNull();
-        assertThat(get.getAnnotation(Path.class).value()).isEqualTo("/by-code/{modelCode: .+}");
-        assertThat(get.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxModelGetByCode");
+    void declaresDetailByCode() throws Exception {
+        // UI 契约：详情按稳定业务键直出展示记录（/api/d/models/{code}，~ 替代 /）
+        Method detail = ModelEndpoint.class.getMethod("detail", String.class);
+        assertThat(detail.getAnnotation(GET.class)).isNotNull();
+        assertThat(detail.getAnnotation(Path.class).value()).isEqualTo("/{modelCode}");
+        assertThat(detail.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxModelGetByCode");
+        assertThat(detail.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.model.ModelRecord.class);
     }
 
     @Test
@@ -55,11 +61,4 @@ class ModelEndpointContractTest {
         assertThat(disable.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxModelDisable");
     }
 
-    @Test
-    void getByCodeWrapsDetailVo() throws Exception {
-        Method get = ModelEndpoint.class.getMethod("getByCode", String.class);
-        ParameterizedType returnType = (ParameterizedType) get.getGenericReturnType();
-        assertThat(returnType.getActualTypeArguments()[0])
-                .isEqualTo(com.innospots.nexmux.core.model.domain.vo.ModelDetailVo.class);
-    }
 }

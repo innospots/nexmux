@@ -51,6 +51,17 @@ public class ClientTemplateService {
         return PageResult.of(records, pageNo, pageSize, matched.size());
     }
 
+    /**
+     * 全量查询（Console 列表页构成口径与关联统计用；P0 数据量小，不分页）。
+     */
+    public List<ClientTemplateVo> listAll() {
+        return clientTemplateDao.selectList(new LambdaQueryWrapper<ClientTemplateEntity>()
+                        .orderByAsc(ClientTemplateEntity::getCreatedAt))
+                .stream()
+                .map(this::toVo)
+                .toList();
+    }
+
     public ClientTemplateDetailVo getByCode(String templateCode) {
         ClientTemplateEntity entity = clientTemplateDao.selectOne(
                 new LambdaQueryWrapper<ClientTemplateEntity>()

@@ -31,10 +31,15 @@ class ClientTemplateEndpointContractTest {
                 "page", Long.class, Long.class, String.class, String.class, String.class);
         assertThat(page.getAnnotation(GET.class)).isNotNull();
         assertThat(page.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientTemplatePage");
+        assertThat(page.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.access.ClientTemplateListResult.class);
 
-        Method get = ClientTemplateEndpoint.class.getMethod("getByCode", String.class);
-        assertThat(get.getAnnotation(Path.class).value()).isEqualTo("/by-code/{templateCode}");
-        assertThat(get.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientTemplateGetByCode");
+        // UI 契约：详情按稳定业务键直出展示记录（/api/d/client-templates/{code}）
+        Method detail = ClientTemplateEndpoint.class.getMethod("detail", String.class);
+        assertThat(detail.getAnnotation(Path.class).value()).isEqualTo("/{templateCode}");
+        assertThat(detail.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientTemplateGetByCode");
+        assertThat(detail.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.access.ClientTemplateRecord.class);
 
         Method create = ClientTemplateEndpoint.class.getMethod("create", ClientTemplateCreateRequest.class);
         assertThat(create.getAnnotation(POST.class)).isNotNull();
@@ -52,7 +57,7 @@ class ClientTemplateEndpointContractTest {
 
         Method createdClients = ClientTemplateEndpoint.class.getMethod("createdClients", String.class);
         assertThat(createdClients.getAnnotation(GET.class)).isNotNull();
-        assertThat(createdClients.getAnnotation(Path.class).value()).isEqualTo("/{templateId}/created-clients");
+        assertThat(createdClients.getAnnotation(Path.class).value()).isEqualTo("/{templateCode}/created-clients");
         assertThat(createdClients.getAnnotation(Operation.class).operationId())
                 .isEqualTo("nexmuxClientTemplateCreatedClients");
     }

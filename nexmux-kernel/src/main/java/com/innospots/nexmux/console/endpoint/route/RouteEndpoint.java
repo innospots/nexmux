@@ -1,12 +1,13 @@
 package com.innospots.nexmux.console.endpoint.route;
 
-import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.route.RouteListResult;
+import com.innospots.nexmux.console.route.RouteRecord;
+import com.innospots.nexmux.console.route.RouteViewAssembler;
 import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePageRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePublishRequest;
 import com.innospots.nexmux.core.route.domain.request.RouteUpdateRequest;
-import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -37,40 +38,50 @@ import lombok.RequiredArgsConstructor;
 public class RouteEndpoint {
 
     private final RouteService routeService;
+    private final RouteViewAssembler routeViewAssembler;
 
+    /**
+     * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
+     * UI 快筛 status 映射：enabled→PUBLISHED、disabled→DISABLED、draft→DRAFT。
+     */
     @GET
     @Operation(operationId = "nexmuxRoutePage", summary = "分页查询路由")
-    public R<PageResult<RouteVo>> page(
+    public RouteListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
+            @QueryParam("page") @DefaultValue("1") Long page,
             @Parameter(description = "每页条数", example = "20")
             @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
-            @Parameter(description = "状态（PUBLISHED / DISABLED / DRAFT）")
-            @QueryParam("status") String status,
-            @Parameter(description = "类型（single / pool）")
-            @QueryParam("type") String type,
+            @Parameter(description = "快筛（all / enabled / disabled / draft）")
+            @QueryParam("status") @DefaultValue("all") String status,
+            @Parameter(description = "类型（all / single / pool / conditional）")
+            @QueryParam("type") @DefaultValue("all") String type,
             @Parameter(description = "标签，逗号分隔（取交集）")
-            @QueryParam("tags") String tags) {
+            @QueryParam("tags") String tags,
+            @Parameter(description = "模型编码（UI 形式，~ 即 /；命中任一候选即匹配）")
+            @QueryParam("model") String model) {
         List<String> tagList = tags == null || tags.isBlank()
                 ? List.of()
                 : Arrays.stream(tags.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
-        return R.ok(routeService.page(new RoutePageRequest(pageNo, pageSize, status, type, tagList)));
+        String backendStatus = switch (status) {
+            case "enabled" -> "PUBLISHED";
+            case "disabled" -> "DISABLED";
+            case "draft" -> "DRAFT";
+            default -> null;
+        };
+        String backendModel = model == null || model.isBlank() ? null : model.replace("~", "/");
+        return routeViewAssembler.assemble(new RoutePageRequest(
+                page, pageSize, backendStatus, "all".equals(type) ? null : type, tagList, backendModel));
     }
 
+    /**
+     * 按稳定业务键查询详情（UI 契约：展示记录直出，不包 R）。
+     */
     @GET
-    @Path("/by-code/{routeCode}")
+    @Path("/{routeCode}")
     @Operation(operationId = "nexmuxRouteGetByCode", summary = "按编码查询路由详情")
-    public R<RouteDetailVo> getByCode(
+    public RouteRecord detail(
             @Parameter(description = "路由编码", required = true) @PathParam("routeCode") String routeCode) {
-        return R.ok(routeService.getByCode(routeCode));
-    }
-
-    @GET
-    @Path("/{routeId}")
-    @Operation(operationId = "nexmuxRouteGet", summary = "查询路由详情")
-    public R<RouteVo> get(
-            @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId) {
-        return R.ok(routeService.get(routeId));
+        return routeViewAssembler.detail(routeCode);
     }
 
     @POST

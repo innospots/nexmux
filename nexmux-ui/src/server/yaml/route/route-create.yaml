@@ -33,20 +33,38 @@ body:
       props:
         layout: vertical
         initialValues:
-          type: pool
+          routeType: pool
           protocol: OpenAI / Chat Completions
           operation: chat.completions
           strategy: WEIGHTED
           healthFilter: on
       events:
         onSubmit:
-          - action: message
+          - id: createResult
+            action: request
             params:
-              messageType: success
-              text: 路由「${event.name}」已创建并启用（演示）
-          - action: navigate
+              method: POST
+              url: /api/d/ops/route-create
+              body: ${event}
+          - action: if
             params:
-              to: /routes
+              condition: ${actions.createResult == null || actions.createResult.ok == false}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: "${actions.createResult != null && actions.createResult.error != null ? actions.createResult.error.message : '创建失败'}"
+          - action: if
+            params:
+              condition: ${actions.createResult != null && actions.createResult.ok != false}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 路由「${event.name}」已创建
+                - action: navigate
+                  params:
+                    to: /routes
       children:
         - type: Flex
           props:
@@ -97,7 +115,7 @@ body:
                       children:
                         - type: RadioGroup
                           props:
-                            name: type
+                            name: routeType
                             direction: horizontal
                             options:
                               - label: 单模型

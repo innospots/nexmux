@@ -5,9 +5,19 @@ import com.innospots.nexmux.console.endpoint.client.ClientTemplateEndpoint;
 import com.innospots.nexmux.console.endpoint.debug.DebugEndpoint;
 import com.innospots.nexmux.console.endpoint.model.ModelEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsEndpoint;
+import com.innospots.nexmux.console.endpoint.ops.OpsWriteEndpoint;
 import com.innospots.nexmux.console.endpoint.provider.ProviderEndpoint;
+import com.innospots.nexmux.console.endpoint.provider.ProviderOptionsEndpoint;
 import com.innospots.nexmux.console.endpoint.route.RouteEndpoint;
 import com.innospots.nexmux.console.endpoint.stats.StatsEndpoint;
+import com.innospots.nexmux.console.access.ClientTemplateViewAssembler;
+import com.innospots.nexmux.console.access.ClientViewAssembler;
+import com.innospots.nexmux.console.ops.CallLogViewAssembler;
+import com.innospots.nexmux.console.ops.CostViewAssembler;
+import com.innospots.nexmux.console.model.ModelViewAssembler;
+import com.innospots.nexmux.console.stats.StatsViewAssembler;
+import com.innospots.nexmux.console.route.RouteViewAssembler;
+import com.innospots.nexmux.console.provider.ProviderViewAssembler;
 import com.innospots.nexmux.console.sitemap.endpoint.NexmuxSitemapEndpoint;
 import com.innospots.nexmux.console.sitemap.service.NexmuxSitemapService;
 import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
@@ -128,42 +138,105 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
-    @Lazy
-    ProviderEndpoint providerEndpoint(ProviderService providerService) {
-        return new ProviderEndpoint(providerService);
+    ProviderViewAssembler providerViewAssembler(
+            ProviderService providerService, ModelService modelService, RouteService routeService) {
+        return new ProviderViewAssembler(providerService, modelService, routeService);
+    }
+
+    @Bean
+    ModelViewAssembler modelViewAssembler(
+            ModelService modelService, ProviderService providerService, RouteService routeService) {
+        return new ModelViewAssembler(modelService, providerService, routeService);
     }
 
     @Bean
     @Lazy
-    ModelEndpoint modelEndpoint(ModelService modelService) {
-        return new ModelEndpoint(modelService);
+    ProviderEndpoint providerEndpoint(
+            ProviderService providerService, ProviderViewAssembler providerViewAssembler) {
+        return new ProviderEndpoint(providerService, providerViewAssembler);
     }
 
     @Bean
     @Lazy
-    RouteEndpoint routeEndpoint(RouteService routeService) {
-        return new RouteEndpoint(routeService);
+    ProviderOptionsEndpoint providerOptionsEndpoint(ProviderViewAssembler providerViewAssembler) {
+        return new ProviderOptionsEndpoint(providerViewAssembler);
     }
 
     @Bean
     @Lazy
-    ClientEndpoint clientEndpoint(ClientService clientService) {
-        return new ClientEndpoint(clientService);
+    ModelEndpoint modelEndpoint(ModelService modelService, ModelViewAssembler modelViewAssembler) {
+        return new ModelEndpoint(modelService, modelViewAssembler);
+    }
+
+    @Bean
+    RouteViewAssembler routeViewAssembler(RouteService routeService, ModelService modelService) {
+        return new RouteViewAssembler(routeService, modelService);
     }
 
     @Bean
     @Lazy
-    ClientTemplateEndpoint clientTemplateEndpoint(ClientTemplateService clientTemplateService) {
-        return new ClientTemplateEndpoint(clientTemplateService);
+    RouteEndpoint routeEndpoint(RouteService routeService, RouteViewAssembler routeViewAssembler) {
+        return new RouteEndpoint(routeService, routeViewAssembler);
+    }
+
+    @Bean
+    ClientViewAssembler clientViewAssembler(
+            ClientService clientService, RouteService routeService,
+            ClientTemplateService clientTemplateService) {
+        return new ClientViewAssembler(clientService, routeService, clientTemplateService);
+    }
+
+    @Bean
+    ClientTemplateViewAssembler clientTemplateViewAssembler(
+            ClientTemplateService clientTemplateService, RouteService routeService,
+            ClientViewAssembler clientViewAssembler) {
+        return new ClientTemplateViewAssembler(
+                clientTemplateService, routeService, clientViewAssembler);
+    }
+
+    @Bean
+    @Lazy
+    ClientEndpoint clientEndpoint(ClientService clientService, ClientViewAssembler clientViewAssembler) {
+        return new ClientEndpoint(clientService, clientViewAssembler);
+    }
+
+    @Bean
+    @Lazy
+    ClientTemplateEndpoint clientTemplateEndpoint(
+            ClientTemplateService clientTemplateService,
+            ClientTemplateViewAssembler clientTemplateViewAssembler) {
+        return new ClientTemplateEndpoint(clientTemplateService, clientTemplateViewAssembler);
+    }
+
+    @Bean
+    CallLogViewAssembler callLogViewAssembler(
+            RequestLogQueryService requestLogQueryService, ClientService clientService,
+            RouteService routeService, ModelService modelService, ProviderService providerService) {
+        return new CallLogViewAssembler(
+                requestLogQueryService, clientService, routeService, modelService, providerService);
+    }
+
+    @Bean
+    CostViewAssembler costViewAssembler(
+            CostQueryService costQueryService, ClientService clientService,
+            ModelService modelService, ProviderService providerService) {
+        return new CostViewAssembler(costQueryService, clientService, modelService, providerService);
     }
 
     @Bean
     @Lazy
     OpsEndpoint opsEndpoint(
-            RequestLogQueryService requestLogQueryService,
             AuditQueryService auditQueryService,
-            CostQueryService costQueryService) {
-        return new OpsEndpoint(requestLogQueryService, auditQueryService, costQueryService);
+            CallLogViewAssembler callLogViewAssembler,
+            CostViewAssembler costViewAssembler) {
+        return new OpsEndpoint(auditQueryService, callLogViewAssembler, costViewAssembler);
+    }
+
+    @Bean
+    @Lazy
+    OpsWriteEndpoint opsWriteEndpoint(
+            ProviderService providerService, ModelService modelService, RouteService routeService) {
+        return new OpsWriteEndpoint(providerService, modelService, routeService);
     }
 
     @Bean
@@ -173,12 +246,18 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
+    StatsViewAssembler statsViewAssembler(
+            DashboardService dashboardService, UsageStatsService usageStatsService,
+            AvailabilityService availabilityService, ModelService modelService,
+            ProviderService providerService, ClientService clientService, RouteService routeService) {
+        return new StatsViewAssembler(dashboardService, usageStatsService, availabilityService,
+                modelService, providerService, clientService, routeService);
+    }
+
+    @Bean
     @Lazy
-    StatsEndpoint statsEndpoint(
-            DashboardService dashboardService,
-            UsageStatsService usageStatsService,
-            AvailabilityService availabilityService) {
-        return new StatsEndpoint(dashboardService, usageStatsService, availabilityService);
+    StatsEndpoint statsEndpoint(StatsViewAssembler statsViewAssembler) {
+        return new StatsEndpoint(statsViewAssembler);
     }
 
     @Bean

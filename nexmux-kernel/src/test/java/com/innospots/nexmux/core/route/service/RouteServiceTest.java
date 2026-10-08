@@ -45,6 +45,28 @@ class RouteServiceTest {
         return entity;
     }
 
+    @Test
+    void deleteRemovesRouteAfterAudit() {
+        RouteEntity entity = route("r-1", "general", "DRAFT", specJson("general", 1));
+        when(routeDao.selectById("r-1")).thenReturn(entity);
+
+        routeService.delete("r-1");
+
+        Mockito.verify(configAuditService).record(
+                Mockito.eq("ROUTE"), Mockito.eq("r-1"), Mockito.eq("DELETE"),
+                any(), any());
+        Mockito.verify(routeDao).deleteById(entity);
+    }
+
+    @Test
+    void deleteThrowsNotFoundWhenMissing() {
+        when(routeDao.selectById("r-9")).thenReturn(null);
+
+        assertThatThrownBy(() -> routeService.delete("r-9"))
+                .isInstanceOf(NexusException.class);
+        Mockito.verify(routeDao, Mockito.never()).deleteById(any(RouteEntity.class));
+    }
+
     private static String specJson(String alias, int candidates) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < candidates; i++) {
@@ -140,6 +162,10 @@ class RouteServiceTest {
 
         assertThat(entity.getStatus()).isEqualTo("PUBLISHED");
         assertThat(vo.status()).isEqualTo("PUBLISHED");
+        // 与 DISABLE / PUBLISH 对称：ENABLE 也落审计
+        Mockito.verify(configAuditService).record(
+                Mockito.eq("ROUTE"), Mockito.eq("rt-1"), Mockito.eq("ENABLE"),
+                any(), any());
     }
 
     @Test
@@ -172,12 +198,46 @@ class RouteServiceTest {
         RouteEntity pool = route("rt-2", "pool-route", "PUBLISHED", specJson("b", 2));
         when(routeDao.selectList(any())).thenReturn(List.of(single, pool));
 
-        var poolResult = routeService.page(new RoutePageRequest(1L, 20L, null, "pool", null));
+        var poolResult = routeService.page(new RoutePageRequest(1L, 20L, null, "pool", null, null));
         assertThat(poolResult.records()).hasSize(1);
         assertThat(poolResult.total()).isEqualTo(1);
 
-        var tagMiss = routeService.page(new RoutePageRequest(1L, 20L, null, null, List.of("vision")));
+        var tagMiss = routeService.page(new RoutePageRequest(1L, 20L, null, null, List.of("vision"), null));
         assertThat(tagMiss.records()).isEmpty();
         assertThat(tagMiss.total()).isZero();
+    }
+
+    @Test
+    void pageFiltersByModelCandidate() {
+        RouteEntity hit = route("rt-1", "hit-route", "PUBLISHED",
+                specJsonWithModels("a", "zai/glm-5.3-highspeed"));
+        RouteEntity miss = route("rt-2", "miss-route", "PUBLISHED",
+                specJsonWithModels("b", "openai/gpt-5"));
+        when(routeDao.selectList(any())).thenReturn(List.of(hit, miss));
+
+        var result = routeService.page(
+                new RoutePageRequest(1L, 20L, null, null, null, "zai/glm-5.3-highspeed"));
+        assertThat(result.records()).hasSize(1);
+        assertThat(result.total()).isEqualTo(1);
+
+        var noMatch = routeService.page(
+                new RoutePageRequest(1L, 20L, null, null, null, "anthropic/claude-4"));
+        assertThat(noMatch.records()).isEmpty();
+        assertThat(noMatch.total()).isZero();
+    }
+
+    private static String specJsonWithModels(String alias, String... modelCodes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < modelCodes.length; i++) {
+            if (i > 0) {
+                sb.append(",");
+            }
+            sb.append("{\"modelCode\":\"").append(modelCodes[i])
+                    .append("\",\"weight\":").append(100 / Math.max(modelCodes.length, 1)).append("}");
+        }
+        return "{\"alias\":\"" + alias + "\",\"ingress\":\"/v1/chat/completions\","
+                + "\"strategyType\":\"FIXED\",\"candidates\":[" + sb + "],"
+                + "\"filterUnhealthyBindings\":true,\"schemaVersion\":1,"
+                + "\"tags\":[\"prod\"]}";
     }
 }

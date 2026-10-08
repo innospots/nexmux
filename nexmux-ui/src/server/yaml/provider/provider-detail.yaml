@@ -199,10 +199,9 @@ body:
                         size: small
                       events:
                         onClick:
-                          - action: message
+                          - action: navigate
                             params:
-                              messageType: info
-                              text: 跳转 Model 列表（演示：目标页建设中）
+                              to: /models?provider=${route.params.code}
                     - type: DropdownMenu
                       props:
                         items:
@@ -227,7 +226,7 @@ body:
                                     - type: Text
                                       props:
                                         size: small
-                                        text: 删除后不可恢复。（演示：后端删除接口未开放，代理层默认成功，数据未真正移除）
+                                        text: 删除后不可恢复。
                                     - type: Flex
                                       props:
                                         direction: vertical
@@ -295,7 +294,7 @@ body:
                                       - action: message
                                         params:
                                           messageType: success
-                                          text: 已删除（演示：代理层默认成功，后端接口就绪后真正移除）
+                                          text: 已删除
                                       - action: navigate
                                         params:
                                           to: /providers
@@ -803,10 +802,9 @@ body:
                                   size: small
                                 events:
                                   onClick:
-                                    - action: message
+                                    - action: navigate
                                       params:
-                                        messageType: info
-                                        text: 跳转 Model 列表（带 Provider 筛选，演示：目标页建设中）
+                                        to: /models?provider=${route.params.code}
                       - type: Table
                         props:
                           dataSource: ${data.detail.models}
@@ -842,10 +840,9 @@ body:
                                   className: p-0
                                 events:
                                   onClick:
-                                    - action: message
+                                    - action: navigate
                                       params:
-                                        messageType: info
-                                        text: 跳转模型详情：${row.code}（演示：目标页建设中）
+                                        to: /models/${row.codeUi}
                   - key: relations
                     label: 引用关系
                     className: p-2

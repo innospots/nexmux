@@ -22,22 +22,25 @@ class RouteEndpointContractTest {
     }
 
     @Test
-    void pageAcceptsFilters() throws Exception {
+    void pageReturnsUiListContract() throws Exception {
+        // /api/d 列表契约：{items,total,filters} 直出，不包 R（nexmux-ui-missing-api 对接约定）
         Method page = RouteEndpoint.class.getMethod(
-                "page", Long.class, Long.class, String.class, String.class, String.class);
+                "page", Long.class, Long.class, String.class, String.class, String.class, String.class);
         assertThat(page.getAnnotation(GET.class)).isNotNull();
         assertThat(page.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxRoutePage");
+        assertThat(page.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.route.RouteListResult.class);
     }
 
     @Test
-    void declaresGetByCode() throws Exception {
-        Method get = RouteEndpoint.class.getMethod("getByCode", String.class);
-        assertThat(get.getAnnotation(GET.class)).isNotNull();
-        assertThat(get.getAnnotation(Path.class).value()).isEqualTo("/by-code/{routeCode}");
-        assertThat(get.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxRouteGetByCode");
-        ParameterizedType returnType = (ParameterizedType) get.getGenericReturnType();
-        assertThat(returnType.getActualTypeArguments()[0])
-                .isEqualTo(com.innospots.nexmux.core.route.domain.vo.RouteDetailVo.class);
+    void declaresDetailByCode() throws Exception {
+        // UI 契约：详情按稳定业务键直出展示记录（/api/d/routes/{code}）
+        Method detail = RouteEndpoint.class.getMethod("detail", String.class);
+        assertThat(detail.getAnnotation(GET.class)).isNotNull();
+        assertThat(detail.getAnnotation(Path.class).value()).isEqualTo("/{routeCode}");
+        assertThat(detail.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxRouteGetByCode");
+        assertThat(detail.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.route.RouteRecord.class);
     }
 
     @Test

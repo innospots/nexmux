@@ -62,6 +62,17 @@ public class ProviderService {
         return PageResult.of(records, pageNo, pageSize, total);
     }
 
+    /**
+     * 全量查询（Console 列表页构成口径与关联统计用；P0 数据量小，不分页）。
+     */
+    public List<ProviderVo> listAll() {
+        return providerDao.selectList(new LambdaQueryWrapper<ProviderEntity>()
+                        .orderByAsc(ProviderEntity::getCreatedAt))
+                .stream()
+                .map(this::toVo)
+                .toList();
+    }
+
     public ProviderVo get(String providerId) {
         return toVo(require(providerId));
     }
@@ -141,6 +152,25 @@ public class ProviderService {
         }
         providerDao.updateById(entity);
         return toVo(entity);
+    }
+
+    /**
+     * 删除提供方（含凭证）；存在模型引用时拒绝（前置检查）。
+     */
+    public void delete(String providerId) {
+        ProviderEntity entity = require(providerId);
+        long modelRefs = modelDao.selectCount(new LambdaQueryWrapper<ModelEntity>()
+                .eq(ModelEntity::getPrimaryProviderId, providerId));
+        if (modelRefs > 0) {
+            throw NexusException.build(
+                    NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "provider has " + modelRefs + " model reference(s), remove them before delete");
+        }
+        ProviderCredentialEntity credential = credentialOf(providerId);
+        if (credential != null) {
+            providerCredentialDao.deleteById(credential);
+        }
+        providerDao.deleteById(entity);
     }
 
     public ProviderVo setEnabled(String providerId, boolean enabled) {

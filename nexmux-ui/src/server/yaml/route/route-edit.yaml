@@ -45,7 +45,7 @@ body:
         initialValues:
           code: ${data.detail.code}
           name: ${data.detail.name}
-          type: ${data.detail.type}
+          routeType: ${data.detail.type}
           alias: ${data.detail.alias}
           tags: ${data.detail.tagsText}
           description: ${data.detail.description}
@@ -57,13 +57,31 @@ body:
           healthFilter: "${data.detail.healthFilter ? 'on' : 'off'}"
       events:
         onSubmit:
-          - action: message
+          - id: saveResult
+            action: request
             params:
-              messageType: success
-              text: 路由已保存并启用（演示：静态页面不落库）
-          - action: navigate
+              method: POST
+              url: /api/d/ops/route-save?code=${route.params.code}
+              body: ${event}
+          - action: if
             params:
-              to: /routes/${route.params.code}
+              condition: ${actions.saveResult == null || actions.saveResult.ok == false}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: 保存失败
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok != false}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 路由已保存
+                - action: navigate
+                  params:
+                    to: /routes/${route.params.code}
       children:
         - type: Flex
           props:
@@ -114,7 +132,7 @@ body:
                       children:
                         - type: RadioGroup
                           props:
-                            name: type
+                            name: routeType
                             direction: horizontal
                             options:
                               - label: 单模型
@@ -723,13 +741,30 @@ body:
                     params:
                       condition: ${actions.delCfm.ok}
                       then:
-                        - action: message
+                        - id: deleteResult
+                          action: request
                           params:
-                            messageType: success
-                            text: 路由已删除（演示）
-                        - action: navigate
+                            method: POST
+                            url: /api/d/ops/route-delete?code=${route.params.code}
+                        - action: if
                           params:
-                            to: /routes
+                            condition: ${actions.deleteResult == null || actions.deleteResult.ok == false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: error
+                                  text: 删除失败（可能存在客户端授权引用）
+                        - action: if
+                          params:
+                            condition: ${actions.deleteResult != null && actions.deleteResult.ok != false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 路由已删除
+                              - action: navigate
+                                params:
+                                  to: /routes
             - type: Flex
               props:
                 align: center

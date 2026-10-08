@@ -20,6 +20,18 @@ dataSources:
         providers: ${state.provChips}
         page: ${state.page}
         pageSize: 11
+lifecycle:
+  onInit:
+    - action: if
+      params:
+        condition: ${route.query.provider != null && route.query.provider != ''}
+        then:
+          - action: setState
+            params:
+              provChips: ${route.query.provider}
+          - action: reload
+            params:
+              dataSource: models
 body:
   type: Page
   children:
@@ -492,7 +504,7 @@ body:
                         onClick:
                           - action: navigate
                             params:
-                              to: /routes
+                              to: /routes?model=${row.code}
     - type: Pagination
       props:
         total: ${data.models.total}

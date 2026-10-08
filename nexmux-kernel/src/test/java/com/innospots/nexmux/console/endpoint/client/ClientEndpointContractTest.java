@@ -22,22 +22,25 @@ class ClientEndpointContractTest {
     }
 
     @Test
-    void pageAcceptsFilters() throws Exception {
+    void pageReturnsUiListContract() throws Exception {
+        // /api/d 列表契约：{items,total,filters} 直出，不包 R（nexmux-ui-missing-api 对接约定）
         Method page = ClientEndpoint.class.getMethod(
                 "page", Long.class, Long.class, String.class, String.class, String.class, String.class);
         assertThat(page.getAnnotation(GET.class)).isNotNull();
         assertThat(page.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientPage");
+        assertThat(page.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.access.ClientListResult.class);
     }
 
     @Test
-    void declaresGetByCode() throws Exception {
-        Method get = ClientEndpoint.class.getMethod("getByCode", String.class);
-        assertThat(get.getAnnotation(GET.class)).isNotNull();
-        assertThat(get.getAnnotation(Path.class).value()).isEqualTo("/by-code/{clientCode}");
-        assertThat(get.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientGetByCode");
-        ParameterizedType returnType = (ParameterizedType) get.getGenericReturnType();
-        assertThat(returnType.getActualTypeArguments()[0])
-                .isEqualTo(com.innospots.nexmux.core.access.domain.vo.ClientDetailVo.class);
+    void declaresDetailByCode() throws Exception {
+        // UI 契约：详情按稳定业务键直出展示记录（/api/d/clients/{code}）
+        Method detail = ClientEndpoint.class.getMethod("detail", String.class);
+        assertThat(detail.getAnnotation(GET.class)).isNotNull();
+        assertThat(detail.getAnnotation(Path.class).value()).isEqualTo("/{clientCode}");
+        assertThat(detail.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientGetByCode");
+        assertThat(detail.getReturnType())
+                .isEqualTo(com.innospots.nexmux.console.access.ClientRecord.class);
     }
 
     @Test

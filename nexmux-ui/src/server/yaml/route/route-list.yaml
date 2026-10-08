@@ -20,6 +20,7 @@ dataSources:
         status: ${state.statusChip}
         type: ${state.typeChip}
         tags: ${state.tagChips}
+        model: ${route.query.model}
         page: ${state.page}
         pageSize: 12
 body:
@@ -30,6 +31,24 @@ body:
         items:
           - label: 模型路由
           - label: 路由
+    - type: Alert
+      when: ${route.query.model != null && route.query.model != ''}
+      props:
+        showIcon: true
+        variant: info
+        message: 已按模型 ${route.query.model} 过滤路由
+    - type: Button
+      when: ${route.query.model != null && route.query.model != ''}
+      props:
+        text: 清除模型过滤
+        variant: link
+        size: small
+        className: p-0 h-auto w-fit
+      events:
+        onClick:
+          - action: navigate
+            params:
+              to: /routes
     - type: Flex
       props:
         align: baseline
@@ -334,10 +353,30 @@ body:
                                 params:
                                   condition: ${actions.statusCfm.ok}
                                   then:
-                                    - action: message
+                                    - id: toggleResult
+                                      action: request
                                       params:
-                                        messageType: success
-                                        text: "${row.status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        method: POST
+                                        url: "${parent.row.status == 'enabled' ? '/api/d/ops/route-disable' : parent.row.status == 'draft' ? '/api/d/ops/route-publish' : '/api/d/ops/route-enable'}?code=${parent.row.code}"
+                                    - action: if
+                                      params:
+                                        condition: ${actions.toggleResult == null || actions.toggleResult.ok == false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: error
+                                              text: 操作失败
+                                    - action: if
+                                      params:
+                                        condition: ${actions.toggleResult != null && actions.toggleResult.ok != false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: success
+                                              text: "${parent.row.status == 'enabled' ? '已停用' : '已启用'}"
+                                          - action: reload
+                                            params:
+                                              dataSource: routes
                     - type: Tooltip
                       props:
                         content: 编辑

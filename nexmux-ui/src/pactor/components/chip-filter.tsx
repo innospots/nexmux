@@ -8,8 +8,9 @@
  * 兼容各列表页的两种交互（Provider / Model / Route / Client / ClientTemplate）：
  * - mode="single"：单选，value 为字符串。点击已选项回到 allValue（默认 'all'），
  *   与「状态 / 类型」单选快筛的 toggle 语义一致；
- * - mode="multi"：多选，value 为已选值数组。选项中含 value === allValue 的
- *   「全部」项时，点击它清空选择、仅在无选择时高亮（标签 / 厂商快筛语义）；
+ * - mode="multi"：多选，value 为已选值数组（也容忍逗号分隔字符串，如
+ *   经 ?provider=zai 进入页面时由 query 初始化的单值）。选项中含
+ *   value === allValue 的 「全部」项时，点击它清空选择、仅在无选择时高亮（标签 / 厂商快筛语义）；
  *   不含「全部」项时纯切换、不选即全部（Provider 类型快筛语义）。
  *
  * DSL 用法（${event} = 新值，single 为字符串 / multi 为数组）：
@@ -48,7 +49,11 @@ export function ChipFilter({
   onChange?: (value: string | string[]) => void;
 }) {
   if (!Array.isArray(items)) return null;
-  const selectedValues = Array.isArray(value) ? value : [];
+  const selectedValues = Array.isArray(value)
+    ? value
+    : typeof value === 'string' && value !== ''
+      ? value.split(',')
+      : [];
   return (
     <>
       {items.map((item) => {

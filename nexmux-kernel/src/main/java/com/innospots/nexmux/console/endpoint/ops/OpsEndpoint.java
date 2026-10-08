@@ -1,129 +1,181 @@
 package com.innospots.nexmux.console.endpoint.ops;
 
-import com.innospots.nexus.base.domain.response.PageResult;
-import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.audit.AuditRecord;
+import com.innospots.nexmux.console.audit.AuditViewMapper;
+import com.innospots.nexmux.console.ops.CallLogListResult;
+import com.innospots.nexmux.console.ops.CallLogRecord;
+import com.innospots.nexmux.console.ops.CallLogViewAssembler;
+import com.innospots.nexmux.console.ops.CostListResult;
+import com.innospots.nexmux.console.ops.CostRecord;
+import com.innospots.nexmux.console.ops.CostViewAssembler;
 import com.innospots.nexmux.core.audit.domain.request.AuditLogPageRequest;
-import com.innospots.nexmux.core.audit.domain.vo.AuditLogDetailVo;
-import com.innospots.nexmux.core.audit.domain.vo.AuditLogVo;
 import com.innospots.nexmux.core.audit.service.AuditQueryService;
 import com.innospots.nexmux.core.ops.domain.request.CostPageRequest;
 import com.innospots.nexmux.core.ops.domain.request.RequestLogPageRequest;
-import com.innospots.nexmux.core.ops.domain.vo.CostRecordVo;
-import com.innospots.nexmux.core.ops.domain.vo.RequestLogDetailVo;
-import com.innospots.nexmux.core.ops.domain.vo.RequestLogVo;
-import com.innospots.nexmux.core.ops.service.CostQueryService;
-import com.innospots.nexmux.core.ops.service.RequestLogQueryService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
+import jakarta.ws.rs.Consumes;
 import jakarta.ws.rs.DefaultValue;
-import java.util.List;
-import org.eclipse.microprofile.openapi.annotations.Operation;
-import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
-import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import jakarta.ws.rs.GET;
-import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
 import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
+import java.util.List;
+import org.eclipse.microprofile.openapi.annotations.Operation;
+import org.eclipse.microprofile.openapi.annotations.media.Schema;
+import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
+import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+/**
+ * 运行管理数据端点（/api/d 单段 kebab 路径约定；UI 契约形状直出，不包 R）。
+ */
 @Path("/api/d")
 @Produces(MediaType.APPLICATION_JSON)
+@Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "NexmuxOps", description = "请求与审计日志")
 @NexusAuthenticatedApi
 @RequiredArgsConstructor
 public class OpsEndpoint {
 
-    private final RequestLogQueryService requestLogQueryService;
     private final AuditQueryService auditQueryService;
-    private final CostQueryService costQueryService;
+    private final CallLogViewAssembler callLogViewAssembler;
+    private final CostViewAssembler costViewAssembler;
 
+    /**
+     * 调用日志筛选列表（UI 契约：{items,total,filteredText} 直出）。
+     */
     @GET
-    @Path("/request-logs")
-    @Operation(operationId = "nexmuxRequestLogPage", summary = "分页查询请求日志")
-    public R<PageResult<RequestLogVo>> pageRequestLogs(
-            @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
-            @Parameter(description = "每页条数", example = "20")
-            @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
+    @Path("/call-logs")
+    @Operation(operationId = "nexmuxCallLogPage", summary = "筛选查询调用日志")
+    public CallLogListResult callLogs(
             @QueryParam("start") String start,
             @QueryParam("end") String end,
-            @QueryParam("status") String status,
-            @QueryParam("model") String model,
-            @QueryParam("provider") String provider,
-            @QueryParam("protocol") String protocol,
-            @QueryParam("routeGroup") String routeGroup,
+            @Parameter(description = "状态（all / SUCCESS / ERROR / ...）")
+            @QueryParam("status") @DefaultValue("all") String status,
+            @QueryParam("model") @DefaultValue("all") String model,
+            @QueryParam("provider") @DefaultValue("all") String provider,
+            @QueryParam("protocol") @DefaultValue("all") String protocol,
+            @QueryParam("routeGroup") @DefaultValue("all") String routeGroup,
             @QueryParam("email") String email,
             @QueryParam("appKey") String appKey) {
-        return R.ok(requestLogQueryService.page(new RequestLogPageRequest(
-                pageNo, pageSize, start, end, status, model, provider, protocol, routeGroup, email, appKey)));
+        return callLogViewAssembler.assemble(new RequestLogPageRequest(
+                null, null, start, end,
+                upper(status), nonAll(model), nonAll(provider), nonAll(protocol), nonAll(routeGroup),
+                email, appKey));
     }
 
+    /**
+     * 调用日志详情（UI 契约：展示记录直出）。
+     */
     @GET
-    @Path("/request-logs/{requestId}")
-    @Operation(operationId = "nexmuxRequestLogGet", summary = "查询请求日志详情")
-    public R<RequestLogDetailVo> getRequestLog(
-            @Parameter(description = "请求日志 ID", required = true) @PathParam("requestId") String requestId) {
-        return R.ok(requestLogQueryService.get(requestId));
+    @Path("/call-logs/{requestId}")
+    @Operation(operationId = "nexmuxCallLogGet", summary = "查询调用日志详情")
+    public CallLogRecord callLog(
+            @Parameter(description = "请求 ID", required = true) @PathParam("requestId") String requestId) {
+        return callLogViewAssembler.detail(requestId);
     }
 
+    /**
+     * 审计日志筛选列表（UI 契约：{items,filteredText} 直出）。
+     */
     @GET
     @Path("/audit-logs")
-    @Operation(operationId = "nexmuxAuditLogPage", summary = "分页查询审计日志")
-    public R<PageResult<AuditLogVo>> pageAuditLogs(
-            @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
-            @Parameter(description = "每页条数", example = "20")
-            @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
+    @Operation(operationId = "nexmuxAuditLogPage", summary = "筛选查询审计日志")
+    public AuditListResult auditLogs(
             @QueryParam("start") String start,
             @QueryParam("end") String end,
-            @QueryParam("operator") String operator,
-            @QueryParam("operation") String operation,
-            @QueryParam("resourceType") String resourceType,
+            @QueryParam("operator") @DefaultValue("all") String operator,
+            @QueryParam("operation") @DefaultValue("all") String operation,
+            @QueryParam("resourceType") @DefaultValue("all") String resourceType,
             @QueryParam("resourceId") String resourceId) {
-        return R.ok(auditQueryService.page(new AuditLogPageRequest(
-                pageNo, pageSize, start, end, operator, operation, resourceType, resourceId)));
+        var page = auditQueryService.page(new AuditLogPageRequest(
+                1L, 5000L, start, end,
+                "all".equals(operator) ? null : operator,
+                upper(operation), upper(resourceType), resourceId));
+        List<AuditRecord> items = page.records().stream().map(AuditViewMapper::toRecord).toList();
+        return new AuditListResult(items,
+                com.innospots.nexmux.console.shared.LogTexts.thousands(items.size()));
     }
 
-    @GET
-    @Path("/costs")
-    @Operation(operationId = "nexmuxCostPage", summary = "分页查询成本明细")
-    public R<PageResult<CostRecordVo>> pageCosts(
-            @Parameter(description = "页码，从 1 开始", example = "1")
-            @QueryParam("pageNo") @DefaultValue("1") Long pageNo,
-            @Parameter(description = "每页条数", example = "20")
-            @QueryParam("pageSize") @DefaultValue("20") Long pageSize,
-            @QueryParam("application") String application,
-            @QueryParam("appKey") String appKey,
-            @QueryParam("alias") String alias,
-            @QueryParam("model") String model,
-            @QueryParam("provider") String provider,
-            @QueryParam("start") String start,
-            @QueryParam("end") String end) {
-        return R.ok(costQueryService.page(new CostPageRequest(
-                pageNo, pageSize, application, appKey, alias, model, provider, start, end)));
-    }
-
-    @GET
-    @Path("/costs/{requestId}")
-    @Operation(operationId = "nexmuxCostGet", summary = "查询成本明细详情")
-    public R<CostRecordVo> getCost(
-            @Parameter(description = "请求 ID", required = true) @PathParam("requestId") String requestId) {
-        return R.ok(costQueryService.get(requestId));
-    }
-
-    @GET
-    @Path("/audit-logs/operators")
-    @Operation(operationId = "nexmuxAuditLogOperators", summary = "审计操作人去重列表")
-    public R<List<String>> auditOperators() {
-        return R.ok(auditQueryService.operators());
-    }
-
+    /**
+     * 审计日志详情（UI 契约：展示记录直出，含行级 diff）。
+     */
     @GET
     @Path("/audit-logs/{auditId}")
     @Operation(operationId = "nexmuxAuditLogGet", summary = "查询审计日志详情")
-    public R<AuditLogDetailVo> getAuditLog(
+    public AuditRecord auditLog(
             @Parameter(description = "审计日志 ID", required = true) @PathParam("auditId") String auditId) {
-        return R.ok(auditQueryService.get(auditId));
+        return AuditViewMapper.toRecord(auditQueryService.get(auditId));
+    }
+
+    /**
+     * 审计操作人去重列表（UI 契约：{items} 直出，单段路径约定）。
+     */
+    @GET
+    @Path("/audit-operators")
+    @Operation(operationId = "nexmuxAuditLogOperators", summary = "审计操作人去重列表")
+    public AuditOperatorsResult auditOperators() {
+        return new AuditOperatorsResult(auditQueryService.operators());
+    }
+
+    /**
+     * 成本明细筛选列表（UI 契约：{items,total} 直出）。
+     */
+    @GET
+    @Path("/costs")
+    @Operation(operationId = "nexmuxCostPage", summary = "筛选查询成本明细")
+    public CostListResult costs(
+            @QueryParam("application") String application,
+            @QueryParam("appKey") String appKey,
+            @QueryParam("alias") String alias,
+            @QueryParam("model") @DefaultValue("all") String model,
+            @QueryParam("provider") @DefaultValue("all") String provider,
+            @QueryParam("start") String start,
+            @QueryParam("end") String end) {
+        return costViewAssembler.assemble(new CostPageRequest(
+                null, null, application, appKey, alias, nonAll(model), nonAll(provider), start, end));
+    }
+
+    /**
+     * 成本明细详情（UI 契约：展示记录直出）。
+     */
+    @GET
+    @Path("/costs/{requestId}")
+    @Operation(operationId = "nexmuxCostGet", summary = "查询成本明细详情")
+    public CostRecord cost(
+            @Parameter(description = "请求 ID", required = true) @PathParam("requestId") String requestId) {
+        return costViewAssembler.detail(requestId);
+    }
+
+    private static String upper(String value) {
+        return value == null || value.isBlank() || "all".equals(value) ? null : value.toUpperCase();
+    }
+
+    private static String nonAll(String value) {
+        return value == null || value.isBlank() || "all".equals(value) ? null : value;
+    }
+
+    /**
+     * 审计列表结果。
+     *
+     * @param items        列表行
+     * @param filteredText 筛选命中数（千分位）
+     */
+    @Schema(name = "AuditListResult", description = "审计列表结果（UI 契约）")
+    public record AuditListResult(
+            List<AuditRecord> items,
+            String filteredText) {
+    }
+
+    /**
+     * 审计操作人结果（{items} 形状约定）。
+     *
+     * @param items 操作人列表
+     */
+    @Schema(name = "AuditOperatorsResult", description = "审计操作人结果（UI 契约）")
+    public record AuditOperatorsResult(
+            List<String> items) {
     }
 }

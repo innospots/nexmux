@@ -15,6 +15,7 @@ import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.shared.analysis.DependencyImpactAnalyzer;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
+import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -44,11 +45,23 @@ public class RouteService {
                 .stream()
                 .filter(e -> matchesType(e, request.type()))
                 .filter(e -> matchesTags(e, request.tags()))
+                .filter(e -> matchesModel(e, request.model()))
                 .toList();
         long from = Math.min((pageNo - 1) * pageSize, matched.size());
         long to = Math.min(from + pageSize, matched.size());
         var records = matched.subList((int) from, (int) to).stream().map(this::toVo).toList();
         return PageResult.of(records, pageNo, pageSize, matched.size());
+    }
+
+    /**
+     * 全量查询（Console 列表页关联统计用；P0 数据量小，不分页）。
+     */
+    public List<RouteVo> listAll() {
+        return routeDao.selectList(new LambdaQueryWrapper<RouteEntity>()
+                        .orderByAsc(RouteEntity::getCreatedAt))
+                .stream()
+                .map(this::toVo)
+                .toList();
     }
 
     public RouteVo get(String routeId) {
@@ -122,6 +135,8 @@ public class RouteService {
         }
         entity.setStatus(STATUS_PUBLISHED);
         routeDao.updateById(entity);
+        configAuditService.record("ROUTE", routeId, "ENABLE", null,
+                "{\"before\":null,\"after\":" + entity.getPublishedRouteSpec() + "}");
         return toVo(entity);
     }
 
@@ -142,6 +157,18 @@ public class RouteService {
         configAuditService.record("ROUTE", routeId, "DISABLE", null,
                 "{\"before\":" + entity.getPublishedRouteSpec() + ",\"after\":null}");
         return toVo(entity);
+    }
+
+    /**
+     * 删除路由；存在客户端授权引用时拒绝（前置检查，与停用同一影响分析）。
+     */
+    public void delete(String routeId) {
+        RouteEntity entity = require(routeId);
+        dependencyImpactAnalyzer.requireSafe(
+                dependencyImpactAnalyzer.analyzeDisable("ROUTE", routeId));
+        configAuditService.record("ROUTE", routeId, "DELETE", null,
+                "{\"before\":" + entity.getRouteSpec() + ",\"after\":null}");
+        routeDao.deleteById(entity);
     }
 
     public RouteVo publish(String routeId, RoutePublishRequest request) {
@@ -184,6 +211,15 @@ public class RouteService {
         RouteSpec spec = NexmuxJson.read(entity.getRouteSpec(), RouteSpec.class);
         List<String> own = spec == null ? List.of() : spec.tags();
         return tags.stream().allMatch(own::contains);
+    }
+
+    private boolean matchesModel(RouteEntity entity, String model) {
+        if (model == null || model.isBlank()) {
+            return true;
+        }
+        RouteSpec spec = NexmuxJson.read(entity.getRouteSpec(), RouteSpec.class);
+        List<RouteCandidate> candidates = spec == null ? List.of() : spec.candidates();
+        return candidates.stream().anyMatch(c -> model.equals(c.modelCode()));
     }
 
     private RouteEntity require(String routeId) {

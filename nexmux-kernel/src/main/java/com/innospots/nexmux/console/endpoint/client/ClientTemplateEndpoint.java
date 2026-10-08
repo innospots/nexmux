@@ -28,7 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Path("/api/nexmux/client-templates")
+@Path("/api/d/client-templates")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "NexmuxClientTemplate", description = "客户端模板")

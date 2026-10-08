@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsCostList
   description: 运行管理 / 成本明细：按单次请求展示实际成本与定价快照（命中档位 + 时段倍率）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-cost-list
 state:

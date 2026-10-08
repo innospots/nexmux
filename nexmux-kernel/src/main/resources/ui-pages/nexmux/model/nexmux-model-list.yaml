@@ -5,7 +5,7 @@ page:
   name: nexmuxModelList
   description: 模型资产 / 模型：对客户端暴露的模型管理（卡片式列表）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/model/nexmux-model-list
 state:

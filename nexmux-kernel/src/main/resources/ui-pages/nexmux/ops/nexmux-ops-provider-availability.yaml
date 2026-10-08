@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsProviderAvailability
   description: 运行管理 / 供应商可用性：供应商与路由质量
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-provider-availability
 state:

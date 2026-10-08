@@ -27,7 +27,7 @@ Classpath 路径由 Nexus `PageDslConfig` 固定为 **`ui-pages/{domainKey}/{mod
 | `page.id` | 同 `pageKey`（加载器校验失败即 CONFIG_ERROR） |
 | `page.name` | camelCase，由 pageKey 推导（如 `nexmux-provider-list` → `nexmuxProviderList`） |
 | 后缀 | **仅** `.yaml`（本仓库不新增 `.yml` 页面） |
-| API 基址 | `meta.apiBase: /api/nexmux`（与 `nexus/nexmux.yaml` → `nexmux.console.api-base-path` 一致） |
+| API 基址 | `meta.apiBase: /api/d`（与 `nexus/nexmux.yaml` → `nexmux.console.api-base-path` 一致） |
 | 页面路由 | `meta.routePath` 与 Entry `pagePath` 一致（以 **`/page/nexmux`** 开头；**不用** `/console`） |
 | 请求头 | 数据请求携带 `X-Nexus-Page-Key: ${page.id}` |
 
@@ -82,7 +82,7 @@ page:          # id / title / type / layout / permission
 meta:          # apiBase, product, priority P0|P1, wireframeRef
 meta.routePath: # 与 Entry pagePath 一致（PageDsl 根对象无 route 段，勿写顶层 route:）
 state:         # 列表筛选、分页、选中主键、表单草稿
-dataSources:   # http → /api/nexmux/...
+dataSources:   # http → /api/d/...
 actions:       # search / save / publish / enable / testConnection ...
 regions:       # 声明式区域清单（对应线框区块名，body 可后补）
 lifecycle:     # onInit / onShow
@@ -219,7 +219,7 @@ page:
   permission: nexmux.provider.view
 
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   layoutScheme: S-LIST
   wireframe: product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md

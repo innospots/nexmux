@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------
 nexmux:
   console:
-    api-base-path: /api/nexmux
+    api-base-path: /api/d
   client:
     app-key-grace-seconds: 300
   debug:

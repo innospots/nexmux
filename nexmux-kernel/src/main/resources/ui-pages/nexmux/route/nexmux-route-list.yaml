@@ -5,7 +5,7 @@ page:
   name: nexmuxRouteList
   description: 模型路由 / 路由：对外请求路径、协议与模型调度策略（卡片式列表）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/route/nexmux-route-list
 state:

@@ -11,7 +11,7 @@
 
 ## 2. 背景与目标
 
-`nexmux-ui`（Next.js 16 + pactor-app YAML DSL）当前全部数据来自 `src/pactor/mocks/*`（12 个 mock，约 5.8k 行）。后端 `nexmux-kernel` 已提供 6 组 JAX-RS 端点（`/api/nexmux/**`，`R<T>` 包装），但与前端 DSL 绑定的数据形状差距大，且 Dashboard / 用量 / 成本 / 客户端模板等页面无后端服务。
+`nexmux-ui`（Next.js 16 + pactor-app YAML DSL）当前全部数据来自 `src/pactor/mocks/*`（12 个 mock，约 5.8k 行）。后端 `nexmux-kernel` 已提供 6 组 JAX-RS 端点（`/api/d/**`，`R<T>` 包装），但与前端 DSL 绑定的数据形状差距大，且 Dashboard / 用量 / 成本 / 客户端模板等页面无后端服务。
 
 **目标**：让 35 个前端页面全部接真实后端（grill-me Q4 确认），且 **35k 行 YAML 的 `${data.*}` 绑定路径零改动**。
 
@@ -207,7 +207,7 @@ public record ClientTemplateCreateRequest(String templateCode, String displayNam
 
 ## 7. 接口与 API（四步法 ④）
 
-### 7.1 HTTP 端点（后端补全清单，基路径 `/api/nexmux`，全部 `R<T>` + `@NexusAuthenticatedApi`）
+### 7.1 HTTP 端点（后端补全清单，基路径 `/api/d`，全部 `R<T>` + `@NexusAuthenticatedApi`）
 
 **新增端点**：
 
@@ -258,12 +258,12 @@ public record ClientTemplateCreateRequest(String templateCode, String displayNam
 
 | 前端调用 | 后端端点 |
 |----------|----------|
-| `POST /api/data/providers` | `POST /api/nexmux/providers` |
-| `PUT /api/data/providers/{code}` | `PUT /api/nexmux/providers/{id}`（BFF 先 code→id 解析） |
+| `POST /api/data/providers` | `POST /api/d/providers` |
+| `PUT /api/data/providers/{code}` | `PUT /api/d/providers/{id}`（BFF 先 code→id 解析） |
 | `POST /api/data/providers/{code}/disable` | `POST .../providers/{id}/disable` |
 | `POST /api/data/providers/{code}/connection-test` | `POST .../providers/{id}/connection-test` |
 | `POST /api/data/providers/{code}/pull-models` | `POST .../providers/{id}/pull-models` |
-| `POST /api/data/routes` / `PUT /api/data/routes/{code}` | `POST/PUT /api/nexmux/routes[/{id}]` |
+| `POST /api/data/routes` / `PUT /api/data/routes/{code}` | `POST/PUT /api/d/routes[/{id}]` |
 | `POST /api/data/routes/{code}/publish` | `POST .../routes/{id}/publish` |
 | `POST /api/data/routes/{code}/enable\|disable` | 对应端点 |
 | `POST /api/data/models` / `POST /api/data/models/{code}/enable\|disable` | 对应端点 |
@@ -271,7 +271,7 @@ public record ClientTemplateCreateRequest(String templateCode, String displayNam
 | `POST /api/data/clients/{code}/rotate-app-key` | `POST .../clients/{id}/rotate-app-key` |
 | `PUT /api/data/clients/{code}/route-grants` | `PUT .../clients/{id}/route-grants` |
 | `POST /api/data/client-templates[/{code}...]` | 对应端点 |
-| `POST /api/data/debug/model-invoke` / `client-invoke` | `POST /api/nexmux/debug/model-invoke` / `client-invoke` |
+| `POST /api/data/debug/model-invoke` / `client-invoke` | `POST /api/d/debug/model-invoke` / `client-invoke` |
 
 - **BFF→后端鉴权**（Q3-A）：`client.ts` 从服务端环境变量读 `NEXMUX_BACKEND_BASE_URL` / `NEXMUX_BACKEND_USERNAME` / `NEXMUX_BACKEND_PASSWORD`（或 token），登录 Nexus Console 获取会话后带 cookie 调后端；凭证不出服务端。
 - **错误映射**：后端 `R` 非 ok → BFF 返回 `{ error: message, advice }` + 对应 HTTP 状态；pactor `message` action 展示。

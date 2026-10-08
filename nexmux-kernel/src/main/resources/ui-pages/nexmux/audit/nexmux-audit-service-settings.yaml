@@ -5,7 +5,7 @@ page:
   name: nexmuxAuditServiceSettings
   description: 系统管理 / 服务设置：平台级全局参数，影响控制台展示、计量汇总与运行策略默认值
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/audit/nexmux-audit-service-settings
 body:

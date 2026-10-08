@@ -10,7 +10,7 @@ page:
   name: nexmuxClientLogin
   description: Model Console 登录页
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/client/nexmux-client-login
 

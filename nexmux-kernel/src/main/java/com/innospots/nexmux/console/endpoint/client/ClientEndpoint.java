@@ -30,7 +30,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
-@Path("/api/nexmux/clients")
+@Path("/api/d/clients")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
 @Tag(name = "NexmuxClient", description = "接入客户端与授权")

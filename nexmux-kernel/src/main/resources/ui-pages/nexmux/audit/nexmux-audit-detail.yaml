@@ -5,7 +5,7 @@ page:
   name: nexmuxAuditDetail
   description: 系统管理 / 审计详情：变更前 / 变更后 / Diff / 操作上下文（敏感数据脱敏显示）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/audit/nexmux-audit-detail
 dataSources:

@@ -5,7 +5,7 @@ page:
   name: nexmuxClientEdit
   description: 创建或修改客户端：基本信息、AppKey、路由授权、配额与限流策略
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/client/nexmux-client-edit
 dataSources:

@@ -27,7 +27,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
-@Path("/api/nexmux")
+@Path("/api/d")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "NexmuxOps", description = "请求与审计日志")
 @NexusAuthenticatedApi

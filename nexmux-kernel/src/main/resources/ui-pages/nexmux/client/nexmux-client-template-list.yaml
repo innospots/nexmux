@@ -5,7 +5,7 @@ page:
   name: nexmuxClientTemplateList
   description: 访问治理 / 客户端模板：预置路由、配额与限流的策略预设（卡片式列表）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/client/nexmux-client-template-list
 state:

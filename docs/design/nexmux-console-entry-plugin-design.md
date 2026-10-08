@@ -18,7 +18,7 @@
 |------|------|------|
 | **Entity**（`mux_*`） | `core.*.domain.entity` | 业务配置与运行只读数据；**不由插件定义** |
 | **Entry 插件** | `console.entry` | 向 Nexus 宿主注册 **模块 / 菜单 / 页面路由 / 权限资源**；同步到 `nx_console_catalog_resource` |
-| **管理 API** | `console.endpoint` | Jersey；路径 `/api/nexmux/*` |
+| **管理 API** | `console.endpoint` | Jersey；路径 `/api/d/*` |
 | **前端** | `nexmux-ui` | 消费菜单与 `pagePath`；列表/详情/编辑 UX 对齐线框 |
 
 ```text
@@ -55,7 +55,7 @@ PluginDefinition (com.innospots.nexmux.console)
 | 默认菜单入口 | 每模块 `entryPageKey` = 菜单叶子绑定的 `pageKey`，且为 `ConsoleModuleDeclaration.pages` **第一项** | `nexmux-provider-list` |
 | `pagePath` | 与 Nexus 一致：`/page/{domainKey}/{moduleKey}/{pageKey}`（`ConsoleModuleDescriptor.pagePath`） | `/page/nexmux/provider/nexmux-provider-list` |
 | `permission` | 与 page 或 action 绑定；前缀 `nexmux.` | `nexmux.provider.view` |
-| `datasourceKey` | 列表页代理 API 时用；`nexmux.{resource}` | `nexmux.providers` → `GET /api/nexmux/providers` |
+| `datasourceKey` | 列表页代理 API 时用；`nexmux.{resource}` | `nexmux.providers` → `GET /api/d/providers` |
 
 `resourceKey`（同步进 catalog）：`module:nexmux`、`page:nexmux.{pageKey}`、`menu:{menuKey}`（由 Nexus 同步规则生成，实现侧勿手写落库）。
 

@@ -5,7 +5,7 @@ page:
   name: nexmuxRouteDetail
   description: 模型路由 / 路由详情：基本信息、入口配置、模型与路由策略（单页纵向，无 Tab）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/route/nexmux-route-detail
 dataSources:

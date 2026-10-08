@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsHome
   description: GateWeave 运营概览：核心指标、趋势分析、用量构成
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-home
 state:

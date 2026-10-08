@@ -5,7 +5,7 @@ page:
   name: nexmuxModelDetail
   description: 模型资产 / 模型详情：基本信息、默认参数、定价、多供应商上游绑定与路由引用
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/model/nexmux-model-detail
 state:

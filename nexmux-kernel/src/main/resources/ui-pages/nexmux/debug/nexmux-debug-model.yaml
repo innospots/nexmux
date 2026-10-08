@@ -5,7 +5,7 @@ page:
   name: nexmuxDebugModel
   description: 调试台 / 模型调试：直连供应商模型，验证连通性与效果（Chat 对话式）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/debug/nexmux-debug-model
 state:

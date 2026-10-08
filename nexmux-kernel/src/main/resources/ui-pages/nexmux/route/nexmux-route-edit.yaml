@@ -5,7 +5,7 @@ page:
   name: nexmuxRouteEdit
   description: 创建或修改 Route：基本信息、入口配置与模型路由策略
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/route/nexmux-route-edit
 dataSources:

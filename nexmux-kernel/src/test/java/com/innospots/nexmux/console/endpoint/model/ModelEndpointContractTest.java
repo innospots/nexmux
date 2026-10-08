@@ -18,7 +18,7 @@ class ModelEndpointContractTest {
 
     @Test
     void declaresApiBasePath() {
-        assertThat(ModelEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexmux/models");
+        assertThat(ModelEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/d/models");
         assertThat(ModelEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("NexmuxModel");
         assertThat(ModelEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();
     }

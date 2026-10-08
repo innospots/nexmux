@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsProviderUsage
   description: 运行管理 / 供应商用量：按上游供应商统计用量与成本
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-provider-usage
 state:

@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsModelUsage
   description: 运行管理 / 模型用量：按模型与路由组的用量与成本
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-model-usage
 state:

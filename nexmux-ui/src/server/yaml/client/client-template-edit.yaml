@@ -12,7 +12,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/client-templates/${route.params.code}
+      url: /api/d/client-templates/${route.params.code}
 lifecycle:
   onLoad:
     - action: setState

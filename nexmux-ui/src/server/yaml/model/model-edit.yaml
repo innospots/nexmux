@@ -10,13 +10,13 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/models/${route.params.code}
+      url: /api/d/models/${route.params.code}
   providerOptions:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/data/provider-options
+      url: /api/d/provider-options
 body:
   type: Page
   children:
@@ -80,8 +80,8 @@ body:
           - id: saveResult
             action: request
             params:
-              method: PUT
-              url: /api/data/models/${route.params.code}
+              method: POST
+              url: /api/d/ops/model-save?code=${route.params.code}
               body: ${event}
           - action: if
             params:
@@ -156,7 +156,7 @@ body:
                                 props:
                                   name: primaryProviderCode
                                   className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
-                                  options: ${data.providerOptions}
+                                  options: ${data.providerOptions.items}
                                   rules:
                                     - required: true
                                       message: 请选择 Provider

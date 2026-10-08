@@ -10,13 +10,13 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/client-templates/${route.params.code}
+      url: /api/d/client-templates/${route.params.code}
   createdClients:
     type: http
     autoLoad: true
     request:
       method: GET
-      url: /api/data/client-templates/${route.params.code}/created-clients
+      url: /api/d/client-templates/${route.params.code}/created-clients
 body:
   type: Page
   children:

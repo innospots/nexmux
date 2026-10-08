@@ -15,7 +15,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/providers
+      url: /api/d/providers
       params:
         keyword: ${state.keyword}
         status: ${state.statusChip}
@@ -368,8 +368,8 @@ body:
                                       params:
                                         method: POST
                                         url:
-                                          "/api/data/providers/${row.code}/${row.status == 'enabled'
-                                          ? 'disable' : 'enable'}"
+                                          "/api/d/ops/provider-${row.status == 'enabled'
+                                          ? 'disable' : 'enable'}?code=${row.code}"
                                     - action: if
                                       params:
                                         condition:

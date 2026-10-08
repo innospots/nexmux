@@ -47,7 +47,7 @@ body:
             action: request
             params:
               method: POST
-              url: /api/data/providers
+              url: /api/d/ops/provider-create
               body: ${event}
           - action: if
             params:

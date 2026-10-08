@@ -19,7 +19,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/costs
+      url: /api/d/costs
       params:
         application: ${state.applicationKeyword}
         appKey: ${state.appKeyKeyword}

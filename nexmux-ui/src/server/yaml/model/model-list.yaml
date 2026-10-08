@@ -14,7 +14,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/models
+      url: /api/d/models
       params:
         type: ${state.typeChip}
         providers: ${state.provChips}
@@ -403,8 +403,8 @@ body:
                                       action: request
                                       params:
                                         method: POST
-                                        url: "/api/data/models/${row.code}/${row.status == 'enabled'
-                                          ? 'disable' : 'enable'}"
+                                        url: "/api/d/ops/model-${row.status == 'enabled'
+                                          ? 'disable' : 'enable'}?code=${row.code}"
                                     - action: if
                                       params:
                                         condition: ${actions.toggleResult == null || actions.toggleResult.ok

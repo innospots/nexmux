@@ -16,7 +16,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/clients
+      url: /api/d/clients
       params:
         status: ${state.statusFilter}
         name: ${state.nameKeyword}

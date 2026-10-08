@@ -12,12 +12,12 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/providers/${route.params.code}
+      url: /api/d/providers/${route.params.code}
   upstream:
     type: http
     request:
       method: GET
-      url: /api/data/providers/${route.params.code}/pull-models
+      url: /api/d/providers/${route.params.code}/pull-models
 body:
   type: Page
   children:
@@ -167,8 +167,8 @@ body:
                                   action: request
                                   params:
                                     method: POST
-                                    url: "/api/data/providers/${route.params.code}/${data.detail.status
-                                      == 'enabled' ? 'disable' : 'enable'}"
+                                    url: "/api/d/ops/provider-${data.detail.status
+                                      == 'enabled' ? 'disable' : 'enable'}?code=${route.params.code}"
                                 - action: if
                                   params:
                                     condition: ${actions.toggleResult == null || actions.toggleResult.ok
@@ -274,8 +274,8 @@ body:
                                 - id: deleteResult
                                   action: request
                                   params:
-                                    method: DELETE
-                                    url: /api/data/providers/${route.params.code}
+                                    method: POST
+                                    url: /api/d/ops/provider-delete?code=${route.params.code}
                                 - action: if
                                   params:
                                     condition: ${actions.deleteResult == null || actions.deleteResult.ok
@@ -544,7 +544,7 @@ body:
                                       action: request
                                       params:
                                         method: POST
-                                        url: /api/data/providers/${route.params.code}/connection-test
+                                        url: /api/d/ops/provider-connection-test?code=${route.params.code}
                                     - action: if
                                       params:
                                         condition: ${actions.testResult == null || actions.testResult.error

@@ -10,7 +10,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/providers/${route.params.code}
+      url: /api/d/providers/${route.params.code}
 body:
   type: Page
   children:
@@ -59,8 +59,8 @@ body:
           - id: saveResult
             action: request
             params:
-              method: PUT
-              url: /api/data/providers/${route.params.code}
+              method: POST
+              url: /api/d/ops/provider-save?code=${route.params.code}
               body: ${event}
           - action: if
             params:

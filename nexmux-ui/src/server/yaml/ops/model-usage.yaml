@@ -15,7 +15,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/ops/model-usage
+      url: /api/d/stats-model-usage
       params:
         start: ${state.range.start}
         end: ${state.range.end}

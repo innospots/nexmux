@@ -16,19 +16,17 @@ import type { ActionHandler } from "@pactor-app/runtime";
 
 import {
   appKeyOptionsOf,
-  routeOptionsOf,
-  routeTagOptionsOf,
-  simulateClientCallReal,
-} from "./debug-data";
-import type { ClientDebugRound } from "./backend/contracts";
-import {
   capabilitiesOf,
   modelOptionsOf,
   paramDefaultsOf,
+  routeOptionsOf,
+  routeTagOptionsOf,
+  simulateClientCallReal,
   simulateModelCallReal,
   supportsReasoning,
   testConnectionReal,
 } from "./debug-data";
+import type { ClientDebugRound } from "./debug-data";
 import { streamText, type DebugChatMessage } from "./components/debug-chat";
 
 /** SitemapApp actions 选项 handler 的结构化最小契约（ActionHandler 子集） */

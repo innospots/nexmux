@@ -12,7 +12,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/models/${route.params.code}
+      url: /api/d/models/${route.params.code}
 body:
   type: Page
   children:
@@ -167,8 +167,8 @@ body:
                                   action: request
                                   params:
                                     method: POST
-                                    url: "/api/data/models/${route.params.code}/${data.detail.status
-                                      == 'enabled' ? 'disable' : 'enable'}"
+                                    url: "/api/d/ops/model-${data.detail.status
+                                      == 'enabled' ? 'disable' : 'enable'}?code=${route.params.code}"
                                 - action: if
                                   params:
                                     condition: ${actions.toggleResult == null || actions.toggleResult.ok
@@ -249,7 +249,7 @@ body:
                                                 action: request
                                                 params:
                                                   method: POST
-                                                  url: /api/data/models/${route.params.code}/invoke-test
+                                                  url: /api/d/ops/model-invoke-test?code=${route.params.code}
                                               - action: if
                                                 params:
                                                   condition: ${actions.invokeResult == null || actions.invokeResult.ok

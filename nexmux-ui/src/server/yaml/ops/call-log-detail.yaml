@@ -11,7 +11,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/call-logs/${route.params.id}
+      url: /api/d/call-logs/${route.params.id}
 body:
   type: Page
   children:

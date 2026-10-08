@@ -21,7 +21,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/call-logs
+      url: /api/d/call-logs
       params:
         start: ${state.range.start}
         end: ${state.range.end}

@@ -10,7 +10,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/audit/${route.params.id}
+      url: /api/d/audit-logs/${route.params.id}
 body:
   type: Page
   children:

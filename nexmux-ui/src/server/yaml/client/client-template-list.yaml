@@ -15,7 +15,7 @@ dataSources:
     autoLoad: true
     request:
       method: GET
-      url: /api/data/client-templates
+      url: /api/d/client-templates
       params:
         status: ${state.statusChip}
         keyword: ${state.keyword}

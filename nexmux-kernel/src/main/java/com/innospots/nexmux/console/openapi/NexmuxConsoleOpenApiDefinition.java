@@ -18,7 +18,7 @@ import com.innospots.nexus.core.openapi.NexusOpenApiSecurityNames;
  * 类本身无资源方法，运行时不额外暴露 HTTP 端点。产物写入
  * {@code META-INF/nexus-openapi/nexmux-kernel.yaml}。</p>
  */
-@Path("/api/nexmux")
+@Path("/api/d")
 @OpenAPIDefinition(
         info = @Info(
                 title = "Nexmux Console API",

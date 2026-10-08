@@ -19,7 +19,7 @@ class ClientTemplateEndpointContractTest {
     @Test
     void declaresApiBasePath() {
         assertThat(ClientTemplateEndpoint.class.getAnnotation(Path.class).value())
-                .isEqualTo("/api/nexmux/client-templates");
+                .isEqualTo("/api/d/client-templates");
         assertThat(ClientTemplateEndpoint.class.getAnnotation(Tag.class).name())
                 .isEqualTo("NexmuxClientTemplate");
         assertThat(ClientTemplateEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();

@@ -171,7 +171,7 @@ OpenAPI 中可搜索 `PageDsl` / `uiSitemapRenderNexmux` 相关 operation。
 - 路径：**`ui-pages/nexmux/{moduleKey}/{pageKey}.yaml`**
 - **`page.id`**、文件名（无后缀）与控制台 Entry 的 **`pageKey`** 必须一致
 - **`meta.routePath`** 与 SPA 路由一致：`/page/nexmux/{moduleKey}/{pageKey}`（见 Entry 插件）
-- **`meta.apiBase`** 应与 `nexus/nexmux.yaml` 中 **`nexmux.console.api-base-path`**（默认 `/api/nexmux`）一致
+- **`meta.apiBase`** 应与 `nexus/nexmux.yaml` 中 **`nexmux.console.api-base-path`**（默认 `/api/d`）一致
 - `dataSources` 中相对 URL 基于 `meta.apiBase` 解析到 Nexmux 管理 API
 
 ### 3. 控制台目录（Console Entry）
@@ -212,7 +212,7 @@ OpenAPI 中可搜索 `PageDsl` / `uiSitemapRenderNexmux` 相关 operation。
 
 | 文件 | 前缀 / 绑定 | 说明 |
 |------|-------------|------|
-| **`nexmux.yaml`** | `nexmux.*` | 产品业务：Console API 前缀 `nexmux.console.api-base-path`（默认 `/api/nexmux`）、AppKey 宽限期、调试响应体上限、Runtime 轮询间隔等。**不含** JDBC、插件列表、Filter 开关 |
+| **`nexmux.yaml`** | `nexmux.*` | 产品业务：Console API 前缀 `nexmux.console.api-base-path`（默认 `/api/d`）、AppKey 宽限期、调试响应体上限、Runtime 轮询间隔等。**不含** JDBC、插件列表、Filter 开关 |
 | **`console-auth.yaml`** | `nexus.console.auth.*` | 登录与令牌策略（见上表） |
 | **`console-credential.yaml`** | `nexus.console.credential.totp.*` | TOTP 主密钥等凭据能力 |
 | **`console-web.yaml`** | `nexus.console.web.*` | Web 横切：总开关 `enabled`、安全/CORS/dev-session（见上节） |

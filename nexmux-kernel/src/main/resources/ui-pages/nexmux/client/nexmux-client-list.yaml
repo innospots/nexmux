@@ -5,7 +5,7 @@ page:
   name: nexmuxClientList
   description: 访问治理 / 客户端：调用实例（含 AppKey）的表格列表，支持空白新建或从模板创建
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/client/nexmux-client-list
 state:

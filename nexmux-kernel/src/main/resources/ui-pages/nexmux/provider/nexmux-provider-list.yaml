@@ -5,7 +5,7 @@ page:
   name: nexmuxProviderList
   description: 模型资产 / Provider：上游 AI 供应商端点管理（卡片式列表）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/provider/nexmux-provider-list
 state:

@@ -7,12 +7,12 @@
 
 ```text
 浏览器 → nexmux-ui BFF（/api/data/**，Next 服务端，cookie 会话鉴权）
-       → nexmux-spring 后端（/api/nexmux/**，R<T> 包装，dev-session 或 Bearer）
+       → nexmux-spring 后端（/api/d/**，R<T> 包装，dev-session 或 Bearer）
 ```
 
 ---
 
-## 1. 后端接口（nexmux-spring，基路径 `/api/nexmux`）
+## 1. 后端接口（nexmux-spring，基路径 `/api/d`）
 
 ### 通用约定
 
@@ -591,7 +591,7 @@
 
 ### 1.7 Stats（统计聚合，B6）
 
-> 基路径 `/api/nexmux/stats`；原始聚合数值（展示格式化在 BFF）；`start`/`end` 缺省近 7 天。
+> 基路径 `/api/d/stats`；原始聚合数值（展示格式化在 BFF）；`start`/`end` 缺省近 7 天。
 
 | 方法 | 路径 | 响应 `R<T>` |
 |------|------|-------------|

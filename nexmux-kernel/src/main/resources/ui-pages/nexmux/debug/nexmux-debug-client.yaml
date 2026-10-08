@@ -5,7 +5,7 @@ page:
   name: nexmuxDebugClient
   description: 调试台 / 客户端调试：模拟业务侧真实调用，验证鉴权、路由与配额（Chat 对话式）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/debug/nexmux-debug-client
 state:

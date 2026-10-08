@@ -5,7 +5,7 @@ page:
   name: nexmuxProviderDetail
   description: 模型资产 / Provider 详情：基本信息、连接与凭证、关联模型、引用关系
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/provider/nexmux-provider-detail
 state:

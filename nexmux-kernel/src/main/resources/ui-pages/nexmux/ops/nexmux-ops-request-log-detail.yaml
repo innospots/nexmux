@@ -6,7 +6,7 @@ page:
   description: 运行管理 /
     调用日志详情：基本信息、调用主体、Ingress、路由结果、Upstream、性能、用量、成本、错误、路由追踪、Prompt/Response
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/ops/nexmux-ops-request-log-detail
 dataSources:

@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsRequestLogList
   description: 运行管理 / 调用日志：Gateway 每次模型请求的完整运行记录（状态 + 路由 + 用量/成本）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/ops/nexmux-ops-request-log-list
 state:

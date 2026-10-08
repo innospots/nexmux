@@ -15,10 +15,10 @@ class OpenApiBuildContractsTest {
         assertThat(spec).exists();
         String yaml = Files.readString(spec);
         assertThat(yaml).contains("Nexmux Console API");
-        assertThat(yaml).contains("/api/nexmux/providers");
-        assertThat(yaml).contains("/api/nexmux/models");
-        assertThat(yaml).contains("/api/nexmux/routes");
-        assertThat(yaml).contains("/api/nexmux/clients");
+        assertThat(yaml).contains("/api/d/providers");
+        assertThat(yaml).contains("/api/d/models");
+        assertThat(yaml).contains("/api/d/routes");
+        assertThat(yaml).contains("/api/d/clients");
         assertThat(yaml).contains("operationId: nexmuxProviderPage");
         assertThat(yaml).contains("operationId: nexmuxRoutePublish");
         assertThat(yaml).contains("name: NexmuxProvider");

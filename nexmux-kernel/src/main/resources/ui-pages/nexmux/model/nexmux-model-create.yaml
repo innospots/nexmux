@@ -5,7 +5,7 @@ page:
   name: nexmuxModelCreate
   description: 创建或修改 Model：基本信息、默认参数与分档定价
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/model/nexmux-model-create
 body:

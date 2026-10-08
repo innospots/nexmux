@@ -23,7 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.Parameter;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
-@Path("/api/nexmux/stats")
+@Path("/api/d/stats")
 @Produces(MediaType.APPLICATION_JSON)
 @Tag(name = "NexmuxStats", description = "统计聚合")
 @NexusAuthenticatedApi

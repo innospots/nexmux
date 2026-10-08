@@ -6,7 +6,7 @@ page:
   description: 系统管理 / 审计：Provider / Model / Route / Client / 配额 / 限流 / 定价 / 服务设置 /
     AppKey 等全部管理操作记录
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P0
   routePath: /page/nexmux/audit/nexmux-audit-list
 state:

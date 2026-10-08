@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsCostDetail
   description: 运行管理 / 成本明细详情：成本证据链（定价快照、用量与费用拆分）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-cost-detail
 dataSources:

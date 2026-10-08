@@ -5,7 +5,7 @@ page:
   name: nexmuxOpsClientUsage
   description: 运行管理 / 客户端用量：按客户端与 AppKey 的用量与成本
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/ops/nexmux-ops-client-usage
 state:

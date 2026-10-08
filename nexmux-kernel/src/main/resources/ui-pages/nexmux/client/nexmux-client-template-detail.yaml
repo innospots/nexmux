@@ -5,7 +5,7 @@ page:
   name: nexmuxClientTemplateDetail
   description: 访问治理 / 客户端模板详情：基本信息、路由授权、配额与限流策略（单页纵向，无 Tab，无 AppKey）
 meta:
-  apiBase: /api/nexmux
+  apiBase: /api/d
   priority: P1
   routePath: /page/nexmux/client/nexmux-client-template-detail
 dataSources:

@@ -15,7 +15,7 @@ class NexmuxConsoleOpenApiDefinitionContractsTest {
 
     @Test
     void definitionCarriesPathForJaxRsScanner() {
-        assertThat(NexmuxConsoleOpenApiDefinition.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexmux");
+        assertThat(NexmuxConsoleOpenApiDefinition.class.getAnnotation(Path.class).value()).isEqualTo("/api/d");
         assertThat(NexmuxConsoleOpenApiDefinition.class.getAnnotation(OpenAPIDefinition.class)).isNotNull();
         assertThat(NexmuxConsoleOpenApiDefinition.class.getAnnotation(SecurityScheme.class).securitySchemeName())
                 .isEqualTo(NexusOpenApiSecurityNames.BEARER_AUTH);

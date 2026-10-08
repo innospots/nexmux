@@ -24,7 +24,7 @@
 | 绑定行级管理（Provider / Model 两侧） | `/api/d/provider-bindings`、`/api/d/ops/model-binding-*` | **缺失** | 列表回退 `{}` 空态；写回退 `{ ok: true }` |
 | 定价版本（Model） | `GET /api/d/model-price-versions` | **缺失** | 回退 `{}` 空态 |
 | 模型列表过滤参数 | `GET /api/d/models` 增加 `keyword`、`status` | **缺失**（预留） | 参数被忽略即全量，分页口径不受影响再下推 |
-| 模型调用测试 | `POST /api/nexmux/models/{modelId}/invoke-test` | **占位实现**（接口存在，功能未落地） | — |
+| 模型调用测试 | `POST /api/d/models/{modelId}/invoke-test` | **占位实现**（接口存在，功能未落地） | — |
 
 ## 二、按模块明细
 
@@ -32,11 +32,11 @@
 
 | 契约路径（单段 kebab-case） | 建议后端路径 | 用途 / 影响页面 | 状态 |
 |------------------------------|--------------|------------------|------|
-| `GET /api/d/stats-dashboard` | `GET /api/nexmux/stats/dashboard` | 仪表盘汇总卡片与趋势 → `ops/dashboard.yaml` | **缺失**（404） |
-| `GET /api/d/stats-model-usage` | `GET /api/nexmux/stats/model-usage` | 模型用量时间序列 → `ops/model-usage.yaml` | **缺失**（404） |
-| `GET /api/d/stats-provider-usage` | `GET /api/nexmux/stats/provider-usage` | 供应商用量 → `ops/provider-usage.yaml` | **缺失**（404） |
-| `GET /api/d/stats-client-usage` | `GET /api/nexmux/stats/client-usage` | 客户端用量 → `ops/client-usage.yaml` | **缺失**（404） |
-| `GET /api/d/stats-provider-availability` | `GET /api/nexmux/stats/provider-availability` | 供应商可用性 → `ops/provider-availability.yaml` | **缺失**（404） |
+| `GET /api/d/stats-dashboard` | `GET /api/d/stats/dashboard` | 仪表盘汇总卡片与趋势 → `ops/dashboard.yaml` | **缺失**（404） |
+| `GET /api/d/stats-model-usage` | `GET /api/d/stats/model-usage` | 模型用量时间序列 → `ops/model-usage.yaml` | **缺失**（404） |
+| `GET /api/d/stats-provider-usage` | `GET /api/d/stats/provider-usage` | 供应商用量 → `ops/provider-usage.yaml` | **缺失**（404） |
+| `GET /api/d/stats-client-usage` | `GET /api/d/stats/client-usage` | 客户端用量 → `ops/client-usage.yaml` | **缺失**（404） |
+| `GET /api/d/stats-provider-availability` | `GET /api/d/stats/provider-availability` | 供应商可用性 → `ops/provider-availability.yaml` | **缺失**（404） |
 
 公共查询参数约定：`start` / `end`（ISO 时间范围）。返回形状按列表约定 `{ items, total }` 或汇总对象。
 
@@ -44,10 +44,10 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/provider-delete`（body `{ code }`） | `DELETE /api/nexmux/providers/{providerId}` | 删除供应商（详情页「···」菜单） | **缺失**；现转发层回退 `{ ok: true }` |
-| `GET /api/d/provider-bindings?provider=<code>` | `GET /api/nexmux/providers/{providerId}/bindings` | 详情页绑定模型行列表 | **缺失**；现仅 `GET by-code` 内嵌只读返回 |
-| `POST /api/d/ops/provider-binding-save` | `POST/PUT /api/nexmux/providers/{providerId}/bindings[/{bindingId}]` | 绑定行添加 / 编辑（providerModelId、单价、启停） | **缺失** |
-| `POST /api/d/ops/provider-binding-delete` | `DELETE /api/nexmux/providers/{providerId}/bindings/{bindingId}` | 绑定行移除 | **缺失** |
+| `POST /api/d/ops/provider-delete`（body `{ code }`） | `DELETE /api/d/providers/{providerId}` | 删除供应商（详情页「···」菜单） | **缺失**；现转发层回退 `{ ok: true }` |
+| `GET /api/d/provider-bindings?provider=<code>` | `GET /api/d/providers/{providerId}/bindings` | 详情页绑定模型行列表 | **缺失**；现仅 `GET by-code` 内嵌只读返回 |
+| `POST /api/d/ops/provider-binding-save` | `POST/PUT /api/d/providers/{providerId}/bindings[/{bindingId}]` | 绑定行添加 / 编辑（providerModelId、单价、启停） | **缺失** |
+| `POST /api/d/ops/provider-binding-delete` | `DELETE /api/d/providers/{providerId}/bindings/{bindingId}` | 绑定行移除 | **缺失** |
 
 已具备：分页列表（`keyword / status / types / keyStatus` 过滤全支持）、按 ID/编码查询、创建、更新、启停、连接测试、拉取上游模型（`pull-models` 只拉清单、不落绑定）。
 
@@ -55,12 +55,12 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/model-delete`（body `{ code }`） | `DELETE /api/nexmux/models/{modelId}` | 删除模型 | **缺失** |
+| `POST /api/d/ops/model-delete`（body `{ code }`） | `DELETE /api/d/models/{modelId}` | 删除模型 | **缺失** |
 | `GET /api/d/models` 增加 `keyword` 参数 | 同左 | 按编码/名称搜索 | **缺失**（预留：页面暂无搜索框） |
 | `GET /api/d/models` 增加 `status` 参数 | 同左 | 启用/停用 ChipFilter 筛选 | **缺失**（预留：页面暂无状态筛选） |
-| `GET /api/d/model-price-versions?model=<code>` | `GET /api/nexmux/models/{modelId}/price-versions` | 定价历史版本（BFF 契约 `priceVersion / priceEffective / priceVersions[]` 的数据源） | **缺失** |
-| `POST /api/d/ops/model-binding-save` / `-delete` | `POST/PUT/DELETE /api/nexmux/models/{modelId}/bindings[/{bindingId}]` | 扩展绑定（suppliers / extraBindings）单条增删改 | **缺失**；当前只能随整包更新提交 |
-| `POST /api/nexmux/models/{modelId}/invoke-test` | — | 调用测试 | **占位实现**（接口存在，后端自注未落地） |
+| `GET /api/d/model-price-versions?model=<code>` | `GET /api/d/models/{modelId}/price-versions` | 定价历史版本（BFF 契约 `priceVersion / priceEffective / priceVersions[]` 的数据源） | **缺失** |
+| `POST /api/d/ops/model-binding-save` / `-delete` | `POST/PUT/DELETE /api/d/models/{modelId}/bindings[/{bindingId}]` | 扩展绑定（suppliers / extraBindings）单条增删改 | **缺失**；当前只能随整包更新提交 |
+| `POST /api/d/models/{modelId}/invoke-test` | — | 调用测试 | **占位实现**（接口存在，后端自注未落地） |
 
 已具备：分页列表（`providers / type` 过滤）、按 ID/编码查询、创建、更新、启停。
 
@@ -68,7 +68,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/route-delete`（body `{ code }`） | `DELETE /api/nexmux/routes/{routeId}` | 删除路由 | **缺失** |
+| `POST /api/d/ops/route-delete`（body `{ code }`） | `DELETE /api/d/routes/{routeId}` | 删除路由 | **缺失** |
 
 已具备：分页列表（`status / type / tags` 过滤全支持）、按 ID/编码查询、创建、更新、发布、启停。
 
@@ -76,7 +76,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/client-delete`（body `{ code }`） | `DELETE /api/nexmux/clients/{clientId}` | 删除客户端 | **缺失** |
+| `POST /api/d/ops/client-delete`（body `{ code }`） | `DELETE /api/d/clients/{clientId}` | 删除客户端 | **缺失** |
 
 已具备：分页列表（`code / name / status / tags` 过滤全支持）、按 ID/编码查询、创建、更新、启停、轮换 AppKey（`rotate-app-key`）、路由授权（`route-grants`）。
 
@@ -84,7 +84,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/client-template-delete`（body `{ code }`） | `DELETE /api/nexmux/client-templates/{templateId}` | 删除模板 | **缺失** |
+| `POST /api/d/ops/client-template-delete`（body `{ code }`） | `DELETE /api/d/client-templates/{templateId}` | 删除模板 | **缺失** |
 
 已具备：分页列表（`keyword / status / tags` 过滤全支持）、按编码查询、创建、更新、启停、基于模板创建的客户端列表（`created-clients`）。
 

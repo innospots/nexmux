@@ -49,7 +49,7 @@
 
 **约束**：
 
-- 仅描述 **Nexus 控制台宿主**；不定义 `mux_*` 表、不定义 `/api/nexmux` 资源字段。
+- 仅描述 **Nexus 控制台宿主**；不定义 `mux_*` 表、不定义 `/api/d` 资源字段。
 - 与 Nexmux 产品相关的只有 **插件必选列表** 与 Web 层对 `X-Nexus-Page-Key` 的通用行为（见 `console-web.yaml` 注释）。
 - Workspace 会话由宿主写入 `SessionContext`；**不**在 YAML 中为 Nexmux 配置表增加 `tenant_id` / `workspace_id` 隔离项。
 
@@ -59,7 +59,7 @@
 
 | 键 | 类型 | 说明 | 消费方 |
 |----|------|------|--------|
-| `nexmux.console.api-base-path` | string | 管理 API 前缀，固定 `/api/nexmux` | Console 文档、PageDsl `meta.apiBase`、实现 `@Path` |
+| `nexmux.console.api-base-path` | string | 管理 API 前缀，固定 `/api/d` | Console 文档、PageDsl `meta.apiBase`、实现 `@Path` |
 | `nexmux.client.app-key-grace-seconds` | int | AppKey 轮换宽限期（秒） | `ClientService` |
 | `nexmux.debug.max-response-body-bytes` | int | 调试台响应体上限 | `DebugService` |
 | `nexmux.runtime.snapshot-poll-interval-seconds` | int | Runtime 拉取 `published_route_spec` 间隔 | **仅 Runtime/inbound**；Console 只写库 |
@@ -120,7 +120,7 @@ nexmux-kernel/src/main/resources/ui-pages/nexmux/provider/nexmux-provider-list.y
 |------|------|
 | `UiSpecPageDeclaration.pagePath` | 与 Nexus 统一：`/page/{domainKey}/{moduleKey}/{pageKey}`（Nexmux 即 `/page/nexmux/provider/nexmux-provider-list` 等） |
 | PageDsl `meta.routePath` | 与 Entry `pagePath` **逐字一致**（勿使用顶层 `route:`，解析器不识别） |
-| 管理 REST | `meta.apiBase` = `nexmux.console.api-base-path`（默认 `/api/nexmux`） |
+| 管理 REST | `meta.apiBase` = `nexmux.console.api-base-path`（默认 `/api/d`） |
 | 页面权限 HTTP 头 | `X-Nexus-Page-Key: {page.id}` |
 
 内置与产品均使用 `ConsoleModuleDescriptor.PAGE_ROUTE_PREFIX`（`/page`）+ `/{domainKey}/{moduleKey}/{pageKey}`；Nexmux 的 `domainKey=nexmux`。

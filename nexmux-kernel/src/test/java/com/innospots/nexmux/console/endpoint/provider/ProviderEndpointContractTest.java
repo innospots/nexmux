@@ -17,7 +17,7 @@ class ProviderEndpointContractTest {
 
     @Test
     void declaresApiBasePath() {
-        assertThat(ProviderEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/nexmux/providers");
+        assertThat(ProviderEndpoint.class.getAnnotation(Path.class).value()).isEqualTo("/api/d/providers");
         assertThat(ProviderEndpoint.class.getAnnotation(Tag.class).name()).isEqualTo("NexmuxProvider");
         assertThat(ProviderEndpoint.class.getAnnotation(NexusAuthenticatedApi.class)).isNotNull();
     }

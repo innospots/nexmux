@@ -9,7 +9,7 @@ import type { LayoutDsl, SitemapResource } from "pactor-app";
 import type { DemoUser } from "./accounts";
 
 /**
- * Sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
+ * sitemap 数据源（design/dynamic-page.md 方案 B 示例实现）。
  * 真实项目由后端接口返回同构对象——端点按会话裁剪：
  * 匿名 → public 页（登录/注册）；登录后 → 该角色可见的 menus / pages / permissions。
  *

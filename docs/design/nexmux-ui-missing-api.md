@@ -12,7 +12,7 @@
   - 列表/选项类一律**单段 kebab-case**：`/api/d/stats-dashboard`、`/api/d/provider-bindings`；**禁止** `/api/d/stats/dashboard` 两段写法（`[...parts]` 会把第二段当详情 id 解析）
   - 详情：`/api/d/<resource>/<code|id>`；子资源：`/api/d/<resource>/<code>/<sub>`
   - **写操作走 `ops/` 前缀 POST**：`/api/d/ops/provider-delete`（转发层仅导出 GET/POST，不用 DELETE/PATCH 动词）
-- **返回形状约定**：列表 `{ items, total, filters? }`；详情对空 id 返回空对象而非 404（新建预填链路依赖）；选项类单段路径供 `options: ${data.xxx}` 绑定；写操作提交闭环（request → message → reload）不依赖返回体内容。
+- **返回形状约定**：列表 `{ items, total, filters? }`；选项类同样返回 `{ items: [...] }`，页面绑定 `options: ${data.xxx.items}`（空数据回退 `{}` 时 `.items` 为 undefined，Select 按空选项渲染；**不可用 `${data.xxx || []}`——DSL 表达式不支持数组字面量 `[]`**）；详情对空 id 返回空对象而非 404（新建预填链路依赖）；写操作提交闭环（request → message → reload）不依赖返回体内容。
 - **接真实后端**：只需把 `next.config.js` 的 `API_BASE_URLS` 换成真实地址，页面 yaml 与转发层零改动。
 
 ## 一、按用途汇总

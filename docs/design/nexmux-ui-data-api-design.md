@@ -61,7 +61,7 @@
 | 统计聚合（stats） | `nexmux-kernel` | `innospots-nexus-platform`（既有） | 否，新 Java 包 |
 | 客户端模板服务 | `nexmux-kernel`（`core/access` 内扩展） | 同上 | 否 |
 | 端点补全（provider/model/route/client/ops/debug） | `nexmux-kernel`（`console/endpoint` 内扩展） | 同上 | 否 |
-| `mux_request_log` 扩列 DDL | `nexmux-spring`（`nexus/schema/nexmux-h2.sql`） | — | 否 |
+| `mux_request_log` 扩列 DDL | `nexmux-spring`（`schema/nexmux/nexmux-h2.sql`） | — | 否 |
 | BFF 适配层 | `nexmux-ui`（非 Maven） | 无新 npm 依赖（用原生 fetch） | 否 |
 
 ### 5.2 包结构

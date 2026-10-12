@@ -15,14 +15,14 @@ spring:
     init:
       # Spring Boot 4 的 embedded 模式仅识别 jdbc:h2:mem，file 库须用 always（脚本均为 CREATE IF NOT EXISTS）
       mode: always
-      # 本模块 src/main/resources/schema/*.sql，按 core → plugin → console → platform 顺序执行
+      # 本模块 src/main/resources/schema/ 下：宿主平台 DDL 在根（core → plugin → console → platform），
+      # 产品脚本（mux_* 表 DDL 与种子数据）在 schema/nexmux/
       schema-locations:
         - classpath:schema/nexus-core-h2.sql
         - classpath:schema/nexus-plugin-h2.sql
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
-        # Nexmux 产品表（mux_*）
-        - classpath:nexus/schema/nexmux-h2.sql
+        - classpath:schema/nexmux/nexmux-h2.sql
       # 种子数据：pi-ai 提供商/模型 catalog（MERGE 幂等，可重复执行）
       data-locations:
-        - classpath:nexus/schema/nexmux-catalog-data-h2.sql
+        - classpath:schema/nexmux/nexmux-catalog-data-h2.sql

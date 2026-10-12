@@ -194,7 +194,7 @@ public record ClientRotateAppKeyRequest(
 
 运行库表（`mux_request_log` 等）由 Runtime 写入；Console 只读 Dao 可落在 `core.ops`，连接只读数据源或同一库只读账号（部署决策见 P0 实施文档）。
 
-> **落地口径**（ADR-0001 审计 A1/A4 修复）：独立 Runtime assembly 就绪前，`mux_request_log` DDL 暂驻 `nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql`（脚本头部有归属注释），Runtime assembly 立项后迁出；本地开发单库同账号仅限 dev（`application-local.yaml` 已注释），生产部署 Console 必须用对运行表无写权限的只读账号；过渡期内 Console 侧唯一的运行表写入来自调试台，一律 `source=DEBUG`。
+> **落地口径**（ADR-0001 审计 A1/A4 修复）：独立 Runtime assembly 就绪前，`mux_request_log` DDL 暂驻 `nexmux-spring/src/main/resources/schema/nexmux/nexmux-h2.sql`（脚本头部有归属注释），Runtime assembly 立项后迁出；本地开发单库同账号仅限 dev（`application-local.yaml` 已注释），生产部署 Console 必须用对运行表无写权限的只读账号；过渡期内 Console 侧唯一的运行表写入来自调试台，一律 `source=DEBUG`。
 
 **配置**：分项 YAML 边界见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) — `application.yaml` 仅引导；`nexus/console-*.yaml` 为 Nexus 宿主；产品键在 `nexus/nexmux.yaml`（前缀 `nexmux.`）。禁止新增业务 `*.properties`。
 

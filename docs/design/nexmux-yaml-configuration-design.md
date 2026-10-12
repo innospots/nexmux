@@ -32,10 +32,10 @@
 
 | 项 | 规则 |
 |----|------|
-| 职责边界 | 仅 **引导与基础设施**：`spring.application.name`、`spring.jersey`、`spring.datasource`、`spring.sql.init` |
+| 职责边界 | 仅 **引导与基础设施**：`spring.application.name`、`spring.jersey`、`spring.datasource`、`spring.sql.init`；`application.yaml` 同时承载 **Console 默认面**（端口 `${CONSOLE_PORT:8082}` / `${CONSOLE_MANAGEMENT_PORT:19090}`），Runtime 进程以 `application-runtime.yaml` 覆盖（`${RUNTIME_PORT:8083}` / `${RUNTIME_MANAGEMENT_PORT:19091}`）。不设 `application-console.yaml`：Console 即默认面，避免漏传 profile 回落默认端口 |
 | 配置导入 | 通过 `spring.config.import` 引入 `classpath:nexus/console-*.yaml` 与 `classpath:nexus/nexmux.yaml`；**不得**把 Nexmux 业务键写入本文件 |
-| Schema | `spring.sql.init.schema-locations` 逗号分隔；须包含 `plugin-installation-h2.sql`、`console-catalog-h2.sql`、**`nexmux-h2.sql`**（产品表） |
-| 覆盖 | 生产/本地可使用 `optional:file:./config/nexus/<同名文件>` 覆盖 classpath 分项，**不**复制整棵配置进 `application.yaml` |
+| Schema | `spring.sql.init.schema-locations` 逗号分隔；宿主平台 DDL 为 `schema/nexus-{core,plugin,console,platform}-h2.sql`（含 `nx_plugin_installation`、`nx_console_catalog_resource` 等宿主表），产品表 DDL 为 **`schema/nexmux/nexmux-h2.sql`**，种子数据为 `schema/nexmux/nexmux-*-data-h2.sql`。**DDL/种子仅 Console 进程执行**；`application-runtime.yaml` 固定 `spring.sql.init.mode=never`（ADR-0002 表级写责分离），fresh 库须先起 Console |
+| 覆盖 | 生产/本地可使用 `optional:file:./config/nexus/<同名文件>` 覆盖 classpath 分项（两进程共享 `config/`），**不**复制整棵配置进 `application.yaml`；角色级覆盖用 `config/application-runtime.yaml`（仅 Runtime 进程加载） |
 
 ## 4. 分类 B：`nexus/console-*.yaml` 约束
 

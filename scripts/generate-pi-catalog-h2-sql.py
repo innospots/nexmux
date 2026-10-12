@@ -13,7 +13,7 @@
 生图/语音需厂商原生协议，暂不引入），并把已收厂商的模型行补上中文描述、双币定价、
 发布日与模态。
 
-输出：nexmux-spring/src/main/resources/nexus/schema/nexmux-catalog-data-h2.sql
+输出：nexmux-spring/src/main/resources/schema/nexmux/nexmux-catalog-data-h2.sql
   - mux_provider / mux_model 种子数据
   - 使用 H2 MERGE INTO ... WHEN NOT MATCHED THEN INSERT，只插不更新
     （已落库的表行不会被本脚本覆盖；改种子值后需清库或手工迁移才生效）
@@ -41,7 +41,7 @@ INSTALLED_DATA = ("/Users/mac/.local/share/fnm/node-versions/v25.8.1/installatio
                   "@earendil-works/pi-coding-agent/node_modules/@earendil-works/pi-ai/dist/providers/data")
 
 OUT_SQL = os.path.join(os.path.dirname(os.path.abspath(__file__)),
-                       "../nexmux-spring/src/main/resources/nexus/schema/nexmux-catalog-data-h2.sql")
+                       "../nexmux-spring/src/main/resources/schema/nexmux/nexmux-catalog-data-h2.sql")
 
 # pi provider -> mux provider_type（COMMERCIAL / CLOUD / PRIVATE / CUSTOM）
 PROVIDER_TYPE = {

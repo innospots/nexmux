@@ -218,7 +218,7 @@ OpenAPI 中可搜索 `PageDsl` / `uiSitemapRenderNexmux` 相关 operation。
 | **`console-web.yaml`** | `nexus.console.web.*` | Web 横切：总开关 `enabled`、安全/CORS/dev-session（见上节） |
 | **`console-openapi.yaml`** | `scalar.*` | Scalar 文档页与 OpenAPI HTTP 出口 |
 | **`console-plugins.yaml`** | `nexus.plugin.*`、`nexus.plugins.*` | 插件自动安装、`required` 列表（须含 **`com.innospots.nexmux.console`**） |
-| **`schema/`** | — | 产品 H2 增量脚本（如 `nexmux-h2.sql`），由 `application-local.yaml` 的 `spring.sql.init` 与根 `schema/` 脚本一起初始化库 |
+| **`schema/nexmux/`** | — | 产品 H2 脚本（`nexmux-h2.sql` DDL 与 `nexmux-*-data-h2.sql` 种子数据），由 `application-local.yaml` 的 `spring.sql.init` 与 `schema/` 根的宿主平台脚本（`nexus-{core,plugin,console,platform}-h2.sql`）一起初始化库 |
 
 产品键规范与禁止项：仓库 **`docs/design/nexmux-yaml-configuration-design.md`**。
 

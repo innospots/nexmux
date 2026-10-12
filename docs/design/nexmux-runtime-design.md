@@ -161,7 +161,7 @@ public record InvocationContext(
 ### 6.4 持久化与 Dao
 
 - `mux_binding_health` 一表一 Dao（`inbound` 侧 `BindingHealthDao`，Console 侧只读复用同一 Dao 接口，不调写方法）；无 join、无 mapper.xml。
-- DDL 归属：`nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql` 追加，脚本内注释「数据面表，Runtime 写 / Console 只读」（沿用审计 A4 口径；拆库时随运行表一并迁出）。
+- DDL 归属：`nexmux-spring/src/main/resources/schema/nexmux/nexmux-h2.sql` 追加，脚本内注释「数据面表，Runtime 写 / Console 只读」（沿用审计 A4 口径；拆库时随运行表一并迁出）。
 - 配置键（`nexus/nexmux.yaml` 的 `nexmux.runtime.*`）：
 
 | 键 | 默认 | 说明 |

@@ -134,7 +134,7 @@ call '{"model":"e2e-route","messages":[{"role":"user","content":"hi"}]}'
 # 注意：/call-logs 仅支持 start/end/status 等过滤（无分页参数），不传会全量返回
 curl -s "http://localhost:8082/api/d/call-logs?start=$(date +%F)&end=$(date +%F)" | grep -o 'rq-[a-z0-9]*' | head -2
 # 预期：返回中出现 rq- 前缀（RUNTIME）行，clientCode=e2e-app；:9011 调用日志页同可见
-# 注：共库时 runtime 的 spring.sql.init（mode=always）会对开发库执行幂等 DDL（新增 mux_binding_health 表）
+# 注：runtime 进程 spring.sql.init.mode=never（DDL/种子归 Console）；E2E 须先起 Console 建库（含 mux_binding_health）
 
 # 验证后精确清理（必须）
 cleanup_fixtures

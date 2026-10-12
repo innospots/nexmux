@@ -16,15 +16,17 @@ spring:
       - optional:classpath:nexus/console-plugins.yaml
       # 本地覆盖：可选放置同名文件，例如 optional:file:./config/nexus/console-web.yaml
 
+# 默认面 = Console 进程（profile: local / prod）；Runtime 进程以 runtime profile 叠加覆盖
+# 端口与装配（application-runtime.yaml）。本文件不含数据源与业务键。
 server:
-  port: 8082
+  port: ${CONSOLE_PORT:8082}
 
 management:
   # actuator 仅供内网/本机：绑定回环地址 + 独立管理端口（默认 19090；runtime profile 19091），
   # 不随业务端口（8082/18082、8083）公网暴露
   server:
     address: 127.0.0.1
-    port: ${MANAGEMENT_PORT:19090}
+    port: ${CONSOLE_MANAGEMENT_PORT:19090}
   endpoints:
     web:
       exposure:

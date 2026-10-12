@@ -73,7 +73,7 @@
 
 - **架构依据**：架构 §8「运行库表由 Runtime 写入；Console 只读 Dao，连接只读数据源或同一库只读账号」；ADR-0001 备选方案明确**否决**「Console 与 Runtime 单库实时读写」。
 - **现状证据**：
-  - `mux_request_log` 建表/索引位于 Console 侧 `nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql:180`（及 `:224+` 的增量列）。
+  - `mux_request_log` 建表/索引位于 Console 侧 `nexmux-spring/src/main/resources/schema/nexmux/nexmux-h2.sql:180`（及 `:224+` 的增量列）。
   - `nexmux-spring/src/main/resources/application-local.yaml:5-8`：配置库与运行库**同库、同账号 `sa`、可写**。
 - **影响**：控制面/数据面未分离；高频运行状态与配置同库同权限，ADR 已明确否决该模式。
 - **修复方向**：运行表 DDL 归属数据面；Console 侧改用只读数据源/只读账号；本地开发如需单库，至少在文档与配置中体现"只读"约束。
@@ -165,7 +165,7 @@
 | A1 | `nexmux-kernel/.../core/debug/service/DebugService.java:516,586` |
 | A2 | `DebugService.java:235,281`；`core/provider/service/ProviderService.java:229,282-284`；`nexmux-spring/.../NexmuxKernelConfiguration.java:161,296` |
 | A3 | `DebugService.java:235,281,415` |
-| A4 | `nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql:180,224`；`application-local.yaml:5-8` |
+| A4 | `nexmux-spring/src/main/resources/schema/nexmux/nexmux-h2.sql:180,224`；`application-local.yaml:5-8` |
 | B1 | `DebugService.java:159-204`（`resolveClientTarget`） |
 | B2 | `docs/design/nexmux-architecture-design.md` §5.2 |
 | E1 | `nexmux-kernel/src/main/resources/ui-pages/nexmux/**` vs `nexmux-ui/src/server/yaml/**` |

@@ -44,6 +44,14 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 ./bin/startup.sh "prod,runtime"
 ```
 
+**启动顺序**：fresh 库必须先起 Console（DDL 与种子数据由 Console 进程执行；Runtime 的 `spring.sql.init.mode=never`，只消费快照）。
+
+可选端口覆盖（默认值见括号）：`CONSOLE_PORT`（8082）、`RUNTIME_PORT`（8083）、`CONSOLE_MANAGEMENT_PORT`（19090）、`RUNTIME_MANAGEMENT_PORT`（19091）。
+
+**配置覆盖**：`config/` 目录对两个进程共享（`startup.sh` 挂载 `optional:file:config/`），`config/nexus/*.yaml` 会同时影响两进程；角色级覆盖使用 `config/application-runtime.yaml`（仅 Runtime 进程加载）。
+
+注意：宿主认证装配无 profile 守卫，**prod 下 Console 与 Runtime 都必须注入 `CONSOLE_TOKEN_SECRET`**（同值）。
+
 停止：`./bin/shutdown.sh`（各进程独立 PID 文件）。
 
 ## 3. Profile 矩阵
@@ -54,6 +62,8 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 | `local,runtime` | 本地 Runtime | 同上（跨目录启动须 `SPRING_DATASOURCE_URL` 绝对路径覆盖） | `/v1/**` 免会话鉴权 |
 | `prod` | 生产 Console | `DB_URL`（绝对路径） | security 强制开启 |
 | `prod,runtime` | 生产 Runtime | 同上 | 同上 + AppKey 鉴权 |
+
+所有 runtime 组合：`spring.sql.init.mode=never`（DDL/种子归 Console），且 prod 下必须注入 `CONSOLE_TOKEN_SECRET`。
 
 ## 4. 关键配置（`config/nexus/nexmux.yaml`）
 
@@ -71,7 +81,7 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 ## 5. 健康检查与监控（仅内网/本机）
 
 - actuator 绑定回环地址（`management.server.address=127.0.0.1`）+ 独立管理端口：
-  Console `127.0.0.1:19090`、Runtime `127.0.0.1:19091`（runtime profile 覆盖；可用 `MANAGEMENT_PORT` env 再改）。
+  Console `127.0.0.1:19090`、Runtime `127.0.0.1:19091`（runtime profile 覆盖；可分别用 `CONSOLE_MANAGEMENT_PORT` / `RUNTIME_MANAGEMENT_PORT` env 再改）。
   **业务端口（8082/18082/8083）不再暴露 `/actuator/**`**，公网不可达。
 - `GET /actuator/health`（liveness/readiness 已启用）；Prometheus：`/actuator/prometheus`。
 

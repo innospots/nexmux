@@ -14,4 +14,15 @@ nexmux:
   debug:
     max-response-body-bytes: 65536
   runtime:
+    # 快照全量重载周期（秒）
     snapshot-poll-interval-seconds: 30
+    # Binding 主动探活周期（秒）
+    health-probe-interval-seconds: 60
+    # 单次探测超时（毫秒）
+    health-probe-timeout-ms: 5000
+    # 连续失败判 UNAVAILABLE 阈值
+    health-unhealthy-threshold: 3
+    # 探测延迟超此值判 DEGRADED（毫秒）
+    health-degraded-latency-ms: 10000
+    # 配额内存计数与运行库聚合校准周期（秒）
+    quota-resync-interval-seconds: 300

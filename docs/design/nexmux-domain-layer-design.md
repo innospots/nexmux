@@ -97,7 +97,7 @@
 | referenceMultiplier | 内部参考倍率 M |
 | timeRateRules | 可选；Binding 级时段倍率（成本/参考分列） |
 | enabled | |
-| healthStatus | 运行探测回写 |
+| ~~healthStatus~~ | **废止**（ADR-0001 边界：高频运行状态不回写配置表）；健康状态由 Runtime 侧 `mux_binding_health` 承载，见 [nexmux-runtime-design.md](./nexmux-runtime-design.md) §6.1 |
 
 ### 5.2 `ModelEntity` → `mux_model`
 

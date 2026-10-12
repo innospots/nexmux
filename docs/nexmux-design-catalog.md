@@ -27,8 +27,10 @@
 | L2 | [nexmux-ui-spec-pages-design.md](./design/nexmux-ui-spec-pages-design.md) | UiSpec/PageDsl 页面方案结构（S-LIST / Tab / Stack 等） |
 | L1 | [nexmux-p0-console-design.md](./design/nexmux-p0-console-design.md) | P0 可调用闭环：域划分、表意契约、测试范围 |
 | L2 | [nexmux-ui-data-api-design.md](./design/nexmux-ui-data-api-design.md) | UI 数据接口：BFF 适配层、后端端点补全、mux_request_log 扩列、实施批次 |
+| L2 | [nexmux-runtime-design.md](./design/nexmux-runtime-design.md) | **Model Runtime（数据面）P0**：profile 进程形态、Ingress、调用流水线、探活、计量全量、状态码与测试范围 |
 | 参考 | [nexmux-ui-data-api-inventory.md](./design/nexmux-ui-data-api-inventory.md) | **已实现**数据接口清单（字段级输入输出；随批次滚动更新） |
 | L3 | [0001-console-runtime-configuration-boundary.md](./design/adr/0001-console-runtime-configuration-boundary.md) | Console 与 Runtime 配置边界 ADR |
+| L3 | [0002-runtime-deployment-form.md](./design/adr/0002-runtime-deployment-form.md) | Runtime 工程形态（独立 profile 进程）与运行库共用（修订 ADR-0001 决策 5） |
 
 命名约定（`java:design`）：
 
@@ -45,7 +47,7 @@
 | 项 | 结论 / 待确认 |
 |----|----------------|
 | 平台级 vs Nexus Workspace | Nexmux **不做 Tenant/Workspace 资源隔离**；Nexus Console 默认带 workspace 会话。实现须在 **平台域（PLATFORM realm）** 下挂载菜单与 API，配置表**不含** `tenant_id` / `workspace_id` 隔离列（与 PRD §3.7 一致）。 |
-| Runtime 落仓 | 当前 AGENTS **无**独立 Runtime 模块；P0 先交付 **Model Console**；Runtime 逻辑先沉淀在 `nexmux-kernel.inbound` 包，**独立进程/assembly 另开 `java:project` 评审**（见 ADR-0001）。 |
+| Runtime 落仓 | Runtime 设计已立项（[nexmux-runtime-design.md](./design/nexmux-runtime-design.md)）：不新增 Maven 模块，`nexmux-spring` 独立 `runtime` profile 进程启动，代码归属 `nexmux-kernel.inbound`（见 ADR-0002）。 |
 | 身份与权限 | 不建设用户/角色页；复用 Nexus 控制台鉴权 + 外部 IAM；Nexmux 定义 **页面级 permission key**（前缀 `nexmux.`）与三类默认角色映射（PRD §4）。 |
 | 状态码模块码 | 产品域使用 **`NMX`**，异常统一 `NexusException` + `StatusCode`（`innospots-nexus-base`）。 |
 

@@ -1,0 +1,21 @@
+# ---------------------------------------------------------------------------
+# spring.profiles.active=local,runtime —— Model Runtime 数据面进程（ADR-0002）
+#
+# 与 Console 进程（默认 profile）共用 artifact 与数据库实例，但：
+#   - 独立端口（默认 8083）；独立 JVM 进程启动
+#   - 仅装配 inbound 链路（/v1/** Ingress + 快照/探活/配额调度），不装配 /api/d/** 管理端点
+#   - 运行表（mux_request_log / mux_binding_health）由本进程写入；Console 只读
+# ---------------------------------------------------------------------------
+server:
+  port: 8083
+
+nexus:
+  console:
+    web:
+      security:
+        # /v1/** 由 AppKey 鉴权（inbound AppKeyVerifier），不走控制台 Bearer 会话；
+        # security.enabled=true 时该前缀跳过 ConsoleAuthenticationFilter
+        permit-all-patterns:
+          - /v1/**
+          - /actuator/**
+          - /openapi/**

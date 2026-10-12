@@ -2,7 +2,7 @@
 
 ## 状态
 
-已接受（与产品 PRD 一致；Runtime 工程形态待二期 project 评审）
+已接受（与产品 PRD 一致；Runtime 工程形态已由 [ADR-0002](./0002-runtime-deployment-form.md) 收口：不新增模块，`nexmux-spring` 独立 `runtime` profile 进程）
 
 ## 日期
 

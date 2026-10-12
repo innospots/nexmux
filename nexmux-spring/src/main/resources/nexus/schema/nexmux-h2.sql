@@ -168,6 +168,18 @@ ALTER TABLE mux_config_audit_log ADD COLUMN IF NOT EXISTS client_ip VARCHAR(64);
 ALTER TABLE mux_config_audit_log ADD COLUMN IF NOT EXISTS request_id VARCHAR(64);
 ALTER TABLE mux_config_audit_log ADD COLUMN IF NOT EXISTS user_agent VARCHAR(512);
 
+CREATE TABLE IF NOT EXISTS mux_platform_setting (
+    setting_key VARCHAR(64) NOT NULL PRIMARY KEY,
+    setting_value CLOB,
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    created_by VARCHAR(64),
+    updated_by VARCHAR(64)
+);
+
+-- 数据面运行表（ADR-0001 §3）：正常流量由 Runtime 写入，Console 只读查询；
+-- Console 调试台的穿透调用以 source='DEBUG' 显式标记（审计 A1 修复）。
+-- 本地开发单库暂驻本 assembly；独立 Runtime assembly 落地后 DDL 迁出 Console（审计 A4）。
 CREATE TABLE IF NOT EXISTS mux_request_log (
     request_id VARCHAR(64) NOT NULL PRIMARY KEY,
     client_id VARCHAR(32),
@@ -205,6 +217,7 @@ CREATE TABLE IF NOT EXISTS mux_request_log (
     error_type VARCHAR(64),
     pricing_snapshot CLOB,
     prompt_snapshot CLOB,
+    source VARCHAR(16),
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
     created_by VARCHAR(64),
@@ -239,7 +252,28 @@ ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS trace_id VARCHAR(64);
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS error_type VARCHAR(64);
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS pricing_snapshot CLOB;
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS prompt_snapshot CLOB;
+ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS source VARCHAR(16);
 CREATE INDEX IF NOT EXISTS idx_mux_request_log_time ON mux_request_log(requested_at);
 CREATE INDEX IF NOT EXISTS idx_mux_request_log_model_time ON mux_request_log(model_code, requested_at);
 CREATE INDEX IF NOT EXISTS idx_mux_request_log_provider_time ON mux_request_log(provider_code, requested_at);
 CREATE INDEX IF NOT EXISTS idx_mux_request_log_client_time ON mux_request_log(client_id, requested_at);
+
+-- 数据面运行表（nexmux-runtime-design §6.1）：Binding 主动探活结果，Runtime 写 / Console 只读。
+CREATE TABLE IF NOT EXISTS mux_binding_health (
+    probe_id VARCHAR(32) NOT NULL PRIMARY KEY,
+    provider_id VARCHAR(32) NOT NULL,
+    provider_model_id VARCHAR(256) NOT NULL,
+    model_code VARCHAR(64),
+    health_status VARCHAR(16) NOT NULL,
+    consecutive_failures INT NOT NULL,
+    last_probe_at TIMESTAMP,
+    last_latency_ms BIGINT,
+    last_error VARCHAR(512),
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+    created_by VARCHAR(64),
+    updated_by VARCHAR(64)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS uk_mux_binding_health_target
+    ON mux_binding_health(provider_id, provider_model_id);
+CREATE INDEX IF NOT EXISTS idx_mux_binding_health_model ON mux_binding_health(model_code);

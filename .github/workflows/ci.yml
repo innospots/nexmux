@@ -1,0 +1,59 @@
+name: ci
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+
+jobs:
+  backend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # kernel 依赖 innospots-nexus-platform（SNAPSHOT，sibling 仓库）
+      - uses: actions/checkout@v4
+        with:
+          repository: innospots/innospots-nexus
+          path: innospots-nexus
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: corretto
+          java-version: "25"
+
+      - name: Install nexus platform to local repo
+        working-directory: innospots-nexus
+        run: mvn -B clean install -DskipTests
+
+      - name: Verify (compile + tests)
+        run: mvn -B clean verify
+
+      - name: Package assembly
+        run: mvn -B package -pl nexmux-spring -am -DskipTests
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nexmux-spring-dist
+          path: dist/nexmux-spring.tar.gz
+
+  frontend:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+          cache-dependency-path: nexmux-ui/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: nexmux-ui
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck + Lint
+        working-directory: nexmux-ui
+        run: |
+          npx tsc --noEmit
+          npx eslint src

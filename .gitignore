@@ -35,4 +35,5 @@ coverage/
 logs
 *.log
 out/
-logs
+logsscripts/__pycache__/
+nexmux-ui/tsconfig.tsbuildinfo

@@ -1,11 +1,22 @@
-# spring.profiles.active=prod — 仅数据源差异化（公共项见 application.yaml）
-# 生产库 DDL 需自行迁移；运行时 classpath 需包含 MySQL JDBC 驱动（示例模块默认仅打包 H2）。
+# ---------------------------------------------------------------------------
+# spring.profiles.active=prod — 生产数据源与安全基线（公共项见 application.yaml）
+#
+# 生产默认同样使用 **H2 嵌入式文件库**（与 local 同引擎，DDL 脚本幂等：
+# CREATE/ALTER ... IF NOT EXISTS，启动自动迁移）。如需 MySQL 等外部库，
+# 替换 spring.datasource.* 并将 spring.sql.init.mode 置为 never（DDL 手工迁移，
+# 当前仅提供 H2 方言脚本）。
+#
+# 必填环境变量：CONSOLE_TOKEN_SECRET（16 字节 AES 密钥）。
+# 可选覆盖：DB_URL / DB_USER / DB_PASSWORD / CONSOLE_SECURITY_ENABLED。
+# ---------------------------------------------------------------------------
 spring:
   datasource:
-    driver-class-name: ${DB_DRIVER:com.mysql.cj.jdbc.Driver}
-    url: jdbc:mysql://${DB_IP}:${DB_PORT:3306}/${DB_NAME}?allowMultiQueries=true&useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=${DB_TIMEZONE:GMT%2B8}&zeroDateTimeBehavior=CONVERT_TO_NULL
-    username: ${DB_USER}
-    password: ${DB_PASSWORD}
+    # ⚠️ 生产库必须为绝对路径：Console / Runtime 双进程 CWD 不同，
+    # 相对路径 ./out/db 会让两进程各用各的库（本地 E2E 已踩过）。
+    url: ${DB_URL:jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE}
+    driver-class-name: org.h2.Driver
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
     hikari:
       maximum-pool-size: 32
       minimum-idle: 2
@@ -14,4 +25,28 @@ spring:
       idle-timeout: 600000
   sql:
     init:
-      mode: never
+      # 幂等脚本，启动自动建表/补列
+      mode: always
+      schema-locations:
+        - classpath:schema/nexus-core-h2.sql
+        - classpath:schema/nexus-plugin-h2.sql
+        - classpath:schema/nexus-console-h2.sql
+        - classpath:schema/nexus-platform-h2.sql
+        # Nexmux 产品表（mux_*）
+        - classpath:nexus/schema/nexmux-h2.sql
+      # 生产不自动种 catalog；如需种子数据，追加
+      # data-locations: classpath:nexus/schema/nexmux-catalog-data-h2.sql
+
+# 生产安全基线（覆盖 nexus/console-*.yaml 的开发态默认值）
+nexus:
+  console:
+    auth:
+      # 生产必须经环境变量注入（16 字节 AES 密钥），无默认值，缺省启动失败
+      token-secret: ${CONSOLE_TOKEN_SECRET}
+    web:
+      security:
+        # 生产强制 Bearer 鉴权 + 页面权限判定（runtime profile 下 /v1/** 由
+        # application-runtime.yaml 的 permit-all-patterns 放行，走 AppKey 鉴权）
+        enabled: ${CONSOLE_SECURITY_ENABLED:true}
+        dev-session:
+          enabled: false

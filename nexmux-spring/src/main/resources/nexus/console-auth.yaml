@@ -11,6 +11,7 @@ nexus:
   console:
     auth:
       # 紧凑令牌 AES 密钥；未配置时使用 AuthConfig.DEFAULT_TOKEN_SECRET
+      # ⚠️ 生产：application-prod.yaml 强制经 CONSOLE_TOKEN_SECRET 环境变量注入（无默认值）
       token-secret: "0123456789abcdef"
       # 访问令牌有效期（秒）；默认 7200
       access-token-ttl-seconds: 7200

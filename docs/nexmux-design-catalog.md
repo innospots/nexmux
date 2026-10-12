@@ -14,7 +14,7 @@
 | 管理控制台设计 V1.0 | [`../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md`](../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md) |
 | 线框图目录 | [`../../product-design/gateweave/prd-diagram/README.md`](../../product-design/gateweave/prd-diagram/README.md) |
 
-可运行控制面组装：**nexmux-spring**（Model Console）。
+可运行控制面组装：**nexmux-spring**（Model Console）。运行部署见 [`nexmux-deployment.md`](./nexmux-deployment.md)。
 
 ## 本仓库设计文档索引
 

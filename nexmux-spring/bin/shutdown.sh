@@ -23,7 +23,7 @@ if [[ -z "${SERVER_MAIN_CLASS}" ]]; then
 fi
 
 getPid() {
-  TPID=$(pgrep -f "spring.profiles.active=${PROFILE}.*${SERVER_MAIN_CLASS}" 2>/dev/null || true)
+  TPID=$(pgrep -f "spring.profiles.active=${PROFILE}[[:space:]].*${SERVER_MAIN_CLASS}" 2>/dev/null || true)
   if [[ -z "${TPID}" ]]; then
     TPID=0
   fi

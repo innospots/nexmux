@@ -86,11 +86,13 @@ public final class InvocationPipeline {
                     .map(QuotaGate::windowStart)
                     .min(LocalDateTime::compareTo)
                     .orElse(LocalDateTime.of(1970, 1, 1, 0, 0));
+            // 聚合别名须加双引号保留大小写（同 StatsQueryDao 约定）：
+            // H2 DATABASE_TO_LOWER=TRUE 会把未加引号的别名小写化（label=costusd），导致驼峰键取不到值
             List<Map<String, Object>> rows = requestLogDao.selectMaps(new QueryWrapper<RequestLogEntity>()
-                    .select("COUNT(*) AS requestCount",
-                            "COALESCE(SUM(input_tokens),0) AS inputTokens",
-                            "COALESCE(SUM(output_tokens),0) AS outputTokens",
-                            "COALESCE(SUM(cost_usd),0) AS costUsd")
+                    .select("COUNT(*) AS \"requestCount\"",
+                            "COALESCE(SUM(input_tokens),0) AS \"inputTokens\"",
+                            "COALESCE(SUM(output_tokens),0) AS \"outputTokens\"",
+                            "COALESCE(SUM(cost_usd),0) AS \"costUsd\"")
                     .eq("client_id", client.getClientId())
                     .eq("source", REQUEST_LOG_SOURCE)
                     .ge("requested_at", earliest));
@@ -98,18 +100,28 @@ public final class InvocationPipeline {
                 continue;
             }
             Map<String, Object> row = rows.get(0);
-            long in = numberOf(row.get("inputTokens"));
-            long out = numberOf(row.get("outputTokens"));
+            long in = numberOf(valueOf(row, "inputTokens"));
+            long out = numberOf(valueOf(row, "outputTokens"));
             Map<String, Long> usage = Map.of(
-                    "REQUEST", numberOf(row.get("requestCount")),
+                    "REQUEST", numberOf(valueOf(row, "requestCount")),
                     "INPUT_TOKEN", in,
                     "OUTPUT_TOKEN", out,
                     "TOTAL_TOKEN", in + out,
                     // COST 计数刻度与 QuotaGate 一致：1e-8 美元
-                    "COST", new java.math.BigDecimal(String.valueOf(row.get("costUsd")))
-                            .movePointRight(8).longValue());
+                    "COST", scaledCostOf(valueOf(row, "costUsd")));
             quotaGate.resync(client.getClientId(), rules, usage);
         }
+    }
+
+    /** 取聚合行值：优先原键，回退小写键（防御未加引号别名被 H2 小写化的历史库/方言差异）。 */
+    private static Object valueOf(Map<String, Object> row, String key) {
+        Object value = row.get(key);
+        return value != null ? value : row.get(key.toLowerCase(java.util.Locale.ROOT));
+    }
+
+    /** COST 聚合计值换算（1e-8 美元刻度），null 安全（与 {@link #numberOf} 一致）。 */
+    private static long scaledCostOf(Object value) {
+        return value == null ? 0 : new java.math.BigDecimal(String.valueOf(value)).movePointRight(8).longValue();
     }
 
     private static long numberOf(Object value) {

@@ -371,4 +371,42 @@ class InvocationPipelineTest {
                         assertThat(e.code()).isEqualTo(NexmuxStatusCode.QUOTA_EXCEEDED.fullCode()));
         Mockito.verifyNoInteractions(chatAdapter);
     }
+
+    @Test
+    void resyncQuotasToleratesLowercaseAggregateAliases() throws IOException {
+        // 复现：H2 DATABASE_TO_LOWER=TRUE 下未加引号的聚合别名被小写化（label=costusd），
+        // row.get("costUsd") 得 null → String.valueOf(null)="null" → BigDecimal 抛 NumberFormatException
+        // （RuntimeSnapshotRefresher 日志 quota resync failed: Character n is neither a decimal digit...）
+        ClientEntity limited = client();
+        limited.setQuotaSpec("[{\"name\":\"q\",\"quotaType\":\"lifetime\",\"metric\":\"REQUEST\","
+                + "\"limit\":5,\"mode\":\"hard\",\"status\":\"enabled\"}]");
+        ClientDao clientDao = Mockito.mock(ClientDao.class);
+        when(clientDao.selectList(null)).thenReturn(List.of(limited));
+        ModelDao modelDao = Mockito.mock(ModelDao.class);
+        ProviderDao providerDao = Mockito.mock(ProviderDao.class);
+        ProviderCredentialDao credentialDao = Mockito.mock(ProviderCredentialDao.class);
+        when(modelDao.selectList(null)).thenReturn(List.of(model()));
+        when(providerDao.selectList(null)).thenReturn(List.of(provider()));
+        when(credentialDao.selectList(null)).thenReturn(List.of(credential()));
+        RuntimeCatalogCache limitedCatalog = new RuntimeCatalogCache(modelDao, providerDao, credentialDao, clientDao);
+        limitedCatalog.refresh();
+        RouteDao routeDao = Mockito.mock(RouteDao.class);
+        when(routeDao.selectList(any())).thenReturn(List.of(publishedRoute()));
+        PublishedRouteCache routeCache = new PublishedRouteCache(routeDao);
+        routeCache.refresh();
+        PlatformSettingService settings = Mockito.mock(PlatformSettingService.class);
+        when(settings.getAll()).thenReturn(PlatformSettingService.DEFAULTS);
+        when(requestLogDao.selectMaps(any())).thenReturn(List.of(Map.of(
+                "requestcount", 5L, "inputtokens", 0L, "outputtokens", 0L, "costusd", BigDecimal.ZERO)));
+        InvocationPipeline resyncPipeline = new InvocationPipeline(limitedCatalog, routeCache,
+                new BindingHealthRegistry(3, 10000), chatAdapter,
+                new RequestLogWriter(requestLogDao, settings), requestLogDao);
+
+        resyncPipeline.resyncQuotas();
+
+        assertThatThrownBy(() -> resyncPipeline.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.QUOTA_EXCEEDED.fullCode()));
+        Mockito.verifyNoInteractions(chatAdapter);
+    }
 }

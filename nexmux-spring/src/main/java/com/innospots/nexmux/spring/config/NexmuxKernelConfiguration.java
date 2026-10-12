@@ -22,10 +22,6 @@ import com.innospots.nexmux.console.model.ModelViewAssembler;
 import com.innospots.nexmux.console.stats.StatsViewAssembler;
 import com.innospots.nexmux.console.route.RouteViewAssembler;
 import com.innospots.nexmux.console.provider.ProviderViewAssembler;
-import com.innospots.nexmux.console.sitemap.endpoint.NexmuxSitemapEndpoint;
-import com.innospots.nexmux.console.sitemap.service.NexmuxSitemapService;
-import com.innospots.nexus.console.sitemap.loader.SitemapConfigLoader;
-import com.innospots.nexus.console.sitemap.service.SitemapMapper;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -332,17 +328,5 @@ public class NexmuxKernelConfiguration {
     @Profile("!runtime")
     StatsEndpoint statsEndpoint(StatsViewAssembler statsViewAssembler) {
         return new StatsEndpoint(statsViewAssembler);
-    }
-
-    @Bean
-    NexmuxSitemapService nexmuxSitemapService(SitemapConfigLoader sitemapConfigLoader) {
-        return new NexmuxSitemapService(sitemapConfigLoader, new SitemapMapper());
-    }
-
-    @Bean
-    @Lazy
-    @Profile("!runtime")
-    NexmuxSitemapEndpoint nexmuxSitemapEndpoint(NexmuxSitemapService nexmuxSitemapService) {
-        return new NexmuxSitemapEndpoint(nexmuxSitemapService);
     }
 }

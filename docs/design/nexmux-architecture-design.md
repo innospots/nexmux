@@ -196,9 +196,9 @@ public record ClientRotateAppKeyRequest(
 
 > **落地口径**（ADR-0001 审计 A1/A4 修复）：独立 Runtime assembly 就绪前，`mux_request_log` DDL 暂驻 `nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql`（脚本头部有归属注释），Runtime assembly 立项后迁出；本地开发单库同账号仅限 dev（`application-local.yaml` 已注释），生产部署 Console 必须用对运行表无写权限的只读账号；过渡期内 Console 侧唯一的运行表写入来自调试台，一律 `source=DEBUG`。
 
-**配置**：分项 YAML 边界见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) — `application.yaml` 仅引导；`nexus/console-*.yaml` 为 Nexus 宿主；产品键在 `nexus/nexmux.yaml`（前缀 `nexmux.`）；PageDsl 在 `ui-pages/nexmux/{moduleKey}/*.yaml`（`domainKey=nexmux`，`moduleKey` 为 provider/model 等）。禁止新增业务 `*.properties`。
+**配置**：分项 YAML 边界见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) — `application.yaml` 仅引导；`nexus/console-*.yaml` 为 Nexus 宿主；产品键在 `nexus/nexmux.yaml`（前缀 `nexmux.`）。禁止新增业务 `*.properties`。
 
-> **页面 DSL 双实现口径**（审计 E1）：页面存在两套 DSL——kernel `ui-pages/nexmux/**`（Nexus PageDsl，Nexus Console 内置渲染，sitemap 页面契约受 `NexmuxSitemapLoadTest` 约束）与 `nexmux-ui/src/server/yaml/**`（Pactor DSL，独立门户 :9011 实际运行）。定位：**`nexmux-ui` 是页面行为与数据接口的权威来源**（先改先验），kernel `ui-pages` 是 Nexus Console 挂载的**结构镜像**（页面清单、布局与静态文案保持一致，交互细节以 Pactor 版为准）。同步机制：新增 / 删除页面时两侧同提交（kernel 侧文件名 `nexmux-{module}-{page}.yaml` ↔ nexmux-ui `{module}/{page}.yaml`），`NexmuxSitemapLoadTest` 负责校验 sitemap 与 kernel 页面集合一致；合并前抽查两側页面标题 / 数据源路径一致。任一侧单独存在超过一个迭代的页面视为漂移缺陷。
+> **页面 DSL 单一来源**（2026-10-12 决策，终结审计 E1）：页面只有一套——`nexmux-ui/src/server/yaml/**`（Pactor DSL，独立门户 :9011）。kernel `ui-pages/nexmux/**`（Nexus PageDsl 镜像）已**删除**，配套的 `NexmuxSitemapEndpoint`/`NexmuxSitemapService`（sitemap yaml 渲染）与 `NexmuxSitemapLoadTest`/`NexmuxPageDslClasspathTest`（双来源契约）一并移除；Nexus Console 集成只保留 `NexmuxConsoleEntryPlugin` 的菜单/页面**声明**（Java），不再承担页面渲染。
 
 ## 7. 失败与状态码
 

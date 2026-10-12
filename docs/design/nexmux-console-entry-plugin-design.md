@@ -133,6 +133,8 @@ nexmux（MODULE，不在侧栏单独显示时可作为根 module）
 
 ## 7. UiSpec / PageDsl
 
+> **2026-10-12 起本节作废**：页面 DSL 已收敛为 nexmux-ui 单一来源（Pactor DSL），kernel 不再持有 `ui-pages/` PageDsl 镜像，`ClasspathPageDslLoader` 契约不再适用。Entry 插件仅保留菜单与页面键声明（供 Nexus Console 导航挂载）。历史内容见 git 历史。
+
 页面方案结构、布局模式（列表 / Tab 详情 / 纵向区块 / 表单 / 调试台）、P0 yaml 清单与最小壳模板见 **[nexmux-ui-spec-pages-design.md](./nexmux-ui-spec-pages-design.md)**。
 
 与 Nexus `ClasspathPageDslLoader` 对齐：每个页面须在 **`ui-pages/nexmux/{moduleKey}/{pageKey}.yaml`** 存在且 `page.id` 一致（见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) §6）。

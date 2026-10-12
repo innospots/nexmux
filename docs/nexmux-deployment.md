@@ -83,6 +83,8 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 
 ## 7. 已知限制（P0）
 
+- **nexmux-ui 的 `NEXT_PUBLIC_*` 为构建期内联变量**：改动 API 上游地址必须「改环境变量 + 重新 `pnpm build` + 重启」，仅改 systemd unit 重启无效（部署实测教训）。
+
 - 配额/限流为 Runtime **实例级**计数（多实例非全局精确；多实例部署前评审 ADR-0002 退出条件）。
 - AppKey 轮换后旧 key 立即失效（宽限期未实现）。
 - 仅 OpenAI 兼容 `/v1/chat/completions`（含 SSE）；`/v1/responses` 等后续阶段。

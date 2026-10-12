@@ -38,7 +38,7 @@ body:
             action: util.request
             params:
               method: POST
-              url: http://localhost:9011/api/auth/login
+              url: /api/auth/login
               body:
                 username: ${event.username}
                 password: ${event.password}

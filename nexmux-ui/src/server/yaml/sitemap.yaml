@@ -584,7 +584,7 @@ layouts:
                         - action: util.request
                           params:
                             method: POST
-                            url: http://localhost:9011/api/auth/logout
+                            url: /api/auth/logout
                         - action: app.reload
                           params: { to: /login }
                       else:

@@ -12,7 +12,7 @@
 
 **Nexmux** 将系统划分为 **Model Console**（控制面）与 **Model Runtime**（数据面）。Console 定义策略，Runtime 执行鉴权、路由、转发与计量。本仓库当前仅包含 Console 可运行组装（`nexmux-spring`），须避免把高频运行时状态写入 Console 业务库。
 
-依据：[需求说明书 §2](../../../../product-design/gateweave/模型管理系统产品功能需求说明书.md)、[控制台设计 §24](../../../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md)。
+依据：[需求说明书 §2](../../../../product-design/nexmux/模型管理系统产品功能需求说明书.md)、[控制台设计 §24](../../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)。
 
 ## 决策
 

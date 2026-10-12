@@ -11,7 +11,7 @@
   - [nexmux-architecture-design.md](./nexmux-architecture-design.md)（§2 控制面/数据面、§5.2 包结构、§8 运行库归属）
   - [nexmux-p0-console-design.md](./nexmux-p0-console-design.md) §9（P0 联调最小契约）
   - [nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)（实体与 Binding 结构）
-  - PRD：[需求说明书](../../../product-design/gateweave/模型管理系统产品功能需求说明书.md) §16–19、§27、§28、§31、§33–36
+  - PRD：[需求说明书](../../../product-design/nexmux/模型管理系统产品功能需求说明书.md) §16–19、§27、§28、§31、§33–36
 
 ### grill-me 摘要（已与开发者确认，2026-10-10）
 

@@ -6,13 +6,13 @@
 
 ## 产品需求来源（只读引用）
 
-产品文档当前存放在 `product-design/gateweave/` 目录（历史路径名；**产品名称为 Nexmux**）。
+产品文档当前存放在 `product-design/nexmux/` 目录（早期曾用名 gateweave；**产品名称为 Nexmux**）。
 
 | 文档 | 路径 |
 |------|------|
-| 需求说明书 V2.1 | [`../../product-design/gateweave/模型管理系统产品功能需求说明书.md`](../../product-design/gateweave/模型管理系统产品功能需求说明书.md) |
-| 管理控制台设计 V1.0 | [`../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md`](../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md) |
-| 线框图目录 | [`../../product-design/gateweave/prd-diagram/README.md`](../../product-design/gateweave/prd-diagram/README.md) |
+| 需求说明书 V2.1 | [`../../product-design/nexmux/模型管理系统产品功能需求说明书.md`](../../product-design/nexmux/模型管理系统产品功能需求说明书.md) |
+| 管理控制台设计 V1.0 | [`../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md`](../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md) |
+| 线框图目录 | [`../../product-design/nexmux/prd-diagram/README.md`](../../product-design/nexmux/prd-diagram/README.md) |
 
 可运行控制面组装：**nexmux-spring**（Model Console）。运行部署见 [`nexmux-deployment.md`](./nexmux-deployment.md)。
 
@@ -29,6 +29,8 @@
 | L2 | [nexmux-ui-data-api-design.md](./design/nexmux-ui-data-api-design.md) | UI 数据接口：BFF 适配层、后端端点补全、mux_request_log 扩列、实施批次 |
 | L2 | [nexmux-runtime-design.md](./design/nexmux-runtime-design.md) | **Model Runtime（数据面）P0**：profile 进程形态、Ingress、调用流水线、探活、计量全量、状态码与测试范围 |
 | 参考 | [nexmux-ui-data-api-inventory.md](./design/nexmux-ui-data-api-inventory.md) | **已实现**数据接口清单（字段级输入输出；随批次滚动更新） |
+| 跟踪 | [nexmux-ui-missing-api.md](./design/nexmux-ui-missing-api.md) | UI 数据接口**剩余缺口**清单（已实现项滚动移除） |
+| 快照 | [nexmux-architecture-compliance-audit.md](./design/nexmux-architecture-compliance-audit.md) | ADR-0001 合规审计（时点快照，不滚动更新） |
 | L3 | [0001-console-runtime-configuration-boundary.md](./design/adr/0001-console-runtime-configuration-boundary.md) | Console 与 Runtime 配置边界 ADR |
 | L3 | [0002-runtime-deployment-form.md](./design/adr/0002-runtime-deployment-form.md) | Runtime 工程形态（独立 profile 进程）与运行库共用（修订 ADR-0001 决策 5） |
 

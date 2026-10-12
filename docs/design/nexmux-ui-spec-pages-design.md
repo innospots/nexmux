@@ -6,8 +6,8 @@
 - **日期**：2026-09-27
 - **归属**：`nexmux-kernel/src/main/resources/ui-pages/nexmux/{moduleKey}/`（`domainKey=nexmux`；`moduleKey` 为 provider / model / …）
 - **关联**：
-  - 产品统一详情 §17–§18：[管理控制台产品功能设计文档](../../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md)
-  - 线框通用说明：[prd-diagram/README.md](../../../product-design/gateweave/prd-diagram/README.md)
+  - 产品统一详情 §17–§18：[管理控制台产品功能设计文档](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
+  - 线框通用说明：[prd-diagram/README.md](../../../product-design/nexmux/prd-diagram/README.md)
   - 路由与 pageKey：[nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)
   - 领域与 API：[nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)
 - **规范**：Nexus PageDsl `dsl: '1.0'`（参考 `innospots-nexus-plugin` 测试用例与 `innospots-nexus-console` 内置 `ui-pages`）
@@ -47,7 +47,7 @@ nexmux-kernel/src/main/resources/ui-pages/nexmux/
 
 ## 3. 产品页面方案（布局模式）
 
-产品线框约定三种主形态（[prd-diagram 通用说明](../../../product-design/gateweave/prd-diagram/README.md)）：
+产品线框约定三种主形态（[prd-diagram 通用说明](../../../product-design/nexmux/prd-diagram/README.md)）：
 
 | 方案 ID | 适用对象 | 产品形态 | PageDsl `page.type` | 结构要点 |
 |---------|----------|----------|----------------------|----------|
@@ -109,9 +109,9 @@ regions:
 
 | pageKey | 方案 | pagePath | 线框 | regions（content） |
 |---------|------|----------|------|---------------------|
-| nexmux-provider-list | S-LIST | `/page/nexmux/provider` | [列表](../../../product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md) | 搜索、类型 Chip、卡片网格、添加卡 |
-| nexmux-provider-detail | S-DETAIL-TAB | `.../provider/{providerCode}` | [详情](../../../product-design/gateweave/prd-diagram/模型资产/Provider/02-Provider详情页.md) | Tab：概览、连接与凭证、能力扩展、关系、审计 |
-| nexmux-provider-edit | S-FORM | `.../provider/{providerCode}/edit` | [编辑](../../../product-design/gateweave/prd-diagram/模型资产/Provider/03-Provider新增编辑页.md) | 基本信息、连接与凭证、能力扩展；`providerCode` 新增可编辑 |
+| nexmux-provider-list | S-LIST | `/page/nexmux/provider` | [列表](../../../product-design/nexmux/prd-diagram/模型资产/Provider/01-Provider列表页.md) | 搜索、类型 Chip、卡片网格、添加卡 |
+| nexmux-provider-detail | S-DETAIL-TAB | `.../provider/{providerCode}` | [详情](../../../product-design/nexmux/prd-diagram/模型资产/Provider/02-Provider详情页.md) | Tab：概览、连接与凭证、能力扩展、关系、审计 |
+| nexmux-provider-edit | S-FORM | `.../provider/{providerCode}/edit` | [编辑](../../../product-design/nexmux/prd-diagram/模型资产/Provider/03-Provider新增编辑页.md) | 基本信息、连接与凭证、能力扩展；`providerCode` 新增可编辑 |
 
 **dataSources 示例**：`providerDetail` → `GET /providers/{providerCode}`；`testConnection` → `POST /providers/{id}/connection-test`。
 
@@ -191,7 +191,7 @@ regions:
 
 ## 8. 详情 Tab 结构（S-DETAIL-TAB · Model 示例）
 
-与 [Model 详情线框](../../../product-design/gateweave/prd-diagram/模型资产/Model/02-Model详情页.md) 对齐：
+与 [Model 详情线框](../../../product-design/nexmux/prd-diagram/模型资产/Model/02-Model详情页.md) 对齐：
 
 | Tab key | 绑定数据 | 主要字段来源 |
 |---------|----------|--------------|
@@ -222,7 +222,7 @@ meta:
   apiBase: /api/d
   priority: P0
   layoutScheme: S-LIST
-  wireframe: product-design/gateweave/prd-diagram/模型资产/Provider/01-Provider列表页.md
+  wireframe: product-design/nexmux/prd-diagram/模型资产/Provider/01-Provider列表页.md
 
   routePath: /page/nexmux/provider/nexmux-provider-list
 

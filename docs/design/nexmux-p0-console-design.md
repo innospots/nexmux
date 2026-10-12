@@ -6,7 +6,7 @@
 - **日期**：2026-09-26
 - **归属模块**：`nexmux-kernel`、`nexmux-spring`、`nexmux-ui`
 - **上级文档**：[nexmux-architecture-design.md](./nexmux-architecture-design.md)
-- **产品依据**：PRD §25.1、[控制台设计 §25.1](../../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md)
+- **产品依据**：PRD §25.1、[控制台设计 §25.1](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
 
 ## 2. P0 目标（可调用闭环）
 
@@ -21,15 +21,15 @@
 
 | 产品模块 | P0 页面（线框） | 后端聚合 |
 |----------|-----------------|----------|
-| 模型资产 Provider | [01–03 Provider](../../../product-design/gateweave/prd-diagram/模型资产/Provider/) | `ProviderService` |
-| 模型资产 Model | [01–03 Model](../../../product-design/gateweave/prd-diagram/模型资产/Model/) | `ModelService` |
-| 模型路由 | [01–03 路由](../../../product-design/gateweave/prd-diagram/模型路由/) | `RouteService` |
-| 访问治理 Client | [01–03 客户端](../../../product-design/gateweave/prd-diagram/访问治理/Client/) | `ClientService` |
-| 运行管理 | [01 调用日志](../../../product-design/gateweave/prd-diagram/运行管理/01-调用日志列表与详情.md) | `RequestLogQueryService` |
-| 调试台 | [01–02 调试台](../../../product-design/gateweave/prd-diagram/调试台/) | `DebugService` |
-| 系统管理 | [02 审计](../../../product-design/gateweave/prd-diagram/系统管理/02-审计.md) | `AuditQueryService` |
+| 模型资产 Provider | [01–03 Provider](../../../product-design/nexmux/prd-diagram/模型资产/Provider/) | `ProviderService` |
+| 模型资产 Model | [01–03 Model](../../../product-design/nexmux/prd-diagram/模型资产/Model/) | `ModelService` |
+| 模型路由 | [01–03 路由](../../../product-design/nexmux/prd-diagram/模型路由/) | `RouteService` |
+| 访问治理 Client | [01–03 客户端](../../../product-design/nexmux/prd-diagram/访问治理/Client/) | `ClientService` |
+| 运行管理 | [01 调用日志](../../../product-design/nexmux/prd-diagram/运行管理/01-调用日志列表与详情.md) | `RequestLogQueryService` |
+| 调试台 | [01–02 调试台](../../../product-design/nexmux/prd-diagram/调试台/) | `DebugService` |
+| 系统管理 | [02 审计](../../../product-design/nexmux/prd-diagram/系统管理/02-审计.md) | `AuditQueryService` |
 
-凭证说明：[AppKey与凭证说明](../../../product-design/gateweave/prd-diagram/模型资产/AppKey与凭证说明.md)。
+凭证说明：[AppKey与凭证说明](../../../product-design/nexmux/prd-diagram/模型资产/AppKey与凭证说明.md)。
 
 ## 4. P0 核心业务流程
 
@@ -185,7 +185,7 @@ Runtime 交付（`inbound`，独立进程）：
 - 消费 `published_route_spec` 当前行。
 - 写 `mux_request_log` 最小字段：`request_id`, `client_id`, `route_id`, `status`, `latency_ms`, `error_code`。
 
-详细字段对齐 [调用日志线框](../../../product-design/gateweave/prd-diagram/运行管理/01-调用日志列表与详情.md)。
+详细字段对齐 [调用日志线框](../../../product-design/nexmux/prd-diagram/运行管理/01-调用日志列表与详情.md)。
 
 ## 10. 开放问题（P0）
 

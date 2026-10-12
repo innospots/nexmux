@@ -12,7 +12,7 @@
   - [nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)
   - [nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)
   - [nexmux-ui-spec-pages-design.md](./nexmux-ui-spec-pages-design.md)
-  - 产品：[控制台设计 V1.0](../../../product-design/gateweave/模型管理系统-管理控制台产品功能设计文档.md)
+  - 产品：[控制台设计 V1.0](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
 
 ## 2. 背景与目标
 
@@ -293,4 +293,4 @@ public record ClientRotateAppKeyRequest(
 | **P1** | Dashboard、Template、多维用量、成本明细、条件路由/灰度/Failover 等；可能引入只读 OLAP 或导出任务 |
 | **P2** | 智能路由策略包；`inbound` 内策略扩展点 |
 
-UI 线框与页面清单位图见 [产品线框图目录](../../../product-design/gateweave/prd-diagram/README.md)。
+UI 线框与页面清单位图见 [产品线框图目录](../../../product-design/nexmux/prd-diagram/README.md)。

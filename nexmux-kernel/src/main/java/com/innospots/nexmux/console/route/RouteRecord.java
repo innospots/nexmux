@@ -36,9 +36,12 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param enabledModelCount 启用候选数
  * @param weightTotal       启用候选权重合计
  * @param shortDate         最近更新短日期（MM-dd）
+ * @param hasUnpublishedChanges 是否存在未发布的草稿变更（草稿规格 ≠ 发布快照）
  */
 @Schema(name = "RouteRecord", description = "Route 展示记录（UI 契约）")
 public record RouteRecord(
+        @Schema(description = "路由 ID", required = true)
+        String id,
         String code,
         String name,
         String type,
@@ -65,7 +68,9 @@ public record RouteRecord(
         String tagsText,
         long enabledModelCount,
         long weightTotal,
-        String shortDate) {
+        String shortDate,
+        @Schema(description = "是否存在未发布的草稿变更（草稿规格 ≠ 发布快照）")
+        boolean hasUnpublishedChanges) {
 
     /**
      * 候选模型行。

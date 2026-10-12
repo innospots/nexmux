@@ -10,13 +10,13 @@ import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderDetailVo;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
 import com.innospots.nexmux.core.provider.domain.vo.UpstreamModelVo;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexus.base.domain.response.PageResult;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.LinkedHashMap;
@@ -32,11 +32,11 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProviderViewAssembler {
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final ProviderService providerService;
     private final ModelService modelService;
     private final RouteService routeService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 分页列表：items 为当前页，counts/filters 为全量构成口径。
@@ -100,7 +100,8 @@ public class ProviderViewAssembler {
                 row.providerModelId(), row.providerModelId(), row.existsLocally() ? "已存在" : "新增");
     }
 
-    private static ProviderRecord toRecord(ProviderVo vo, Relations relations, ProviderDetailVo detail) {
+    private ProviderRecord toRecord(ProviderVo vo, Relations relations, ProviderDetailVo detail) {
+        DisplayFormats formats = displayFormats.current();
         List<ModelVo> ownModels = relations.modelsByProvider.getOrDefault(vo.providerId(), List.of());
         ProviderRecord.RouteStat routes =
                 relations.routesByProvider.getOrDefault(vo.providerId(), new ProviderRecord.RouteStat(0, 0));
@@ -146,8 +147,8 @@ public class ProviderViewAssembler {
                 enabledModelCount,
                 detail == null ? "" : nullToEmpty(detail.description()),
                 detail == null ? "" : nullToEmpty(detail.capabilityExtension()),
-                detail == null ? "" : timeText(detail.createdAt()),
-                detail == null ? "" : timeText(detail.updatedAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.createdAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.updatedAt()),
                 detail == null || detail.updatedBy() == null ? "—" : detail.updatedBy());
     }
 
@@ -186,9 +187,6 @@ public class ProviderViewAssembler {
                 : routes.total() + " 条路由 · " + routes.enabled() + " 条启用";
     }
 
-    private static String timeText(LocalDateTime time) {
-        return time == null ? "" : TIME_FORMAT.format(time);
-    }
 
     private static JsonNode readJsonTolerant(String json) {
         try {

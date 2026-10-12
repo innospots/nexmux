@@ -44,6 +44,18 @@ async function forward(request: Request, parts: string[]): Promise<Response> {
     return emptyData(request); // 上游不可达 → 空数据
   }
   const upstreamType = upstream.headers.get("content-type") ?? "";
+  if (upstreamType.includes("text/event-stream")) {
+    // SSE 流式透传：不缓冲、不校验 JSON，直接桥接上游字节流
+    return new Response(upstream.body, {
+      status: upstream.status,
+      headers: {
+        "content-type": upstreamType,
+        "cache-control": "no-store",
+        "x-accel-buffering": "no",
+        ...corsHeaders(request),
+      },
+    });
+  }
   if (upstream.status === 404 || !upstreamType.includes("json")) {
     return emptyData(request); // 接口不存在 / 命中前端兜底 HTML → 空数据
   }
@@ -75,6 +87,8 @@ async function handle(
 
 export const GET = handle;
 export const POST = handle;
+export const PUT = handle;
+export const DELETE = handle;
 
 /** 预检（跨源带凭据 / 自定义头时） */
 export const OPTIONS = corsPreflight;

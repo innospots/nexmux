@@ -57,7 +57,7 @@ body:
       events:
         onSubmit:
           - id: saveResult
-            action: request
+            action: util.request
             params:
               method: POST
               url: /api/d/ops/provider-save?code=${route.params.code}
@@ -289,7 +289,7 @@ body:
                           events:
                             onClick:
                               - id: testResult
-                                action: request
+                                action: util.request
                                 params:
                                   method: POST
                                   url: /api/d/ops/provider-connection-test?code=${route.params.code}

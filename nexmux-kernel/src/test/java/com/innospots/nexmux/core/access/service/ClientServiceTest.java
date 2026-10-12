@@ -1,5 +1,6 @@
 package com.innospots.nexmux.core.access.service;
 
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
@@ -30,7 +31,7 @@ class ClientServiceTest {
     void setUp() {
         clientDao = Mockito.mock(ClientDao.class);
         clientTemplateDao = Mockito.mock(ClientTemplateDao.class);
-        clientService = new ClientService(clientDao, clientTemplateDao);
+        clientService = new ClientService(clientDao, clientTemplateDao, Mockito.mock(ConfigAuditService.class));
     }
 
     private ClientEntity client(String id, String code, String status) {
@@ -101,7 +102,7 @@ class ClientServiceTest {
         when(clientTemplateDao.selectOne(any())).thenReturn(template);
 
         var result = clientService.create(new ClientCreateRequest(
-                "mobile-app", "移动 App", List.of("mobile"), "team-default", null, null));
+                "mobile-app", "移动 App", List.of("mobile"), "team-default", null, null, null, null));
 
         Mockito.verify(clientDao).insert(Mockito.<ClientEntity>argThat(e ->
                 "ct-1".equals(e.getSourceTemplateId())
@@ -118,7 +119,7 @@ class ClientServiceTest {
         when(clientTemplateDao.selectOne(any())).thenReturn(null);
 
         assertThatThrownBy(() -> clientService.create(new ClientCreateRequest(
-                "mobile-app", "移动 App", null, "ghost", null, null)))
+                "mobile-app", "移动 App", null, "ghost", null, null, null, null)))
                 .isInstanceOfSatisfying(NexusException.class, e ->
                         assertThat(e.code()).isEqualTo(
                                 NexmuxStatusCode.RESOURCE_NOT_FOUND.fullCode()));

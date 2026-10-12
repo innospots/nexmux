@@ -99,7 +99,7 @@ export interface ClientDebugRound {
 
 // ── http 基础 ──────────────────────────────────────────────────
 
-async function callJson<T>(url: string, init?: RequestInit): Promise<T> {
+export async function callJson<T>(url: string, init?: RequestInit): Promise<T> {
   const response = await fetch(url, {
     headers: { "content-type": "application/json" },
     ...init,
@@ -128,17 +128,18 @@ interface ModelDetailForDebug {
   params?: Partial<ModelParams>;
 }
 
+/** 详情路径契约：modelCode 中的 / 以 ~ 替代（服务端 ModelEndpoint 约定）。 */
+function modelDetailUrl(modelCode: string): string {
+  return `/api/d/models/${encodeURIComponent(modelCode.replaceAll("/", "~"))}`;
+}
+
 export async function capabilitiesOf(modelCode: string): Promise<string[]> {
-  const detail = await callJson<ModelDetailForDebug>(
-    `/api/d/models/${encodeURIComponent(modelCode)}`,
-  );
+  const detail = await callJson<ModelDetailForDebug>(modelDetailUrl(modelCode));
   return detail.params?.capabilities ?? [];
 }
 
 export async function supportsReasoning(modelCode: string): Promise<boolean> {
-  const detail = await callJson<ModelDetailForDebug>(
-    `/api/d/models/${encodeURIComponent(modelCode)}`,
-  );
+  const detail = await callJson<ModelDetailForDebug>(modelDetailUrl(modelCode));
   const effort = detail.params?.reasoningEffort;
   return !!effort && effort !== "—";
 }
@@ -149,9 +150,7 @@ export async function paramDefaultsOf(modelCode: string): Promise<{
   maxTokens?: number;
   reasoningEffort?: string;
 }> {
-  const detail = await callJson<ModelDetailForDebug>(
-    `/api/d/models/${encodeURIComponent(modelCode)}`,
-  );
+  const detail = await callJson<ModelDetailForDebug>(modelDetailUrl(modelCode));
   const num = (v?: string) => (v === undefined || v === "—" || v === "" ? undefined : Number(v));
   return {
     temperature: num(detail.params?.temperature),
@@ -207,45 +206,182 @@ export async function simulateModelCallReal(
   params: ModelDebugParams,
   userText: string,
 ): Promise<ModelDebugResult> {
-  return callJson<ModelDebugResult>(`/api/d/ops/debug-model-invoke`, {
-    method: "POST",
-    body: JSON.stringify({
-      modelCode,
-      systemPrompt,
-      text: userText,
-      chatParams: {
-        temperature: params.temperature,
-        topP: params.topP,
-        maxTokens: params.maxTokens,
-        reasoningEffort: params.reasoningEffort,
-      },
-    }),
-  });
-}
-
-export async function simulateClientCallReal(
-  context: {
-    clientCode: string;
-    appKeyId: string;
-    routeCode: string;
-    channel: string;
-    routeTag: string;
-    user: string;
-  },
-  userText: string,
-  seq: number,
-): Promise<ClientDebugRound> {
-  const result = await callJson<Partial<ClientDebugRound>>(
-    `/api/d/ops/debug-client-invoke`,
+  const envelope = await callJson<{ data?: ModelDebugResult } & Partial<ModelDebugResult>>(
+    `/api/d/debug/model-invoke`,
     {
       method: "POST",
       body: JSON.stringify({
-        clientCode: context.clientCode,
-        routeCode: context.routeCode,
+        modelCode,
+        systemPrompt,
         text: userText,
-        routeTag: context.routeTag,
+        chatParams: {
+          temperature: params.temperature,
+          topP: params.topP,
+          maxTokens: params.maxTokens,
+          reasoningEffort: params.reasoningEffort,
+        },
       }),
     },
   );
-  return { id: `round-${seq}`, seq, ...result } as ClientDebugRound;
+  return (envelope.data ?? envelope) as ModelDebugResult;
+}
+
+// ── 流式调试（SSE）─────────────────────────────────────────────
+//
+// 契约（服务端 DebugService 流式端点）：上游 chunk 逐行穿透（OpenAI 兼容
+// delta），终态 `event: debug-meta`（tokens / 延迟 / 路由命中上下文 /
+// requestJson / responseJson），失败 `event: debug-error`，均以
+// `data: [DONE]` 收尾。
+
+/** debug-meta 事件负载（空值字段服务端不输出） */
+export interface DebugStreamMeta {
+  requestId: string;
+  status: number;
+  latencyMs: number;
+  ttftMs: number;
+  tokensIn?: number;
+  tokensOut?: number;
+  routeGroup?: string;
+  target?: string;
+  quotaPreview?: string;
+  rateLimitResult?: string;
+  requestJson?: string;
+  responseJson?: string;
+}
+
+export interface DebugStreamError {
+  requestId?: string;
+  status: number;
+  message: string;
+}
+
+export interface DebugStreamHandlers {
+  /** 正文增量（choices[0].delta.content 累积追加） */
+  onDelta: (text: string) => void;
+  /** 正常收尾（debug-meta） */
+  onMeta: (meta: DebugStreamMeta) => void;
+  /** 失败收尾（debug-error 或传输层失败）；与 onMeta 互斥且必居其一 */
+  onError: (error: DebugStreamError) => void;
+}
+
+/** SSE 逐事件解析：事件以空行分隔，event: 指定类型，data: 为负载 */
+async function readSseStream(
+  body: ReadableStream<Uint8Array>,
+  dispatch: (event: string, data: string) => boolean | void,
+): Promise<void> {
+  const reader = body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+  const handleBlock = (block: string): boolean | void => {
+    let event = "message";
+    const dataLines: string[] = [];
+    for (const line of block.split("\n")) {
+      if (line.startsWith("event: ")) event = line.slice(7).trim();
+      else if (line.startsWith("data: ")) dataLines.push(line.slice(6));
+      else if (line.startsWith("data:")) dataLines.push(line.slice(5).trim());
+    }
+    if (dataLines.length > 0) return dispatch(event, dataLines.join("\n"));
+  };
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value, { stream: true });
+    let sep: number;
+    while ((sep = buffer.indexOf("\n\n")) >= 0) {
+      const block = buffer.slice(0, sep);
+      buffer = buffer.slice(sep + 2);
+      if (handleBlock(block) === true) return;
+    }
+  }
+  if (buffer.trim()) handleBlock(buffer);
+}
+
+/** 调试流式调用共用入口：非 SSE 响应（转发层空数据回退 / 未登录）转为 onError */
+export async function streamDebugCall(
+  url: string,
+  body: unknown,
+  handlers: DebugStreamHandlers,
+  signal?: AbortSignal,
+): Promise<void> {
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(body),
+    signal,
+  });
+  const type = response.headers.get("content-type") ?? "";
+  if (!response.ok) {
+    const payload = await response.json().catch(() => ({}));
+    handlers.onError({
+      status: response.status,
+      message: (payload as { error?: string }).error ?? `HTTP ${response.status}`,
+    });
+    return;
+  }
+  if (!type.includes("text/event-stream") || !response.body) {
+    handlers.onError({ status: 502, message: "调试流式接口不可用（上游未返回 SSE）" });
+    return;
+  }
+  await readSseStream(response.body, (event, data) => {
+    if (event === "debug-meta") {
+      handlers.onMeta(JSON.parse(data) as DebugStreamMeta);
+      return;
+    }
+    if (event === "debug-error") {
+      handlers.onError(JSON.parse(data) as DebugStreamError);
+      return true;
+    }
+    if (data === "[DONE]") return true;
+    try {
+      const chunk = JSON.parse(data) as {
+        choices?: { delta?: { content?: string } }[];
+      };
+      const delta = chunk.choices?.[0]?.delta?.content;
+      if (typeof delta === "string" && delta) handlers.onDelta(delta);
+    } catch {
+      // 非 JSON 心跳行等忽略
+    }
+  });
+}
+
+/** 模型调试流式：直连供应商模型 */
+export function streamModelCall(
+  modelCode: string,
+  systemPrompt: string,
+  chatParams: {
+    temperature?: number;
+    topP?: number;
+    maxTokens?: number;
+    reasoningEffort?: string;
+  },
+  text: string,
+  handlers: DebugStreamHandlers,
+  signal?: AbortSignal,
+): Promise<void> {
+  return streamDebugCall(
+    "/api/d/debug/model-invoke/stream",
+    { modelCode, systemPrompt, text, chatParams },
+    handlers,
+    signal,
+  );
+}
+
+/** 客户端调试流式：客户端 + 路由全链路 */
+export function streamClientCall(
+  context: { clientCode: string; routeCode: string; routeTag: string },
+  text: string,
+  handlers: DebugStreamHandlers,
+  signal?: AbortSignal,
+): Promise<void> {
+  return streamDebugCall(
+    "/api/d/debug/client-invoke/stream",
+    {
+      clientCode: context.clientCode,
+      routeCode: context.routeCode,
+      text,
+      routeTag: context.routeTag,
+    },
+    handlers,
+    signal,
+  );
 }

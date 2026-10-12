@@ -14,6 +14,7 @@ import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import java.math.BigDecimal;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ public class ModelService {
 
     private final ModelDao modelDao;
     private final ProviderDao providerDao;
+    private final ConfigAuditService configAuditService;
 
     public PageResult<ModelVo> page(ModelPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -124,6 +126,8 @@ public class ModelService {
         entity.setPrimaryReferenceMultiplier(BigDecimal.ONE);
         entity.setPrimaryBindingWeight(100);
         modelDao.insert(entity);
+        configAuditService.record("MODEL", entity.getModelId(), "CREATE",
+                "创建模型 " + entity.getModelCode(), null);
         return toVo(entity);
     }
 
@@ -151,6 +155,8 @@ public class ModelService {
             entity.setTags(NexmuxJson.write(request.tags()));
         }
         modelDao.updateById(entity);
+        configAuditService.record("MODEL", entity.getModelId(), "UPDATE",
+                "更新模型 " + entity.getModelCode(), null);
         return toVo(entity);
     }
 
@@ -158,11 +164,21 @@ public class ModelService {
         ModelEntity entity = require(modelId);
         entity.setStatus(enabled ? "ENABLED" : "DISABLED");
         modelDao.updateById(entity);
+        configAuditService.record("MODEL", entity.getModelId(),
+                enabled ? "ENABLE" : "DISABLE",
+                (enabled ? "启用" : "停用") + "模型 " + entity.getModelCode(), null);
         return toVo(entity);
     }
 
     public ModelVo disable(String modelId) {
         return setEnabled(modelId, false);
+    }
+
+    public void delete(String modelId) {
+        ModelEntity entity = require(modelId);
+        modelDao.deleteById(modelId);
+        configAuditService.record("MODEL", entity.getModelId(), "DELETE",
+                "删除模型 " + entity.getModelCode(), null);
     }
 
     public boolean invokeTest(String modelId) {
@@ -174,6 +190,11 @@ public class ModelService {
         var wrapper = new LambdaQueryWrapper<ModelEntity>();
         if (request.type() != null && !request.type().isBlank()) {
             wrapper.eq(ModelEntity::getModelType, request.type());
+        }
+        if (request.keyword() != null && !request.keyword().isBlank()) {
+            String keyword = request.keyword().trim();
+            wrapper.and(w -> w.like(ModelEntity::getModelCode, keyword)
+                    .or().like(ModelEntity::getDisplayName, keyword));
         }
         if (request.providers() != null && !request.providers().isEmpty()) {
             // 厂商编码 → providerId 集合（两次单表查询，避免 join）

@@ -6,6 +6,7 @@ import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.ops.domain.request.CostPageRequest;
 import com.innospots.nexmux.core.ops.domain.vo.CostRecordVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.ops.service.CostQueryService;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
@@ -34,7 +35,8 @@ class CostViewAssemblerTest {
         ClientService clientService = Mockito.mock(ClientService.class);
         ModelService modelService = Mockito.mock(ModelService.class);
         ProviderService providerService = Mockito.mock(ProviderService.class);
-        assembler = new CostViewAssembler(costQueryService, clientService, modelService, providerService);
+        assembler = new CostViewAssembler(costQueryService, clientService, modelService, providerService,
+                DisplayFormatsProvider.defaults());
 
         when(clientService.listAll()).thenReturn(List.of(
                 new ClientVo("c1", "app-web", "Web 应用", "ENABLED", List.of(),

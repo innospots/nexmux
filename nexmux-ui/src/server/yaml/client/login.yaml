@@ -35,7 +35,7 @@ body:
       events:
         onSubmit:
           - id: loginResult
-            action: request
+            action: util.request
             params:
               method: POST
               url: http://localhost:9011/api/auth/login

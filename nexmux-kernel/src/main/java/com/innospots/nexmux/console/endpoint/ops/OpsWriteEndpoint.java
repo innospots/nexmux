@@ -14,6 +14,7 @@ import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePublishRequest;
 import com.innospots.nexmux.core.route.domain.request.RouteUpdateRequest;
+import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.service.RouteService;
@@ -90,7 +91,9 @@ public class OpsWriteEndpoint {
                 textOrNull(body, "baseUrl"),
                 textOrNull(body, "region"),
                 body != null && body.has("timeoutMs") && body.get("timeoutMs").isNumber()
-                        ? body.get("timeoutMs").asInt() : null));
+                        ? body.get("timeoutMs").asInt() : null,
+                textOrNull(body, "apiKey"),
+                textOrNull(body, "description")));
         return OpsResult.OK;
     }
 
@@ -115,7 +118,9 @@ public class OpsWriteEndpoint {
                 textOrNull(body, "baseUrl"),
                 textOrNull(body, "region"),
                 body != null && body.has("timeoutMs") && body.get("timeoutMs").isNumber()
-                        ? body.get("timeoutMs").asInt() : null));
+                        ? body.get("timeoutMs").asInt() : null,
+                textOrNull(body, "apiKey"),
+                textOrNull(body, "description")));
         return OpsResult.OK;
     }
 
@@ -235,7 +240,7 @@ public class OpsWriteEndpoint {
                 flagOrNull(body, "stickySession"),
                 flagOrNull(body, "healthFilter"),
                 stringListOrNull(body, "tags"),
-                List.of()));
+                candidatesOf(body, List.of())));
         return OpsResult.OK;
     }
 
@@ -253,7 +258,7 @@ public class OpsWriteEndpoint {
                 orElse(textOrNull(body, "alias"), spec.alias()),
                 orElse(textOrNull(body, "path"), spec.ingress()),
                 orElse(textOrNull(body, "strategy"), spec.strategyType()),
-                spec.candidates(),
+                candidatesOf(body, spec.candidates()),
                 orElse(flagOrNull(body, "healthFilter"), spec.filterUnhealthyBindings()),
                 spec.schemaVersion(),
                 orElse(textOrNull(body, "description"), spec.description()),
@@ -364,6 +369,34 @@ public class OpsWriteEndpoint {
      *
      * @param ok 是否成功
      */
+    /** 候选模型数组（编辑页「添加模型」整包提交；缺省 = 保留现状）。 */
+    private static List<RouteCandidate> candidatesOf(JsonNode body, List<RouteCandidate> fallback) {
+        JsonNode arr = body == null ? null : body.get("candidates");
+        if (arr == null || !arr.isArray()) {
+            return fallback;
+        }
+        List<RouteCandidate> out = new ArrayList<>();
+        for (JsonNode c : arr) {
+            String modelCode = c.hasNonNull("modelCode") ? c.get("modelCode").asText() : null;
+            if (modelCode == null || modelCode.isBlank()) {
+                continue;
+            }
+            out.add(new RouteCandidate(
+                    modelCode,
+                    c.hasNonNull("weight") && c.get("weight").isNumber() ? c.get("weight").asInt() : 100,
+                    c.hasNonNull("status") ? "enabled".equals(c.get("status").asText()) : null,
+                    c.hasNonNull("priority") ? c.get("priority").asText() : null,
+                    decimalOrNull(c, "costRate"),
+                    decimalOrNull(c, "billingRate")));
+        }
+        return out;
+    }
+
+    private static java.math.BigDecimal decimalOrNull(JsonNode node, String field) {
+        return node != null && node.hasNonNull(field) && node.get(field).isNumber()
+                ? node.get(field).decimalValue() : null;
+    }
+
     @Schema(name = "OpsResult", description = "写操作结果（UI 契约）")
     public record OpsResult(
             @Schema(description = "是否成功", required = true)

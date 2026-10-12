@@ -44,7 +44,7 @@ body:
       events:
         onSubmit:
           - id: createResult
-            action: request
+            action: util.request
             params:
               method: POST
               url: /api/d/ops/provider-create
@@ -279,8 +279,8 @@ body:
                             onClick:
                               - action: message
                                 params:
-                                  messageType: success
-                                  text: 连接测试成功：HTTP 200, 128ms（演示：不持久化未保存字段）
+                                  messageType: info
+                                  text: 连接测试基于已保存的凭证进行：请先保存，再到 Provider 详情页或编辑页测试连接
                         - type: Text
                           props:
                             text: 保存前建议先测试 Base URL 与 API Key 是否有效

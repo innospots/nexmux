@@ -5,6 +5,7 @@ page:
   name: modelList
   description: 模型资产 / 模型：对客户端暴露的模型管理（卡片式列表）
 state:
+  keyword: ""
   typeChip: all
   provChips: []
   page: 1
@@ -16,6 +17,7 @@ dataSources:
       method: GET
       url: /api/d/models
       params:
+        keyword: ${state.keyword}
         type: ${state.typeChip}
         providers: ${state.provChips}
         page: ${state.page}
@@ -58,9 +60,50 @@ body:
         - type: Flex
           props:
             align: center
+            gap: middle
+          children:
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.keyword}
+                    placeholder: 搜索模型编码或名称
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          keyword: ${event}
+                      - action: setState
+                        params:
+                          page: 1
+                      - action: reload
+                        params:
+                          dataSource: models
+            - type: Text
+              props:
+                text: 共 ${data.models.total} 条
+                type: secondary
+                className: tabular-nums text-sm
+        - type: Flex
+          props:
+            align: center
             gap: small
             style:
               flexWrap: wrap
+            className: mt-2
           children:
             - type: Text
               props:
@@ -262,8 +305,8 @@ body:
                                 then:
                                   - action: message
                                     params:
-                                      messageType: success
-                                      text: 已创建导入草稿（演示：后续步骤为目录勾选与批量创建）
+                                      messageType: info
+                                      text: 目录模型批量导入暂未开放（后端目录端点未建，已列入任务清单）；可先在 Provider 详情页拉取/导入单个模型
                       - type: Button
                         props:
                           text: 新建
@@ -412,7 +455,7 @@ body:
                                   condition: ${actions.statusCfm.ok}
                                   then:
                                     - id: toggleResult
-                                      action: request
+                                      action: util.request
                                       params:
                                         method: POST
                                         url: "/api/d/ops/model-${row.status == 'enabled'

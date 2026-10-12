@@ -12,6 +12,7 @@ import com.innospots.nexmux.core.access.domain.vo.ClientTemplateVo;
 import com.innospots.nexmux.core.access.service.ClientTemplateService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.POST;
@@ -120,5 +121,14 @@ public class ClientTemplateEndpoint {
     public R<ClientTemplateVo> disable(
             @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId) {
         return R.ok(clientTemplateService.disable(templateId));
+    }
+
+    @DELETE
+    @Path("/{templateId}")
+    @Operation(operationId = "nexmuxClientTemplateDelete", summary = "删除客户端模板")
+    public R<Void> delete(
+            @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId) {
+        clientTemplateService.delete(templateId);
+        return R.ok();
     }
 }

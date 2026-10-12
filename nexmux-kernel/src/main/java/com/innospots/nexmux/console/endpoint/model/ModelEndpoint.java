@@ -11,6 +11,7 @@ import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -41,6 +42,7 @@ public class ModelEndpoint {
 
     /**
      * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
+    @param keyword   搜索关键字（模型编码 / 名称模糊匹配），空为不过滤
      */
     @GET
     @Operation(operationId = "nexmuxModelPage", summary = "分页查询模型")
@@ -52,12 +54,14 @@ public class ModelEndpoint {
             @Parameter(description = "模型类型（all / LLM / Embedding / Image / Audio）")
             @QueryParam("type") @DefaultValue("all") String type,
             @Parameter(description = "提供方编码，逗号分隔")
-            @QueryParam("providers") String providers) {
+            @QueryParam("providers") String providers,
+            @Parameter(description = "搜索关键字（模型编码 / 名称模糊匹配）")
+            @QueryParam("keyword") String keyword) {
         List<String> providerList = providers == null || providers.isBlank()
                 ? List.of()
                 : Arrays.stream(providers.split(",")).map(String::trim).filter(s -> !s.isEmpty()).toList();
         return modelViewAssembler.assemble(new ModelPageRequest(
-                page, pageSize, "all".equals(type) ? null : type, providerList));
+                page, pageSize, "all".equals(type) ? null : type, providerList, keyword));
     }
 
     /**
@@ -109,5 +113,14 @@ public class ModelEndpoint {
     public R<Boolean> invokeTest(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
         return R.ok(modelService.invokeTest(modelId));
+    }
+
+    @DELETE
+    @Path("/{modelId}")
+    @Operation(operationId = "nexmuxModelDelete", summary = "删除模型")
+    public R<Void> delete(
+            @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
+        modelService.delete(modelId);
+        return R.ok();
     }
 }

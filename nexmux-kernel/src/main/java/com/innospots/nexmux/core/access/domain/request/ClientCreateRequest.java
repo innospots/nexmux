@@ -26,5 +26,9 @@ public record ClientCreateRequest(
         @Schema(description = "授权路由 ID")
         List<String> routeIds,
         @Schema(description = "到期时间（ISO 文本）")
-        String expiresAt) {
+        String expiresAt,
+        @Schema(description = "配额规格（JSON 原文）")
+        String quotaSpec,
+        @Schema(description = "限流规格（JSON 原文）")
+        String rateLimitSpec) {
 }

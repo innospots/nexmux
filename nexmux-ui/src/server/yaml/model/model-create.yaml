@@ -52,7 +52,7 @@ body:
       events:
         onSubmit:
           - id: createResult
-            action: request
+            action: util.request
             params:
               method: POST
               url: /api/d/ops/model-create
@@ -427,7 +427,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: JSON 编辑模式：批量编辑 tiers + multipliers 后回表单校验（演示）
+                                    text: 定价 JSON 批量编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Flex
                         props:
                           direction: vertical
@@ -470,7 +470,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: 添加价格档位（演示：UPTO 需严格递增，末行为无上限档）
+                                    text: 价格档位编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Text
                         props:
                           text: 时段倍率
@@ -497,7 +497,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: 添加时段倍率规则（演示：每天 / 工作日 / 周末 + 起止时间 + 倍率）
+                                    text: 时段倍率编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Alert
                         props:
                           showIcon: true

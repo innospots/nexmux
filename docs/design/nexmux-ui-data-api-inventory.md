@@ -1137,7 +1137,7 @@
 
 | 数据 | 来源 |
 |------|------|
-| 42 供应商 + 1616 模型 | pi-ai catalog 种子（`nexmux-catalog-data-h2.sql`，**只插不更新**，重启保留用户修改；供应商 `DISABLED`、模型 `DRAFT`） |
+| 47 供应商 + 1672 模型 | pi-ai catalog 种子 + OctaFuse preset 覆盖层（`nexmux-catalog-data-h2.sql`，**只插不更新**，重启保留用户修改；供应商 `DISABLED`、模型 `DRAFT`）。生成脚本 `scripts/generate-pi-catalog-h2-sql.py`；覆盖层补齐 volcengine/aliyun/tencent/stepfun/meituan 五个国内厂商（**仅 LLM**，生图/语音需厂商原生协议暂不引入），并给已有厂商模型补中文描述、双币定价、发布日与模态 |
 | keyStatus | 由 `mux_provider_credential` 实时派生（openai 已配置联调凭证，其余 `none`） |
 | 路由 / 客户端 / 模板 | 联调经写接口创建（`mux_route` 2 条已发布、`mux_client_template` 1 条、`mux_client` 1 条） |
 | 请求日志 | 联调种子 SQL（Runtime 写入链路属 inbound 建设范围） |

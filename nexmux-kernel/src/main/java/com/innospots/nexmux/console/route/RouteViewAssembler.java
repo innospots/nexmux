@@ -6,6 +6,8 @@ import com.innospots.nexmux.console.shared.FilterChip;
 import com.innospots.nexmux.console.shared.StrategyLabels;
 import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.model.service.ModelService;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.route.domain.request.RoutePageRequest;
 import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
@@ -13,8 +15,6 @@ import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexus.base.domain.response.PageResult;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,11 +49,10 @@ public class RouteViewAssembler {
 
     private static final List<String> TYPE_CHIP_ORDER = List.of("single", "pool", "conditional");
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter SHORT_DATE_FORMAT = DateTimeFormatter.ofPattern("MM-dd");
 
     private final RouteService routeService;
     private final ModelService modelService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 分页列表：items 为当前页，counts/filters 为全量构成口径。
@@ -61,12 +60,13 @@ public class RouteViewAssembler {
     public RouteListResult assemble(RoutePageRequest request) {
         PageResult<RouteVo> page = routeService.page(request);
         Map<String, ModelVo> modelsByCode = modelsByCode();
+        DisplayFormats formats = displayFormats.current();
 
         List<RouteRecord> items = page.records().stream()
-                .map(vo -> toRecord(vo, null, modelsByCode))
+                .map(vo -> toRecord(vo, null, modelsByCode, formats))
                 .toList();
         List<RouteRecord> universe = routeService.listAll().stream()
-                .map(vo -> toRecord(vo, null, modelsByCode))
+                .map(vo -> toRecord(vo, null, modelsByCode, formats))
                 .toList();
 
         RouteListResult.Counts counts = countsOf(universe);
@@ -80,7 +80,7 @@ public class RouteViewAssembler {
      */
     public RouteRecord detail(String routeCode) {
         RouteDetailVo detail = routeService.getByCode(routeCode);
-        return toRecord(baseViewOf(detail), detail, modelsByCode());
+        return toRecord(baseViewOf(detail), detail, modelsByCode(), displayFormats.current());
     }
 
     /** 详情 VO → 概要视图字段（record 无继承，显式提取公共字段）。 */
@@ -98,7 +98,8 @@ public class RouteViewAssembler {
         return modelsByCode;
     }
 
-    private static RouteRecord toRecord(RouteVo vo, RouteDetailVo detail, Map<String, ModelVo> modelsByCode) {
+    private static RouteRecord toRecord(RouteVo vo, RouteDetailVo detail, Map<String, ModelVo> modelsByCode,
+            DisplayFormats formats) {
         RouteSpec spec = vo.routeSpec();
         List<RouteCandidate> candidates = spec == null ? List.of() : spec.candidates();
         List<ModelEntry> models = candidates.stream()
@@ -115,9 +116,14 @@ public class RouteViewAssembler {
         long weightTotal = models.stream()
                 .filter(m -> "enabled".equals(m.status()))
                 .mapToLong(ModelEntry::weight).sum();
-        String updatedAt = detail == null ? "" : timeText(detail.updatedAt());
+        String updatedAt = detail == null ? "" : formats.dayMinuteTime(detail.updatedAt());
+        // 草稿与发布快照不一致 → 存在未发布变更（详情页提示用）
+        boolean hasUnpublishedChanges = detail != null
+                && detail.publishedRouteSpec() != null
+                && !detail.routeSpec().equals(detail.publishedRouteSpec());
 
         return new RouteRecord(
+                vo.routeId(),
                 vo.routeCode(),
                 vo.displayName(),
                 type,
@@ -135,7 +141,7 @@ public class RouteViewAssembler {
                 spec != null && Boolean.TRUE.equals(spec.stickySession()),
                 spec == null || spec.filterUnhealthyBindings(),
                 models,
-                detail == null ? "" : timeText(detail.createdAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.createdAt()),
                 updatedAt,
                 detail == null || detail.updatedBy() == null ? "—" : detail.updatedBy(),
                 path + " · " + protocol,
@@ -144,7 +150,8 @@ public class RouteViewAssembler {
                 String.join(" · ", tags),
                 enabledModelCount,
                 weightTotal,
-                detail == null || detail.updatedAt() == null ? "" : SHORT_DATE_FORMAT.format(detail.updatedAt()));
+                detail == null || detail.updatedAt() == null ? "" : formats.shortDate(detail.updatedAt()),
+                hasUnpublishedChanges);
     }
 
     private static ModelEntry modelEntryOf(RouteCandidate candidate, Map<String, ModelVo> modelsByCode) {
@@ -225,9 +232,7 @@ public class RouteViewAssembler {
         return new RouteListResult.Filters(statusChips, typeChips, tagChips);
     }
 
-    private static String timeText(LocalDateTime time) {
-        return time == null ? "" : TIME_FORMAT.format(time);
-    }
+
 
     private static String nullToEmpty(String value) {
         return value == null ? "" : value;

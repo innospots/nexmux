@@ -6,6 +6,7 @@ page:
   description: 模型资产 / Provider 详情：基本信息、连接与凭证、关联模型、引用关系
 state:
   capExtExpanded: false
+  pullSelected: []
 dataSources:
   detail:
     type: http
@@ -164,7 +165,7 @@ body:
                               condition: ${actions.statusCfm.ok}
                               then:
                                 - id: toggleResult
-                                  action: request
+                                  action: util.request
                                   params:
                                     method: POST
                                     url: "/api/d/ops/provider-${data.detail.status
@@ -271,7 +272,7 @@ body:
                               condition: ${actions.deleteCfm.ok}
                               then:
                                 - id: deleteResult
-                                  action: request
+                                  action: util.request
                                   params:
                                     method: POST
                                     url: /api/d/ops/provider-delete?code=${route.params.code}
@@ -540,7 +541,7 @@ body:
                                 events:
                                   onClick:
                                     - id: testResult
-                                      action: request
+                                      action: util.request
                                       params:
                                         method: POST
                                         url: /api/d/ops/provider-connection-test?code=${route.params.code}
@@ -618,6 +619,7 @@ body:
                                     - action: reload
                                       params:
                                         dataSource: upstream
+                                    - action: providerModels.initPull
                                     - id: pullResult
                                       action: overlay.open
                                       params:
@@ -648,8 +650,15 @@ body:
                                                       cell:
                                                         type: Checkbox
                                                         props:
-                                                          value: ${row.local == '新增'}
+                                                          value: false
                                                           disabled: ${row.local != '新增'}
+                                                        events:
+                                                          onChange:
+                                                            - action: providerModels.toggle
+                                                              params:
+                                                                id: ${row.id}
+                                                                name: ${row.name}
+                                                                checked: ${event}
                                                     - title: Provider Model ID
                                                       dataIndex: id
                                                     - title: 建议 Model Name
@@ -658,7 +667,7 @@ body:
                                                       dataIndex: local
                                               - type: Text
                                                 props:
-                                                  text: 已选 2 项（新增） · 0 项已存在将跳过
+                                                  text: 已选 ${state.pullSelected.length} 项（新增）；已存在的将跳过
                                                   type: secondary
                                                   className: text-sm
                                               - type: Flex
@@ -686,10 +695,26 @@ body:
                                       params:
                                         condition: ${actions.pullResult.ok}
                                         then:
-                                          - action: message
+                                          - id: importResult2
+                                            action: providerModels.importSelected
                                             params:
-                                              messageType: success
-                                              text: 已为选中项批量创建 Model（演示）
+                                              providerCode: ${route.params.code}
+                                          - action: if
+                                            params:
+                                              condition: ${actions.importResult2 != null && actions.importResult2.created > 0}
+                                              then:
+                                                - action: message
+                                                  params:
+                                                    messageType: success
+                                                    text: 已创建 ${actions.importResult2.created} 个 Model 草稿（可去编辑补全定价与参数）
+                                          - action: if
+                                            params:
+                                              condition: ${actions.importResult2 != null && actions.importResult2.failures != null && actions.importResult2.failures.length > 0}
+                                              then:
+                                                - action: message
+                                                  params:
+                                                    messageType: error
+                                                    text: "${actions.importResult2.failures.length} 项创建失败：${actions.importResult2.failures[0].id} ${actions.importResult2.failures[0].error}"
                                           - action: reload
                                             params:
                                               dataSource: detail
@@ -713,10 +738,31 @@ body:
                                               name: importModel
                                             events:
                                               onSubmit:
-                                                - action: overlay.close
+                                                - id: importOneResult
+                                                  action: providerModels.importOne
                                                   params:
-                                                    payload:
-                                                      ok: true
+                                                    providerCode: ${route.params.code}
+                                                    values: ${event}
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.importOneResult == null || actions.importOneResult.ok == false}
+                                                    then:
+                                                      - action: message
+                                                        params:
+                                                          messageType: error
+                                                          text: "${actions.importOneResult != null && actions.importOneResult.error != null ? actions.importOneResult.error.message : '创建失败'}"
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.importOneResult != null && actions.importOneResult.ok != false}
+                                                    then:
+                                                      - action: overlay.close
+                                                      - action: message
+                                                        params:
+                                                          messageType: success
+                                                          text: 已创建 Model 草稿（可去编辑补全定价与参数）
+                                                      - action: reload
+                                                        params:
+                                                          dataSource: detail
                                             children:
                                               - type: Field
                                                 props:
@@ -784,17 +830,6 @@ body:
                                                       text: 确认导入
                                                       variant: primary
                                                       submit: true
-                                    - action: if
-                                      params:
-                                        condition: ${actions.importResult.ok}
-                                        then:
-                                          - action: message
-                                            params:
-                                              messageType: success
-                                              text: 已创建 Model 草稿（演示：可去编辑补全定价与参数）
-                                          - action: reload
-                                            params:
-                                              dataSource: detail
                               - type: Button
                                 props:
                                   text: 查看全部模型
@@ -882,20 +917,22 @@ body:
                                   size: small
                                 events:
                                   onClick:
-                                    - action: message
+                                    - action: navigate
                                       params:
-                                        messageType: info
-                                        text: 展开全部（演示）
+                                        to: /models?provider=${route.params.code}
                               - type: Button
                                 props:
                                   text: 导出关系图
                                   size: small
                                 events:
                                   onClick:
+                                    - action: util.copyJson
+                                      params:
+                                        data: ${data.detail}
                                     - action: message
                                       params:
-                                        messageType: info
-                                        text: 导出关系图（演示）
+                                        messageType: success
+                                        text: 引用关系数据 JSON 已复制到剪贴板
     - type: Empty
       when: ${data.detail == null && !dataStatus.detail.loading}
       props:

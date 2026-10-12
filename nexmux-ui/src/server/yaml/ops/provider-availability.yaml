@@ -5,19 +5,27 @@ page:
   name: providerAvailability
   description: 运行管理 / 供应商可用性：供应商与路由质量
 state:
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
     start: 2026-09-22
     end: 2026-09-28
 dataSources:
   availability:
     type: http
-    autoLoad: true
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
     request:
       method: GET
       url: /api/d/stats-provider-availability
       params:
         start: ${state.range.start}
         end: ${state.range.end}
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: availability
 body:
   type: Page
   children:

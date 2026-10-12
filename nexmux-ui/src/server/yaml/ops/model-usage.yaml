@@ -6,19 +6,42 @@ page:
   description: 运行管理 / 模型用量：按模型与路由组的用量与成本
 state:
   tokenMode: compact
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
     start: 2026-09-22
     end: 2026-09-28
 dataSources:
   usage:
     type: http
-    autoLoad: true
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
     request:
       method: GET
       url: /api/d/stats-model-usage
       params:
         start: ${state.range.start}
         end: ${state.range.end}
+  settings:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/service-settings
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: usage
+  onLoad:
+    - action: if
+      params:
+        condition: ${data.settings != null && data.settings.tokenDisplay != null}
+        then:
+          - action: setState
+            params:
+              tokenMode: "${data.settings.tokenDisplay == 'full' ? 'raw' : 'compact'}"
+
 body:
   type: Page
   children:
@@ -126,10 +149,44 @@ body:
             icon: download
           events:
             onClick:
-              - action: message
+              - id: csvResult
+                action: util.exportCsv
                 params:
-                  messageType: info
-                  text: 导出 CSV（演示：静态页面不落库）
+                  filename: model-usage.csv
+                  rows: ${data.usage.items}
+                  headers:
+                        - key: model
+                          label: 模型
+                        - key: route
+                          label: 路由组
+                        - key: requests
+                          label: 请求数
+                        - key: inputRaw
+                          label: 输入 Token
+                        - key: outputRaw
+                          label: 输出 Token
+                        - key: cacheHit
+                          label: 缓存命中率
+                        - key: standard
+                          label: 标准
+                        - key: billed
+                          label: 计费
+                        - key: cost
+                          label: 成本
+                        - key: avgBilled
+                          label: 平均计费/请求
+                        - key: successRate
+                          label: 成功率
+                        - key: avgLatency
+                          label: 平均延迟
+              - action: if
+                params:
+                  condition: ${actions.csvResult != null && actions.csvResult.ok != false}
+                  then:
+                    - action: message
+                      params:
+                        messageType: success
+                        text: 已导出 CSV
         - type: Text
           props:
             text: "范围合计  标准: ${data.usage.summary.standard}  计费:

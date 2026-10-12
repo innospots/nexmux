@@ -581,7 +581,7 @@ layouts:
                     params:
                       condition: ${event == 'logout'}
                       then:
-                        - action: request
+                        - action: util.request
                           params:
                             method: POST
                             url: http://localhost:9011/api/auth/logout
@@ -591,7 +591,7 @@ layouts:
                         - action: message
                           params:
                             messageType: info
-                            text: 打开个人中心（演示）
+                            text: 个人中心暂未开放（账号体系由平台侧统一管理）
                 onLocaleChange:
                   - action: message
                     params:

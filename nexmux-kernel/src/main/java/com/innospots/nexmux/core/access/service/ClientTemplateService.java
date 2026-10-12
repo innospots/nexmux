@@ -13,6 +13,7 @@ import com.innospots.nexmux.core.access.domain.request.ClientTemplateUpdateReque
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import java.time.LocalDate;
@@ -26,6 +27,7 @@ public class ClientTemplateService {
 
     private final ClientTemplateDao clientTemplateDao;
     private final ClientDao clientDao;
+    private final ConfigAuditService configAuditService;
 
     public PageResult<ClientTemplateVo> page(ClientTemplatePageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -108,6 +110,8 @@ public class ClientTemplateService {
         entity.setValidityDays(request.validityDays());
         entity.setValidTo(parseFixedDate(request.validityFixedDate()));
         clientTemplateDao.insert(entity);
+        configAuditService.record("CLIENT_TEMPLATE", entity.getTemplateId(), "CREATE",
+                "创建客户端模板 " + entity.getTemplateCode(), null);
         return toVo(entity);
     }
 
@@ -137,6 +141,8 @@ public class ClientTemplateService {
             entity.setRateLimitSpec(request.rateLimitSpec());
         }
         clientTemplateDao.updateById(entity);
+        configAuditService.record("CLIENT_TEMPLATE", entity.getTemplateId(), "UPDATE",
+                "更新客户端模板 " + entity.getTemplateCode(), null);
         return toVo(entity);
     }
 
@@ -144,11 +150,21 @@ public class ClientTemplateService {
         ClientTemplateEntity entity = require(templateId);
         entity.setStatus(enabled ? "ENABLED" : "DISABLED");
         clientTemplateDao.updateById(entity);
+        configAuditService.record("CLIENT_TEMPLATE", entity.getTemplateId(),
+                enabled ? "ENABLE" : "DISABLE",
+                (enabled ? "启用" : "停用") + "客户端模板 " + entity.getTemplateCode(), null);
         return toVo(entity);
     }
 
     public ClientTemplateVo disable(String templateId) {
         return setEnabled(templateId, false);
+    }
+
+    public void delete(String templateId) {
+        ClientTemplateEntity entity = require(templateId);
+        clientTemplateDao.deleteById(templateId);
+        configAuditService.record("CLIENT_TEMPLATE", entity.getTemplateId(), "DELETE",
+                "删除客户端模板 " + entity.getTemplateCode(), null);
     }
 
     /**

@@ -6,6 +6,8 @@ import com.innospots.nexmux.core.access.domain.request.ClientPageRequest;
 import com.innospots.nexmux.core.access.domain.vo.ClientDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexmux.core.access.service.ClientTemplateService;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
@@ -13,7 +15,6 @@ import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexus.base.domain.response.PageResult;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -36,11 +37,11 @@ public class ClientViewAssembler {
     /** enabled/expired 快筛拉全量 ENABLED 的自保护上限（与原 BFF 一致）。 */
     private static final long LOCAL_FILTER_PAGE_SIZE = 5000L;
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     private final ClientService clientService;
     private final RouteService routeService;
     private final ClientTemplateService clientTemplateService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 分页列表：items 为当前页，counts/filters 为全量构成口径。
@@ -115,7 +116,8 @@ public class ClientViewAssembler {
             Map<String, ClientTemplateVo> templatesById) {
     }
 
-    private static ClientRecord toRecord(ClientVo vo, ClientDetailVo detail, Relations relations) {
+    private ClientRecord toRecord(ClientVo vo, ClientDetailVo detail, Relations relations) {
+        DisplayFormats formats = displayFormats.current();
         List<AuthRoute> authRoutes = (vo.authorizedRouteIds() == null ? List.<String>of() : vo.authorizedRouteIds())
                 .stream()
                 .map(relations.routesById::get)
@@ -131,7 +133,7 @@ public class ClientViewAssembler {
 
         String status = statusOf(vo.status(), vo.expiresAt());
         String rateLimitSummary = PolicyDerive.rateLimitSummaryOf(rateLimits);
-        String expiresAt = timeText(vo.expiresAt());
+        String expiresAt = formats.dayMinuteTime(vo.expiresAt());
         ClientTemplateVo template = relations.templatesById.get(
                 vo.sourceTemplateId() == null ? "" : vo.sourceTemplateId());
         List<String> tags = detail != null && detail.tags() != null
@@ -139,6 +141,7 @@ public class ClientViewAssembler {
         String appKeyId = vo.appKeyId() == null ? "" : vo.appKeyId();
 
         return new ClientRecord(
+                vo.clientId(),
                 vo.clientCode(),
                 vo.displayName(),
                 tags,
@@ -147,14 +150,14 @@ public class ClientViewAssembler {
                 STATUS_LABELS.getOrDefault(status, status),
                 expiresAt,
                 appKeyId,
-                timeText(vo.appKeyRotatedAt()),
+                formats.dayMinuteTime(vo.appKeyRotatedAt()),
                 template == null ? null : template.templateCode(),
                 template == null ? null : template.displayName(),
                 authRoutes,
                 quotas,
                 rateLimits,
-                detail == null ? "" : timeText(detail.createdAt()),
-                detail == null ? "" : timeText(detail.updatedAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.createdAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.updatedAt()),
                 detail == null || detail.updatedBy() == null ? "—" : detail.updatedBy(),
                 authRoutes.size(),
                 PolicyDerive.quotaSummaryOf(quotas),
@@ -169,6 +172,7 @@ public class ClientViewAssembler {
     private static AuthRoute authRouteOf(RouteVo route) {
         int candidates = route.routeSpec() == null ? 0 : route.routeSpec().candidates().size();
         return new AuthRoute(
+                route.routeId(),
                 route.routeCode(),
                 route.displayName(),
                 route.alias(),
@@ -223,7 +227,4 @@ public class ClientViewAssembler {
         return new ClientListResult.Filters(tagChips);
     }
 
-    private static String timeText(LocalDateTime time) {
-        return time == null ? "" : TIME_FORMAT.format(time);
-    }
 }

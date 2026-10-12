@@ -1,6 +1,7 @@
 package com.innospots.nexmux.core.ops.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexmux.core.ops.dao.RequestLogDao;
@@ -30,6 +31,17 @@ public class RequestLogQueryService {
                 .map(this::toVo)
                 .toList();
         return PageResult.of(records, pageNo, pageSize, total);
+    }
+
+    /** 日志中出现过的模型编码（去重、升序；筛选下拉数据源）。 */
+    public java.util.List<String> distinctModelCodes() {
+        return requestLogDao.selectObjs(new QueryWrapper<RequestLogEntity>()
+                        .select("DISTINCT model_code")
+                        .isNotNull("model_code")
+                        .orderByAsc("model_code"))
+                .stream()
+                .map(String::valueOf)
+                .toList();
     }
 
     public RequestLogDetailVo get(String requestId) {

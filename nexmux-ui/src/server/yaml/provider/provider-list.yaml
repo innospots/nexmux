@@ -191,7 +191,7 @@ body:
                             - action: message
                               params:
                                 messageType: info
-                                text: 模板导入流程（演示：选择内置/社区模板 → 生成草稿 → 引导填密钥）
+                                text: 模板导入暂未开放（后端目录模板端点未建，已列入任务清单）；请先用「新建」或详情页拉取模型
                       - type: Button
                         props:
                           text: 新建
@@ -364,7 +364,7 @@ body:
                                   condition: ${actions.statusCfm.ok}
                                   then:
                                     - id: toggleResult
-                                      action: request
+                                      action: util.request
                                       params:
                                         method: POST
                                         url:

@@ -4,6 +4,7 @@ import com.innospots.nexmux.console.shared.FilterChip;
 import com.innospots.nexmux.core.model.domain.request.ModelPageRequest;
 import com.innospots.nexmux.core.model.domain.vo.ModelDetailVo;
 import com.innospots.nexmux.core.model.domain.vo.ModelVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
@@ -37,7 +38,7 @@ class ModelViewAssemblerTest {
         modelService = Mockito.mock(ModelService.class);
         providerService = Mockito.mock(ProviderService.class);
         routeService = Mockito.mock(RouteService.class);
-        assembler = new ModelViewAssembler(modelService, providerService, routeService);
+        assembler = new ModelViewAssembler(modelService, providerService, routeService, DisplayFormatsProvider.defaults());
     }
 
     private static ProviderVo openai() {
@@ -75,7 +76,7 @@ class ModelViewAssemblerTest {
     void assemblesRowShapeBoundByListPage() {
         stubRelations();
 
-        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null));
+        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null, null));
 
         assertThat(result.total()).isEqualTo(2);
         assertThat(result.items()).hasSize(2);
@@ -116,7 +117,7 @@ class ModelViewAssemblerTest {
         when(providerService.listAll()).thenReturn(List.of(openai()));
         when(routeService.listAll()).thenReturn(List.of());
 
-        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null));
+        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null, null));
 
         ModelRecord item = result.items().get(0);
         assertThat(item.pricingSummary()).isEqualTo("未定价");
@@ -130,7 +131,7 @@ class ModelViewAssemblerTest {
     void buildsTypeAndProviderFilterChips() {
         stubRelations();
 
-        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null));
+        ModelListResult result = assembler.assemble(new ModelPageRequest(1L, 11L, null, null, null));
 
         assertThat(result.filters().type()).containsExactly(
                 new FilterChip("all", "全部 2", null),
@@ -199,5 +200,16 @@ class ModelViewAssemblerTest {
         assertThat(record.shortDate()).isEqualTo("10-05");
         assertThat(record.operator()).isEqualTo("admin");
         assertThat(record.pricingSummary()).isEqualTo("$1.1 / $4.4 /M");
+    }
+
+    @Test
+    void optionsReturnOnlyEnabledModels() {
+        stubRelations();
+
+        var options = assembler.options();
+
+        assertThat(options).hasSize(1);
+        assertThat(options.get(0).value()).isEqualTo("openai/o4-mini");
+        assertThat(options.get(0).label()).isEqualTo("o4 mini（openai/o4-mini）");
     }
 }

@@ -7,6 +7,7 @@ import com.innospots.nexmux.core.access.domain.entity.ClientTemplateEntity;
 import com.innospots.nexmux.core.access.domain.request.ClientTemplateCreateRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientTemplatePageRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientTemplateUpdateRequest;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
 import java.util.List;
@@ -29,7 +30,8 @@ class ClientTemplateServiceTest {
     void setUp() {
         clientTemplateDao = Mockito.mock(ClientTemplateDao.class);
         clientDao = Mockito.mock(ClientDao.class);
-        templateService = new ClientTemplateService(clientTemplateDao, clientDao);
+        templateService = new ClientTemplateService(clientTemplateDao, clientDao,
+                Mockito.mock(ConfigAuditService.class));
     }
 
     private ClientTemplateEntity template(String id, String code, String status) {

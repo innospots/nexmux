@@ -54,6 +54,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  */
 @Schema(name = "ModelRecord", description = "Model 展示记录（UI 契约）")
 public record ModelRecord(
+        @Schema(description = "模型 ID", required = true)
+        String id,
         String code,
         String name,
         String providerCode,

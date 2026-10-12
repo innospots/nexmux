@@ -4,6 +4,7 @@ import com.innospots.nexmux.console.shared.FilterChip;
 import com.innospots.nexmux.core.access.domain.vo.ClientDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexmux.core.access.service.ClientTemplateService;
 import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
@@ -37,7 +38,7 @@ class ClientViewAssemblerTest {
         clientService = Mockito.mock(ClientService.class);
         routeService = Mockito.mock(RouteService.class);
         templateService = Mockito.mock(ClientTemplateService.class);
-        assembler = new ClientViewAssembler(clientService, routeService, templateService);
+        assembler = new ClientViewAssembler(clientService, routeService, templateService, DisplayFormatsProvider.defaults());
     }
 
     private static RouteVo route(String id, String code, String name, int candidates) {

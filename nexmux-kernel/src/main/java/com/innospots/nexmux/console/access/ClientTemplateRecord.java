@@ -7,6 +7,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * ClientTemplate 展示记录（/api/d/client-templates UI 契约；列表行与详情共用，
  * 列表行中详情专有字段取缺省值）。
  *
+ * @param id                 模板 ID（更新 / 启停端点路径参数）
  * @param code               模板编码（稳定业务键）
  * @param name               显示名称
  * @param tags               标签
@@ -32,6 +33,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  */
 @Schema(name = "ClientTemplateRecord", description = "ClientTemplate 展示记录（UI 契约）")
 public record ClientTemplateRecord(
+        @Schema(description = "模板 ID", required = true)
+        String id,
         String code,
         String name,
         List<String> tags,

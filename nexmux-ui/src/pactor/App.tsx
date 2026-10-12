@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Suspense } from "react";
+import { Suspense, useEffect } from "react";
 import { SitemapApp } from "pactor-app";
 
 import { apiBaseUrl, pageEndpoint, sitemapSources } from "./config";
@@ -37,6 +37,27 @@ function PactorAppInner() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+
+  // 服务设置 → 浏览器标题（displayName）；/login 上 401 静默跳过，
+  // 登录成功跳转后随 pathname 变化重试
+  useEffect(() => {
+    if (pathname === "/login") {
+      return;
+    }
+    let cancelled = false;
+    fetch(`${apiBaseUrl}/api/d/service-settings`, { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((settings) => {
+        if (!cancelled && settings?.displayName) {
+          document.title = settings.displayName;
+        }
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, [pathname]);
+
   return (
     <SitemapApp
       sources={sitemapSources}

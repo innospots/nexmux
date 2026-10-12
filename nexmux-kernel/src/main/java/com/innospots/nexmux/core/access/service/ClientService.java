@@ -7,6 +7,7 @@ import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
 import com.innospots.nexmux.core.access.domain.entity.ClientTemplateEntity;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.access.domain.request.ClientCreateRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientPageRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientRouteGrantsRequest;
@@ -18,7 +19,9 @@ import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.security.AppKeySupport;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 
@@ -27,6 +30,7 @@ public class ClientService {
 
     private final ClientDao clientDao;
     private final ClientTemplateDao clientTemplateDao;
+    private final ConfigAuditService configAuditService;
 
     public PageResult<ClientVo> page(ClientPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -112,6 +116,8 @@ public class ClientService {
         entity.setTags(request.tags() == null ? null : NexmuxJson.write(request.tags()));
         applyTemplateOrBlank(entity, request);
         clientDao.insert(entity);
+        configAuditService.record("CLIENT", entity.getClientId(), "CREATE",
+                "创建客户端 " + entity.getClientCode(), null);
         return new ClientCreateResultVo(toVo(entity), material.plainKey());
     }
 
@@ -122,8 +128,10 @@ public class ClientService {
         if (request.sourceTemplateCode() == null || request.sourceTemplateCode().isBlank()) {
             entity.setAuthorizedRouteIds(NexmuxJson.write(
                     request.routeIds() == null ? List.of() : request.routeIds()));
+            entity.setQuotaSpec(request.quotaSpec());
+            entity.setRateLimitSpec(request.rateLimitSpec());
             if (request.expiresAt() != null && !request.expiresAt().isBlank()) {
-                entity.setExpiresAt(LocalDateTime.parse(request.expiresAt().replace(" ", "T")));
+                entity.setExpiresAt(parseExpiry(request.expiresAt()));
             }
             return;
         }
@@ -167,6 +175,8 @@ public class ClientService {
             entity.setTags(NexmuxJson.write(request.tags()));
         }
         clientDao.updateById(entity);
+        configAuditService.record("CLIENT", entity.getClientId(), "UPDATE",
+                "更新客户端 " + entity.getClientCode(), null);
         return toVo(entity);
     }
 
@@ -174,11 +184,21 @@ public class ClientService {
         ClientEntity entity = require(clientId);
         entity.setStatus(enabled ? "ENABLED" : "DISABLED");
         clientDao.updateById(entity);
+        configAuditService.record("CLIENT", entity.getClientId(),
+                enabled ? "ENABLE" : "DISABLE",
+                (enabled ? "启用" : "停用") + "客户端 " + entity.getClientCode(), null);
         return toVo(entity);
     }
 
     public ClientVo disable(String clientId) {
         return setEnabled(clientId, false);
+    }
+
+    public void delete(String clientId) {
+        ClientEntity entity = require(clientId);
+        clientDao.deleteById(clientId);
+        configAuditService.record("CLIENT", entity.getClientId(), "DELETE",
+                "删除客户端 " + entity.getClientCode(), null);
     }
 
     public ClientRotateResultVo rotateAppKey(String clientId) {
@@ -189,6 +209,8 @@ public class ClientService {
         entity.setAppKeyVersion(entity.getAppKeyVersion() + 1);
         entity.setAppKeyRotatedAt(LocalDateTime.now());
         clientDao.updateById(entity);
+        configAuditService.record("CLIENT", entity.getClientId(), "ROTATE",
+                "轮换 AppKey（v" + entity.getAppKeyVersion() + "）", null);
         return new ClientRotateResultVo(entity.getClientId(), material.plainKey(), entity.getAppKeyVersion());
     }
 
@@ -196,7 +218,17 @@ public class ClientService {
         ClientEntity entity = require(clientId);
         entity.setAuthorizedRouteIds(NexmuxJson.write(request.routeIds()));
         clientDao.updateById(entity);
+        configAuditService.record("CLIENT", entity.getClientId(), "UPDATE",
+                "更新路由授权（" + request.routeIds().size() + " 条）", null);
         return toVo(entity);
+    }
+
+    /** 到期时间解析：日期（yyyy-MM-dd）视为当天 23:59:59；带时间按 ISO / 空格分隔解析。 */
+    private static LocalDateTime parseExpiry(String raw) {
+        String trimmed = raw.trim();
+        return trimmed.length() == 10
+                ? LocalDate.parse(trimmed).atTime(LocalTime.MAX)
+                : LocalDateTime.parse(trimmed.replace(" ", "T"));
     }
 
     private boolean matchesTags(ClientEntity entity, List<String> tags) {
@@ -216,7 +248,7 @@ public class ClientService {
     }
 
     /** AppKey 展示 ID：gw-ak- + 哈希前 8 位（不含可逆信息）。 */
-    static String appKeyIdOf(ClientEntity entity) {
+    public static String appKeyIdOf(ClientEntity entity) {
         String hash = entity.getAppKeyHash();
         return "gw-ak-" + (hash == null ? "--------" : hash.substring(0, Math.min(8, hash.length())));
     }

@@ -2,6 +2,7 @@ package com.innospots.nexmux.core.model.service;
 
 import com.innospots.nexmux.core.model.dao.ModelDao;
 import com.innospots.nexmux.core.model.domain.entity.ModelEntity;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.model.domain.request.ModelCreateRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelPageRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelUpdateRequest;
@@ -28,9 +29,14 @@ class ModelServiceTest {
 
     @BeforeEach
     void setUp() {
+        // LambdaQueryWrapper 列名解析依赖 TableInfo（纯单测无 SqlSessionFactory，手动初始化）
+        com.baomidou.mybatisplus.core.metadata.TableInfoHelper.initTableInfo(
+                new org.apache.ibatis.builder.MapperBuilderAssistant(
+                        new com.baomidou.mybatisplus.core.MybatisConfiguration(), ""),
+                com.innospots.nexmux.core.model.domain.entity.ModelEntity.class);
         modelDao = Mockito.mock(ModelDao.class);
         providerDao = Mockito.mock(ProviderDao.class);
-        modelService = new ModelService(modelDao, providerDao);
+        modelService = new ModelService(modelDao, providerDao, Mockito.mock(ConfigAuditService.class));
     }
 
     private ProviderEntity provider(String id, String code) {
@@ -160,9 +166,25 @@ class ModelServiceTest {
         when(modelDao.selectList(any())).thenReturn(List.of(model("md-1", "qwen3.5-flash")));
 
         var result = modelService.page(new ModelPageRequest(
-                1L, 20L, "LLM", List.of("dashscope")));
+                1L, 20L, "LLM", List.of("dashscope"), null));
 
         assertThat(result.records()).hasSize(1);
         Mockito.verify(providerDao).selectList(any());
+    }
+
+    @Test
+    void pageFiltersByKeywordOnCodeAndName() {
+        when(modelDao.selectCount(any())).thenReturn(0L);
+        when(modelDao.selectList(any())).thenReturn(List.of());
+
+        modelService.page(new ModelPageRequest(1L, 20L, null, null, "flash"));
+
+        // 关键字过滤作用于 modelCode 与 displayName（OR LIKE），与 Provider 列表语义一致
+        var captor = org.mockito.ArgumentCaptor.forClass(com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper.class);
+        Mockito.verify(modelDao).selectList(captor.capture());
+        String sql = captor.getValue().getSqlSegment();
+        assertThat(sql).contains("LIKE");
+        assertThat(captor.getValue().getParamNameValuePairs().values())
+                .allMatch(v -> "%flash%".equals(v));
     }
 }

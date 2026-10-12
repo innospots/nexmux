@@ -1,5 +1,6 @@
 package com.innospots.nexmux.console.audit;
 
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.audit.domain.vo.AuditLogVo;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -12,6 +13,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 class AuditViewMapperTest {
 
+    private final AuditViewMapper mapper = new AuditViewMapper(DisplayFormatsProvider.defaults());
+
     @Test
     void splitsEnvelopeAndComputesDiff() {
         AuditLogVo vo = new AuditLogVo(
@@ -20,7 +23,7 @@ class AuditViewMapperTest {
                 "admin", "1.2.3.4", "req-1", "curl/8",
                 LocalDateTime.of(2026, 10, 5, 8, 0));
 
-        AuditRecord record = AuditViewMapper.toRecord(vo);
+        AuditRecord record = mapper.toRecord(vo);
 
         assertThat(record.operation()).isEqualTo("修改");
         assertThat(record.operationType()).isEqualTo("update");
@@ -49,7 +52,7 @@ class AuditViewMapperTest {
                 "{\"alias\":\"general\"}", "admin", null, null, null,
                 LocalDateTime.of(2026, 10, 1, 12, 0));
 
-        AuditRecord record = AuditViewMapper.toRecord(vo);
+        AuditRecord record = mapper.toRecord(vo);
 
         assertThat(record.beforeJson()).isNull();
         assertThat(record.afterJson()).contains("general");

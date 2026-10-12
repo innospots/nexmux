@@ -14,6 +14,7 @@ import com.innospots.nexmux.core.stats.domain.vo.AvailabilityVo;
 import com.innospots.nexmux.core.stats.domain.vo.DashboardVo;
 import com.innospots.nexmux.core.stats.domain.vo.UsageRowVo;
 import com.innospots.nexmux.core.stats.service.AvailabilityService;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.stats.service.DashboardService;
 import com.innospots.nexmux.core.stats.service.UsageStatsService;
 import java.math.BigDecimal;
@@ -47,7 +48,7 @@ class StatsViewAssemblerTest {
         ClientService clientService = Mockito.mock(ClientService.class);
         RouteService routeService = Mockito.mock(RouteService.class);
         assembler = new StatsViewAssembler(dashboardService, usageStatsService, availabilityService,
-                modelService, providerService, clientService, routeService);
+                modelService, providerService, clientService, routeService, DisplayFormatsProvider.defaults());
 
         when(modelService.listAll()).thenReturn(List.of(
                 new ModelVo("m1", "zai/glm-5", "GLM-5", "ENABLED", "LLM",
@@ -121,16 +122,16 @@ class StatsViewAssemblerTest {
         assertThat(row.display().requests()).isEqualTo("12.5K");
         assertThat(row.display().inputCompact()).isEqualTo("2.0M");
         assertThat(row.display().cacheHit()).isEqualTo("16.7%");
-        assertThat(row.display().standard()).isEqualTo("$30.00");
-        assertThat(row.display().billed()).isEqualTo("$36.00");
-        assertThat(row.display().cost()).isEqualTo("$24.00");
+        assertThat(row.display().standard()).isEqualTo("$30.0000");
+        assertThat(row.display().billed()).isEqualTo("$36.0000");
+        assertThat(row.display().cost()).isEqualTo("$24.0000");
         assertThat(row.display().avgBilled()).isEqualTo("$0.0029");
         assertThat(row.display().successRate()).isEqualTo("99.8%");
         assertThat(row.display().avgLatency()).isEqualTo("820ms");
         assertThat(row.display().ttft()).isEqualTo("95ms");
         assertThat(row.display().avgAttempts()).isEqualTo("1.02");
         assertThat(row.display().tps()).isNotBlank();
-        assertThat(result.summary().standard()).isEqualTo("$30.00");
+        assertThat(result.summary().standard()).isEqualTo("$30.0000");
     }
 
     @Test
@@ -165,7 +166,7 @@ class StatsViewAssemblerTest {
         assertThat(view.providers().get(0).display().successRate()).isEqualTo("99.8%");
         assertThat(view.compare().get(0).model()).isEqualTo("GLM-5");
         assertThat(view.compare().get(0).provider()).isEqualTo("Z.AI");
-        assertThat(view.errors().get(0).time()).isEqualTo("10-05 08:00:00 UTC");
+        assertThat(view.errors().get(0).time()).isEqualTo("10-05 08:00:00 UTC+8");
         assertThat(view.errors().get(0).target()).isEqualTo("GLM-5 / Z.AI");
         assertThat(view.errors().get(0).error()).isEqualTo("UPSTREAM_5XX");
     }

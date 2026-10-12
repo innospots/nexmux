@@ -2,6 +2,7 @@ package com.innospots.nexmux.core.provider.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.model.dao.ModelDao;
 import com.innospots.nexmux.core.model.domain.entity.ModelEntity;
 import com.innospots.nexmux.core.provider.dao.ProviderCredentialDao;
@@ -19,6 +20,7 @@ import com.innospots.nexmux.core.provider.domain.vo.UpstreamModelVo;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.domain.response.PageResult;
+import java.time.LocalDateTime;
 import com.innospots.nexus.base.exception.NexusException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -47,6 +49,7 @@ public class ProviderService {
     private final ProviderDao providerDao;
     private final ProviderCredentialDao providerCredentialDao;
     private final ModelDao modelDao;
+    private final ConfigAuditService configAuditService;
 
     public PageResult<ProviderVo> page(ProviderPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -137,8 +140,12 @@ public class ProviderService {
         entity.setBaseUrl(request.baseUrl());
         entity.setRegion(request.region());
         entity.setTimeoutMs(request.timeoutMs() == null ? 60000 : request.timeoutMs());
+        entity.setDescription(request.description());
         entity.setStatus("ENABLED");
         providerDao.insert(entity);
+        if (request.apiKey() != null && !request.apiKey().isBlank()) {
+            upsertCredential(entity.getProviderId(), request.apiKey().trim());
+        }
         return toVo(entity);
     }
 
@@ -150,8 +157,35 @@ public class ProviderService {
         if (request.timeoutMs() != null) {
             entity.setTimeoutMs(request.timeoutMs());
         }
+        if (request.description() != null) {
+            entity.setDescription(request.description());
+        }
         providerDao.updateById(entity);
+        if (request.apiKey() != null && !request.apiKey().isBlank()) {
+            upsertCredential(providerId, request.apiKey().trim());
+        }
         return toVo(entity);
+    }
+
+    /** 保存 / 轮换上游 API Key（版本递增，rotatedAt 刷新；明文不落审计）。 */
+    private void upsertCredential(String providerId, String apiKey) {
+        ProviderCredentialEntity credential = credentialOf(providerId);
+        if (credential == null) {
+            credential = new ProviderCredentialEntity();
+            credential.setProviderId(providerId);
+            credential.setCredentialMode("API_KEY");
+            credential.setKeyVersion(1);
+        } else {
+            credential.setKeyVersion(
+                    (credential.getKeyVersion() == null ? 1 : credential.getKeyVersion()) + 1);
+        }
+        credential.setCiphertext(apiKey);
+        credential.setRotatedAt(LocalDateTime.now());
+        if (credential.getCredentialId() == null) {
+            providerCredentialDao.insert(credential);
+        } else {
+            providerCredentialDao.updateById(credential);
+        }
     }
 
     /**
@@ -171,12 +205,17 @@ public class ProviderService {
             providerCredentialDao.deleteById(credential);
         }
         providerDao.deleteById(entity);
+        configAuditService.record("PROVIDER", entity.getProviderId(), "DELETE",
+                "删除 Provider " + entity.getProviderCode(), null);
     }
 
     public ProviderVo setEnabled(String providerId, boolean enabled) {
         ProviderEntity entity = require(providerId);
         entity.setStatus(enabled ? "ENABLED" : "DISABLED");
         providerDao.updateById(entity);
+        configAuditService.record("PROVIDER", entity.getProviderId(),
+                enabled ? "ENABLE" : "DISABLE",
+                (enabled ? "启用" : "停用") + " Provider " + entity.getProviderCode(), null);
         return toVo(entity);
     }
 

@@ -5,6 +5,7 @@ page:
   name: dashboard
   description: GateWeave 运营概览：核心指标、趋势分析、用量构成
 state:
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
     start: 2026-09-22
     end: 2026-09-28
@@ -12,13 +13,20 @@ state:
 dataSources:
   dashboard:
     type: http
-    autoLoad: true
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
     request:
       method: GET
       url: /api/d/stats-dashboard
       params:
         start: ${state.range.start}
         end: ${state.range.end}
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: dashboard
 body:
   type: Page
   children:
@@ -166,10 +174,9 @@ body:
                 className: p-0
               events:
                 onClick:
-                  - action: message
+                  - action: navigate
                     params:
-                      messageType: info
-                      text: 跳转调用日志（失败筛选，演示：目标页建设中）
+                      to: /call-logs
         - type: Card
           props:
             className: stat-card
@@ -199,10 +206,9 @@ body:
                 className: p-0
               events:
                 onClick:
-                  - action: message
+                  - action: navigate
                     params:
-                      messageType: info
-                      text: 跳转供应商可用性（演示：目标页建设中）
+                      to: /provider-availability
         - type: Card
           props:
             className: stat-card
@@ -378,10 +384,9 @@ body:
                 className: p-0
               events:
                 onClick:
-                  - action: message
+                  - action: navigate
                     params:
-                      messageType: info
-                      text: 跳转模型用量（演示：目标页建设中）
+                      to: /model-usage
         - type: Card
           props:
             title: 用量构成 · 客户端
@@ -492,7 +497,6 @@ body:
                 className: p-0
               events:
                 onClick:
-                  - action: message
+                  - action: navigate
                     params:
-                      messageType: info
-                      text: 跳转客户端用量（演示：目标页建设中）
+                      to: /client-usage

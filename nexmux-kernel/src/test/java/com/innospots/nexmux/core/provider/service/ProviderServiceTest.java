@@ -7,10 +7,12 @@ import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderCredentialEntity;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderEntity;
 import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
+import com.innospots.nexmux.core.provider.domain.request.ProviderUpdateRequest;
 import com.innospots.nexmux.core.provider.domain.vo.ConnectionTestVo;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderDetailVo;
 import com.innospots.nexmux.core.provider.domain.vo.UpstreamModelVo;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexus.base.exception.NexusException;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -34,7 +36,7 @@ class ProviderServiceTest {
         providerDao = Mockito.mock(ProviderDao.class);
         providerCredentialDao = Mockito.mock(ProviderCredentialDao.class);
         modelDao = Mockito.mock(ModelDao.class);
-        providerService = new ProviderService(providerDao, providerCredentialDao, modelDao);
+        providerService = new ProviderService(providerDao, providerCredentialDao, modelDao, Mockito.mock(ConfigAuditService.class));
     }
 
     private ProviderEntity provider(String id, String code) {
@@ -225,5 +227,53 @@ class ProviderServiceTest {
 
         assertThat(result.records()).hasSize(1);
         Mockito.verify(providerCredentialDao).selectList(any());
+    }
+
+    // ── update + API Key ─────────────────────────────────────
+
+    @Test
+    void updateWithApiKeyCreatesCredential() {
+        ProviderEntity entity = provider("pv-1", "deepseek");
+        when(providerDao.selectById("pv-1")).thenReturn(entity);
+        when(providerCredentialDao.selectOne(any())).thenReturn(null);
+
+        providerService.update("pv-1", new ProviderUpdateRequest(
+                "DeepSeek", "https://api.deepseek.com", null, null, "sk-test", null));
+
+        Mockito.verify(providerCredentialDao).insert(Mockito.<ProviderCredentialEntity>argThat(c ->
+                "pv-1".equals(c.getProviderId())
+                        && "sk-test".equals(c.getCiphertext())
+                        && Integer.valueOf(1).equals(c.getKeyVersion())
+                        && c.getRotatedAt() != null));
+    }
+
+    @Test
+    void updateWithApiKeyRotatesExistingCredential() {
+        ProviderEntity entity = provider("pv-1", "deepseek");
+        when(providerDao.selectById("pv-1")).thenReturn(entity);
+        var existing = new com.innospots.nexmux.core.provider.domain.entity.ProviderCredentialEntity();
+        existing.setCredentialId("cred-1");
+        existing.setProviderId("pv-1");
+        existing.setKeyVersion(3);
+        when(providerCredentialDao.selectOne(any())).thenReturn(existing);
+
+        providerService.update("pv-1", new ProviderUpdateRequest(
+                "DeepSeek", "https://api.deepseek.com", null, null, "sk-new", null));
+
+        assertThat(existing.getKeyVersion()).isEqualTo(4);
+        assertThat(existing.getCiphertext()).isEqualTo("sk-new");
+        Mockito.verify(providerCredentialDao).updateById(existing);
+    }
+
+    @Test
+    void updateWithoutApiKeyLeavesCredentialUntouched() {
+        ProviderEntity entity = provider("pv-1", "deepseek");
+        when(providerDao.selectById("pv-1")).thenReturn(entity);
+
+        providerService.update("pv-1", new ProviderUpdateRequest(
+                "DeepSeek", "https://api.deepseek.com", null, null, null, null));
+
+        Mockito.verify(providerCredentialDao, Mockito.never()).insert(any(ProviderCredentialEntity.class));
+        Mockito.verify(providerCredentialDao, Mockito.never()).updateById(any(ProviderCredentialEntity.class));
     }
 }

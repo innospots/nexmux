@@ -37,5 +37,9 @@ public record ProviderCreateRequest(
         @Schema(description = "区域", examples = {"cn-north-1"})
         String region,
         @Schema(description = "超时（毫秒）", examples = {"30000"})
-        Integer timeoutMs) {
+        Integer timeoutMs,
+        @Schema(description = "上游 API Key（可空，创建即配置）")
+        String apiKey,
+        @Schema(description = "描述")
+        String description) {
 }

@@ -14,6 +14,8 @@ import com.innospots.nexmux.console.shared.VendorIcons;
 import com.innospots.nexmux.core.model.domain.request.ModelPageRequest;
 import com.innospots.nexmux.core.model.domain.vo.ModelDetailVo;
 import com.innospots.nexmux.core.model.domain.vo.ModelVo;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
@@ -24,8 +26,6 @@ import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexus.base.domain.response.PageResult;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -58,12 +58,11 @@ public class ModelViewAssembler {
     private static final Map<String, String> MODALITY_LETTERS = Map.of(
             "text", "T", "image", "I", "audio", "A", "video", "V", "file", "F");
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter SHORT_DATE_FORMAT = DateTimeFormatter.ofPattern("MM-dd");
 
     private final ModelService modelService;
     private final ProviderService providerService;
     private final RouteService routeService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 分页列表：items 为当前页，counts/filters 为全量构成口径。
@@ -88,6 +87,15 @@ public class ModelViewAssembler {
     public ModelRecord detail(String uiCode) {
         ModelDetailVo detail = modelService.getByCode(uiCode.replace("~", "/"));
         return toRecord(baseViewOf(detail), detail, relations());
+    }
+
+    /** 启用模型下拉选项（路由编辑「添加模型」Select；value 为 / 分隔后端编码）。 */
+    public List<ModelOption> options() {
+        return modelService.listAll().stream()
+                .filter(m -> "ENABLED".equals(m.status()))
+                .map(m -> new ModelOption(
+                        m.displayName() + "（" + m.modelCode() + "）", m.modelCode()))
+                .toList();
     }
 
     /** 详情 VO → 概要视图字段（record 无继承，显式提取公共字段）。 */
@@ -115,7 +123,8 @@ public class ModelViewAssembler {
 
     // ── VO → ModelRecord ──────────────────────────────────────
 
-    private static ModelRecord toRecord(ModelVo vo, ModelDetailVo d, Relations relations) {
+    private ModelRecord toRecord(ModelVo vo, ModelDetailVo d, Relations relations) {
+        DisplayFormats formats = displayFormats.current();
         JsonNode pricing = readJsonTolerant(vo.pricingSpec());
         List<ModelTier> tiers = tiersOf(pricing);
         List<SupplierModel> suppliers = suppliersOf(vo, d, relations.providersById);
@@ -134,9 +143,10 @@ public class ModelViewAssembler {
         List<String> tags = jsonStringList(d == null ? null : d.tags());
         long contextWindow = vo.contextLength() == null ? 0 : vo.contextLength();
         long maxTokens = vo.maxOutputTokens() == null ? 0 : vo.maxOutputTokens();
-        String updatedAt = d == null ? "" : timeText(d.updatedAt());
+        String updatedAt = d == null ? "" : formats.dayMinuteTime(d.updatedAt());
 
         return new ModelRecord(
+                vo.modelId(),
                 vo.modelCode().replace("/", "~"),
                 vo.displayName(),
                 primary == null ? "" : primary.providerCode(),
@@ -163,7 +173,7 @@ public class ModelViewAssembler {
                 routeStat,
                 routeRefs,
                 paramsOf(d),
-                d == null ? "" : timeText(d.createdAt()),
+                d == null ? "" : formats.dayMinuteTime(d.createdAt()),
                 updatedAt,
                 d == null || d.updatedBy() == null ? "—" : d.updatedBy(),
                 formatTokens(contextWindow) + " · " + (maxTokens > 0 ? formatTokens(maxTokens) : "—"),
@@ -181,7 +191,7 @@ public class ModelViewAssembler {
                         : primary.providerName() + "（主） · 共 " + suppliers.size() + " 个供应商模型",
                 primary == null ? "—" : primary.providerModelId(),
                 String.valueOf(enabledSuppliers.stream().mapToLong(SupplierModel::weight).sum()),
-                d == null || d.updatedAt() == null ? "" : SHORT_DATE_FORMAT.format(d.updatedAt()));
+                d == null || d.updatedAt() == null ? "" : formats.shortDate(d.updatedAt()));
     }
 
     // ── 定价 ───────────────────────────────────────────────────
@@ -464,9 +474,6 @@ public class ModelViewAssembler {
         return out;
     }
 
-    private static String timeText(LocalDateTime time) {
-        return time == null ? "" : TIME_FORMAT.format(time);
-    }
 
     private static String textOf(JsonNode node, String field, String fallback) {
         String value = textOrNull(node == null ? null : node.get(field));

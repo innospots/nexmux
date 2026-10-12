@@ -4,6 +4,16 @@ page:
   title: 新增路由
   name: routeForm
   description: 创建或修改 Route：基本信息、入口配置与模型路由策略
+state:
+  candidates: []
+  submitMode: publish
+dataSources:
+  modelOptions:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/model-options
 body:
   type: Page
   children:
@@ -33,7 +43,6 @@ body:
       props:
         layout: vertical
         initialValues:
-          routeType: pool
           protocol: OpenAI / Chat Completions
           operation: chat.completions
           strategy: WEIGHTED
@@ -41,11 +50,11 @@ body:
       events:
         onSubmit:
           - id: createResult
-            action: request
+            action: routeCandidates.submit
             params:
               method: POST
               url: /api/d/ops/route-create
-              body: ${event}
+              values: ${event}
           - action: if
             params:
               condition: ${actions.createResult == null || actions.createResult.ok == false}
@@ -54,6 +63,24 @@ body:
                   params:
                     messageType: error
                     text: "${actions.createResult != null && actions.createResult.error != null ? actions.createResult.error.message : '创建失败'}"
+          - action: if
+            params:
+              condition: ${actions.createResult != null && actions.createResult.ok != false
+                && state.submitMode == 'publish'}
+              then:
+                - id: publishResult
+                  action: util.request
+                  params:
+                    method: POST
+                    url: /api/d/ops/route-publish?code=${event.code}
+                - action: if
+                  params:
+                    condition: ${actions.publishResult == null || actions.publishResult.ok == false}
+                    then:
+                      - action: message
+                        params:
+                          messageType: warning
+                          text: 路由已创建为草稿，但发布失败，请在编辑页重试
           - action: if
             params:
               condition: ${actions.createResult != null && actions.createResult.ok != false}
@@ -111,20 +138,16 @@ body:
                     - type: Field
                       props:
                         label: 类型
-                        required: true
                       children:
-                        - type: RadioGroup
+                        - type: Text
                           props:
-                            name: routeType
-                            direction: horizontal
-                            options:
-                              - label: 单模型
-                                value: single
-                              - label: 多模型池
-                                value: pool
-                              - label: 条件路由
-                                value: conditional
-                            className: mt-2
+                            text: "${state.candidates.length > 1 ? '多模型池' : '单模型'}"
+                            className: mt-2 block
+                        - type: Text
+                          props:
+                            text: 按候选模型数量自动判定（条件路由暂不支持）
+                            type: secondary
+                            className: text-xs
                     - type: Field
                       props:
                         label: 逻辑模型 Alias
@@ -299,15 +322,7 @@ body:
                                                   props:
                                                     name: model
                                                     className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
-                                                    options:
-                                                      - label: GPT-5（gpt-5）
-                                                        value: gpt-5
-                                                      - label: Qwen3.5 Flash（qwen3.5-flash）
-                                                        value: qwen3.5-flash
-                                                      - label: Qwen3-VL Plus（qwen3-vl-plus）
-                                                        value: qwen3-vl-plus
-                                                      - label: Gemini 3 Flash（gemini-3-flash）
-                                                        value: gemini-3-flash
+                                                    options: ${data.modelOptions.items}
                                                     rules:
                                                       - required: true
                                                         message: 请选择 Model
@@ -392,10 +407,13 @@ body:
                             params:
                               condition: ${actions.modelResult.ok}
                               then:
+                                - action: routeCandidates.add
+                                  params:
+                                    candidate: ${form}
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 模型已添加（演示：不落库）
+                                    text: 模型已添加
                 - type: Grid
                   props:
                     columns: 2
@@ -455,7 +473,54 @@ body:
                               - label: 关闭
                                 value: off
                             className: mt-2
+                - type: Table
+                  when: ${state.candidates.length > 0}
+                  props:
+                    dataSource: ${state.candidates}
+                    rowKey: modelCode
+                    pagination: false
+                    className: mt-4
+                    columns:
+                      - title: Model
+                        dataIndex: modelCode
+                      - title: 权重
+                        cell:
+                          type: Text
+                          props:
+                            text: ${row.weight}
+                            className: tabular-nums
+                      - title: 优先级
+                        dataIndex: priority
+                      - title: C
+                        cell:
+                          type: Text
+                          props:
+                            text: "${row.costRate == null ? '继承' : '×' + row.costRate}"
+                      - title: M
+                        cell:
+                          type: Text
+                          props:
+                            text: "${row.billingRate == null ? '继承' : '×' + row.billingRate}"
+                      - title: 状态
+                        cell:
+                          type: StatusBadge
+                          props:
+                            status: ${row.status}
+                      - title: 操作
+                        cell:
+                          type: Button
+                          props:
+                            text: 移除
+                            variant: link
+                            size: small
+                            className: p-0
+                          events:
+                            onClick:
+                              - action: routeCandidates.remove
+                                params:
+                                  modelCode: ${row.modelCode}
                 - type: Text
+                  when: ${state.candidates.length == 0}
                   props:
                     text: 尚未添加模型；保存草稿允许 0 条，启用前至少 1 条启用模型。
                     type: secondary
@@ -485,26 +550,92 @@ body:
                     icon: zap
                   events:
                     onClick:
-                      - action: message
+                      - action: if
                         params:
-                          messageType: info
-                          text: 模拟调用：用当前未保存配置演算命中模型与策略（演示）
+                          condition: ${state.candidates.length == 0}
+                          then:
+                            - action: message
+                              params:
+                                messageType: warning
+                                text: 请先添加候选模型再模拟调用
+                      - action: if
+                        params:
+                          condition: ${state.candidates.length > 0}
+                          then:
+                            - id: simResult
+                              action: util.request
+                              params:
+                                method: POST
+                                url: /api/d/debug/model-invoke
+                                body:
+                                  modelCode: ${state.candidates[0].modelCode}
+                                  text: ping
+                            - action: if
+                              params:
+                                condition: ${actions.simResult == null || actions.simResult.ok == false}
+                                then:
+                                  - action: message
+                                    params:
+                                      messageType: error
+                                      text: "${actions.simResult != null && actions.simResult.error != null ? actions.simResult.error.message : '模拟调用失败'}"
+                            - action: if
+                              params:
+                                condition: ${actions.simResult != null && actions.simResult.ok != false}
+                                then:
+                                  - id: simShown
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 模拟调用结果 — ${state.candidates[0].modelCode}
+                                        width: 640
+                                        content:
+                                          type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: middle
+                                          children:
+                                            - type: Text
+                                              props:
+                                                size: small
+                                                type: secondary
+                                                text: "延迟 ${actions.simResult.data.latencyMs}ms · Token ${actions.simResult.data.tokensIn}/${actions.simResult.data.tokensOut} · 上游 ${actions.simResult.data.status} · 目标 ${actions.simResult.data.target}"
+                                            - type: Card
+                                              props:
+                                                size: small
+                                              children:
+                                                - type: Text
+                                                  props:
+                                                    text: ${actions.simResult.data.reply}
+                                            - type: Flex
+                                              props:
+                                                justify: end
+                                              children:
+                                                - type: Button
+                                                  props:
+                                                    text: 关闭
+                                                    variant: primary
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
                 - type: Button
                   props:
                     text: 保存草稿
                     icon: save
+                    submit: true
                   events:
                     onClick:
-                      - action: message
+                      - action: setState
                         params:
-                          messageType: success
-                          text: 草稿已保存（演示：静态页面不落库）
-                      - action: navigate
-                        params:
-                          to: /routes
+                          submitMode: draft
                 - type: Button
                   props:
                     text: 保存并启用
                     icon: check-circle
                     variant: primary
                     submit: true
+                  events:
+                    onClick:
+                      - action: setState
+                        params:
+                          submitMode: publish

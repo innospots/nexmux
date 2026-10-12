@@ -1,18 +1,21 @@
 package com.innospots.nexmux.console.audit;
 
 import com.innospots.nexmux.core.audit.domain.vo.AuditLogVo;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.console.shared.LogTexts;
 import com.fasterxml.jackson.databind.JsonNode;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import lombok.RequiredArgsConstructor;
 
 /**
  * Audit UI 投影（/api/d/audit-logs 契约的装配点）：change_diff 信封解析、
  * before/after 快照 pretty 化与行级 diff（LCS）、操作/资源类型展示名映射。
  */
+@RequiredArgsConstructor
 public final class AuditViewMapper {
 
     /** 操作码 → 展示名（后端存储大写操作码）。 */
@@ -30,15 +33,14 @@ public final class AuditViewMapper {
             "MODEL", "Model",
             "ROUTE", "Route",
             "CLIENT", "API Client",
-            "CLIENT_TEMPLATE", "Client Template");
+            "CLIENT_TEMPLATE", "Client Template",
+            "SETTINGS", "服务设置");
 
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final DisplayFormatsProvider displayFormats;
 
-    private AuditViewMapper() {
-    }
-
-    /** VO → 展示记录（列表与详情同一整形）。 */
-    public static AuditRecord toRecord(AuditLogVo vo) {
+    /** VO → 展示记录（列表与详情同一整形；时间按时区/格式设置渲染）。 */
+    public AuditRecord toRecord(AuditLogVo vo) {
+        DisplayFormats formats = displayFormats.current();
         Snapshots snapshots = splitSnapshots(vo.changeDiff());
         String beforeJson = snapshots.before() == null ? null : LogTexts.prettyJson(snapshots.before().toString());
         String afterJson = snapshots.after() == null ? null : LogTexts.prettyJson(snapshots.after().toString());
@@ -48,9 +50,9 @@ public final class AuditViewMapper {
 
         return new AuditRecord(
                 vo.auditId(),
-                createdAt == null ? "" : DATE_FORMAT.format(createdAt),
-                LogTexts.fullTime(createdAt) + " (UTC+8)",
-                LogTexts.minuteTime(createdAt),
+                createdAt == null ? "" : formats.date(createdAt),
+                formats.fullTime(createdAt) + " (" + formats.zoneLabel() + ")",
+                formats.minuteTime(createdAt),
                 vo.operatorId() == null ? "—" : vo.operatorId(),
                 OPERATION_LABELS.getOrDefault(operation, operation),
                 operation.toLowerCase(),
@@ -71,7 +73,7 @@ public final class AuditViewMapper {
     }
 
     /** 详情 VO → 展示记录（字段与概要同构，显式转换）。 */
-    public static AuditRecord toRecord(com.innospots.nexmux.core.audit.domain.vo.AuditLogDetailVo d) {
+    public AuditRecord toRecord(com.innospots.nexmux.core.audit.domain.vo.AuditLogDetailVo d) {
         return toRecord(new AuditLogVo(
                 d.auditId(), d.resourceType(), d.resourceId(), d.operation(), d.changeSummary(),
                 d.changeDiff(), d.operatorId(), d.clientIp(), d.requestId(), d.userAgent(), d.createdAt()));

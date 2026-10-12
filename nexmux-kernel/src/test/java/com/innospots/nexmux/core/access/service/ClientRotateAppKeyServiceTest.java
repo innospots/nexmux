@@ -1,5 +1,6 @@
 package com.innospots.nexmux.core.access.service;
 
+import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
@@ -19,7 +20,7 @@ class ClientRotateAppKeyServiceTest {
     @BeforeEach
     void setUp() {
         clientDao = Mockito.mock(ClientDao.class);
-        clientService = new ClientService(clientDao, Mockito.mock(ClientTemplateDao.class));
+        clientService = new ClientService(clientDao, Mockito.mock(ClientTemplateDao.class), Mockito.mock(ConfigAuditService.class));
     }
 
     @Test

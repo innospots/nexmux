@@ -40,6 +40,7 @@ import lombok.RequiredArgsConstructor;
 public class OpsEndpoint {
 
     private final AuditQueryService auditQueryService;
+    private final AuditViewMapper auditViewMapper;
     private final CallLogViewAssembler callLogViewAssembler;
     private final CostViewAssembler costViewAssembler;
 
@@ -94,9 +95,31 @@ public class OpsEndpoint {
                 1L, 5000L, start, end,
                 "all".equals(operator) ? null : operator,
                 upper(operation), upper(resourceType), resourceId));
-        List<AuditRecord> items = page.records().stream().map(AuditViewMapper::toRecord).toList();
+        List<AuditRecord> items = page.records().stream().map(auditViewMapper::toRecord).toList();
         return new AuditListResult(items,
                 com.innospots.nexmux.console.shared.LogTexts.thousands(items.size()));
+    }
+
+    /**
+     * 模型筛选项（UI 契约：{items:[{label,value}]} 直出；日志中出现过的模型，
+     * 供调用日志 / 成本明细页的模型筛选下拉）。
+     */
+    @GET
+    @Path("/request-log-model-options")
+    @Operation(operationId = "nexmuxRequestLogModelOptions", summary = "日志模型筛选项")
+    public ModelOptionsResult requestLogModelOptions() {
+        return new ModelOptionsResult(callLogViewAssembler.modelOptions());
+    }
+
+    /**
+     * 模型筛选项结果（{items} 形状约定）。
+     *
+     * @param items 选项列表
+     */
+    @Schema(name = "RequestLogModelOptionsResult", description = "日志模型筛选项结果")
+    public record ModelOptionsResult(
+            @Schema(description = "选项列表", required = true)
+            List<com.innospots.nexmux.console.model.ModelOption> items) {
     }
 
     /**
@@ -107,7 +130,7 @@ public class OpsEndpoint {
     @Operation(operationId = "nexmuxAuditLogGet", summary = "查询审计日志详情")
     public AuditRecord auditLog(
             @Parameter(description = "审计日志 ID", required = true) @PathParam("auditId") String auditId) {
-        return AuditViewMapper.toRecord(auditQueryService.get(auditId));
+        return auditViewMapper.toRecord(auditQueryService.get(auditId));
     }
 
     /**

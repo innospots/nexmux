@@ -148,7 +148,7 @@ body:
                       - type: Empty
                         when: ${data.detail.beforeJson == null}
                         props:
-                          title: 该操作为创建，无变更前快照
+                          title: 无变更前快照（创建操作或快照缺失）
                   - key: after
                     label: 变更后
                     className: p-2

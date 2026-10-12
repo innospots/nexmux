@@ -28,6 +28,12 @@ body:
         gap: middle
         align: stretch
       children:
+        - type: Alert
+          when: ${data.detail.hasUnpublishedChanges}
+          props:
+            showIcon: true
+            variant: warning
+            message: 存在未发布的草稿变更：当前展示为草稿配置，「保存并启用」后才会对客户端调用生效。
         - type: Card
           children:
             - type: Flex
@@ -163,7 +169,7 @@ body:
                               condition: ${actions.statusCfm.ok}
                               then:
                                 - id: toggleResult
-                                  action: request
+                                  action: util.request
                                   params:
                                     method: POST
                                     url: "${data.detail.status == 'enabled' ? '/api/d/ops/route-disable' : data.detail.status == 'draft' ? '/api/d/ops/route-publish' : '/api/d/ops/route-enable'}?code=${route.params.code}"
@@ -193,65 +199,74 @@ body:
                         size: small
                       events:
                         onClick:
-                          - id: simulate
-                            action: overlay.open
+                          - action: if
                             params:
-                              overlay:
-                                type: modal
-                                title: 模拟调用
-                                width: 560
-                                content:
-                                  type: Flex
-                                  props:
-                                    direction: vertical
-                                    gap: middle
-                                    align: stretch
-                                  children:
-                                    - type: Text
-                                      props:
-                                        text: 输入 channel、routeTag 等参数，演算当前路由的命中模型与策略结果。
-                                        type: secondary
-                                        className: text-sm
-                                    - type: Field
-                                      props:
-                                        label: Channel
-                                      children:
-                                        - type: Input
-                                          props:
-                                            className: w-full
-                                            placeholder: 如 web / ios / android
-                                    - type: Field
-                                      props:
-                                        label: Route Tag
-                                      children:
-                                        - type: Input
-                                          props:
-                                            className: w-full
-                                            placeholder: 可选，如 premium
-                                    - type: Flex
-                                      props:
-                                        justify: end
-                                        gap: middle
-                                      children:
-                                        - type: Button
-                                          props:
-                                            text: 取消
-                                          events:
-                                            onClick:
-                                              - action: overlay.close
-                                        - type: Button
-                                          props:
-                                            text: 运行演算
-                                            icon: send
-                                            variant: primary
-                                          events:
-                                            onClick:
-                                              - action: overlay.close
-                                              - action: message
-                                                params:
-                                                  messageType: success
-                                                  text: 命中模型：${data.detail.models[0].modelName} ·
-                                                    策略：${data.detail.strategyLabel}（演示）
+                              condition: ${data.detail.models.length == 0}
+                              then:
+                                - action: message
+                                  params:
+                                    messageType: warning
+                                    text: 该路由暂无候选模型，无法模拟调用
+                          - action: if
+                            params:
+                              condition: ${data.detail.models.length > 0}
+                              then:
+                                - id: simResult
+                                  action: util.request
+                                  params:
+                                    method: POST
+                                    url: /api/d/debug/model-invoke
+                                    body:
+                                      modelCode: ${data.detail.models[0].modelCode}
+                                      text: ping
+                                - action: if
+                                  params:
+                                    condition: ${actions.simResult == null || actions.simResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.simResult != null && actions.simResult.error != null ? actions.simResult.error.message : '模拟调用失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.simResult != null && actions.simResult.ok != false}
+                                    then:
+                                      - id: simShown
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 模拟调用结果 — ${data.detail.models[0].modelCode}
+                                            width: 640
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Text
+                                                  props:
+                                                    size: small
+                                                    type: secondary
+                                                    text: "延迟 ${actions.simResult.data.latencyMs}ms · Token ${actions.simResult.data.tokensIn}/${actions.simResult.data.tokensOut} · 上游 ${actions.simResult.data.status}"
+                                                - type: Card
+                                                  props:
+                                                    size: small
+                                                  children:
+                                                    - type: Text
+                                                      props:
+                                                        text: ${actions.simResult.data.reply}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 关闭
+                                                        variant: primary
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
                     - type: DropdownMenu
                       props:
                         items:
@@ -263,10 +278,28 @@ body:
                             icon: download
                       events:
                         onSelect:
-                          - action: message
+                          - action: if
                             params:
-                              messageType: info
-                              text: 操作：${event}（演示）
+                              condition: ${event == 'copy'}
+                              then:
+                                - action: util.copy
+                                  params:
+                                    text: ${data.detail.code}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 路由标识已复制
+                          - action: if
+                            params:
+                              condition: ${event == 'export'}
+                              then:
+                                - action: util.copyJson
+                                  params:
+                                    data: ${data.detail}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 配置 JSON 已复制到剪贴板
                       children:
                         - type: Button
                           props:

@@ -351,10 +351,31 @@ body:
                                 params:
                                   condition: ${actions.statusCfm.ok}
                                   then:
-                                    - action: message
+                                    - id: statusResult
+                                      action: util.request
                                       params:
-                                        messageType: success
-                                        text: "${row.status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                        method: POST
+                                        url: "/api/d/client-templates/${row.id}/${row.status == 'enabled' ? 'disable' : 'enable'}"
+                                        body: {}
+                                    - action: if
+                                      params:
+                                        condition: ${actions.statusResult == null || actions.statusResult.ok == false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: error
+                                              text: "${actions.statusResult != null && actions.statusResult.error != null ? actions.statusResult.error.message : '操作失败'}"
+                                    - action: if
+                                      params:
+                                        condition: ${actions.statusResult != null && actions.statusResult.ok != false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: success
+                                              text: "${row.status == 'enabled' ? '已停用' : '已启用'}"
+                                          - action: reload
+                                            params:
+                                              dataSource: templates
                     - type: Tooltip
                       props:
                         content: 编辑
@@ -441,3 +462,4 @@ body:
       props:
         title: 无匹配模板
         description: 调整状态、标签或搜索关键词后重试；也可以新建一个模板
+

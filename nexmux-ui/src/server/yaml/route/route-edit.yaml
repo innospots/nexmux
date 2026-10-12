@@ -4,6 +4,9 @@ page:
   title: 编辑路由
   name: routeForm
   description: 创建或修改 Route：基本信息、入口配置与模型路由策略
+state:
+  candidates: []
+  submitMode: publish
 dataSources:
   detail:
     type: http
@@ -11,6 +14,21 @@ dataSources:
     request:
       method: GET
       url: /api/d/routes/${route.params.code}
+  modelOptions:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/model-options
+lifecycle:
+  onLoad:
+    - action: if
+      params:
+        condition: ${data.detail != null}
+        then:
+          - action: setState
+            params:
+              candidates: ${data.detail.models}
 body:
   type: Page
   children:
@@ -45,7 +63,6 @@ body:
         initialValues:
           code: ${data.detail.code}
           name: ${data.detail.name}
-          routeType: ${data.detail.type}
           alias: ${data.detail.alias}
           tags: ${data.detail.tagsText}
           description: ${data.detail.description}
@@ -58,11 +75,11 @@ body:
       events:
         onSubmit:
           - id: saveResult
-            action: request
+            action: routeCandidates.submit
             params:
               method: POST
               url: /api/d/ops/route-save?code=${route.params.code}
-              body: ${event}
+              values: ${event}
           - action: if
             params:
               condition: ${actions.saveResult == null || actions.saveResult.ok == false}
@@ -70,7 +87,25 @@ body:
                 - action: message
                   params:
                     messageType: error
-                    text: 保存失败
+                    text: "${actions.saveResult != null && actions.saveResult.error != null ? actions.saveResult.error.message : '保存失败'}"
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok != false
+                && state.submitMode == 'publish'}
+              then:
+                - id: publishResult
+                  action: util.request
+                  params:
+                    method: POST
+                    url: /api/d/ops/route-publish?code=${route.params.code}
+                - action: if
+                  params:
+                    condition: ${actions.publishResult == null || actions.publishResult.ok == false}
+                    then:
+                      - action: message
+                        params:
+                          messageType: warning
+                          text: 已保存草稿，但发布失败，请稍后重试
           - action: if
             params:
               condition: ${actions.saveResult != null && actions.saveResult.ok != false}
@@ -128,20 +163,16 @@ body:
                     - type: Field
                       props:
                         label: 类型
-                        required: true
                       children:
-                        - type: RadioGroup
+                        - type: Text
                           props:
-                            name: routeType
-                            direction: horizontal
-                            options:
-                              - label: 单模型
-                                value: single
-                              - label: 多模型池
-                                value: pool
-                              - label: 条件路由
-                                value: conditional
-                            className: mt-2
+                            text: "${state.candidates.length > 1 ? '多模型池' : '单模型'}"
+                            className: mt-2 block
+                        - type: Text
+                          props:
+                            text: 按候选模型数量自动判定（条件路由暂不支持）
+                            type: secondary
+                            className: text-xs
                     - type: Field
                       props:
                         label: 逻辑模型 Alias
@@ -316,15 +347,7 @@ body:
                                                   props:
                                                     name: model
                                                     className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
-                                                    options:
-                                                      - label: GPT-5（gpt-5）
-                                                        value: gpt-5
-                                                      - label: Qwen3.5 Flash（qwen3.5-flash）
-                                                        value: qwen3.5-flash
-                                                      - label: Qwen3-VL Plus（qwen3-vl-plus）
-                                                        value: qwen3-vl-plus
-                                                      - label: Gemini 3 Flash（gemini-3-flash）
-                                                        value: gemini-3-flash
+                                                    options: ${data.modelOptions.items}
                                                     rules:
                                                       - required: true
                                                         message: 请选择 Model
@@ -409,10 +432,13 @@ body:
                             params:
                               condition: ${actions.modelResult.ok}
                               then:
+                                - action: routeCandidates.add
+                                  params:
+                                    candidate: ${form}
                                 - action: message
                                   params:
                                     messageType: success
-                                    text: 模型已添加（演示：不落库）
+                                    text: 模型已添加
                 - type: Grid
                   props:
                     columns: 2
@@ -474,7 +500,7 @@ body:
                             className: mt-2
                 - type: Table
                   props:
-                    dataSource: ${data.detail.models}
+                    dataSource: ${state.candidates}
                     rowKey: modelCode
                     pagination: false
                     className: mt-4
@@ -532,7 +558,12 @@ body:
                                           props:
                                             name: routeModel
                                             initialValues:
-                                              status: enabled
+                                              model: ${parent.row.modelCode}
+                                              weight: ${parent.row.weight}
+                                              priority: ${parent.row.priority}
+                                              costRate: ${parent.row.costRate}
+                                              billingRate: ${parent.row.billingRate}
+                                              status: ${parent.row.status}
                                           events:
                                             onSubmit:
                                               - action: overlay.close
@@ -561,15 +592,7 @@ body:
                                                           props:
                                                             name: model
                                                             className: w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
-                                                            options:
-                                                              - label: GPT-5（gpt-5）
-                                                                value: gpt-5
-                                                              - label: Qwen3.5 Flash（qwen3.5-flash）
-                                                                value: qwen3.5-flash
-                                                              - label: Qwen3-VL Plus（qwen3-vl-plus）
-                                                                value: qwen3-vl-plus
-                                                              - label: Gemini 3 Flash（gemini-3-flash）
-                                                                value: gemini-3-flash
+                                                            options: ${data.modelOptions.items}
                                                             rules:
                                                               - required: true
                                                                 message: 请选择 Model
@@ -650,6 +673,17 @@ body:
                                                         text: 确认添加
                                                         variant: primary
                                                         submit: true
+                                  - action: if
+                                    params:
+                                      condition: ${actions.modelResult.ok}
+                                      then:
+                                        - action: routeCandidates.add
+                                          params:
+                                            candidate: ${form}
+                                        - action: message
+                                          params:
+                                            messageType: success
+                                            text: 模型已更新
                             - type: Button
                               props:
                                 text: 移除
@@ -658,10 +692,13 @@ body:
                                 danger: true
                               events:
                                 onClick:
+                                  - action: routeCandidates.remove
+                                    params:
+                                      modelCode: ${row.modelCode}
                                   - action: message
                                     params:
                                       messageType: info
-                                      text: 移除模型：${row.modelName}（演示：不落库）
+                                      text: 已移除模型：${row.modelName}
                 - type: Text
                   props:
                     text: 权重合计 ${data.detail.weightTotal}（启用项） · 建议 WEIGHTED 时合计 100
@@ -707,10 +744,10 @@ body:
                                     strong: true
                                 - type: Text
                                   props:
-                                    text: · 关联模型：${data.detail.models.length} 个
+                                    text: · 关联模型：${state.candidates.length} 个
                                     type: secondary
                             - type: Text
-                              when: ${data.detail.models.length > 0}
+                              when: ${state.candidates.length > 0}
                               props:
                                 size: small
                                 text: ⚠ 存在关联模型时，删除会导致对应入口的调用失败，建议先解除模型引用。
@@ -742,7 +779,7 @@ body:
                       condition: ${actions.delCfm.ok}
                       then:
                         - id: deleteResult
-                          action: request
+                          action: util.request
                           params:
                             method: POST
                             url: /api/d/ops/route-delete?code=${route.params.code}
@@ -785,29 +822,95 @@ body:
                     icon: zap
                   events:
                     onClick:
-                      - action: message
+                      - action: if
                         params:
-                          messageType: info
-                          text: 模拟调用：用当前未保存配置演算命中模型与策略（演示）
+                          condition: ${state.candidates.length == 0}
+                          then:
+                            - action: message
+                              params:
+                                messageType: warning
+                                text: 请先添加候选模型再模拟调用
+                      - action: if
+                        params:
+                          condition: ${state.candidates.length > 0}
+                          then:
+                            - id: simResult
+                              action: util.request
+                              params:
+                                method: POST
+                                url: /api/d/debug/model-invoke
+                                body:
+                                  modelCode: ${state.candidates[0].modelCode}
+                                  text: ping
+                            - action: if
+                              params:
+                                condition: ${actions.simResult == null || actions.simResult.ok == false}
+                                then:
+                                  - action: message
+                                    params:
+                                      messageType: error
+                                      text: "${actions.simResult != null && actions.simResult.error != null ? actions.simResult.error.message : '模拟调用失败'}"
+                            - action: if
+                              params:
+                                condition: ${actions.simResult != null && actions.simResult.ok != false}
+                                then:
+                                  - id: simShown
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 模拟调用结果 — ${state.candidates[0].modelCode}
+                                        width: 640
+                                        content:
+                                          type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: middle
+                                          children:
+                                            - type: Text
+                                              props:
+                                                size: small
+                                                type: secondary
+                                                text: "延迟 ${actions.simResult.data.latencyMs}ms · Token ${actions.simResult.data.tokensIn}/${actions.simResult.data.tokensOut} · 上游 ${actions.simResult.data.status} · 目标 ${actions.simResult.data.target}"
+                                            - type: Card
+                                              props:
+                                                size: small
+                                              children:
+                                                - type: Text
+                                                  props:
+                                                    text: ${actions.simResult.data.reply}
+                                            - type: Flex
+                                              props:
+                                                justify: end
+                                              children:
+                                                - type: Button
+                                                  props:
+                                                    text: 关闭
+                                                    variant: primary
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
                 - type: Button
                   props:
                     text: 保存草稿
                     icon: save
+                    submit: true
                   events:
                     onClick:
-                      - action: message
+                      - action: setState
                         params:
-                          messageType: success
-                          text: 草稿已保存（演示：静态页面不落库）
-                      - action: navigate
-                        params:
-                          to: /routes/${route.params.code}
+                          submitMode: draft
                 - type: Button
                   props:
                     text: 保存并启用
                     icon: check-circle
                     variant: primary
                     submit: true
+                  events:
+                    onClick:
+                      - action: setState
+                        params:
+                          submitMode: publish
     - type: Empty
       when: ${data.detail == null && !dataStatus.detail.loading}
       props:

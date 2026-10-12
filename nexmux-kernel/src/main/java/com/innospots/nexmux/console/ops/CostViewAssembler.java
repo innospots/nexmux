@@ -1,6 +1,8 @@
 package com.innospots.nexmux.console.ops;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.console.shared.LogTexts;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -36,6 +38,7 @@ public class CostViewAssembler {
     private final ClientService clientService;
     private final ModelService modelService;
     private final ProviderService providerService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 筛选列表（pageNo 恒 1、pageSize 5000；total 为全量条数）。
@@ -79,7 +82,8 @@ public class CostViewAssembler {
             Map<String, String> providerNameByCode) {
     }
 
-    private static CostRecord toRecord(CostRecordVo vo, Relations relations) {
+    private CostRecord toRecord(CostRecordVo vo, Relations relations) {
+        DisplayFormats formats = displayFormats.current();
         JsonNode snap = LogTexts.readJson(vo.pricingSnapshot());
         long input = vo.inputTokens() == null ? 0 : vo.inputTokens();
         long output = vo.outputTokens() == null ? 0 : vo.outputTokens();
@@ -106,7 +110,7 @@ public class CostViewAssembler {
         String providerName = relations.providerNameByCode.getOrDefault(
                 vo.providerCode() == null ? "" : vo.providerCode(),
                 vo.providerCode() == null ? "—" : vo.providerCode());
-        String shortTime = LogTexts.minuteTime(vo.requestedAt());
+        String shortTime = formats.minuteTime(vo.requestedAt());
         long minutesAgo = vo.requestedAt() == null
                 ? 0 : Math.max(0, Duration.between(vo.requestedAt(), LocalDateTime.now()).toMinutes());
         Long tierUpto = snap != null && snap.hasNonNull("tierUpto") ? snap.get("tierUpto").asLong() : null;
@@ -115,7 +119,7 @@ public class CostViewAssembler {
         return new CostRecord(
                 vo.requestId(),
                 minutesAgo,
-                LogTexts.fullTime(vo.requestedAt()),
+                formats.fullTime(vo.requestedAt()),
                 shortTime,
                 vo.application() == null ? "—" : vo.application(),
                 clientName,
@@ -142,25 +146,26 @@ public class CostViewAssembler {
                                 ? "未命中时段倍率（按 1.0 计）" : "时段倍率 ×" + multiplierText),
                 tierUpto == null ? "∞" : "≤" + LogTexts.compactTokens(tierUpto),
                 multiplierText + "x",
-                moneyText(inputCost),
-                moneyText(outputCost),
-                cacheCost != null ? moneyText(cacheCost) : "—",
-                moneyText(totalCost),
+                moneyText(formats, inputCost),
+                moneyText(formats, outputCost),
+                cacheCost != null ? moneyText(formats, cacheCost) : "—",
+                moneyText(formats, totalCost),
                 shortTime + " · " + clientName + "（" + (vo.appKeyId() == null ? "—" : vo.appKeyId()) + "）· "
                         + modelName + " · " + providerName,
                 tierUpto == null ? "UPTO ∞（无上限档）" : "UPTO ≤ " + LogTexts.thousands(tierUpto),
-                "输入 $" + numberText(tierInput) + "/M · 输出 $" + numberText(tierOutput)
-                        + "/M · 缓存读 " + (tierCache != null ? "$" + numberText(tierCache) + "/M" : "—"),
+                "输入 " + formats.currencySymbol() + numberText(tierInput) + "/M · 输出 "
+                        + formats.currencySymbol() + numberText(tierOutput)
+                        + "/M · 缓存读 " + (tierCache != null ? formats.currencySymbol() + numberText(tierCache) + "/M" : "—"),
                 LogTexts.thousands(input),
                 LogTexts.thousands(output),
                 cacheRead > 0 ? LogTexts.thousands(cacheRead) : "—",
-                LogTexts.thousands(input) + " × $" + numberText(tierInput) + " × " + multiplierText
-                        + " ÷ 1M = $" + moneyText(inputCost),
-                LogTexts.thousands(output) + " × $" + numberText(tierOutput) + " × " + multiplierText
-                        + " ÷ 1M = $" + moneyText(outputCost),
+                LogTexts.thousands(input) + " × " + formats.currencySymbol() + numberText(tierInput) + " × " + multiplierText
+                        + " ÷ 1M = " + formats.currencySymbol() + moneyText(formats, inputCost),
+                LogTexts.thousands(output) + " × " + formats.currencySymbol() + numberText(tierOutput) + " × " + multiplierText
+                        + " ÷ 1M = " + formats.currencySymbol() + moneyText(formats, outputCost),
                 cacheCost != null && tierCache != null
-                        ? LogTexts.thousands(cacheRead) + " × $" + numberText(tierCache) + " × "
-                                + multiplierText + " ÷ 1M = $" + moneyText(cacheCost)
+                        ? LogTexts.thousands(cacheRead) + " × " + formats.currencySymbol() + numberText(tierCache) + " × "
+                                + multiplierText + " ÷ 1M = " + formats.currencySymbol() + moneyText(formats, cacheCost)
                         : "无缓存用量");
     }
 
@@ -170,9 +175,9 @@ public class CostViewAssembler {
                 .divide(BigDecimal.valueOf(1_000_000), 10, RoundingMode.HALF_UP);
     }
 
-    /** 金额 → 4 位小数字符串（对齐 toFixed(4)）。 */
-    private static String moneyText(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_UP).toPlainString();
+    /** 金额 → 配置小数字符串（无符号；公式内自带币种符号）。 */
+    private static String moneyText(DisplayFormats formats, BigDecimal value) {
+        return value.setScale(formats.decimals(), RoundingMode.HALF_UP).toPlainString();
     }
 
     private static String numberText(BigDecimal value) {

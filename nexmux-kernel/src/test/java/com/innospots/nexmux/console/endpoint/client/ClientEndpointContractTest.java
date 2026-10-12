@@ -53,4 +53,12 @@ class ClientEndpointContractTest {
         assertThat(disable.getAnnotation(POST.class)).isNotNull();
         assertThat(disable.getAnnotation(Path.class).value()).isEqualTo("/{clientId}/disable");
     }
+
+    @Test
+    void declaresDelete() throws Exception {
+        Method delete = ClientEndpoint.class.getMethod("delete", String.class);
+        assertThat(delete.getAnnotation(jakarta.ws.rs.DELETE.class)).isNotNull();
+        assertThat(delete.getAnnotation(Path.class).value()).isEqualTo("/{clientId}");
+        assertThat(delete.getAnnotation(Operation.class).operationId()).isEqualTo("nexmuxClientDelete");
+    }
 }

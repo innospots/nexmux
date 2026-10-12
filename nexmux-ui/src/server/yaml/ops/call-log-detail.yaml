@@ -83,10 +83,9 @@ body:
                         size: small
                       events:
                         onClick:
-                          - action: message
+                          - action: navigate
                             params:
-                              messageType: info
-                              text: 已将该请求上下文带入客户端调试台（演示）
+                              to: /client-debug?clientCode=${data.detail.clientCode}&routeCode=${data.detail.routeCode}
                     - type: Button
                       props:
                         text: 跳转客户端用量

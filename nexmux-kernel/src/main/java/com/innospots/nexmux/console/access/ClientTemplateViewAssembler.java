@@ -6,12 +6,12 @@ import com.innospots.nexmux.core.access.domain.request.ClientTemplatePageRequest
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientTemplateVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.access.service.ClientTemplateService;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexus.base.domain.response.PageResult;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,12 +30,11 @@ public class ClientTemplateViewAssembler {
             "enabled", "启用",
             "disabled", "停用");
 
-    private static final DateTimeFormatter TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-    private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     private final ClientTemplateService clientTemplateService;
     private final RouteService routeService;
     private final ClientViewAssembler clientViewAssembler;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 分页列表：items 为当前页，counts/filters 为全量构成口径。
@@ -94,8 +93,9 @@ public class ClientTemplateViewAssembler {
         return routesById;
     }
 
-    private static ClientTemplateRecord toRecord(
+    private ClientTemplateRecord toRecord(
             ClientTemplateVo vo, ClientTemplateDetailVo detail, Map<String, RouteVo> routesById) {
+        DisplayFormats formats = displayFormats.current();
         List<AuthRoute> authRoutes = (vo.authorizedRouteIds() == null ? List.<String>of() : vo.authorizedRouteIds())
                 .stream()
                 .map(routesById::get)
@@ -113,10 +113,11 @@ public class ClientTemplateViewAssembler {
         String status = "ENABLED".equals(vo.status()) ? "enabled" : "disabled";
         List<String> tags = detail != null && detail.tags() != null
                 ? detail.tags() : PolicyDerive.stringListOf(vo.tags());
-        String validityFixedDate = vo.validTo() == null ? null : DATE_FORMAT.format(vo.validTo());
+        String validityFixedDate = vo.validTo() == null ? null : formats.date(vo.validTo());
         String validityType = vo.validityType() == null ? "never" : vo.validityType();
 
         return new ClientTemplateRecord(
+                vo.templateId(),
                 vo.templateCode(),
                 vo.displayName(),
                 tags,
@@ -131,8 +132,8 @@ public class ClientTemplateViewAssembler {
                 quotas,
                 rateLimits,
                 vo.createdClientCount(),
-                detail == null ? "" : timeText(detail.createdAt()),
-                detail == null ? "" : timeText(detail.updatedAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.createdAt()),
+                detail == null ? "" : formats.dayMinuteTime(detail.updatedAt()),
                 detail == null || detail.updatedBy() == null ? "—" : detail.updatedBy(),
                 authRoutes.size(),
                 quotaSummary,
@@ -144,6 +145,7 @@ public class ClientTemplateViewAssembler {
     private static AuthRoute authRouteOf(RouteVo route) {
         int candidates = route.routeSpec() == null ? 0 : route.routeSpec().candidates().size();
         return new AuthRoute(
+                route.routeId(),
                 route.routeCode(),
                 route.displayName(),
                 route.alias(),
@@ -200,9 +202,6 @@ public class ClientTemplateViewAssembler {
         return new ClientTemplateListResult.Filters(statusChips, tagChips);
     }
 
-    private static String timeText(LocalDateTime time) {
-        return time == null ? "" : TIME_FORMAT.format(time);
-    }
 
     private static String nullToEmpty(String value) {
         return value == null ? "" : value;

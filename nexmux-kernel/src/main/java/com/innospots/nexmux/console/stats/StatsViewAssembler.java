@@ -2,6 +2,8 @@ package com.innospots.nexmux.console.stats;
 
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.console.shared.LogTexts;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -45,6 +47,7 @@ public class StatsViewAssembler {
     private final ProviderService providerService;
     private final ClientService clientService;
     private final RouteService routeService;
+    private final DisplayFormatsProvider displayFormats;
 
     // ── Dashboard ──────────────────────────────────────────────
 
@@ -52,6 +55,7 @@ public class StatsViewAssembler {
     public DashboardView dashboard(String start, String end) {
         DashboardVo vo = dashboardService.dashboard(rangeStart(start), rangeEnd(end));
         Relations relations = relations();
+        DisplayFormats formats = displayFormats.current();
         double successPct = vo.successRate() * 100;
         return new DashboardView(
                 new DashboardView.Realtime(vo.realtimeRpm(), fmtCompact(vo.realtimeTokens())),
@@ -65,10 +69,10 @@ public class StatsViewAssembler {
                         fmtInt(vo.errorCount()),
                         String.format(Locale.US, "%.2f", 100 - successPct),
                         Math.round(vo.avgLatencyMs()),
-                        money(vo.costUsd(), 4),
-                        money(vo.requests() == 0
+                        formats.money(vo.costUsd()),
+                        formats.money(vo.requests() == 0
                                 ? BigDecimal.ZERO
-                                : vo.costUsd().divide(BigDecimal.valueOf(vo.requests()), 10, RoundingMode.HALF_UP), 4)),
+                                : vo.costUsd().divide(BigDecimal.valueOf(vo.requests()), 10, RoundingMode.HALF_UP))),
                 vo.trend().stream()
                         .map(t -> new DashboardView.TrendPoint(
                                 t.t() == null ? "" : t.t().substring(Math.min(5, t.t().length()), Math.min(10, t.t().length())),
@@ -106,6 +110,7 @@ public class StatsViewAssembler {
     public UsageListResult<ModelUsageRow> modelUsage(String start, String end) {
         List<UsageRowVo> rows = usageStatsService.usageByModel(rangeStart(start), rangeEnd(end));
         Relations relations = relations();
+        DisplayFormats formats = displayFormats.current();
         long seconds = rangeSeconds(start, end);
         return new UsageListResult<>(
                 rows.stream()
@@ -113,9 +118,9 @@ public class StatsViewAssembler {
                                 row.key(),
                                 relations.modelNameByCode.getOrDefault(row.key(), row.key()),
                                 relations.routeNameByModel.getOrDefault(row.key(), "—"),
-                                usageDisplayOf(row, seconds)))
+                                usageDisplayOf(row, seconds, formats)))
                         .toList(),
-                summarize(rows),
+                summarize(rows, formats),
                 rows.size());
     }
 
@@ -123,15 +128,16 @@ public class StatsViewAssembler {
     public UsageListResult<ProviderUsageRow> providerUsage(String start, String end) {
         List<UsageRowVo> rows = usageStatsService.usageByProvider(rangeStart(start), rangeEnd(end));
         Relations relations = relations();
+        DisplayFormats formats = displayFormats.current();
         long seconds = rangeSeconds(start, end);
         return new UsageListResult<>(
                 rows.stream()
                         .map(row -> new ProviderUsageRow(
                                 row.key(),
                                 relations.providerNameByCode.getOrDefault(row.key(), row.key()),
-                                usageDisplayOf(row, seconds)))
+                                usageDisplayOf(row, seconds, formats)))
                         .toList(),
-                summarize(rows),
+                summarize(rows, formats),
                 rows.size());
     }
 
@@ -139,6 +145,7 @@ public class StatsViewAssembler {
     public UsageListResult<ClientUsageRow> clientUsage(String start, String end) {
         List<UsageRowVo> rows = usageStatsService.usageByClient(rangeStart(start), rangeEnd(end));
         Relations relations = relations();
+        DisplayFormats formats = displayFormats.current();
         long seconds = rangeSeconds(start, end);
         return new UsageListResult<>(
                 rows.stream()
@@ -153,10 +160,10 @@ public class StatsViewAssembler {
                                     client != null && client.tokenLimit() != null
                                             ? fmtCompact(used) + "/" + fmtCompact(client.tokenLimit())
                                             : "—",
-                                    usageDisplayOf(row, seconds));
+                                    usageDisplayOf(row, seconds, formats));
                         })
                         .toList(),
-                summarize(rows),
+                summarize(rows, formats),
                 rows.size());
     }
 
@@ -166,13 +173,14 @@ public class StatsViewAssembler {
     public AvailabilityView availability(String start, String end) {
         AvailabilityVo vo = availabilityService.availability(rangeStart(start), rangeEnd(end));
         Relations relations = relations();
+        DisplayFormats formats = displayFormats.current();
         return new AvailabilityView(
                 vo.providers().stream()
                         .map(row -> new AvailabilityView.ProviderQualityRow(
                                 row.key(),
                                 relations.providerNameByCode.getOrDefault(row.key(), row.key()),
                                 fmtCompact(row.errorCount()),
-                                qualityDisplayOf(row)))
+                                qualityDisplayOf(row, formats)))
                         .toList(),
                 vo.compare().stream()
                         .map(row -> {
@@ -183,17 +191,13 @@ public class StatsViewAssembler {
                                     row.key(),
                                     relations.modelNameByCode.getOrDefault(modelCode, modelCode),
                                     relations.providerNameByCode.getOrDefault(providerCode, providerCode),
-                                    qualityDisplayOf(row));
+                                    qualityDisplayOf(row, formats));
                         })
                         .toList(),
                 vo.recentErrors().stream()
                         .map(row -> new AvailabilityView.RecentErrorRow(
                                 row.requestId(),
-                                row.requestedAt() == null
-                                        ? "—"
-                                        : row.requestedAt()
-                                                .substring(5, Math.min(19, row.requestedAt().length()))
-                                                .replace("T", " ") + " UTC",
+                                errorTime(row.requestedAt(), formats),
                                 relations.modelNameByCode.getOrDefault(
                                                 row.modelCode() == null ? "" : row.modelCode(),
                                                 row.modelCode() == null ? "—" : row.modelCode())
@@ -207,7 +211,7 @@ public class StatsViewAssembler {
 
     // ── 行展示整形 ─────────────────────────────────────────────
 
-    private static UsageDisplay usageDisplayOf(UsageRowVo row, long rangeSeconds) {
+    private static UsageDisplay usageDisplayOf(UsageRowVo row, long rangeSeconds, DisplayFormats formats) {
         long tokens = row.inputTokens() + row.outputTokens();
         long cacheBase = row.inputTokens() + row.cacheReadTokens();
         return new UsageDisplay(
@@ -217,12 +221,12 @@ public class StatsViewAssembler {
                 fmtCompact(row.outputTokens()),
                 fmtInt(row.outputTokens()),
                 fmtPct(cacheBase == 0 ? 0 : (double) row.cacheReadTokens() / cacheBase),
-                money(row.standardUsd(), 2),
-                money(row.billedUsd(), 2),
-                money(row.costUsd(), 2),
-                money(row.requests() == 0
+                formats.money(row.standardUsd()),
+                formats.money(row.billedUsd()),
+                formats.money(row.costUsd()),
+                formats.money(row.requests() == 0
                         ? BigDecimal.ZERO
-                        : row.billedUsd().divide(BigDecimal.valueOf(row.requests()), 10, RoundingMode.HALF_UP), 4),
+                        : row.billedUsd().divide(BigDecimal.valueOf(row.requests()), 10, RoundingMode.HALF_UP)),
                 fmtPct(row.successRate()),
                 fmtMs(row.avgLatencyMs()),
                 fmtMs(row.avgTtftMs()),
@@ -232,7 +236,7 @@ public class StatsViewAssembler {
                 String.format(Locale.US, "%.2f", row.avgAttempts()));
     }
 
-    private static AvailabilityView.QualityDisplay qualityDisplayOf(AvailabilityVo.QualityRow row) {
+    private static AvailabilityView.QualityDisplay qualityDisplayOf(AvailabilityVo.QualityRow row, DisplayFormats formats) {
         return new AvailabilityView.QualityDisplay(
                 fmtCompact(row.requests()),
                 fmtPct(row.successRate()),
@@ -240,16 +244,16 @@ public class StatsViewAssembler {
                 fmtMs(row.avgUpstreamMs()),
                 fmtPct(row.failoverRate()),
                 String.format(Locale.US, "%.2f", row.avgAttempts()),
-                money(row.costUsd(), 2),
-                money(row.billedUsd(), 2),
-                money(row.costUsd(), 2));
+                formats.money(row.costUsd()),
+                formats.money(row.billedUsd()),
+                formats.money(row.costUsd()));
     }
 
-    private static UsageListResult.UsageSummary summarize(List<UsageRowVo> rows) {
+    private static UsageListResult.UsageSummary summarize(List<UsageRowVo> rows, DisplayFormats formats) {
         BigDecimal standard = rows.stream().map(UsageRowVo::standardUsd).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal billed = rows.stream().map(UsageRowVo::billedUsd).reduce(BigDecimal.ZERO, BigDecimal::add);
         BigDecimal cost = rows.stream().map(UsageRowVo::costUsd).reduce(BigDecimal.ZERO, BigDecimal::add);
-        return new UsageListResult.UsageSummary(money(standard, 2), money(billed, 2), money(cost, 2));
+        return new UsageListResult.UsageSummary(formats.money(standard), formats.money(billed), formats.money(cost));
     }
 
     // ── 关联数据 ───────────────────────────────────────────────
@@ -333,8 +337,16 @@ public class StatsViewAssembler {
         return String.valueOf(Math.round(n));
     }
 
-    private static String money(BigDecimal value, int scale) {
-        return "$" + value.setScale(scale, RoundingMode.HALF_UP).toPlainString();
+    /** ISO 时间串 → 配置时区短格式（解析失败回退原文截取）。 */
+    private static String errorTime(String iso, DisplayFormats formats) {
+        if (iso == null) {
+            return "—";
+        }
+        try {
+            return formats.shortTime(LocalDateTime.parse(iso)) + " " + formats.zoneLabel();
+        } catch (Exception e) {
+            return iso.substring(5, Math.min(19, iso.length())).replace("T", " ") + " " + formats.zoneLabel();
+        }
     }
 
     private static String fmtPct(double x) {

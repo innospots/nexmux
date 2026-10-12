@@ -14,6 +14,7 @@ import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
 import java.util.Arrays;
 import java.util.List;
 import org.eclipse.microprofile.openapi.annotations.Operation;
@@ -131,5 +132,14 @@ public class ClientEndpoint {
     public R<ClientVo> disable(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.disable(clientId));
+    }
+
+    @DELETE
+    @Path("/{clientId}")
+    @Operation(operationId = "nexmuxClientDelete", summary = "删除客户端")
+    public R<Void> delete(
+            @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
+        clientService.delete(clientId);
+        return R.ok();
     }
 }

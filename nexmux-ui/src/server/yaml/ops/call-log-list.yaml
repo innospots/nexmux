@@ -5,6 +5,7 @@ page:
   name: callLogList
   description: 运行管理 / 调用日志：Gateway 每次模型请求的完整运行记录（状态 + 路由 + 用量/成本）
 state:
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
     start: 2026-09-22
     end: 2026-09-28
@@ -18,7 +19,8 @@ state:
 dataSources:
   logs:
     type: http
-    autoLoad: true
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
     request:
       method: GET
       url: /api/d/call-logs
@@ -32,6 +34,18 @@ dataSources:
         routeGroup: ${state.routeGroup}
         email: ${state.emailKeyword}
         appKey: ${state.appKeyKeyword}
+  logModels:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/request-log-model-options
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: logs
 body:
   type: Page
   children:
@@ -140,19 +154,7 @@ body:
             - type: Select
               props:
                 value: ${state.model}
-                options:
-                  - value: all
-                    label: 全部
-                  - value: qwen3-vl-plus
-                    label: Qwen3-VL Plus
-                  - value: text-embedding-3-large
-                    label: Text Embedding 3 Large
-                  - value: gpt-5
-                    label: GPT-5
-                  - value: qwen3.5-flash
-                    label: Qwen3.5 Flash
-                  - value: gemini-3-flash
-                    label: Gemini 3 Flash
+                options: ${data.logModels.items}
                 className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
               events:
                 onChange:

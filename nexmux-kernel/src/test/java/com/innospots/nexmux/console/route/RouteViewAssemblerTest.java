@@ -8,6 +8,7 @@ import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexus.base.domain.response.PageResult;
 import java.math.BigDecimal;
@@ -34,7 +35,7 @@ class RouteViewAssemblerTest {
     void setUp() {
         routeService = Mockito.mock(RouteService.class);
         modelService = Mockito.mock(ModelService.class);
-        assembler = new RouteViewAssembler(routeService, modelService);
+        assembler = new RouteViewAssembler(routeService, modelService, DisplayFormatsProvider.defaults());
     }
 
     private static ModelVo model(String code, String name) {
@@ -178,6 +179,41 @@ class RouteViewAssemblerTest {
         assertThat(record.operator()).isEqualTo("admin");
         assertThat(record.stickySession()).isFalse();
         assertThat(record.healthFilter()).isTrue();
+        // 发布快照为 null（未发布过）→ 无未发布变更
+        assertThat(record.hasUnpublishedChanges()).isFalse();
+    }
+
+    @Test
+    void detailFlagsUnpublishedChangesWhenDraftDiffersFromPublished() {
+        RouteDetailVo detail = new RouteDetailVo(
+                "r-chat", "chat", "chat-alias", "Chat 路由", "PUBLISHED",
+                spec("/v1/chat/completions", "OpenAI / Chat Completions", "RANDOM",
+                        List.of("prod"), candidate("gpt-4o", 100)),
+                spec("/v1/chat/completions", "OpenAI / Chat Completions", "WEIGHTED",
+                        List.of("prod"), candidate("gpt-4o", 100)),
+                null, "publisher",
+                java.time.LocalDateTime.of(2026, 10, 1, 12, 30),
+                java.time.LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
+        when(routeService.getByCode("chat")).thenReturn(detail);
+        when(modelService.listAll()).thenReturn(List.of(model("gpt-4o", "GPT-4o")));
+
+        assertThat(assembler.detail("chat").hasUnpublishedChanges()).isTrue();
+    }
+
+    @Test
+    void detailHasNoUnpublishedChangesWhenDraftEqualsPublished() {
+        RouteSpec same = spec("/v1/chat/completions", "OpenAI / Chat Completions", "WEIGHTED",
+                List.of("prod"), candidate("gpt-4o", 100));
+        RouteDetailVo detail = new RouteDetailVo(
+                "r-chat", "chat", "chat-alias", "Chat 路由", "PUBLISHED",
+                same, same,
+                null, "publisher",
+                java.time.LocalDateTime.of(2026, 10, 1, 12, 30),
+                java.time.LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
+        when(routeService.getByCode("chat")).thenReturn(detail);
+        when(modelService.listAll()).thenReturn(List.of(model("gpt-4o", "GPT-4o")));
+
+        assertThat(assembler.detail("chat").hasUnpublishedChanges()).isFalse();
     }
 
     @Test

@@ -55,7 +55,7 @@ body:
           primaryProviderModelId: ${data.detail.primaryUpstreamId}
           modelType: ${data.detail.type}
           releaseDate: ${data.detail.releaseDate}
-          contextLength: ${data.detail.contextWindow}
+          contextLength: "${data.detail.contextWindow == 0 ? null : data.detail.contextWindow}"
           maxOutputTokens: "${data.detail.maxTokens > 0 ? data.detail.maxTokens : null}"
           inputModalities: ${data.detail.inputModalitiesText}
           outputModalities: ${data.detail.outputModalitiesText}
@@ -78,7 +78,7 @@ body:
       events:
         onSubmit:
           - id: saveResult
-            action: request
+            action: util.request
             params:
               method: POST
               url: /api/d/ops/model-save?code=${route.params.code}
@@ -453,7 +453,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: JSON 编辑模式：批量编辑 tiers + multipliers 后回表单校验（演示）
+                                    text: 定价 JSON 批量编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Flex
                         props:
                           direction: vertical
@@ -498,7 +498,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: 添加价格档位（演示：UPTO 需严格递增，末行为无上限档）
+                                    text: 价格档位编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Text
                         props:
                           text: 时段倍率
@@ -545,7 +545,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: 添加时段倍率规则（演示：每天 / 工作日 / 周末 + 起止时间 + 倍率）
+                                    text: 时段倍率编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Alert
                         props:
                           showIcon: true
@@ -644,13 +644,31 @@ body:
                     params:
                       condition: ${actions.delCfm.ok}
                       then:
-                        - action: message
+                        - id: delResult
+                          action: util.request
                           params:
-                            messageType: success
-                            text: 模型已删除（演示：静态页面不落库）
-                        - action: navigate
+                            method: DELETE
+                            url: /api/d/models/${data.detail.id}
+                            body: {}
+                        - action: if
                           params:
-                            to: /models
+                            condition: ${actions.delResult == null || actions.delResult.ok == false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: error
+                                  text: "${actions.delResult != null && actions.delResult.error != null ? actions.delResult.error.message : '删除失败'}"
+                        - action: if
+                          params:
+                            condition: ${actions.delResult != null && actions.delResult.ok != false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 模型已删除
+                              - action: navigate
+                                params:
+                                  to: /models
             - type: Flex
               props:
                 align: center

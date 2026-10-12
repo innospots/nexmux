@@ -6,6 +6,7 @@ import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderDetailVo;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.provider.service.ProviderService;
 import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
@@ -37,7 +38,7 @@ class ProviderViewAssemblerTest {
         providerService = Mockito.mock(ProviderService.class);
         modelService = Mockito.mock(ModelService.class);
         routeService = Mockito.mock(RouteService.class);
-        assembler = new ProviderViewAssembler(providerService, modelService, routeService);
+        assembler = new ProviderViewAssembler(providerService, modelService, routeService, DisplayFormatsProvider.defaults());
     }
 
     private static ProviderVo provider(String id, String code, String name, String vendor,

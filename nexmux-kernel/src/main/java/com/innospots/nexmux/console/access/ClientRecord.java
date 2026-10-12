@@ -32,6 +32,8 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  */
 @Schema(name = "ClientRecord", description = "Client 展示记录（UI 契约）")
 public record ClientRecord(
+        @Schema(description = "客户端 ID", required = true)
+        String id,
         String code,
         String name,
         List<String> tags,

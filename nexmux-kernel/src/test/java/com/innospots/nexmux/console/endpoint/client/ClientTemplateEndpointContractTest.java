@@ -60,5 +60,11 @@ class ClientTemplateEndpointContractTest {
         assertThat(createdClients.getAnnotation(Path.class).value()).isEqualTo("/{templateCode}/created-clients");
         assertThat(createdClients.getAnnotation(Operation.class).operationId())
                 .isEqualTo("nexmuxClientTemplateCreatedClients");
+
+        Method delete = ClientTemplateEndpoint.class.getMethod("delete", String.class);
+        assertThat(delete.getAnnotation(jakarta.ws.rs.DELETE.class)).isNotNull();
+        assertThat(delete.getAnnotation(Path.class).value()).isEqualTo("/{templateId}");
+        assertThat(delete.getAnnotation(Operation.class).operationId())
+                .isEqualTo("nexmuxClientTemplateDelete");
     }
 }

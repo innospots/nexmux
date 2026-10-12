@@ -6,6 +6,7 @@ page:
   description: 系统管理 / 审计：Provider / Model / Route / Client / 配额 / 限流 / 定价 / 服务设置 /
     AppKey 等全部管理操作记录
 state:
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
     start: 2026-09-22
     end: 2026-09-28
@@ -16,7 +17,8 @@ state:
 dataSources:
   audits:
     type: http
-    autoLoad: true
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
     request:
       method: GET
       url: /api/d/audit-logs
@@ -34,6 +36,12 @@ dataSources:
     request:
       method: GET
       url: /api/d/audit-operators
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: audits
 body:
   type: Page
   children:
@@ -183,6 +191,8 @@ body:
                     value: route-policy
                   - label: API Client
                     value: client
+                  - label: Client Template
+                    value: client_template
                   - label: AppKey
                     value: appkey
                   - label: Quota Policy

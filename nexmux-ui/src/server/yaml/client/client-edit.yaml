@@ -4,6 +4,18 @@ page:
   title: 编辑客户端
   name: clientForm
   description: 创建或修改客户端：基本信息、AppKey、路由授权、配额与限流策略
+state:
+  pendingRouteId: ""
+  routeOptions: []
+  routeOptionRows: []
+  pendingScopeRouteId: ""
+  pendingScopeRoutes: []
+  scopeRouteOptions: []
+  rateLimitScope: all
+  record:
+    authRoutes: []
+    quotas: []
+    rateLimits: []
 dataSources:
   detail:
     type: http
@@ -11,6 +23,15 @@ dataSources:
     request:
       method: GET
       url: /api/d/clients/${route.params.code}
+lifecycle:
+  onLoad:
+    - action: if
+      params:
+        condition: ${data.detail != null}
+        then:
+          - action: setState
+            params:
+              record: ${data.detail}
 body:
   type: Page
   children:
@@ -58,13 +79,32 @@ body:
           tags: ${data.detail.tagsText}
       events:
         onSubmit:
-          - action: message
+          - id: saveResult
+            action: policy.submit
             params:
-              messageType: success
-              text: 已保存（演示：静态页面不落库）
-          - action: navigate
+              mode: clientUpdate
+              url: /api/d/clients/${data.detail.id}
+              grantsUrl: /api/d/clients/${data.detail.id}/route-grants
+              values: ${event}
+          - action: if
             params:
-              to: /clients/${route.params.code}
+              condition: ${actions.saveResult == null || actions.saveResult.ok == false}
+              then:
+                - action: message
+                  params:
+                    messageType: error
+                    text: "${actions.saveResult != null && actions.saveResult.error != null ? actions.saveResult.error.message : '保存失败'}"
+          - action: if
+            params:
+              condition: ${actions.saveResult != null && actions.saveResult.ok != false}
+              then:
+                - action: message
+                  params:
+                    messageType: success
+                    text: 已保存
+                - action: navigate
+                  params:
+                    to: /clients/${route.params.code}
       children:
         - type: Flex
           props:
@@ -214,10 +254,65 @@ body:
                             params:
                               condition: ${actions.rotateSecretCfm.ok}
                               then:
-                                - action: message
+                                - id: rotateResult
+                                  action: util.request
                                   params:
-                                    messageType: success
-                                    text: 轮换成功，新 Secret：gw-sk-demo-7f3a······（仅此一次展示，请妥善保存）（演示：静态页面不落库）
+                                    method: POST
+                                    url: /api/d/clients/${data.detail.id}/rotate-app-key
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult == null || actions.rotateResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.rotateResult != null && actions.rotateResult.error
+                                            != null ? actions.rotateResult.error.message
+                                            : '轮换失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult != null && actions.rotateResult.ok
+                                      != false}
+                                    then:
+                                      - id: secretShown
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 新 AppKey Secret（仅此一次展示）
+                                            width: 520
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Alert
+                                                  props:
+                                                    showIcon: true
+                                                    variant: warning
+                                                    message: 旧 Secret 已失效；新 Secret 请立即复制保存。
+                                                - type: Text
+                                                  props:
+                                                    strong: true
+                                                    className: font-mono
+                                                    text: ${actions.rotateResult.data.appKeyPlaintext}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 我已保存
+                                                        variant: primary
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
                     - type: Text
                       props:
                         text: ℹ 轮换后展示新 Secret 一次
@@ -242,6 +337,8 @@ body:
                         size: small
                       events:
                         onClick:
+                          - id: routeOpts
+                            action: clientRoutes.loadOptions
                           - id: addRoute
                             action: overlay.open
                             params:
@@ -258,109 +355,20 @@ body:
                                   children:
                                     - type: Field
                                       props:
-                                        label: 搜索
+                                        label: 可选路由（仅已启用）
+                                        required: true
                                       children:
-                                        - type: Input
+                                        - type: Select
                                           props:
-                                            className: w-full
-                                            placeholder: 路由名称 / 标识（演示）
-                                    - type: Flex
-                                      props:
-                                        direction: vertical
-                                        gap: small
-                                        align: stretch
-                                      children:
-                                        - type: Text
-                                          props:
-                                            text: 可选路由（仅已启用）
-                                            type: secondary
-                                        - type: Flex
-                                          props:
-                                            align: center
-                                            gap: middle
-                                          children:
-                                            - type: Checkbox
-                                              props:
-                                                value: false
-                                            - type: Text
-                                              props:
-                                                text: coding-assistant
-                                                style:
-                                                  width: 160
-                                            - type: Text
-                                              props:
-                                                text: coding
-                                                type: secondary
-                                                style:
-                                                  width: 90
-                                            - type: Text
-                                              props:
-                                                text: 单模型
-                                                type: secondary
-                                                style:
-                                                  width: 80
-                                            - type: Text
-                                              props:
-                                                text: /v1/chat/completions
-                                                type: secondary
-                                        - type: Flex
-                                          props:
-                                            align: center
-                                            gap: middle
-                                          children:
-                                            - type: Checkbox
-                                              props:
-                                                value: false
-                                            - type: Text
-                                              props:
-                                                text: embeddings-std
-                                                style:
-                                                  width: 160
-                                            - type: Text
-                                              props:
-                                                text: embedding
-                                                type: secondary
-                                                style:
-                                                  width: 90
-                                            - type: Text
-                                              props:
-                                                text: 单模型
-                                                type: secondary
-                                                style:
-                                                  width: 80
-                                            - type: Text
-                                              props:
-                                                text: /v1/embeddings
-                                                type: secondary
-                                        - type: Flex
-                                          props:
-                                            align: center
-                                            gap: middle
-                                          children:
-                                            - type: Checkbox
-                                              props:
-                                                value: false
-                                            - type: Text
-                                              props:
-                                                text: mobile-lite
-                                                style:
-                                                  width: 160
-                                            - type: Text
-                                              props:
-                                                text: chat-lite
-                                                type: secondary
-                                                style:
-                                                  width: 90
-                                            - type: Text
-                                              props:
-                                                text: 多模型池
-                                                type: secondary
-                                                style:
-                                                  width: 80
-                                            - type: Text
-                                              props:
-                                                text: /v1/chat/completions
-                                                type: secondary
+                                            value: ${state.pendingRouteId}
+                                            placeholder: 选择要授权的路由
+                                            options: ${state.routeOptions}
+                                            controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                          events:
+                                            onChange:
+                                              - action: setState
+                                                params:
+                                                  pendingRouteId: ${event}
                                     - type: Flex
                                       props:
                                         justify: end
@@ -378,14 +386,17 @@ body:
                                             variant: primary
                                           events:
                                             onClick:
+                                              - action: clientRoutes.add
+                                                params:
+                                                  routeId: ${state.pendingRouteId}
                                               - action: overlay.close
                                               - action: message
                                                 params:
                                                   messageType: success
-                                                  text: 已添加路由授权（演示）
+                                                  text: 已添加路由授权
                 - type: Table
                   props:
-                    dataSource: ${data.detail.authRoutes}
+                    dataSource: ${state.record.authRoutes}
                     rowKey: code
                     pagination: false
                     className: mt-2
@@ -464,12 +475,15 @@ body:
                                 params:
                                   condition: ${actions.removeRouteCfm.ok}
                                   then:
+                                    - action: clientRoutes.remove
+                                      params:
+                                        routeId: ${row.routeId}
                                     - action: message
                                       params:
                                         messageType: success
-                                        text: 已移除路由授权（演示）
+                                        text: 已移除路由授权
                 - type: Text
-                  when: ${data.detail.authRoutes.length == 0}
+                  when: ${state.record.authRoutes.length == 0}
                   props:
                     text: 尚未授权路由；未授权 Route 拒绝调用。
                     type: secondary
@@ -516,11 +530,14 @@ body:
                                           mode: soft
                                       events:
                                         onSubmit:
+                                          - action: policy.upsertQuota
+                                            params:
+                                              quota: ${event}
                                           - action: overlay.close
                                           - action: message
                                             params:
                                               messageType: success
-                                              text: 配额规则已保存（演示）
+                                              text: 配额规则已保存
                                       children:
                                         - type: Flex
                                           props:
@@ -637,299 +654,180 @@ body:
                                                     text: 保存
                                                     variant: primary
                                                     submit: true
-                    - type: Card
-                      when: ${data.detail.quotas[0] != null}
+                    - type: Table
+                      when: ${state.record.quotas.length > 0}
                       props:
-                        size: small
-                      children:
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: small
-                            align: stretch
-                          children:
-                            - type: Flex
+                        dataSource: ${state.record.quotas}
+                        rowKey: name
+                        pagination: false
+                        className: mt-2
+                        columns:
+                          - title: 规则名称
+                            dataIndex: name
+                          - title: 配额类型
+                            dataIndex: quotaTypeLabel
+                          - title: 计量指标
+                            dataIndex: metricLabel
+                          - title: 上限
+                            dataIndex: limitText
+                          - title: 循环周期
+                            cell:
+                              type: Text
                               props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 规则名称
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].name}
-                            - type: Flex
+                                text: "${row.cycleLabel == null ? '—' : row.cycleLabel}"
+                          - title: 模式
+                            dataIndex: modeLabel
+                          - title: 状态
+                            cell:
+                              type: StatusBadge
                               props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 配额类型
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].quotaTypeLabel}
-                            - type: Flex
+                                status: ${row.status}
+                          - title: 操作
+                            align: center
+                            width: 130
+                            cell:
+                              type: Flex
                               props:
-                                align: baseline
-                                gap: middle
+                                gap: small
+                                justify: center
                               children:
-                                - type: Text
+                                - type: Button
                                   props:
-                                    text: 计量指标
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].metricLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 上限
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].limitText}
-                            - type: Flex
-                              when: ${data.detail.quotas[0].quotaType == 'cyclic'}
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 循环周期
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].cycleLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 模式
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[0].modeLabel}
-                            - type: Flex
-                              props:
-                                justify: space-between
-                                align: center
-                              children:
-                                - type: StatusBadge
-                                  props:
-                                    status: ${data.detail.quotas[0].status}
-                                - type: Flex
-                                  props:
-                                    gap: small
-                                  children:
-                                    - type: Button
-                                      props:
-                                        text: 编辑
-                                        size: small
-                                      events:
-                                        onClick:
-                                          - id: editQuota
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 编辑配额规则
-                                                width: 560
-                                                content:
-                                                  type: Form
-                                                  props:
-                                                    name: quotaRule
-                                                    initialValues:
-                                                      quotaType: lifetime
-                                                      metric: TOTAL_TOKEN
-                                                      cycle: hour24
-                                                      mode: soft
-                                                  events:
-                                                    onSubmit:
-                                                      - action: overlay.close
-                                                      - action: message
-                                                        params:
-                                                          messageType: success
-                                                          text: 配额规则已更新（演示）
-                                                  children:
-                                                    - type: Flex
-                                                      props:
-                                                        direction: vertical
-                                                        gap: middle
-                                                        align: stretch
-                                                      children:
-                                                        - type: Field
-                                                          props:
-                                                            label: 规则名称
-                                                            required: true
-                                                          children:
-                                                            - type: Input
-                                                              props:
-                                                                name: name
-                                                                className: w-full
-                                                                placeholder: 如 daily-token-cap
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入规则名称
-                                                                value: ${data.detail.quotas[0].name}
-                                                        - type: Field
-                                                          props:
-                                                            label: 配额类型
-                                                            required: true
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: quotaType
-                                                                direction: horizontal
-                                                                options:
-                                                                  - label: 总配额
-                                                                    value: lifetime
-                                                                  - label: 周期循环配额
-                                                                    value: cyclic
-                                                                value: ${data.detail.quotas[0].quotaType}
-                                                        - type: Field
-                                                          props:
-                                                            label: 计量指标
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: metric
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Request
-                                                                    value: REQUEST
-                                                                  - label: Input Token
-                                                                    value: INPUT_TOKEN
-                                                                  - label: Output Token
-                                                                    value: OUTPUT_TOKEN
-                                                                  - label: Total Token
-                                                                    value: TOTAL_TOKEN
-                                                                  - label: Cost
-                                                                    value: COST
-                                                                  - label: Concurrent
-                                                                    value: CONCURRENT
-                                                                value: ${data.detail.quotas[0].metric}
-                                                        - type: Field
-                                                          props:
-                                                            label: 上限
-                                                            required: true
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: limit
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 如 500000
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入上限
-                                                                value: ${data.detail.quotas[0].limit}
-                                                        - type: Field
-                                                          props:
-                                                            label: 循环周期（仅周期循环配额）
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: cycle
-                                                                direction: vertical
-                                                                options:
-                                                                  - label: 每 24 小时
-                                                                    value: hour24
-                                                                  - label: 每 7 天
-                                                                    value: day7
-                                                                  - label: 每月（自然月，每月 1 日 00:00 重置）
-                                                                    value: month
-                                                                value: "${data.detail.quotas[0].cycleUnit == 'month' ? 'month' :
-                                                                  data.detail.quotas[\
-                                                                  0].cycleUnit ==
-                                                                  'day' ? 'day7' :
-                                                                  'hour24'}"
-                                                        - type: Field
-                                                          props:
-                                                            label: 模式
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: mode
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Soft Limit
-                                                                    value: soft
-                                                                  - label: Hard Limit
-                                                                    value: hard
-                                                                value: ${data.detail.quotas[0].mode}
-                                                        - type: Flex
-                                                          props:
-                                                            justify: end
-                                                            gap: middle
-                                                          children:
-                                                            - type: Button
-                                                              props:
-                                                                text: 取消
-                                                              events:
-                                                                onClick:
-                                                                  - action: overlay.close
-                                                            - type: Button
-                                                              props:
-                                                                text: 保存
-                                                                variant: primary
-                                                                submit: true
-                                    - type: Button
-                                      props:
-                                        text: 删除
-                                        size: small
-                                        danger: true
-                                      events:
-                                        onClick:
-                                          - id: delQuotaCfm
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 确认删除配额规则
-                                                width: 480
-                                                content:
-                                                  type: Flex
+                                    text: 编辑
+                                    variant: link
+                                    size: small
+                                    className: p-0 h-auto
+                                  events:
+                                    onClick:
+                                      - id: editQuota
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 编辑配额规则
+                                            width: 560
+                                            content:
+                                              type: Form
+                                              props:
+                                                  name: quotaRule
+                                                  initialValues:
+                                                    name: ${parent.row.name}
+                                                    quotaType: ${parent.row.quotaType}
+                                                    metric: ${parent.row.metric}
+                                                    limit: ${parent.row.limit}
+                                                    mode: ${parent.row.mode}
+                                                    cycle: "${parent.row.cycleUnit == 'month' ? 'month' : parent.row.cycleUnit == 'day' ? 'day7' : 'hour24'}"
+                                              events:
+                                                onSubmit:
+                                                    - action: policy.upsertQuota
+                                                      params:
+                                                        original: ${parent.row.name}
+                                                        quota: ${event}
+                                                    - action: overlay.close
+                                                    - action: message
+                                                      params:
+                                                        messageType: success
+                                                        text: 配额规则已更新
+                                              children:
+                                                - type: Flex
                                                   props:
                                                     direction: vertical
                                                     gap: middle
+                                                    align: stretch
                                                   children:
-                                                    - type: Text
+                                                    - type: Field
                                                       props:
-                                                        size: small
-                                                        text: 删除后，配额规则「${data.detail.quotas[0].name}」将立即失效且不可恢复。
+                                                        label: 规则名称
+                                                        required: true
+                                                      children:
+                                                        - type: Input
+                                                          props:
+                                                            name: name
+                                                            className: w-full
+                                                            placeholder: 如 daily-token-cap
+                                                            rules:
+                                                              - required: true
+                                                                message: 请输入规则名称
+                                                    - type: Field
+                                                      props:
+                                                        label: 配额类型
+                                                        required: true
+                                                      children:
+                                                        - type: RadioGroup
+                                                          props:
+                                                            name: quotaType
+                                                            direction: horizontal
+                                                            options:
+                                                              - label: 总配额
+                                                                value: lifetime
+                                                              - label: 周期循环配额
+                                                                value: cyclic
+                                                    - type: Field
+                                                      props:
+                                                        label: 计量指标
+                                                        required: true
+                                                      children:
+                                                        - type: Select
+                                                          props:
+                                                            name: metric
+                                                            className: w-full
+                                                            options:
+                                                              - label: Request
+                                                                value: REQUEST
+                                                              - label: Input Token
+                                                                value: INPUT_TOKEN
+                                                              - label: Output Token
+                                                                value: OUTPUT_TOKEN
+                                                              - label: Total Token
+                                                                value: TOTAL_TOKEN
+                                                              - label: Cost
+                                                                value: COST
+                                                              - label: Concurrent
+                                                                value: CONCURRENT
+                                                    - type: Field
+                                                      props:
+                                                        label: 上限
+                                                        required: true
+                                                      children:
+                                                        - type: NumberInput
+                                                          props:
+                                                            name: limit
+                                                            className: w-full
+                                                            min: 1
+                                                            precision: 0
+                                                            placeholder: 如 500000
+                                                            rules:
+                                                              - required: true
+                                                                message: 请输入上限
+                                                    - type: Field
+                                                      props:
+                                                        label: 循环周期（仅周期循环配额）
+                                                      children:
+                                                        - type: RadioGroup
+                                                          props:
+                                                            name: cycle
+                                                            direction: vertical
+                                                            options:
+                                                              - label: 每 24 小时
+                                                                value: hour24
+                                                              - label: 每 7 天
+                                                                value: day7
+                                                              - label: 每月（自然月，每月 1 日 00:00 重置）
+                                                                value: month
+                                                    - type: Field
+                                                      props:
+                                                        label: 模式
+                                                        required: true
+                                                      children:
+                                                        - type: Select
+                                                          props:
+                                                            name: mode
+                                                            className: w-full
+                                                            options:
+                                                              - label: Soft Limit
+                                                                value: soft
+                                                              - label: Hard Limit
+                                                                value: hard
                                                     - type: Flex
                                                       props:
                                                         justify: end
@@ -943,671 +841,70 @@ body:
                                                               - action: overlay.close
                                                         - type: Button
                                                           props:
-                                                            text: 确认删除
+                                                            text: 保存
                                                             variant: primary
-                                                            danger: true
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                                params:
-                                                                  payload:
-                                                                    ok: true
-                                          - action: if
-                                            params:
-                                              condition: ${actions.delQuotaCfm.ok}
-                                              then:
-                                                - action: message
-                                                  params:
-                                                    messageType: success
-                                                    text: 已删除配额规则（演示）
-                    - type: Card
-                      when: ${data.detail.quotas[1] != null}
-                      props:
-                        size: small
-                      children:
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: small
-                            align: stretch
-                          children:
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
+                                                            submit: true
+                                - type: Button
                                   props:
-                                    text: 规则名称
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].name}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 配额类型
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].quotaTypeLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 计量指标
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].metricLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 上限
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].limitText}
-                            - type: Flex
-                              when: ${data.detail.quotas[1].quotaType == 'cyclic'}
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 循环周期
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].cycleLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 模式
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[1].modeLabel}
-                            - type: Flex
-                              props:
-                                justify: space-between
-                                align: center
-                              children:
-                                - type: StatusBadge
-                                  props:
-                                    status: ${data.detail.quotas[1].status}
-                                - type: Flex
-                                  props:
-                                    gap: small
-                                  children:
-                                    - type: Button
-                                      props:
-                                        text: 编辑
-                                        size: small
-                                      events:
-                                        onClick:
-                                          - id: editQuota
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 编辑配额规则
-                                                width: 560
-                                                content:
-                                                  type: Form
+                                    text: 删除
+                                    variant: link
+                                    size: small
+                                    danger: true
+                                    className: p-0 h-auto
+                                  events:
+                                    onClick:
+                                      - id: delQuotaCfm
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 确认删除配额规则
+                                            width: 480
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Text
                                                   props:
-                                                    name: quotaRule
-                                                    initialValues:
-                                                      quotaType: lifetime
-                                                      metric: TOTAL_TOKEN
-                                                      cycle: hour24
-                                                      mode: soft
-                                                  events:
-                                                    onSubmit:
-                                                      - action: overlay.close
-                                                      - action: message
-                                                        params:
-                                                          messageType: success
-                                                          text: 配额规则已更新（演示）
-                                                  children:
-                                                    - type: Flex
-                                                      props:
-                                                        direction: vertical
-                                                        gap: middle
-                                                        align: stretch
-                                                      children:
-                                                        - type: Field
-                                                          props:
-                                                            label: 规则名称
-                                                            required: true
-                                                          children:
-                                                            - type: Input
-                                                              props:
-                                                                name: name
-                                                                className: w-full
-                                                                placeholder: 如 daily-token-cap
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入规则名称
-                                                                value: ${data.detail.quotas[1].name}
-                                                        - type: Field
-                                                          props:
-                                                            label: 配额类型
-                                                            required: true
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: quotaType
-                                                                direction: horizontal
-                                                                options:
-                                                                  - label: 总配额
-                                                                    value: lifetime
-                                                                  - label: 周期循环配额
-                                                                    value: cyclic
-                                                                value: ${data.detail.quotas[1].quotaType}
-                                                        - type: Field
-                                                          props:
-                                                            label: 计量指标
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: metric
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Request
-                                                                    value: REQUEST
-                                                                  - label: Input Token
-                                                                    value: INPUT_TOKEN
-                                                                  - label: Output Token
-                                                                    value: OUTPUT_TOKEN
-                                                                  - label: Total Token
-                                                                    value: TOTAL_TOKEN
-                                                                  - label: Cost
-                                                                    value: COST
-                                                                  - label: Concurrent
-                                                                    value: CONCURRENT
-                                                                value: ${data.detail.quotas[1].metric}
-                                                        - type: Field
-                                                          props:
-                                                            label: 上限
-                                                            required: true
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: limit
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 如 500000
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入上限
-                                                                value: ${data.detail.quotas[1].limit}
-                                                        - type: Field
-                                                          props:
-                                                            label: 循环周期（仅周期循环配额）
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: cycle
-                                                                direction: vertical
-                                                                options:
-                                                                  - label: 每 24 小时
-                                                                    value: hour24
-                                                                  - label: 每 7 天
-                                                                    value: day7
-                                                                  - label: 每月（自然月，每月 1 日 00:00 重置）
-                                                                    value: month
-                                                                value: "${data.detail.quotas[1].cycleUnit == 'month' ? 'month' :
-                                                                  data.detail.quotas[\
-                                                                  1].cycleUnit ==
-                                                                  'day' ? 'day7' :
-                                                                  'hour24'}"
-                                                        - type: Field
-                                                          props:
-                                                            label: 模式
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: mode
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Soft Limit
-                                                                    value: soft
-                                                                  - label: Hard Limit
-                                                                    value: hard
-                                                                value: ${data.detail.quotas[1].mode}
-                                                        - type: Flex
-                                                          props:
-                                                            justify: end
-                                                            gap: middle
-                                                          children:
-                                                            - type: Button
-                                                              props:
-                                                                text: 取消
-                                                              events:
-                                                                onClick:
-                                                                  - action: overlay.close
-                                                            - type: Button
-                                                              props:
-                                                                text: 保存
-                                                                variant: primary
-                                                                submit: true
-                                    - type: Button
-                                      props:
-                                        text: 删除
-                                        size: small
-                                        danger: true
-                                      events:
-                                        onClick:
-                                          - id: delQuotaCfm
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 确认删除配额规则
-                                                width: 480
-                                                content:
-                                                  type: Flex
+                                                    size: small
+                                                    text: 删除后，配额规则「${parent.row.name}」将立即失效且不可恢复。
+                                                - type: Flex
                                                   props:
-                                                    direction: vertical
+                                                    justify: end
                                                     gap: middle
                                                   children:
-                                                    - type: Text
+                                                    - type: Button
                                                       props:
-                                                        size: small
-                                                        text: 删除后，配额规则「${data.detail.quotas[1].name}」将立即失效且不可恢复。
-                                                    - type: Flex
+                                                        text: 取消
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                    - type: Button
                                                       props:
-                                                        justify: end
-                                                        gap: middle
-                                                      children:
-                                                        - type: Button
-                                                          props:
-                                                            text: 取消
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                        - type: Button
-                                                          props:
-                                                            text: 确认删除
-                                                            variant: primary
-                                                            danger: true
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                                params:
-                                                                  payload:
-                                                                    ok: true
-                                          - action: if
-                                            params:
-                                              condition: ${actions.delQuotaCfm.ok}
-                                              then:
-                                                - action: message
-                                                  params:
-                                                    messageType: success
-                                                    text: 已删除配额规则（演示）
-                    - type: Card
-                      when: ${data.detail.quotas[2] != null}
-                      props:
-                        size: small
-                      children:
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: small
-                            align: stretch
-                          children:
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 规则名称
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].name}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 配额类型
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].quotaTypeLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 计量指标
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].metricLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 上限
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].limitText}
-                            - type: Flex
-                              when: ${data.detail.quotas[2].quotaType == 'cyclic'}
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 循环周期
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].cycleLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 模式
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.quotas[2].modeLabel}
-                            - type: Flex
-                              props:
-                                justify: space-between
-                                align: center
-                              children:
-                                - type: StatusBadge
-                                  props:
-                                    status: ${data.detail.quotas[2].status}
-                                - type: Flex
-                                  props:
-                                    gap: small
-                                  children:
-                                    - type: Button
-                                      props:
-                                        text: 编辑
-                                        size: small
-                                      events:
-                                        onClick:
-                                          - id: editQuota
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 编辑配额规则
-                                                width: 560
-                                                content:
-                                                  type: Form
-                                                  props:
-                                                    name: quotaRule
-                                                    initialValues:
-                                                      quotaType: lifetime
-                                                      metric: TOTAL_TOKEN
-                                                      cycle: hour24
-                                                      mode: soft
-                                                  events:
-                                                    onSubmit:
-                                                      - action: overlay.close
-                                                      - action: message
-                                                        params:
-                                                          messageType: success
-                                                          text: 配额规则已更新（演示）
-                                                  children:
-                                                    - type: Flex
-                                                      props:
-                                                        direction: vertical
-                                                        gap: middle
-                                                        align: stretch
-                                                      children:
-                                                        - type: Field
-                                                          props:
-                                                            label: 规则名称
-                                                            required: true
-                                                          children:
-                                                            - type: Input
-                                                              props:
-                                                                name: name
-                                                                className: w-full
-                                                                placeholder: 如 daily-token-cap
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入规则名称
-                                                                value: ${data.detail.quotas[2].name}
-                                                        - type: Field
-                                                          props:
-                                                            label: 配额类型
-                                                            required: true
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: quotaType
-                                                                direction: horizontal
-                                                                options:
-                                                                  - label: 总配额
-                                                                    value: lifetime
-                                                                  - label: 周期循环配额
-                                                                    value: cyclic
-                                                                value: ${data.detail.quotas[2].quotaType}
-                                                        - type: Field
-                                                          props:
-                                                            label: 计量指标
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: metric
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Request
-                                                                    value: REQUEST
-                                                                  - label: Input Token
-                                                                    value: INPUT_TOKEN
-                                                                  - label: Output Token
-                                                                    value: OUTPUT_TOKEN
-                                                                  - label: Total Token
-                                                                    value: TOTAL_TOKEN
-                                                                  - label: Cost
-                                                                    value: COST
-                                                                  - label: Concurrent
-                                                                    value: CONCURRENT
-                                                                value: ${data.detail.quotas[2].metric}
-                                                        - type: Field
-                                                          props:
-                                                            label: 上限
-                                                            required: true
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: limit
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 如 500000
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入上限
-                                                                value: ${data.detail.quotas[2].limit}
-                                                        - type: Field
-                                                          props:
-                                                            label: 循环周期（仅周期循环配额）
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: cycle
-                                                                direction: vertical
-                                                                options:
-                                                                  - label: 每 24 小时
-                                                                    value: hour24
-                                                                  - label: 每 7 天
-                                                                    value: day7
-                                                                  - label: 每月（自然月，每月 1 日 00:00 重置）
-                                                                    value: month
-                                                                value: "${data.detail.quotas[2].cycleUnit == 'month' ? 'month' :
-                                                                  data.detail.quotas[\
-                                                                  2].cycleUnit ==
-                                                                  'day' ? 'day7' :
-                                                                  'hour24'}"
-                                                        - type: Field
-                                                          props:
-                                                            label: 模式
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: mode
-                                                                className: w-full
-                                                                options:
-                                                                  - label: Soft Limit
-                                                                    value: soft
-                                                                  - label: Hard Limit
-                                                                    value: hard
-                                                                value: ${data.detail.quotas[2].mode}
-                                                        - type: Flex
-                                                          props:
-                                                            justify: end
-                                                            gap: middle
-                                                          children:
-                                                            - type: Button
-                                                              props:
-                                                                text: 取消
-                                                              events:
-                                                                onClick:
-                                                                  - action: overlay.close
-                                                            - type: Button
-                                                              props:
-                                                                text: 保存
-                                                                variant: primary
-                                                                submit: true
-                                    - type: Button
-                                      props:
-                                        text: 删除
-                                        size: small
-                                        danger: true
-                                      events:
-                                        onClick:
-                                          - id: delQuotaCfm
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 确认删除配额规则
-                                                width: 480
-                                                content:
-                                                  type: Flex
-                                                  props:
-                                                    direction: vertical
-                                                    gap: middle
-                                                  children:
-                                                    - type: Text
-                                                      props:
-                                                        size: small
-                                                        text: 删除后，配额规则「${data.detail.quotas[2].name}」将立即失效且不可恢复。
-                                                    - type: Flex
-                                                      props:
-                                                        justify: end
-                                                        gap: middle
-                                                      children:
-                                                        - type: Button
-                                                          props:
-                                                            text: 取消
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                        - type: Button
-                                                          props:
-                                                            text: 确认删除
-                                                            variant: primary
-                                                            danger: true
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                                params:
-                                                                  payload:
-                                                                    ok: true
-                                          - action: if
-                                            params:
-                                              condition: ${actions.delQuotaCfm.ok}
-                                              then:
-                                                - action: message
-                                                  params:
-                                                    messageType: success
-                                                    text: 已删除配额规则（演示）
+                                                        text: 确认删除
+                                                        variant: primary
+                                                        danger: true
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                            params:
+                                                              payload:
+                                                                ok: true
+                                      - action: if
+                                        params:
+                                          condition: ${actions.delQuotaCfm.ok}
+                                          then:
+                                            - action: policy.removeQuota
+                                              params:
+                                                name: ${row.name}
+                                            - action: message
+                                              params:
+                                                messageType: success
+                                                text: 已删除配额规则
                     - type: Text
-                      when: ${data.detail.quotas.length == 0}
+                      when: ${state.record.quotas.length == 0}
                       props:
                         text: 尚未配置配额规则。
                         type: secondary
@@ -1628,14 +925,21 @@ body:
                   children:
                     - type: Flex
                       props:
-                        justify: end
+                        justify: space-between
+                        align: center
                       children:
+                        - type: Text
+                          props:
+                            text: 未配置规则时不限流；作用范围可取当前授权路由。
+                            type: secondary
                         - type: Button
                           props:
                             text: + 添加限流规则
                             size: small
                           events:
                             onClick:
+                              - action: policy.beginRateLimitAdd
+                              - action: policy.scopeRouteOptions
                               - id: addRateLimit
                                 action: overlay.open
                                 params:
@@ -1652,11 +956,14 @@ body:
                                           scope: all
                                       events:
                                         onSubmit:
+                                          - action: policy.upsertRateLimit
+                                            params:
+                                              rateLimit: ${event}
                                           - action: overlay.close
                                           - action: message
                                             params:
                                               messageType: success
-                                              text: 限流规则已保存（演示）
+                                              text: 限流规则已保存
                                       children:
                                         - type: Flex
                                           props:
@@ -1710,7 +1017,7 @@ body:
                                                         message: 请输入上限
                                             - type: Field
                                               props:
-                                                label: Burst（Concurrent 时隐藏）
+                                                label: Burst（Concurrent 时不适用）
                                               children:
                                                 - type: NumberInput
                                                   props:
@@ -1732,6 +1039,68 @@ body:
                                                         value: all
                                                       - label: 指定路由
                                                         value: routes
+                                                  events:
+                                                    onChange:
+                                                      - action: setState
+                                                        params:
+                                                          rateLimitScope: ${event}
+                                            - type: Flex
+                                              when: ${state.rateLimitScope == 'routes'}
+                                              props:
+                                                direction: vertical
+                                                gap: small
+                                                align: stretch
+                                              children:
+                                                - type: Flex
+                                                  props:
+                                                    gap: small
+                                                    align: center
+                                                  children:
+                                                    - type: Select
+                                                      props:
+                                                        value: ${state.pendingScopeRouteId}
+                                                        placeholder: 选择授权路由（来自当前授权列表）
+                                                        options: ${state.scopeRouteOptions}
+                                                        controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                      events:
+                                                        onChange:
+                                                          - action: setState
+                                                            params:
+                                                              pendingScopeRouteId: ${event}
+                                                    - type: Button
+                                                      props:
+                                                        text: 添加
+                                                        size: small
+                                                      events:
+                                                        onClick:
+                                                          - action: policy.addScopeRoute
+                                                            params:
+                                                              routeId: ${state.pendingScopeRouteId}
+                                                - type: Table
+                                                  when: ${state.pendingScopeRoutes.length > 0}
+                                                  props:
+                                                    dataSource: ${state.pendingScopeRoutes}
+                                                    rowKey: routeId
+                                                    pagination: false
+                                                    columns:
+                                                      - title: 路由名称
+                                                        dataIndex: name
+                                                      - title: 操作
+                                                        align: center
+                                                        width: 80
+                                                        cell:
+                                                          type: Button
+                                                          props:
+                                                            text: 移除
+                                                            variant: link
+                                                            size: small
+                                                            danger: true
+                                                            className: p-0 h-auto
+                                                          events:
+                                                            onClick:
+                                                              - action: policy.removeScopeRoute
+                                                                params:
+                                                                  routeId: ${row.routeId}
                                             - type: Flex
                                               props:
                                                 justify: end
@@ -1748,256 +1117,222 @@ body:
                                                     text: 保存
                                                     variant: primary
                                                     submit: true
-                    - type: Card
-                      when: ${data.detail.rateLimits[0] != null}
+                    - type: Table
+                      when: ${state.record.rateLimits.length > 0}
                       props:
-                        size: small
-                      children:
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: small
-                            align: stretch
-                          children:
-                            - type: Flex
+                        dataSource: ${state.record.rateLimits}
+                        rowKey: name
+                        pagination: false
+                        className: mt-2
+                        columns:
+                          - title: 规则名称
+                            dataIndex: name
+                          - title: 限流类型
+                            dataIndex: limitTypeLabel
+                          - title: 上限
+                            cell:
+                              type: Text
                               props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 规则名称
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[0].name}
-                            - type: Flex
+                                text: "${row.limitType == 'CONCURRENT' ? row.limitText + ' 并发' : row.limitText + ' / 分钟'}"
+                          - title: Burst
+                            cell:
+                              type: Text
                               props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 限流类型
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[0].limitTypeLabel}
-                            - type: Flex
+                                text: "${row.burst == null ? '—' : row.burst}"
+                          - title: 作用范围
+                            dataIndex: scopeLabel
+                          - title: 状态
+                            cell:
+                              type: StatusBadge
                               props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 上限
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: "${data.detail.rateLimits[0].limitType == 'CONCURRENT' ?
-                                      data.detail.rateLimits[0].limitText + '
-                                      并发' : data.detail.rateLimits[0].limitText
-                                      + ' / 分钟'}"
-                            - type: Flex
-                              when: ${data.detail.rateLimits[0].limitType != 'CONCURRENT' &&
-                                data.detail.rateLimits[0].burst != null}
+                                status: ${row.status}
+                          - title: 操作
+                            align: center
+                            width: 130
+                            cell:
+                              type: Flex
                               props:
-                                align: baseline
-                                gap: middle
+                                gap: small
+                                justify: center
                               children:
-                                - type: Text
+                                - type: Button
                                   props:
-                                    text: Burst
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[0].burst}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 作用范围
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[0].scopeLabel}
-                            - type: Flex
-                              props:
-                                justify: space-between
-                                align: center
-                              children:
-                                - type: StatusBadge
-                                  props:
-                                    status: ${data.detail.rateLimits[0].status}
-                                - type: Flex
-                                  props:
-                                    gap: small
-                                  children:
-                                    - type: Button
-                                      props:
-                                        text: 编辑
-                                        size: small
-                                      events:
-                                        onClick:
-                                          - id: editRateLimit
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 编辑限流规则
-                                                width: 560
-                                                content:
-                                                  type: Form
-                                                  props:
-                                                    name: rateLimitRule
-                                                    initialValues:
-                                                      limitType: RPM
-                                                      scope: all
-                                                  events:
-                                                    onSubmit:
-                                                      - action: overlay.close
-                                                      - action: message
-                                                        params:
-                                                          messageType: success
-                                                          text: 限流规则已更新（演示）
-                                                  children:
-                                                    - type: Flex
-                                                      props:
-                                                        direction: vertical
-                                                        gap: middle
-                                                        align: stretch
-                                                      children:
-                                                        - type: Field
-                                                          props:
-                                                            label: 规则名称
-                                                            required: true
-                                                          children:
-                                                            - type: Input
-                                                              props:
-                                                                name: name
-                                                                className: w-full
-                                                                placeholder: 如 app-rpm
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入规则名称
-                                                                value: ${data.detail.rateLimits[0].name}
-                                                        - type: Field
-                                                          props:
-                                                            label: 限流类型
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: limitType
-                                                                className: w-full
-                                                                options:
-                                                                  - label: RPM（每分钟请求数）
-                                                                    value: RPM
-                                                                  - label: TPM（每分钟 Token 数）
-                                                                    value: TPM
-                                                                  - label: Concurrent（并发连接数）
-                                                                    value: CONCURRENT
-                                                                value: ${data.detail.rateLimits[0].limitType}
-                                                        - type: Field
-                                                          props:
-                                                            label: 上限
-                                                            required: true
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: limit
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 如 1000
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入上限
-                                                                value: ${data.detail.rateLimits[0].limit}
-                                                        - type: Field
-                                                          props:
-                                                            label: Burst（Concurrent 时隐藏）
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: burst
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 可选，如 100
-                                                                value: ${data.detail.rateLimits[0].burst}
-                                                        - type: Field
-                                                          props:
-                                                            label: 作用范围
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: scope
-                                                                direction: horizontal
-                                                                options:
-                                                                  - label: 全部授权路由
-                                                                    value: all
-                                                                  - label: 指定路由
-                                                                    value: routes
-                                                                value: "${data.detail.rateLimits[0].scopeAll ? 'all' : 'routes'}"
-                                                        - type: Flex
-                                                          props:
-                                                            justify: end
-                                                            gap: middle
-                                                          children:
-                                                            - type: Button
-                                                              props:
-                                                                text: 取消
-                                                              events:
-                                                                onClick:
-                                                                  - action: overlay.close
-                                                            - type: Button
-                                                              props:
-                                                                text: 保存
-                                                                variant: primary
-                                                                submit: true
-                                    - type: Button
-                                      props:
-                                        text: 删除
-                                        size: small
-                                        danger: true
-                                      events:
-                                        onClick:
-                                          - id: delRateLimitCfm
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 确认删除限流规则
-                                                width: 480
-                                                content:
-                                                  type: Flex
+                                    text: 编辑
+                                    variant: link
+                                    size: small
+                                    className: p-0 h-auto
+                                  events:
+                                    onClick:
+                                      - action: policy.beginRateLimitEdit
+                                        params:
+                                          scopeRoutes: ${row.scopeRoutes}
+                                          scopeAll: ${row.scopeAll}
+                                      - action: policy.scopeRouteOptions
+                                      - id: editRateLimit
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 编辑限流规则
+                                            width: 560
+                                            content:
+                                              type: Form
+                                              props:
+                                                  name: rateLimitRule
+                                                  initialValues:
+                                                    name: ${parent.row.name}
+                                                    limitType: ${parent.row.limitType}
+                                                    limit: ${parent.row.limit}
+                                                    burst: ${parent.row.burst}
+                                                    scope: "${parent.row.scopeAll ? 'all' : 'routes'}"
+                                              events:
+                                                onSubmit:
+                                                    - action: policy.upsertRateLimit
+                                                      params:
+                                                        original: ${parent.row.name}
+                                                        rateLimit: ${event}
+                                                    - action: overlay.close
+                                                    - action: message
+                                                      params:
+                                                        messageType: success
+                                                        text: 限流规则已更新
+                                              children:
+                                                - type: Flex
                                                   props:
                                                     direction: vertical
                                                     gap: middle
+                                                    align: stretch
                                                   children:
-                                                    - type: Text
+                                                    - type: Field
                                                       props:
-                                                        size: small
-                                                        text: 删除后，限流规则「${data.detail.rateLimits[0].name}」将立即失效且不可恢复。
+                                                        label: 规则名称
+                                                        required: true
+                                                      children:
+                                                        - type: Input
+                                                          props:
+                                                            name: name
+                                                            className: w-full
+                                                            placeholder: 如 app-rpm
+                                                            rules:
+                                                              - required: true
+                                                                message: 请输入规则名称
+                                                    - type: Field
+                                                      props:
+                                                        label: 限流类型
+                                                        required: true
+                                                      children:
+                                                        - type: Select
+                                                          props:
+                                                            name: limitType
+                                                            className: w-full
+                                                            options:
+                                                              - label: RPM（每分钟请求数）
+                                                                value: RPM
+                                                              - label: TPM（每分钟 Token 数）
+                                                                value: TPM
+                                                              - label: Concurrent（并发连接数）
+                                                                value: CONCURRENT
+                                                    - type: Field
+                                                      props:
+                                                        label: 上限
+                                                        required: true
+                                                      children:
+                                                        - type: NumberInput
+                                                          props:
+                                                            name: limit
+                                                            className: w-full
+                                                            min: 1
+                                                            precision: 0
+                                                            placeholder: 如 1000
+                                                            rules:
+                                                              - required: true
+                                                                message: 请输入上限
+                                                    - type: Field
+                                                      props:
+                                                        label: Burst（Concurrent 时不适用）
+                                                      children:
+                                                        - type: NumberInput
+                                                          props:
+                                                            name: burst
+                                                            className: w-full
+                                                            min: 1
+                                                            precision: 0
+                                                            placeholder: 可选，如 100
+                                                    - type: Field
+                                                      props:
+                                                        label: 作用范围
+                                                      children:
+                                                        - type: RadioGroup
+                                                          props:
+                                                            name: scope
+                                                            direction: horizontal
+                                                            options:
+                                                              - label: 全部授权路由
+                                                                value: all
+                                                              - label: 指定路由
+                                                                value: routes
+                                                          events:
+                                                            onChange:
+                                                              - action: setState
+                                                                params:
+                                                                  rateLimitScope: ${event}
+                                                    - type: Flex
+                                                      when: ${state.rateLimitScope == 'routes'}
+                                                      props:
+                                                        direction: vertical
+                                                        gap: small
+                                                        align: stretch
+                                                      children:
+                                                        - type: Flex
+                                                          props:
+                                                            gap: small
+                                                            align: center
+                                                          children:
+                                                            - type: Select
+                                                              props:
+                                                                value: ${state.pendingScopeRouteId}
+                                                                placeholder: 选择授权路由（来自当前授权列表）
+                                                                options: ${state.scopeRouteOptions}
+                                                                controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                              events:
+                                                                onChange:
+                                                                  - action: setState
+                                                                    params:
+                                                                      pendingScopeRouteId: ${event}
+                                                            - type: Button
+                                                              props:
+                                                                text: 添加
+                                                                size: small
+                                                              events:
+                                                                onClick:
+                                                                  - action: policy.addScopeRoute
+                                                                    params:
+                                                                      routeId: ${state.pendingScopeRouteId}
+                                                        - type: Table
+                                                          when: ${state.pendingScopeRoutes.length > 0}
+                                                          props:
+                                                            dataSource: ${state.pendingScopeRoutes}
+                                                            rowKey: routeId
+                                                            pagination: false
+                                                            columns:
+                                                              - title: 路由名称
+                                                                dataIndex: name
+                                                              - title: 操作
+                                                                align: center
+                                                                width: 80
+                                                                cell:
+                                                                  type: Button
+                                                                  props:
+                                                                    text: 移除
+                                                                    variant: link
+                                                                    size: small
+                                                                    danger: true
+                                                                    className: p-0 h-auto
+                                                                  events:
+                                                                    onClick:
+                                                                      - action: policy.removeScopeRoute
+                                                                        params:
+                                                                          routeId: ${row.routeId}
                                                     - type: Flex
                                                       props:
                                                         justify: end
@@ -2011,305 +1346,70 @@ body:
                                                               - action: overlay.close
                                                         - type: Button
                                                           props:
-                                                            text: 确认删除
+                                                            text: 保存
                                                             variant: primary
-                                                            danger: true
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                                params:
-                                                                  payload:
-                                                                    ok: true
-                                          - action: if
-                                            params:
-                                              condition: ${actions.delRateLimitCfm.ok}
-                                              then:
-                                                - action: message
-                                                  params:
-                                                    messageType: success
-                                                    text: 已删除限流规则（演示）
-                    - type: Card
-                      when: ${data.detail.rateLimits[1] != null}
-                      props:
-                        size: small
-                      children:
-                        - type: Flex
-                          props:
-                            direction: vertical
-                            gap: small
-                            align: stretch
-                          children:
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
+                                                            submit: true
+                                - type: Button
                                   props:
-                                    text: 规则名称
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[1].name}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 限流类型
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[1].limitTypeLabel}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 上限
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: "${data.detail.rateLimits[1].limitType == 'CONCURRENT' ?
-                                      data.detail.rateLimits[1].limitText + '
-                                      并发' : data.detail.rateLimits[1].limitText
-                                      + ' / 分钟'}"
-                            - type: Flex
-                              when: ${data.detail.rateLimits[1].limitType != 'CONCURRENT' &&
-                                data.detail.rateLimits[1].burst != null}
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: Burst
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[1].burst}
-                            - type: Flex
-                              props:
-                                align: baseline
-                                gap: middle
-                              children:
-                                - type: Text
-                                  props:
-                                    text: 作用范围
-                                    type: secondary
-                                    style:
-                                      width: 120
-                                      flexShrink: 0
-                                - type: Text
-                                  props:
-                                    text: ${data.detail.rateLimits[1].scopeLabel}
-                            - type: Flex
-                              props:
-                                justify: space-between
-                                align: center
-                              children:
-                                - type: StatusBadge
-                                  props:
-                                    status: ${data.detail.rateLimits[1].status}
-                                - type: Flex
-                                  props:
-                                    gap: small
-                                  children:
-                                    - type: Button
-                                      props:
-                                        text: 编辑
-                                        size: small
-                                      events:
-                                        onClick:
-                                          - id: editRateLimit
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 编辑限流规则
-                                                width: 560
-                                                content:
-                                                  type: Form
+                                    text: 删除
+                                    variant: link
+                                    size: small
+                                    danger: true
+                                    className: p-0 h-auto
+                                  events:
+                                    onClick:
+                                      - id: delRateLimitCfm
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 确认删除限流规则
+                                            width: 480
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Text
                                                   props:
-                                                    name: rateLimitRule
-                                                    initialValues:
-                                                      limitType: RPM
-                                                      scope: all
-                                                  events:
-                                                    onSubmit:
-                                                      - action: overlay.close
-                                                      - action: message
-                                                        params:
-                                                          messageType: success
-                                                          text: 限流规则已更新（演示）
-                                                  children:
-                                                    - type: Flex
-                                                      props:
-                                                        direction: vertical
-                                                        gap: middle
-                                                        align: stretch
-                                                      children:
-                                                        - type: Field
-                                                          props:
-                                                            label: 规则名称
-                                                            required: true
-                                                          children:
-                                                            - type: Input
-                                                              props:
-                                                                name: name
-                                                                className: w-full
-                                                                placeholder: 如 app-rpm
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入规则名称
-                                                                value: ${data.detail.rateLimits[1].name}
-                                                        - type: Field
-                                                          props:
-                                                            label: 限流类型
-                                                            required: true
-                                                          children:
-                                                            - type: Select
-                                                              props:
-                                                                name: limitType
-                                                                className: w-full
-                                                                options:
-                                                                  - label: RPM（每分钟请求数）
-                                                                    value: RPM
-                                                                  - label: TPM（每分钟 Token 数）
-                                                                    value: TPM
-                                                                  - label: Concurrent（并发连接数）
-                                                                    value: CONCURRENT
-                                                                value: ${data.detail.rateLimits[1].limitType}
-                                                        - type: Field
-                                                          props:
-                                                            label: 上限
-                                                            required: true
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: limit
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 如 1000
-                                                                rules:
-                                                                  - required: true
-                                                                    message: 请输入上限
-                                                                value: ${data.detail.rateLimits[1].limit}
-                                                        - type: Field
-                                                          props:
-                                                            label: Burst（Concurrent 时隐藏）
-                                                          children:
-                                                            - type: NumberInput
-                                                              props:
-                                                                name: burst
-                                                                className: w-full
-                                                                min: 1
-                                                                precision: 0
-                                                                placeholder: 可选，如 100
-                                                                value: ${data.detail.rateLimits[1].burst}
-                                                        - type: Field
-                                                          props:
-                                                            label: 作用范围
-                                                          children:
-                                                            - type: RadioGroup
-                                                              props:
-                                                                name: scope
-                                                                direction: horizontal
-                                                                options:
-                                                                  - label: 全部授权路由
-                                                                    value: all
-                                                                  - label: 指定路由
-                                                                    value: routes
-                                                                value: "${data.detail.rateLimits[1].scopeAll ? 'all' : 'routes'}"
-                                                        - type: Flex
-                                                          props:
-                                                            justify: end
-                                                            gap: middle
-                                                          children:
-                                                            - type: Button
-                                                              props:
-                                                                text: 取消
-                                                              events:
-                                                                onClick:
-                                                                  - action: overlay.close
-                                                            - type: Button
-                                                              props:
-                                                                text: 保存
-                                                                variant: primary
-                                                                submit: true
-                                    - type: Button
-                                      props:
-                                        text: 删除
-                                        size: small
-                                        danger: true
-                                      events:
-                                        onClick:
-                                          - id: delRateLimitCfm
-                                            action: overlay.open
-                                            params:
-                                              overlay:
-                                                type: modal
-                                                title: 确认删除限流规则
-                                                width: 480
-                                                content:
-                                                  type: Flex
+                                                    size: small
+                                                    text: 删除后，限流规则「${parent.row.name}」将立即失效且不可恢复。
+                                                - type: Flex
                                                   props:
-                                                    direction: vertical
+                                                    justify: end
                                                     gap: middle
                                                   children:
-                                                    - type: Text
+                                                    - type: Button
                                                       props:
-                                                        size: small
-                                                        text: 删除后，限流规则「${data.detail.rateLimits[1].name}」将立即失效且不可恢复。
-                                                    - type: Flex
+                                                        text: 取消
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                    - type: Button
                                                       props:
-                                                        justify: end
-                                                        gap: middle
-                                                      children:
-                                                        - type: Button
-                                                          props:
-                                                            text: 取消
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                        - type: Button
-                                                          props:
-                                                            text: 确认删除
-                                                            variant: primary
-                                                            danger: true
-                                                          events:
-                                                            onClick:
-                                                              - action: overlay.close
-                                                                params:
-                                                                  payload:
-                                                                    ok: true
-                                          - action: if
-                                            params:
-                                              condition: ${actions.delRateLimitCfm.ok}
-                                              then:
-                                                - action: message
-                                                  params:
-                                                    messageType: success
-                                                    text: 已删除限流规则（演示）
+                                                        text: 确认删除
+                                                        variant: primary
+                                                        danger: true
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                            params:
+                                                              payload:
+                                                                ok: true
+                                      - action: if
+                                        params:
+                                          condition: ${actions.delRateLimitCfm.ok}
+                                          then:
+                                            - action: policy.removeRateLimit
+                                              params:
+                                                name: ${row.name}
+                                            - action: message
+                                              params:
+                                                messageType: success
+                                                text: 已删除限流规则
                     - type: Text
-                      when: ${data.detail.rateLimits.length == 0}
+                      when: ${state.record.rateLimits.length == 0}
                       props:
                         text: 尚未配置限流规则。
                         type: secondary
@@ -2385,13 +1485,31 @@ body:
                     params:
                       condition: ${actions.delCfm.ok}
                       then:
-                        - action: message
+                        - id: delResult
+                          action: util.request
                           params:
-                            messageType: success
-                            text: 客户端已删除（演示）
-                        - action: navigate
+                            method: DELETE
+                            url: /api/d/clients/${data.detail.id}
+                            body: {}
+                        - action: if
                           params:
-                            to: /clients
+                            condition: ${actions.delResult == null || actions.delResult.ok == false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: error
+                                  text: "${actions.delResult != null && actions.delResult.error != null ? actions.delResult.error.message : '删除失败'}"
+                        - action: if
+                          params:
+                            condition: ${actions.delResult != null && actions.delResult.ok != false}
+                            then:
+                              - action: message
+                                params:
+                                  messageType: success
+                                  text: 客户端已删除
+                              - action: navigate
+                                params:
+                                  to: /clients
             - type: Flex
               props:
                 align: center
@@ -2403,19 +1521,6 @@ body:
                     icon: x
                   events:
                     onClick:
-                      - action: navigate
-                        params:
-                          to: /clients/${route.params.code}
-                - type: Button
-                  props:
-                    text: 保存草稿
-                    icon: save
-                  events:
-                    onClick:
-                      - action: message
-                        params:
-                          messageType: success
-                          text: 草稿已保存（演示：静态页面不落库）
                       - action: navigate
                         params:
                           to: /clients/${route.params.code}
@@ -2440,3 +1545,4 @@ body:
               - action: navigate
                 params:
                   to: /clients
+

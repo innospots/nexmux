@@ -350,10 +350,31 @@ body:
                             params:
                               condition: ${actions.clientStatusCfm.ok}
                               then:
-                                - action: message
+                                - id: statusResult
+                                  action: util.request
                                   params:
-                                    messageType: success
-                                    text: "${row.status == 'enabled' ? '已停用' : '已启用'}（演示：静态页面不落库）"
+                                    method: POST
+                                    url: "/api/d/clients/${row.id}/${row.status == 'enabled' ? 'disable' : 'enable'}"
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.statusResult == null || actions.statusResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.statusResult != null && actions.statusResult.error != null ? actions.statusResult.error.message : '操作失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.statusResult != null && actions.statusResult.ok != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${row.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: clients
                     - type: Button
                       props:
                         text: Rotate Secret
@@ -410,10 +431,61 @@ body:
                             params:
                               condition: ${actions.rotateSecretCfm.ok}
                               then:
-                                - action: message
+                                - id: rotateResult
+                                  action: util.request
                                   params:
-                                    messageType: success
-                                    text: 轮换成功，新 Secret：gw-sk-demo-7f3a······（仅此一次展示，请妥善保存）（演示：静态页面不落库）
+                                    method: POST
+                                    url: /api/d/clients/${row.id}/rotate-app-key
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult == null || actions.rotateResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.rotateResult != null && actions.rotateResult.error != null ? actions.rotateResult.error.message : '轮换失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult != null && actions.rotateResult.ok != false}
+                                    then:
+                                      - id: secretShown
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 新 AppKey Secret（仅此一次展示）
+                                            width: 520
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Alert
+                                                  props:
+                                                    showIcon: true
+                                                    variant: warning
+                                                    message: 旧 Secret 已失效；新 Secret 请立即复制保存。
+                                                - type: Text
+                                                  props:
+                                                    strong: true
+                                                    className: font-mono
+                                                    text: ${actions.rotateResult.data.appKeyPlaintext}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 我已保存
+                                                        variant: primary
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: clients
     - type: Pagination
       props:
         total: ${data.clients.total}
@@ -433,3 +505,4 @@ body:
       props:
         title: 无匹配客户端
         description: 调整标签、名称、标识或状态筛选后重试；也可以新建客户端
+

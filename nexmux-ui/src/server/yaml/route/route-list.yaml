@@ -354,7 +354,7 @@ body:
                                   condition: ${actions.statusCfm.ok}
                                   then:
                                     - id: toggleResult
-                                      action: request
+                                      action: util.request
                                       params:
                                         method: POST
                                         url: "${parent.row.status == 'enabled' ? '/api/d/ops/route-disable' : parent.row.status == 'draft' ? '/api/d/ops/route-publish' : '/api/d/ops/route-enable'}?code=${parent.row.code}"

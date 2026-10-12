@@ -1,7 +1,10 @@
 package com.innospots.nexmux.console.ops;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.innospots.nexmux.console.model.ModelOption;
 import com.innospots.nexmux.console.shared.LogTexts;
+import com.innospots.nexmux.console.shared.DisplayFormats;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.console.shared.StrategyLabels;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -47,6 +50,7 @@ public class CallLogViewAssembler {
     private final RouteService routeService;
     private final ModelService modelService;
     private final ProviderService providerService;
+    private final DisplayFormatsProvider displayFormats;
 
     /**
      * 筛选列表（pageNo 恒 1、pageSize 5000；total 为全量条数）。
@@ -61,6 +65,23 @@ public class CallLogViewAssembler {
                 .map(vo -> toRecord(vo, null, relations))
                 .toList();
         return new CallLogListResult(items, page.total(), LogTexts.thousands(items.size()));
+    }
+
+    /**
+     * 模型筛选项（{全部} + 日志中出现过的模型；label 带上模型显示名，未知模型退化为编码）。
+     */
+    public List<ModelOption> modelOptions() {
+        Map<String, String> nameByCode = new LinkedHashMap<>();
+        for (ModelVo model : modelService.listAll()) {
+            nameByCode.put(model.modelCode(), model.displayName());
+        }
+        List<ModelOption> items = new ArrayList<>();
+        items.add(new ModelOption("全部", "all"));
+        for (String code : requestLogQueryService.distinctModelCodes()) {
+            String name = nameByCode.get(code);
+            items.add(new ModelOption(name == null ? code : name + "（" + code + "）", code));
+        }
+        return items;
     }
 
     /**
@@ -83,8 +104,10 @@ public class CallLogViewAssembler {
 
     private Relations relations() {
         Map<String, String> clientNameById = new LinkedHashMap<>();
+        Map<String, String> clientCodeById = new LinkedHashMap<>();
         for (ClientVo client : clientService.listAll()) {
             clientNameById.put(client.clientId(), client.displayName());
+            clientCodeById.put(client.clientId(), client.clientCode());
         }
         Map<String, RouteVo> routeById = new LinkedHashMap<>();
         for (RouteVo route : routeService.listAll()) {
@@ -98,17 +121,19 @@ public class CallLogViewAssembler {
         for (ProviderVo provider : providerService.listAll()) {
             providerNameByCode.put(provider.providerCode(), provider.displayName());
         }
-        return new Relations(clientNameById, routeById, modelNameByCode, providerNameByCode);
+        return new Relations(clientNameById, clientCodeById, routeById, modelNameByCode, providerNameByCode);
     }
 
     private record Relations(
             Map<String, String> clientNameById,
+            Map<String, String> clientCodeById,
             Map<String, RouteVo> routeById,
             Map<String, String> modelNameByCode,
             Map<String, String> providerNameByCode) {
     }
 
-    private static CallLogRecord toRecord(RequestLogVo vo, RequestLogDetailVo detail, Relations relations) {
+    private CallLogRecord toRecord(RequestLogVo vo, RequestLogDetailVo detail, Relations relations) {
+        DisplayFormats formats = displayFormats.current();
         String status = statusOf(vo.status());
         Long input = vo.inputTokens();
         Long output = vo.outputTokens();
@@ -121,20 +146,22 @@ public class CallLogViewAssembler {
                 ? StrategyLabels.of(route.routeSpec().strategyType()) : "—";
         String clientName = relations.clientNameById.getOrDefault(
                 vo.clientId() == null ? "" : vo.clientId(), "—");
+        String clientCode = relations.clientCodeById.getOrDefault(
+                vo.clientId() == null ? "" : vo.clientId(), "—");
         long latencyMs = vo.latencyMs() == null ? 0 : vo.latencyMs();
-        String time = LogTexts.fullTime(vo.requestedAt());
+        String time = formats.fullTime(vo.requestedAt());
         JsonNode prompt = LogTexts.readJson(detail == null ? null : detail.promptSnapshot());
 
         return new CallLogRecord(
                 vo.requestId(),
                 status,
                 STATUS_LABELS.getOrDefault(status, status),
-                time + " UTC",
-                LogTexts.shortTime(vo.requestedAt()) + " UTC",
+                time + " " + formats.zoneLabel(),
+                formats.shortTime(vo.requestedAt()) + " " + formats.zoneLabel(),
                 latencyMs,
                 latencyMs + "ms",
                 vo.userEmail() == null ? "—" : vo.userEmail(),
-                clientName,
+                clientCode,
                 clientName,
                 vo.appKeyId() == null ? "—" : vo.appKeyId(),
                 "—",
@@ -168,9 +195,9 @@ public class CallLogViewAssembler {
                 cost,
                 billing,
                 margin,
-                cost != null ? moneyText(cost) : "—",
-                billing != null ? moneyText(billing) : "—",
-                margin != null && margin.signum() > 0 ? moneyText(margin) : "—",
+                cost != null ? moneyText(formats, cost) : "—",
+                billing != null ? moneyText(formats, billing) : "—",
+                margin != null && margin.signum() > 0 ? moneyText(formats, margin) : "—",
                 "—",
                 pricingText(detail == null ? null : detail.pricingSnapshot()),
                 vo.httpStatus() != null ? String.valueOf(vo.httpStatus()) : "—",
@@ -209,9 +236,9 @@ public class CallLogViewAssembler {
         return STATUS_LABELS.containsKey(key) ? key : "other";
     }
 
-    /** 金额 → 4 位小数字符串（对齐 toFixed(4)）。 */
-    private static String moneyText(BigDecimal value) {
-        return value.setScale(4, RoundingMode.HALF_UP).toPlainString();
+    /** 金额 → 配置小数字符串（无符号；列头/公式自带币种）。 */
+    private static String moneyText(DisplayFormats formats, BigDecimal value) {
+        return value.setScale(formats.decimals(), RoundingMode.HALF_UP).toPlainString();
     }
 
     /** pricingSnapshot JSON → 定价文案（版本（生效）· C= · M= · 时段倍率）。 */

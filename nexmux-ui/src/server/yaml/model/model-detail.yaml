@@ -164,7 +164,7 @@ body:
                               condition: ${actions.statusCfm.ok}
                               then:
                                 - id: toggleResult
-                                  action: request
+                                  action: util.request
                                   params:
                                     method: POST
                                     url: "/api/d/ops/model-${data.detail.status
@@ -246,7 +246,7 @@ body:
                                             onClick:
                                               - action: overlay.close
                                               - id: invokeResult
-                                                action: request
+                                                action: util.request
                                                 params:
                                                   method: POST
                                                   url: /api/d/ops/model-invoke-test?code=${route.params.code}
@@ -291,10 +291,28 @@ body:
                             icon: copy
                       events:
                         onSelect:
-                          - action: message
+                          - action: if
                             params:
-                              messageType: info
-                              text: 操作：${event}（演示）
+                              condition: ${event == 'copy'}
+                              then:
+                                - action: util.copy
+                                  params:
+                                    text: ${data.detail.code}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 模型标识已复制
+                          - action: if
+                            params:
+                              condition: ${event == 'export'}
+                              then:
+                                - action: util.copyJson
+                                  params:
+                                    data: ${data.detail}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 配置 JSON 已复制到剪贴板
                       children:
                         - type: Button
                           props:
@@ -737,7 +755,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: JSON 模式：批量编辑 tiers + multipliers（演示）
+                                    text: 定价 JSON 批量编辑暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Table
                         props:
                           dataSource: ${data.detail.tiers}
@@ -856,7 +874,7 @@ body:
                                         - action: message
                                           params:
                                             messageType: info
-                                            text: 查看定价版本快照：${row.version}（演示）
+                                            text: 定价版本快照暂未开放（后端定价端点未建，已列入任务清单）
                                   - type: Button
                                     props:
                                       text: Diff
@@ -868,7 +886,7 @@ body:
                                         - action: message
                                           params:
                                             messageType: info
-                                            text: 查看与上一版本的 Diff：${row.version}（演示）
+                                            text: 定价版本 Diff 暂未开放（后端定价端点未建，已列入任务清单）
                       - type: Flex
                         props:
                           justify: end
@@ -884,7 +902,7 @@ body:
                                 - action: message
                                   params:
                                     messageType: info
-                                    text: 价格历史台账（演示：见上方版本历史）
+                                    text: 价格历史台账即上方版本历史（快照 / Diff 开放后此处提供导出）
                           - type: Button
                             props:
                               text: 编辑定价
@@ -1076,8 +1094,8 @@ body:
                                     then:
                                       - action: message
                                         params:
-                                          messageType: success
-                                          text: 供应商模型已添加（演示：权重合计请保持 100）
+                                          messageType: info
+                                          text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                       - type: Card
                         when: ${data.detail.suppliers[0] != null}
                         props:
@@ -1285,8 +1303,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已保存（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                                   - type: Button
                                     props:
                                       text: 删除
@@ -1346,8 +1364,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已删除（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                           - type: Grid
                             props:
                               columns: 3
@@ -1662,8 +1680,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已保存（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                                   - type: Button
                                     props:
                                       text: 删除
@@ -1723,8 +1741,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已删除（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                           - type: Grid
                             props:
                               columns: 3
@@ -2039,8 +2057,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已保存（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                                   - type: Button
                                     props:
                                       text: 删除
@@ -2100,8 +2118,8 @@ body:
                                             then:
                                               - action: message
                                                 params:
-                                                  messageType: success
-                                                  text: 供应商模型已删除（演示）
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
                           - type: Grid
                             props:
                               columns: 3

@@ -7,6 +7,7 @@ import com.innospots.nexmux.core.model.service.ModelService;
 import com.innospots.nexmux.core.ops.domain.request.RequestLogPageRequest;
 import com.innospots.nexmux.core.ops.domain.vo.RequestLogDetailVo;
 import com.innospots.nexmux.core.ops.domain.vo.RequestLogVo;
+import com.innospots.nexmux.console.shared.DisplayFormatsProvider;
 import com.innospots.nexmux.core.ops.service.RequestLogQueryService;
 import com.innospots.nexmux.core.provider.domain.vo.ProviderVo;
 import com.innospots.nexmux.core.provider.service.ProviderService;
@@ -32,6 +33,7 @@ import static org.mockito.Mockito.when;
 class CallLogViewAssemblerTest {
 
     private RequestLogQueryService requestLogQueryService;
+    private ModelService modelService;
     private CallLogViewAssembler assembler;
 
     @BeforeEach
@@ -39,10 +41,11 @@ class CallLogViewAssemblerTest {
         requestLogQueryService = Mockito.mock(RequestLogQueryService.class);
         ClientService clientService = Mockito.mock(ClientService.class);
         RouteService routeService = Mockito.mock(RouteService.class);
-        ModelService modelService = Mockito.mock(ModelService.class);
+        modelService = Mockito.mock(ModelService.class);
         ProviderService providerService = Mockito.mock(ProviderService.class);
         assembler = new CallLogViewAssembler(
-                requestLogQueryService, clientService, routeService, modelService, providerService);
+                requestLogQueryService, clientService, routeService, modelService, providerService,
+                DisplayFormatsProvider.defaults());
 
         when(clientService.listAll()).thenReturn(List.of(
                 new ClientVo("c1", "app-web", "Web 应用", "ENABLED", List.of(),
@@ -82,6 +85,7 @@ class CallLogViewAssemblerTest {
         assertThat(row.status()).isEqualTo("success");
         assertThat(row.statusLabel()).isEqualTo("成功");
         assertThat(row.clientName()).isEqualTo("Web 应用");
+        assertThat(row.clientCode()).isEqualTo("app-web");
         assertThat(row.routeCode()).isEqualTo("general-chat");
         assertThat(row.routeName()).isEqualTo("通用对话");
         assertThat(row.strategyText()).isEqualTo("加权轮询");
@@ -94,7 +98,7 @@ class CallLogViewAssemblerTest {
         assertThat(row.billingText()).isEqualTo("0.0030");
         assertThat(row.marginText()).isEqualTo("0.0018");
         assertThat(row.latencyText()).isEqualTo("820ms");
-        assertThat(row.timeShort()).isEqualTo("10-05 08:00:00 UTC");
+        assertThat(row.timeShort()).isEqualTo("10-05 08:00:00 UTC+8");
         assertThat(row.authResult()).isEqualTo("通过（AppKey 有效）");
         assertThat(row.channel()).isEqualTo("—");
         assertThat(row.error()).isNull();
@@ -143,5 +147,25 @@ class CallLogViewAssemblerTest {
         assertThat(record.pr().prompt()).isNull();
         assertThat(record.trace()).hasSize(1);
         assertThat(record.trace().get(0).name()).isEqualTo("route");
+    }
+
+    @Test
+    void modelOptionsListAllFirstThenDistinctLoggedModels() {
+        when(requestLogQueryService.distinctModelCodes())
+                .thenReturn(List.of("openai/o4-mini", "unknown/ghost"));
+        when(modelService.listAll()).thenReturn(List.of(
+                new com.innospots.nexmux.core.model.domain.vo.ModelVo(
+                        "m1", "openai/o4-mini", "o4 mini", "ENABLED", "LLM",
+                        128000L, 4096L, "pv2", null, null)));
+
+        var items = assembler.modelOptions();
+
+        assertThat(items).hasSize(3);
+        assertThat(items.get(0).value()).isEqualTo("all");
+        assertThat(items.get(0).label()).isEqualTo("全部");
+        assertThat(items.get(1).label()).isEqualTo("o4 mini（openai/o4-mini）");
+        assertThat(items.get(1).value()).isEqualTo("openai/o4-mini");
+        // 日志中出现但模型库已不存在的编码：退化为纯编码
+        assertThat(items.get(2).label()).isEqualTo("unknown/ghost");
     }
 }

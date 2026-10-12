@@ -20,6 +20,11 @@ server:
   port: 8082
 
 management:
+  # actuator 仅供内网/本机：绑定回环地址 + 独立管理端口（默认 19090；runtime profile 19091），
+  # 不随业务端口（8082/18082、8083）公网暴露
+  server:
+    address: 127.0.0.1
+    port: ${MANAGEMENT_PORT:19090}
   endpoints:
     web:
       exposure:

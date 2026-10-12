@@ -9,6 +9,10 @@
 server:
   port: 8083
 
+management:
+  server:
+    port: 19091
+
 nexus:
   console:
     web:

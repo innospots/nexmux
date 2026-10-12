@@ -68,10 +68,12 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 
 调试台限域（Console 服务设置页或 `mux_platform_setting` 表）：`debugInvokeEnabled`、`debugDailyQuota`。
 
-## 5. 健康检查与监控
+## 5. 健康检查与监控（仅内网/本机）
 
-- `GET /actuator/health`（两进程各自端口）；liveness/readiness probe 已启用。
-- metrics/Prometheus：`/actuator/prometheus`（application.yaml 已暴露）。
+- actuator 绑定回环地址（`management.server.address=127.0.0.1`）+ 独立管理端口：
+  Console `127.0.0.1:19090`、Runtime `127.0.0.1:19091`（runtime profile 覆盖；可用 `MANAGEMENT_PORT` env 再改）。
+  **业务端口（8082/18082/8083）不再暴露 `/actuator/**`**，公网不可达。
+- `GET /actuator/health`（liveness/readiness 已启用）；Prometheus：`/actuator/prometheus`。
 
 ## 6. 升级与迁移
 
@@ -93,6 +95,6 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 - [ ] `DB_URL` 为绝对路径，两进程指向同一库文件
 - [ ] Console `security.enabled=true` 生效（未登录访问 `/api/d/providers` 返回 401）
 - [ ] Runtime 未暴露 `/api/d/**`（应 404）；Console 未暴露 `/v1/**`（应 404）
-- [ ] `/actuator/health` 两进程 UP
+- [ ] `/actuator/health` 两进程 UP（本机 127.0.0.1:19090 / 19091；业务端口访问 actuator 应 404）
 - [ ] 调试台口径已评审（debugInvokeEnabled / debugDailyQuota）
 - [ ] 库文件备份策略就位（H2 文件库）

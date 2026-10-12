@@ -125,4 +125,8 @@ public class RequestLogEntity extends BaseEntity {
 
     @Column(columnDefinition = "CLOB")
     private String promptSnapshot;
+
+    /** 写入来源：{@code RUNTIME}（数据面真实流量，默认）/ {@code DEBUG}（Console 调试台，ADR-0001 审计 A1 修复）。 */
+    @Column(length = 16)
+    private String source;
 }

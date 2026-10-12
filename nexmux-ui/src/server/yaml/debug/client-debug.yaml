@@ -4,6 +4,23 @@ page:
   title: 客户端调试
   name: clientDebug
   description: 调试台 / 客户端调试：模拟业务侧真实调用，验证鉴权、路由与配额（Chat 对话式）
+lifecycle:
+  onInit:
+    - action: clientDebug.loadClients
+    - action: if
+      params:
+        condition: ${route.query.clientCode != null && route.query.clientCode != ''}
+        then:
+          - action: clientDebug.selectClient
+            params:
+              clientCode: ${route.query.clientCode}
+    - action: if
+      params:
+        condition: ${route.query.routeCode != null && route.query.routeCode != ''}
+        then:
+          - action: clientDebug.selectRoute
+            params:
+              routeCode: ${route.query.routeCode}
 state:
   clientCode: ""
   appKeyId: ""
@@ -44,6 +61,11 @@ body:
           props:
             variant: muted
             text: 模拟业务侧真实调用，验证鉴权、路由与配额
+    - type: Alert
+      props:
+        showIcon: true
+        variant: info
+        message: 调试台在 Console 进程内模拟 Runtime 数据面链路（选路与 Runtime 同一实现：策略 / 权重 / 优先级 / 粘性会话均生效），会产生真实上游调用与费用；调试记录以 source=DEBUG 与真实流量区分。可在「系统管理 / 服务设置」关闭或限制日配额。
     - type: Flex
       props:
         className: debug-split
@@ -110,13 +132,7 @@ body:
                         - type: Select
                           props:
                             value: ${state.clientCode}
-                            options:
-                              - value: agent-app
-                                label: agent-app（agent-app）
-                              - value: web-portal
-                                label: web-portal（web-portal）
-                              - value: internal-batch
-                                label: internal-batch（internal-batch）
+                            options: ${state.clientOptions}
                             placeholder: 选择客户端
                             className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
                           events:

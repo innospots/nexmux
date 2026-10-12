@@ -52,7 +52,7 @@ const triggerClass =
 
 export function ThemeSwitcher() {
   const [skin, setSkin] = useState<SkinValue>(DEFAULT_SKIN);
-  const [mode, setMode] = useState<Mode>("system");
+  const [, setMode] = useState<Mode>("system");
   const [dark, setDark] = useState(false);
 
   // 挂载后读取持久化偏好并接管系统深浅色监听（mode 为 system 时）
@@ -60,9 +60,12 @@ export function ThemeSwitcher() {
     const savedSkin = (localStorage.getItem(SKIN_STORAGE_KEY) ??
       DEFAULT_SKIN) as SkinValue;
     const savedMode = (localStorage.getItem("mc-mode") ?? "system") as Mode;
+    /* eslint-disable react-hooks/set-state-in-effect -- 从 localStorage 同步持久化偏好：
+       SSR 期间不可读，只能在挂载后的 effect 中回写 state（合法的外部系统同步） */
     setSkin(savedSkin);
     setMode(savedMode);
     setDark(applyMode(savedMode));
+    /* eslint-enable react-hooks/set-state-in-effect */
 
     const media = window.matchMedia("(prefers-color-scheme: dark)");
     const onSystemChange = () => {

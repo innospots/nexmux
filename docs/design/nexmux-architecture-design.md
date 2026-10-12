@@ -90,10 +90,14 @@ flowchart TB
 com.innospots.nexmux.core
 ├── provider/          # Provider 聚合（含 domain.entity|request|vo|value）
 ├── model/             # 逻辑 Model（绑定列在 mux_model）
-├── route/             # Route（published_route_spec，无版本表）
+├── route/             # Route（published_route_spec，无版本表；domain/selection 候选选择器，调试台与 Runtime 共用）
 ├── access/            # Client、ClientTemplate
 ├── audit/             # ConfigAuditLog
-└── ops/               # RequestLog 只读查询
+├── debug/             # 调试台穿透（Console 内数据面模拟；debugInvokeEnabled / debugDailyQuota 限域，落日志标 source=DEBUG）
+├── settings/          # 平台服务设置（mux_platform_setting）
+├── stats/             # 用量 / 可用性聚合查询
+├── ops/               # RequestLog 只读查询
+└── shared/            # 状态码 / JSON / 依赖影响分析
 
 各域内统一：dao / operator / service + domain 子包（详见 nexmux-domain-layer-design.md）
 
@@ -103,8 +107,8 @@ com.innospots.nexmux.console
 └── permission/        # nexmux 页面 permission key 常量
 
 com.innospots.nexmux.inbound
-├── runtime/           # 配置快照加载、健康缓存接口（实现可后置）
-└── protocol/          # OpenAI-compatible 等 Ingress 适配（后置）
+├── runtime/           # PublishedRouteCache（只消费 published_route_spec）+ RuntimeRouter（共用 CandidateSelector）；鉴权/计量/Failover 后置
+└── protocol/          # UpstreamChatAdapter + OpenAiCompatibleChatAdapter（SSE 与更多协议后置）；凭证仅在本层消费
 ```
 
 **依赖规则**
@@ -137,6 +141,8 @@ com.innospots.nexmux.inbound
 | RequestLog | 列表/详情 | `/request-logs` | `RequestLogQueryService` |
 | Audit | 列表/详情/Diff | `/audit-logs` | `AuditQueryService` |
 | Debug | 模型调试 / 客户端全链路调试 | `/debug/...` | `DebugService` |
+
+> **调试台口径**（ADR-0001 审计 A1/A2/A3/B1 修复）：Debug 组是 Console 内的「数据面模拟」——服务设置 `debugInvokeEnabled=false` 可整体关闭（403 `NMX020003`）、`debugDailyQuota` 限制日调用量（429 `NMX020004`），每次调用写配置审计；调试流量落 `mux_request_log` 显式标记 `source=DEBUG`，与 Runtime 真实流量区分；选路与未来 Runtime 共用 `core/route/domain/selection/CandidateSelector`（策略 / 权重 / 优先级 / 粘性 / 健康过滤同一语义，选路上下文落 `route_trace`）。
 
 响应封装：`com.innospots.nexus.base.domain.response.R<T>`。
 
@@ -188,7 +194,11 @@ public record ClientRotateAppKeyRequest(
 
 运行库表（`mux_request_log` 等）由 Runtime 写入；Console 只读 Dao 可落在 `core.ops`，连接只读数据源或同一库只读账号（部署决策见 P0 实施文档）。
 
+> **落地口径**（ADR-0001 审计 A1/A4 修复）：独立 Runtime assembly 就绪前，`mux_request_log` DDL 暂驻 `nexmux-spring/src/main/resources/nexus/schema/nexmux-h2.sql`（脚本头部有归属注释），Runtime assembly 立项后迁出；本地开发单库同账号仅限 dev（`application-local.yaml` 已注释），生产部署 Console 必须用对运行表无写权限的只读账号；过渡期内 Console 侧唯一的运行表写入来自调试台，一律 `source=DEBUG`。
+
 **配置**：分项 YAML 边界见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) — `application.yaml` 仅引导；`nexus/console-*.yaml` 为 Nexus 宿主；产品键在 `nexus/nexmux.yaml`（前缀 `nexmux.`）；PageDsl 在 `ui-pages/nexmux/{moduleKey}/*.yaml`（`domainKey=nexmux`，`moduleKey` 为 provider/model 等）。禁止新增业务 `*.properties`。
+
+> **页面 DSL 双实现口径**（审计 E1）：页面存在两套 DSL——kernel `ui-pages/nexmux/**`（Nexus PageDsl，Nexus Console 内置渲染，sitemap 页面契约受 `NexmuxSitemapLoadTest` 约束）与 `nexmux-ui/src/server/yaml/**`（Pactor DSL，独立门户 :9011 实际运行）。定位：**`nexmux-ui` 是页面行为与数据接口的权威来源**（先改先验），kernel `ui-pages` 是 Nexus Console 挂载的**结构镜像**（页面清单、布局与静态文案保持一致，交互细节以 Pactor 版为准）。同步机制：新增 / 删除页面时两侧同提交（kernel 侧文件名 `nexmux-{module}-{page}.yaml` ↔ nexmux-ui `{module}/{page}.yaml`），`NexmuxSitemapLoadTest` 负责校验 sitemap 与 kernel 页面集合一致；合并前抽查两側页面标题 / 数据源路径一致。任一侧单独存在超过一个迭代的页面视为漂移缺陷。
 
 ## 7. 失败与状态码
 
@@ -199,6 +209,8 @@ public record ClientRotateAppKeyRequest(
 | 启停/发布依赖不满足 | `NMX` + FAILED_PRECONDITION + `0001` | Service（影响分析） | 422 |
 | 密钥权限不足 | `NMX` + FORBIDDEN + `0001` | Endpoint 鉴权后 | 403 |
 | Route 未发布即被 Runtime 请求 | `NMX` + FAILED_PRECONDITION + `0002` | inbound（后置） | 503 |
+| 调试调用已关闭 | `NMX` + FAILED_PRECONDITION + `0003` | DebugService（服务设置 debugInvokeEnabled） | 403 |
+| 调试日配额已用尽 | `NMX` + FAILED_PRECONDITION + `0004` | DebugService（服务设置 debugDailyQuota） | 429 |
 
 实现时先登记 `NexmuxStatusCode` 枚举并实现契约测试；禁止业务失败抛裸 `RuntimeException`。
 

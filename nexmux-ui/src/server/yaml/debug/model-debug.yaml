@@ -19,6 +19,13 @@ state:
   canTools: false
   messages: []
   streaming: false
+dataSources:
+  providerOptions:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/provider-options
 body:
   type: Page
   props:
@@ -42,6 +49,11 @@ body:
           props:
             variant: muted
             text: 直连供应商模型，验证连通性与效果
+    - type: Alert
+      props:
+        showIcon: true
+        variant: info
+        message: 模型调试在 Console 进程内直连上游 Binding（不经过 Route），会产生真实上游调用与费用；调试记录以 source=DEBUG 与真实流量区分。可在「系统管理 / 服务设置」关闭或限制日配额。
     - type: Flex
       props:
         className: debug-split
@@ -102,17 +114,7 @@ body:
                         - type: Select
                           props:
                             value: ${state.providerCode}
-                            options:
-                              - value: openai
-                                label: OpenAI
-                              - value: azure-openai
-                                label: Azure OpenAI
-                              - value: anthropic
-                                label: Anthropic
-                              - value: dashscope
-                                label: 阿里云百炼
-                              - value: deepseek
-                                label: DeepSeek (2)
+                            options: ${data.providerOptions.items}
                             placeholder: 选择供应商
                             className: flex-1 w-full [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
                           events:

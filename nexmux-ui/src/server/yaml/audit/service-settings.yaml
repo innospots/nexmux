@@ -4,6 +4,13 @@ page:
   title: 服务设置
   name: serviceSettings
   description: 系统管理 / 服务设置：平台级全局参数，影响控制台展示、计量汇总与运行策略默认值
+dataSources:
+  settings:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/service-settings
 body:
   type: Page
   children:
@@ -26,21 +33,24 @@ body:
             variant: muted
             text: 平台全局参数配置
     - type: Form
+      when: ${data.settings != null}
       props:
         layout: vertical
         initialValues:
-          timezone: Asia/Shanghai
-          language: zh-CN
-          displayName: GateWeave Model Console
-          currency: USD
-          currencyDecimals: "4"
-          tokenDisplay: compact
-          dateFormat: YYYY-MM-DD
-          timeFormat: HH:mm:ss
-          promptPolicy: masked
-          logRetentionDays: 90
-          requestTimeoutMs: 60000
-          upstreamConnectTimeoutMs: 10000
+          timezone: ${data.settings.timezone}
+          language: ${data.settings.language}
+          displayName: ${data.settings.displayName}
+          currency: ${data.settings.currency}
+          currencyDecimals: ${data.settings.currencyDecimals}
+          tokenDisplay: ${data.settings.tokenDisplay}
+          dateFormat: ${data.settings.dateFormat}
+          timeFormat: ${data.settings.timeFormat}
+          promptPolicy: ${data.settings.promptPolicy}
+          debugInvokeEnabled: ${data.settings.debugInvokeEnabled}
+          debugDailyQuota: ${data.settings.debugDailyQuota}
+          logRetentionDays: ${data.settings.logRetentionDays}
+          requestTimeoutMs: ${data.settings.requestTimeoutMs}
+          upstreamConnectTimeoutMs: ${data.settings.upstreamConnectTimeoutMs}
       events:
         onSubmit:
           - action: if
@@ -91,19 +101,39 @@ body:
                                       params:
                                         payload:
                                           ok: true
+          - action: if
+            params:
+              condition: ${event.promptPolicy != 'full' || actions.saveCfm.ok}
+              then:
+                - id: saveResult
+                  action: util.request
+                  params:
+                    method: PUT
+                    url: /api/d/service-settings
+                    body: ${event}
                 - action: if
                   params:
-                    condition: ${actions.saveCfm.ok}
+                    condition: ${actions.saveResult == null || actions.saveResult.ok
+                      == false}
+                    then:
+                      - action: message
+                        params:
+                          messageType: error
+                          text: "${actions.saveResult != null && actions.saveResult.error
+                            != null ? actions.saveResult.error.message
+                            : '保存失败'}"
+                - action: if
+                  params:
+                    condition: ${actions.saveResult != null && actions.saveResult.ok
+                      != false}
                     then:
                       - action: message
                         params:
                           messageType: success
-                          text: 服务设置已保存，变更已写入审计日志（演示：静态页面不落库）
-              else:
-                - action: message
-                  params:
-                    messageType: success
-                    text: 服务设置已保存，变更已写入审计日志（演示：静态页面不落库）
+                          text: 服务设置已保存，变更已写入审计日志
+                      - action: reload
+                        params:
+                          dataSource: settings
       children:
         - type: Flex
           props:
@@ -345,6 +375,52 @@ body:
                             className: w-full
                             min: 1000
                             precision: 0
+            - type: Card
+              props:
+                title: 调试台限域（Console 内数据面模拟）
+              children:
+                - type: Grid
+                  props:
+                    columns: 2
+                    gap: 16
+                  children:
+                    - type: Field
+                      props:
+                        label: 允许调试调用
+                        required: true
+                        description: 关闭后调试台四条链路整体拒绝（403）；调试会产生真实上游调用与费用
+                      children:
+                        - type: RadioGroup
+                          props:
+                            name: debugInvokeEnabled
+                            direction: horizontal
+                            options:
+                              - label: 开启
+                                value: "true"
+                              - label: 关闭
+                                value: "false"
+                    - type: Field
+                      props:
+                        label: 调试日配额
+                        description: 当日 source=DEBUG 调用达到上限后拒绝（429）；-1 表示不限量
+                      children:
+                        - type: Flex
+                          props:
+                            align: center
+                            gap: small
+                          children:
+                            - type: NumberInput
+                              props:
+                                name: debugDailyQuota
+                                className: w-full
+                                min: -1
+                                precision: 0
+                                style:
+                                  flex: 1
+                            - type: Text
+                              props:
+                                text: 次 / 日
+                                type: secondary
         - type: Flex
           props:
             justify: end
@@ -357,10 +433,16 @@ body:
                 icon: x
               events:
                 onClick:
+                  - action: reload
+                    params:
+                      dataSource: settings
+                  - action: form.setValues
+                    params:
+                      values: ${data.settings}
                   - action: message
                     params:
                       messageType: info
-                      text: 已放弃修改，还原为当前生效配置（演示）
+                      text: 已放弃修改，还原为当前生效配置
             - type: Button
               props:
                 text: 保存

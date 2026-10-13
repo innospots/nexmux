@@ -17,9 +17,12 @@ import java.util.concurrent.atomic.LongAdder;
 
 /**
  * 配额关口（PRD §28.2，nexmux-runtime-design §9）：消费 Client {@code quota_spec}
- * （lifetime / cyclic × REQUEST/INPUT_TOKEN/OUTPUT_TOKEN/TOTAL_TOKEN/COST/CONCURRENT ×
- * soft/hard）。进程内计数器 + 窗口推算（cyclic 按 cycleUnit/cycleValue 起算，month 为自然月）；
+ * （lifetime / cyclic × REQUEST/INPUT_TOKEN/OUTPUT_TOKEN/TOTAL_TOKEN/COST × soft/hard）。
+ * 进程内计数器 + 窗口推算（cyclic 按 cycleUnit/cycleValue 起算，month 为自然月）；
  * hard 超限抛 429 {@code QUOTA_EXCEEDED}，soft 仅放行。
+ *
+ * <p>G-07：配额不再接受 CONCURRENT 指标（配额为「窗口内累计」语义，并发控制归
+ * {@link RateLimitGate} 的 CONCURRENT 信号量）；存量 CONCURRENT 配额规则直接忽略。
  *
  * <p>计数为进程内实例级语义（多实例部署非全局精确，ADR-0002 后果已声明）；
  * 进程重启后计数清零、由 {@link #resync} 以运行库聚合回填（RuntimeSnapshotRefresher 周期触发）。
@@ -117,6 +120,10 @@ public final class QuotaGate {
         try {
             for (JsonNode node : NexmuxJson.read(spec, JsonNode.class)) {
                 if (node.has("status") && !"enabled".equals(node.get("status").asText())) {
+                    continue;
+                }
+                // G-07：CONCURRENT 已从配额指标移除（并发归限流侧），存量规则忽略
+                if (node.has("metric") && "CONCURRENT".equals(node.get("metric").asText())) {
                     continue;
                 }
                 rules.add(new QuotaRuleSpec(

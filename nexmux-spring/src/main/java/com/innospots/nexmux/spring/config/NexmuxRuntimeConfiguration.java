@@ -7,6 +7,7 @@ import com.innospots.nexmux.core.ops.service.RequestLogWriter;
 import com.innospots.nexmux.core.provider.dao.ProviderCredentialDao;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.route.dao.RouteDao;
+import com.innospots.nexmux.core.settings.service.PlatformSettingService;
 import com.innospots.nexmux.inbound.ingress.RuntimeIngressEndpoint;
 import com.innospots.nexmux.inbound.pipeline.InvocationPipeline;
 import com.innospots.nexmux.inbound.protocol.OpenAiCompatibleChatAdapter;
@@ -14,6 +15,7 @@ import com.innospots.nexmux.inbound.runtime.BindingHealthDao;
 import com.innospots.nexmux.inbound.runtime.BindingHealthProber;
 import com.innospots.nexmux.inbound.runtime.BindingHealthRegistry;
 import com.innospots.nexmux.inbound.runtime.PublishedRouteCache;
+import com.innospots.nexmux.inbound.runtime.RequestLogRetentionCleaner;
 import com.innospots.nexmux.inbound.runtime.RuntimeCatalogCache;
 import com.innospots.nexmux.inbound.runtime.RuntimeSnapshotRefresher;
 import org.apache.ibatis.annotations.Mapper;
@@ -77,10 +79,14 @@ public class NexmuxRuntimeConfiguration {
     @Bean
     org.springframework.boot.ApplicationRunner runtimeBootstrap(
             RuntimeSnapshotRefresher refresher,
+            RequestLogRetentionCleaner retentionCleaner,
             @Value("${nexmux.runtime.snapshot-poll-interval-seconds:30}") long pollIntervalSeconds,
             @Value("${nexmux.runtime.health-probe-interval-seconds:60}") long probeIntervalSeconds,
             @Value("${nexmux.runtime.quota-resync-interval-seconds:300}") long quotaResyncIntervalSeconds) {
-        return args -> refresher.start(pollIntervalSeconds, probeIntervalSeconds, quotaResyncIntervalSeconds);
+        return args -> {
+            refresher.start(pollIntervalSeconds, probeIntervalSeconds, quotaResyncIntervalSeconds);
+            retentionCleaner.start();
+        };
     }
 
     @Bean
@@ -88,9 +94,21 @@ public class NexmuxRuntimeConfiguration {
                                           PublishedRouteCache routeCache,
                                           BindingHealthRegistry healthRegistry,
                                           RequestLogWriter requestLogWriter,
-                                          RequestLogDao requestLogDao) {
+                                          RequestLogDao requestLogDao,
+                                          PlatformSettingService platformSettingService) {
         return new InvocationPipeline(catalogCache, routeCache, healthRegistry,
-                new OpenAiCompatibleChatAdapter(), requestLogWriter, requestLogDao);
+                new OpenAiCompatibleChatAdapter(), requestLogWriter, requestLogDao,
+                platformSettingService);
+    }
+
+    /**
+     * 调用日志保留清理（G-05）：按服务设置 logRetentionDays 每日清理 mux_request_log
+     * 超期行；启动随 runtimeBootstrap（避让建表竞态）。
+     */
+    @Bean(destroyMethod = "close")
+    RequestLogRetentionCleaner requestLogRetentionCleaner(
+            RequestLogDao requestLogDao, PlatformSettingService platformSettingService) {
+        return new RequestLogRetentionCleaner(requestLogDao, platformSettingService);
     }
 
     @Bean

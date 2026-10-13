@@ -21,9 +21,11 @@ import java.util.Map;
 public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
 
     @Override
-    public String chatCompletions(String baseUrl, String apiKey, String requestBodyJson, int timeoutMs)
+    public String chatCompletions(String baseUrl, String apiKey, String requestBodyJson,
+                                  int readTimeoutMs, int connectTimeoutMs, String proxy)
             throws IOException {
-        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson, timeoutMs);
+        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson,
+                readTimeoutMs, connectTimeoutMs, proxy);
         try {
             InputStream in = connection.getInputStream();
             return in == null
@@ -36,9 +38,11 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
 
     @Override
     public StreamOutcome streamChatCompletions(String baseUrl, String apiKey, String requestBodyJson,
-                                               int timeoutMs, OutputStream out) throws IOException {
+                                               int readTimeoutMs, int connectTimeoutMs, String proxy,
+                                               OutputStream out) throws IOException {
         long start = System.currentTimeMillis();
-        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson, timeoutMs);
+        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson,
+                readTimeoutMs, connectTimeoutMs, proxy);
         long ttftMs = -1;
         StringBuilder reply = new StringBuilder();
         Long tokensIn = null;
@@ -79,15 +83,19 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
     }
 
     /** 建立连接并写请求体；HTTP &ge; 400 读错误流抛 IOException（连接已断开，未向下游写字节）。 */
-    private HttpURLConnection connect(String baseUrl, String apiKey, String requestBodyJson, int timeoutMs)
+    private HttpURLConnection connect(String baseUrl, String apiKey, String requestBodyJson,
+                                      int readTimeoutMs, int connectTimeoutMs, String proxy)
             throws IOException {
         URI uri = URI.create(baseUrl.replaceAll("/+$", "") + "/chat/completions");
-        HttpURLConnection connection = (HttpURLConnection) uri.toURL().openConnection();
+        // G-08：Provider proxy 生效（仅 HTTP 代理，host:port / http://host:port）
+        HttpURLConnection connection = proxy == null || proxy.isBlank()
+                ? (HttpURLConnection) uri.toURL().openConnection()
+                : (HttpURLConnection) uri.toURL().openConnection(proxyOf(proxy));
         connection.setRequestMethod("POST");
         connection.setRequestProperty("Content-Type", "application/json");
         connection.setRequestProperty("Authorization", "Bearer " + apiKey);
-        connection.setConnectTimeout(timeoutMs);
-        connection.setReadTimeout(timeoutMs);
+        connection.setConnectTimeout(connectTimeoutMs);
+        connection.setReadTimeout(readTimeoutMs);
         connection.setDoOutput(true);
         byte[] bytes = requestBodyJson.getBytes(StandardCharsets.UTF_8);
         try (OutputStream out = connection.getOutputStream()) {
@@ -103,6 +111,19 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
             throw new IOException("HTTP " + status + ": " + abbreviate(response));
         }
         return connection;
+    }
+
+    /** 解析代理配置（{@code host:port} 或 {@code http://host:port}，可带尾路径/斜杠）。 */
+    static java.net.Proxy proxyOf(String proxy) {
+        String normalized = proxy.trim().replaceFirst("^https?://", "").replaceAll("/.*$", "");
+        int colon = normalized.lastIndexOf(':');
+        if (colon <= 0 || colon == normalized.length() - 1) {
+            throw new IllegalArgumentException("invalid proxy (expect host:port): " + proxy);
+        }
+        return new java.net.Proxy(java.net.Proxy.Type.HTTP,
+                new java.net.InetSocketAddress(
+                        normalized.substring(0, colon),
+                        Integer.parseInt(normalized.substring(colon + 1))));
     }
 
     private static String readModel(String requestBodyJson) {

@@ -325,7 +325,7 @@ body:
                     - type: Field
                       props:
                         label: 调用日志保留天数
-                        description: 超期归档或清理（Runtime 执行）
+                        description: Runtime 每日清理超期行（启动 10 分钟后首跑，周期 1 天）
                       children:
                         - type: Flex
                           props:
@@ -356,7 +356,7 @@ body:
                     - type: Field
                       props:
                         label: 默认请求超时 (ms)
-                        description: 未在 Route / Client 覆盖时的全局默认
+                        description: Provider 未单独设置 Timeout 时的全局默认（Runtime 转发读取超时）
                       children:
                         - type: NumberInput
                           props:
@@ -367,7 +367,7 @@ body:
                     - type: Field
                       props:
                         label: 上游连接超时 (ms)
-                        description: Provider 探测与转发的默认连接超时
+                        description: Runtime 转发与调试台共用的连接超时
                       children:
                         - type: NumberInput
                           props:

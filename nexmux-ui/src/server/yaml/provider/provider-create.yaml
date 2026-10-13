@@ -224,6 +224,7 @@ body:
                     - type: Field
                       props:
                         label: Region
+                        labelHint: 仅作元数据登记，不参与调用路由
                       children:
                         - type: Input
                           props:

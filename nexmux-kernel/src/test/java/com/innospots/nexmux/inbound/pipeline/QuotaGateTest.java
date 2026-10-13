@@ -114,4 +114,15 @@ class QuotaGateTest {
     void malformedQuotaSpecToleratedAsUnlimited() {
         assertThat(gate.check(client("{broken"))).isEmpty();
     }
+
+    @Test
+    void concurrentMetricRuleIsIgnoredInQuota() {
+        // G-07：配额侧不再接受 CONCURRENT（并发控制归 RateLimitGate）；
+        // 存量 CONCURRENT 规则忽略——即使 limit=0 hard 也不触发
+        ClientEntity client = client("[{\"name\":\"c1\",\"quotaType\":\"lifetime\","
+                + "\"metric\":\"CONCURRENT\",\"limit\":0,\"mode\":\"hard\",\"status\":\"enabled\"}]");
+
+        assertThat(QuotaGate.enabledRules(client)).isEmpty();
+        assertThat(gate.check(client)).isEmpty();
+    }
 }

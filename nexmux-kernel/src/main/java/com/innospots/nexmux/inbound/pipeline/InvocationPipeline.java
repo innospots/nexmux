@@ -10,7 +10,9 @@ import com.innospots.nexmux.core.ops.service.RequestLogWriter;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderCredentialEntity;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderEntity;
 import com.innospots.nexmux.core.route.domain.selection.CandidateSelector;
+import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
+import com.innospots.nexmux.core.settings.service.PlatformSettingService;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexmux.inbound.protocol.UpstreamChatAdapter;
@@ -45,6 +47,7 @@ public final class InvocationPipeline {
     public static final String REQUEST_LOG_SOURCE = "RUNTIME";
 
     private static final int DEFAULT_UPSTREAM_TIMEOUT_MS = 30000;
+    private static final int DEFAULT_CONNECT_TIMEOUT_MS = 10000;
 
     private final RuntimeCatalogCache catalogCache;
     private final RuntimeRouter router;
@@ -55,11 +58,12 @@ public final class InvocationPipeline {
     private final UpstreamChatAdapter chatAdapter;
     private final RequestLogWriter requestLogWriter;
     private final RequestLogDao requestLogDao;
+    private final PlatformSettingService platformSettingService;
 
     public InvocationPipeline(RuntimeCatalogCache catalogCache, PublishedRouteCache routeCache,
                               BindingHealthRegistry healthRegistry,
                               UpstreamChatAdapter chatAdapter, RequestLogWriter requestLogWriter,
-                              RequestLogDao requestLogDao) {
+                              RequestLogDao requestLogDao, PlatformSettingService platformSettingService) {
         this.catalogCache = catalogCache;
         this.router = new RuntimeRouter(routeCache);
         this.appKeyVerifier = new AppKeyVerifier(catalogCache);
@@ -69,6 +73,7 @@ public final class InvocationPipeline {
         this.chatAdapter = chatAdapter;
         this.requestLogWriter = requestLogWriter;
         this.requestLogDao = requestLogDao;
+        this.platformSettingService = platformSettingService;
     }
 
     /**
@@ -157,7 +162,7 @@ public final class InvocationPipeline {
             Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), false);
             String body = chatAdapter.chatCompletions(
                     context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
-                    timeoutOf(context.provider()));
+                    readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy());
             long latency = System.currentTimeMillis() - start;
             JsonNode parsed = readJsonTolerant(body);
             JsonNode usage = parsed == null ? null : parsed.get("usage");
@@ -190,7 +195,7 @@ public final class InvocationPipeline {
             Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), true);
             UpstreamChatAdapter.StreamOutcome outcome = chatAdapter.streamChatCompletions(
                     context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
-                    timeoutOf(context.provider()), out);
+                    readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy(), out);
             InvocationResult result = new InvocationResult(200, outcome.synthesizedBody(),
                     System.currentTimeMillis() - start, outcome.ttftMs(),
                     outcome.tokensIn(), outcome.tokensOut(), context);
@@ -231,18 +236,31 @@ public final class InvocationPipeline {
 
         RouteSpec spec = route.spec();
         Set<String> unhealthy = unhealthyModelCodes(spec);
+        // G-06：停用 Model 不参与选路（即时止损，与 Binding 健康过滤独立、恒生效）；
+        // 全部被剔除时 resolveByAlias 返回 empty → 503 NO_AVAILABLE_CANDIDATE
+        Set<String> excluded = new HashSet<>(unhealthy);
+        spec.candidates().forEach(candidate -> {
+            if (candidate.enabled() != null && !candidate.enabled()) {
+                return;
+            }
+            catalogCache.findModel(candidate.modelCode())
+                    .filter(m -> !"ENABLED".equals(m.getStatus()))
+                    .ifPresent(m -> excluded.add(m.getModelCode()));
+        });
         String sessionKey = textValue(requestBody.get("user")) != null
                 ? textValue(requestBody.get("user")) : client.getClientCode();
-        CandidateSelector.Selection selection = router.resolveByAlias(alias, unhealthy, sessionKey)
+        CandidateSelector.Selection selection = router.resolveByAlias(alias, excluded, sessionKey)
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE,
                         "no available candidate in route: " + alias));
         ModelEntity model = catalogCache.findModel(selection.candidate().modelCode())
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE,
                         "candidate model not found: " + selection.candidate().modelCode()));
         // Binding 级健康过滤跟随路由快照开关（不过滤时选中不健康绑定将真实调上游并失败）
-        ResolvedBinding binding = bindingSelector.select(model, spec.filterUnhealthyBindings())
-                .orElseThrow(() -> NexusException.build(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE,
-                        "no healthy binding for model: " + model.getModelCode()));
+        ResolvedBinding binding = withCandidateRates(
+                bindingSelector.select(model, spec.filterUnhealthyBindings())
+                        .orElseThrow(() -> NexusException.build(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE,
+                                "no healthy binding for model: " + model.getModelCode())),
+                selection.candidate());
         ProviderEntity provider = catalogCache.findProvider(binding.providerId())
                 .filter(p -> "ENABLED".equals(p.getStatus()))
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
@@ -250,6 +268,21 @@ public final class InvocationPipeline {
 
         return new InvocationContext(newRequestId(), UUID.randomUUID().toString().replace("-", ""),
                 client, route, selection, model, binding, provider, softQuota);
+    }
+
+    /**
+     * G-01：候选行 C/M 倍率覆盖 Binding 默认倍率（留空继承 Model 提供商绑定）。
+     */
+    private static ResolvedBinding withCandidateRates(ResolvedBinding binding,
+                                                      RouteCandidate candidate) {
+        if (candidate.costRate() == null && candidate.billingRate() == null) {
+            return binding;
+        }
+        return new ResolvedBinding(binding.providerId(), binding.providerModelId(),
+                binding.upstreamProtocol(),
+                candidate.costRate() != null ? candidate.costRate() : binding.costMultiplier(),
+                candidate.billingRate() != null ? candidate.billingRate() : binding.referenceMultiplier(),
+                binding.primary());
     }
 
     private PublishedRouteCache routerCache() {
@@ -299,10 +332,33 @@ public final class InvocationPipeline {
                         "provider credential not configured: " + context.binding().providerId()));
     }
 
-    private static int timeoutOf(ProviderEntity provider) {
-        return provider.getTimeoutMs() == null || provider.getTimeoutMs() <= 0
-                ? DEFAULT_UPSTREAM_TIMEOUT_MS : provider.getTimeoutMs();
+    /**
+     * 读取超时回退链（G-03）：Provider.timeoutMs → 服务设置 requestTimeoutMs → 常量。
+     * 设置项实时读取（与 promptPolicy 同一口径，不走快照）。
+     */
+    private int readTimeoutOf(ProviderEntity provider) {
+        if (provider.getTimeoutMs() != null && provider.getTimeoutMs() > 0) {
+            return provider.getTimeoutMs();
+        }
+        Integer configured = settingInt("requestTimeoutMs");
+        return configured != null && configured > 0 ? configured : DEFAULT_UPSTREAM_TIMEOUT_MS;
     }
+
+    /** 连接超时（G-04）：服务设置 upstreamConnectTimeoutMs，缺省回退常量。 */
+    private int connectTimeoutOf() {
+        Integer configured = settingInt("upstreamConnectTimeoutMs");
+        return configured != null && configured > 0 ? configured : DEFAULT_CONNECT_TIMEOUT_MS;
+    }
+
+    private Integer settingInt(String key) {
+        try {
+            String value = platformSettingService.getAll().get(key);
+            return value == null || value.isBlank() ? null : Integer.valueOf(value.trim());
+        } catch (RuntimeException e) {
+            return null;
+        }
+    }
+
 
     /** 收尾：记账（配额 tokens / 限流 TPM）+ 计量落库（成功与失败都落）。 */
     private void settle(InvocationContext context, InvocationResult result, Map<String, Object> requestBody) {

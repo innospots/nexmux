@@ -40,7 +40,7 @@ class OpenAiCompatibleChatAdapterTest {
         try {
             String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/v1/";
 
-            String response = adapter.chatCompletions(baseUrl, "sk-runtime", "{\"model\":\"o4-mini\"}", 5000);
+            String response = adapter.chatCompletions(baseUrl, "sk-runtime", "{\"model\":\"o4-mini\"}", 5000, 5000, null);
 
             assertThat(response).contains("\"object\":\"chat.completion\"");
             assertThat(seenAuth.get()).isEqualTo("Bearer sk-runtime");
@@ -69,7 +69,7 @@ class OpenAiCompatibleChatAdapterTest {
             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
 
             UpstreamChatAdapter.StreamOutcome outcome = adapter.streamChatCompletions(
-                    baseUrl, "sk-runtime", "{\"model\":\"o4-mini\",\"stream\":true}", 5000, out);
+                    baseUrl, "sk-runtime", "{\"model\":\"o4-mini\",\"stream\":true}", 5000, 5000, null, out);
 
             String sse = out.toString(StandardCharsets.UTF_8);
             // 上游 chunk 原样透传（含 [DONE]）
@@ -95,7 +95,7 @@ class OpenAiCompatibleChatAdapterTest {
             String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/v1";
             java.io.ByteArrayOutputStream out = new java.io.ByteArrayOutputStream();
 
-            assertThatThrownBy(() -> adapter.streamChatCompletions(baseUrl, "sk-runtime", "{}", 5000, out))
+            assertThatThrownBy(() -> adapter.streamChatCompletions(baseUrl, "sk-runtime", "{}", 5000, 5000, null, out))
                     .isInstanceOf(IOException.class)
                     .hasMessageContaining("HTTP 429");
             // 未向下游写出任何字节（调用方可安全回写错误形态）
@@ -114,12 +114,23 @@ class OpenAiCompatibleChatAdapterTest {
             String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/v1";
 
             assertThatThrownBy(() ->
-                    adapter.chatCompletions(baseUrl, "sk-runtime", "{}", 5000))
+                    adapter.chatCompletions(baseUrl, "sk-runtime", "{}", 5000, 5000, null))
                     .isInstanceOf(IOException.class)
                     .hasMessageContaining("HTTP 400")
                     .hasMessageContaining("bad request");
         } finally {
             server.stop(0);
         }
+    }
+
+    @Test
+    void proxyOfParsesHostPortForms() {
+        // G-08：host:port / http://host:port（可带尾路径）
+        assertThat(OpenAiCompatibleChatAdapter.proxyOf("127.0.0.1:8080").address())
+                .isEqualTo(new InetSocketAddress("127.0.0.1", 8080));
+        assertThat(OpenAiCompatibleChatAdapter.proxyOf("http://proxy.example.com:3128/").address())
+                .isEqualTo(new InetSocketAddress("proxy.example.com", 3128));
+        assertThatThrownBy(() -> OpenAiCompatibleChatAdapter.proxyOf("no-port"))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

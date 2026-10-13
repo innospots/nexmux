@@ -437,6 +437,7 @@ body:
                                             - type: Field
                                               props:
                                                 label: 计量指标
+                                                labelHint: 并发控制请使用下方限流策略（Concurrent）
                                                 required: true
                                               children:
                                                 - type: Select
@@ -454,8 +455,6 @@ body:
                                                         value: TOTAL_TOKEN
                                                       - label: Cost
                                                         value: COST
-                                                      - label: Concurrent
-                                                        value: CONCURRENT
                                             - type: Field
                                               props:
                                                 label: 上限
@@ -627,6 +626,7 @@ body:
                                                     - type: Field
                                                       props:
                                                         label: 计量指标
+                                                        labelHint: 并发控制请使用下方限流策略（Concurrent）
                                                         required: true
                                                       children:
                                                         - type: Select
@@ -644,8 +644,6 @@ body:
                                                                 value: TOTAL_TOKEN
                                                               - label: Cost
                                                                 value: COST
-                                                              - label: Concurrent
-                                                                value: CONCURRENT
                                                     - type: Field
                                                       props:
                                                         label: 上限

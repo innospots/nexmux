@@ -16,6 +16,15 @@
 
 可运行控制面组装：**nexmux-spring**（Model Console）。运行部署见 [`nexmux-deployment.md`](./nexmux-deployment.md)。
 
+## 使用功能文档（面向使用者）
+
+| 文档 | 说明 |
+|------|------|
+| [nexmux-functional-guide.md](./nexmux-functional-guide.md) | **功能说明书（使用者视角）**：模块与页面功能、操作步骤、端到端流程、术语与通用规则 |
+| [nexmux-functional-catalog.md](./nexmux-functional-catalog.md) | **功能页面清单**：菜单 / 路径 / 用途 / 主要操作 / 字段·列 / 数据来源速查 |
+| [nexmux-console-test-plan.md](./nexmux-console-test-plan.md) | **管理控制面测试方案**：使用者视角 149 个测试点（通用/仪表盘/资产/路由/访问治理/运行/调试/系统/端到端/安全） |
+| [nexmux-console-test-report.md](./nexmux-console-test-report.md) | **测试报告**：执行结果、缺陷清单（D-01…）、分模块明细与遗留风险 |
+
 ## 本仓库设计文档索引
 
 | 级别 | 文档 | 说明 |

@@ -1,6 +1,6 @@
 # Nexmux UI 缺失服务端接口清单（剩余缺口）
 
-> 初核：2026-10-06；**复核：2026-10-12**（对照 `nexmux-kernel` 端点实现逐一确认）。
+> 初核：2026-10-06；**复核：2026-10-12**；**二次复核：2026-10-13**（补正：model / client / client-template 删除经实体端点 `@DELETE /api/d/{models,clients,client-templates}/{id}` 实现，上一轮漏查误判为缺失）。
 > 数据接口层约定：**按 pactor-prd template 最新版**（skill v1.4.0+，commit `dfd9342`，2026-10-08）——mock/services 层已移除，页面数据一律 `type: http` 经纯转发层 `app/api/d/[...parts]/route.ts` 直连服务端，**路径即契约**。
 > 结论：下列剩余缺口均在**服务端**；按新约定，缺失接口**无需任何前端桩**——转发层空数据回退自动兜底，后端补齐时页面与转发层零改动。
 
@@ -11,6 +11,7 @@
 | Stats 统计聚合 5 端点（`stats-dashboard` / `stats-model-usage` / `stats-provider-usage` / `stats-client-usage` / `stats-provider-availability`） | **已实现**（B6 批次，见 `StatsQueryDao` / 各 stats 端点） |
 | `POST /api/d/ops/provider-delete` | **已实现**（`OpsWriteEndpoint`） |
 | `POST /api/d/ops/route-delete` | **已实现**（`OpsWriteEndpoint`） |
+| `DELETE /api/d/models/{modelId}` / `clients/{clientId}` / `client-templates/{templateId}` | **已实现**（实体端点 `@DELETE`，非 ops 前缀；实测删除正常） |
 | `GET /api/d/models` 增加 `keyword` 参数 | **已实现**（编码/名称模糊匹配） |
 
 ## 〇、对接约定（pactor-prd template 最新版）
@@ -28,7 +29,7 @@
 
 | 用途 | 契约路径（页面直写） | 状态 | 缺失时回退行为 |
 |------|----------------------|------|----------------|
-| 实体删除（3 个实体） | `POST /api/d/ops/{model,client,client-template}-delete` | **仍缺失**（provider/route 已落地） | 转发层回退 `{ ok: true }`，提交闭环可用、数据不真删 |
+| 实体删除（3 个实体） | `POST /api/d/ops/{model,client,client-template}-delete` | **已实现**（走实体端点 `DELETE /api/d/{models,clients,client-templates}/{id}`；ops 契约路径不再需要） | — |
 | 绑定行级管理（Provider / Model 两侧） | `/api/d/provider-bindings`、`/api/d/ops/model-binding-*` | **仍缺失** | 列表回退 `{}` 空态；写回退 `{ ok: true }` |
 | 定价版本（Model） | `GET /api/d/model-price-versions` | **仍缺失** | 回退 `{}` 空态 |
 | 模型列表 status 过滤 | `GET /api/d/models` 增加 `status` | **仍缺失**（预留） | 参数被忽略即全量，分页口径不受影响再下推 |
@@ -50,7 +51,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/model-delete`（body `{ code }`） | `DELETE /api/d/models/{modelId}` | 删除模型 | **仍缺失** |
+| `POST /api/d/ops/model-delete`（body `{ code }`） | `DELETE /api/d/models/{modelId}` | 删除模型 | **已实现**（实体端点 `@DELETE`） |
 | `GET /api/d/models` 增加 `status` 参数 | 同左 | 启用/停用 ChipFilter 筛选 | **仍缺失**（预留：页面暂无状态筛选） |
 | `GET /api/d/model-price-versions?model=<code>` | `GET /api/d/models/{modelId}/price-versions` | 定价历史版本（BFF 契约 `priceVersion / priceEffective / priceVersions[]` 的数据源） | **仍缺失** |
 | `POST /api/d/ops/model-binding-save` / `-delete` | `POST/PUT/DELETE /api/d/models/{modelId}/bindings[/{bindingId}]` | 扩展绑定（suppliers / extraBindings）单条增删改 | **仍缺失**；当前只能随整包更新提交 |
@@ -62,7 +63,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/client-delete`（body `{ code }`） | `DELETE /api/d/clients/{clientId}` | 删除客户端 | **仍缺失** |
+| `POST /api/d/ops/client-delete`（body `{ code }`） | `DELETE /api/d/clients/{clientId}` | 删除客户端 | **已实现**（实体端点 `@DELETE`） |
 
 已具备：分页列表（`code / name / status / tags` 过滤全支持）、按 ID/编码查询、创建、更新、启停、轮换 AppKey（`rotate-app-key`）、路由授权（`route-grants`）。
 
@@ -70,7 +71,7 @@
 
 | 契约路径 | 建议后端路径 | 用途 | 状态 |
 |----------|--------------|------|------|
-| `POST /api/d/ops/client-template-delete`（body `{ code }`） | `DELETE /api/d/client-templates/{templateId}` | 删除模板 | **仍缺失** |
+| `POST /api/d/ops/client-template-delete`（body `{ code }`） | `DELETE /api/d/client-templates/{templateId}` | 删除模板 | **已实现**（实体端点 `@DELETE`） |
 
 已具备：分页列表（`keyword / status / tags` 过滤全支持）、按编码查询、创建、更新、启停、基于模板创建的客户端列表（`created-clients`）。
 
@@ -89,7 +90,7 @@
 
 ## 四、优先级建议（复核后）
 
-1. **删除接口（剩 3 个实体：model / client / client-template）**：工作量小；补齐后演示/测试数据可真正清理，回退占位语义退役。
+1. ~~**删除接口**~~：5 个实体删除均已落地（provider/route 走 ops，model/client/client-template 走实体端点 `@DELETE`）。
 2. **绑定行级写接口（Provider / Model 两侧）**：工作量最大，决定详情页从只读变可管理。
 3. **Model 列表 status 过滤**：成本低，解锁模型列表状态筛选。
 4. **定价版本接口**：依赖计费侧设计，可后置。

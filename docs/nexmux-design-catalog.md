@@ -24,6 +24,7 @@
 | [nexmux-functional-catalog.md](./nexmux-functional-catalog.md) | **功能页面清单**：菜单 / 路径 / 用途 / 主要操作 / 字段·列 / 数据来源速查 |
 | [nexmux-console-test-plan.md](./nexmux-console-test-plan.md) | **管理控制面测试方案**：使用者视角 149 个测试点（通用/仪表盘/资产/路由/访问治理/运行/调试/系统/端到端/安全） |
 | [nexmux-console-test-report.md](./nexmux-console-test-report.md) | **测试报告**：执行结果、缺陷清单（D-01…）、分模块明细与遗留风险 |
+| [nexmux-console-runtime-config-verification.md](./nexmux-console-runtime-config-verification.md) | **Console→Runtime 配置生效性核查**：配置项×生效矩阵、缺口清单（G-01…）、证据与清理记录 |
 
 ## 本仓库设计文档索引
 

@@ -227,10 +227,13 @@ ingress.RuntimeIngressEndpoint
 |----|------|
 | 请求日志 | 单表 insert，`request_id` 唯一（`rq-` 前缀 UUID）；重试同键冲突视为重复调用，忽略 |
 | 快照刷新 | 全量重载 + `AtomicReference` 切换（已有模式）；刷新失败保留旧快照 |
-| 配额计数 | 进程内 `ConcurrentHashMap` + `LongAdder`；启动与每 `quota-resync-interval-seconds` 以 `mux_request_log` 聚合（`source='RUNTIME'`）校准；hard 超限拒绝。cyclic 窗口按 `cycleUnit`（hour/day/自然月）推算起点 |
+| 选路与模型状态 | 候选行 `enabled` 过滤之外，**Model `status=DISABLED` 恒剔除**（即时止损，G-06）；全部被剔除 → 503 `NO_AVAILABLE_CANDIDATE`。发布校验仍为候选行级（D-01）：Model 状态是运行期可变属性，发布时点快照无意义 |
+| 配额计数 | 进程内 `ConcurrentHashMap` + `LongAdder`；启动与每 `quota-resync-interval-seconds` 以 `mux_request_log` 聚合（`source='RUNTIME'`）校准；hard 超限拒绝。cyclic 窗口按 `cycleUnit`（hour/day/自然月）推算起点。**计量指标不含 CONCURRENT**（配额为窗口累计语义；并发控制归限流信号量），存量 CONCURRENT 配额规则忽略 |
 | 限流 | 进程内令牌桶（RPM/TPM，`burst` 为桶容量）+ 并发信号量（CONCURRENT）；多实例部署时为**实例级**限流（文档注明，分布式计数后续评） |
 | 探活 | 单调度线程顺序探测；探测请求不计入 `mux_request_log`、不消耗客户端配额 |
-| 计费 | 请求结束后同步计算（pricing_spec × 命中 Binding C/M 倍率），与日志同事务插入 |
+| 计费 | 请求结束后同步计算（pricing_spec × 命中倍率：候选行 C/M 优先，留空继承 Binding C/M），与日志同事务插入 |
+| 日志保留 | `RequestLogRetentionCleaner` 按服务设置 `logRetentionDays` 每日清理超期行（≤0 不清理；启动 10 分钟后首跑避让启动高峰） |
+| 超时与代理 | 读取超时：`Provider.timeoutMs` → 服务设置 `requestTimeoutMs` → 常量 30s；连接超时：`upstreamConnectTimeoutMs`（缺省 10s）；Provider `proxy` 配置 HTTP 代理（`host:port`），`region` 仅元数据不参与调用 |
 
 ## 10. 兼容与迁移
 

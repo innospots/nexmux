@@ -29,7 +29,7 @@ WHEN NOT MATCHED THEN INSERT (setting_key, setting_value, created_at, updated_at
     VALUES (s.setting_key, s.setting_value, s.created_at, s.updated_at, s.created_by, s.updated_by);
 
 MERGE INTO mux_platform_setting AS t USING (VALUES (
-    'displayName', 'GateWeave Model Console', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'
+    'displayName', 'Nexmux Model Console', CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, 'system', 'system'
 )) AS s(setting_key, setting_value, created_at, updated_at, created_by, updated_by)
 ON t.setting_key = s.setting_key
 WHEN NOT MATCHED THEN INSERT (setting_key, setting_value, created_at, updated_at, created_by, updated_by)

@@ -21,7 +21,7 @@ public class PlatformSettingService {
     public static final Map<String, String> DEFAULTS = new LinkedHashMap<>() {{
         put("timezone", "Asia/Shanghai");
         put("language", "zh-CN");
-        put("displayName", "GateWeave Model Console");
+        put("displayName", "Nexmux Model Console");
         put("currency", "USD");
         put("currencyDecimals", "4");
         put("tokenDisplay", "compact");

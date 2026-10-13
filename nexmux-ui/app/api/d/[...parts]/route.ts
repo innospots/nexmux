@@ -82,7 +82,39 @@ async function handle(
   }
 
   const { parts } = await context.params;
+  // 接口级写操作权限（D-02）：页面/菜单裁剪只控制 UI 可见性，写请求在此二次校验
+  const denied = requiredWritePermission(request.method, parts.join("/"));
+  if (denied && !user.permissions.includes(denied)) {
+    return Response.json(
+      { error: "无操作权限", permission: denied },
+      { status: 403, headers: corsHeaders(request) },
+    );
+  }
   return forward(request, parts);
+}
+
+/**
+ * 写操作路径 → 所需权限码（仅拦截非 GET/HEAD；规则按序先匹配先生效）。
+ * 键定义见 docs/design/nexmux-console-entry-plugin-design.md §6。
+ */
+function requiredWritePermission(method: string, path: string): string | null {
+  if (method === "GET" || method === "HEAD" || method === "OPTIONS") {
+    return null;
+  }
+  const rules: [RegExp, string][] = [
+    [/^ops\/provider-/, "nexmux.provider.manage"],
+    [/^ops\/model-/, "nexmux.model.manage"],
+    [/^models\/[^/]+$/, "nexmux.model.manage"],
+    [/^ops\/route-/, "nexmux.route.manage"],
+    [/^ops\/client-rotate-app-key$/, "nexmux.client.secret"],
+    [/^ops\/client-/, "nexmux.client.manage"],
+    [/^clients\/[^/]+\/rotate-app-key$/, "nexmux.client.secret"],
+    [/^clients(\/|$)/, "nexmux.client.manage"],
+    [/^client-templates(\/|$)/, "nexmux.client.manage"],
+    [/^debug\//, "nexmux.debug.invoke"],
+    [/^service-settings(\/|$)/, "nexmux.settings.manage"],
+  ];
+  return rules.find(([re]) => re.test(path))?.[1] ?? null;
 }
 
 export const GET = handle;

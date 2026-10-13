@@ -4,8 +4,8 @@ spring:
   application:
     name: nexmux-application
   jersey:
-    # Jersey 以 Servlet Filter 接入，与 Spring MVC 共用同一端口
-    type: filter
+    # Jersey Servlet 直接处理 Jakarta REST 路由（innospots-nexus f8e6eff 起从 Filter 切换为 Servlet 模式）
+    type: servlet
   config:
     import:
       # 控制台示例配置（完整分项见 classpath:nexus/console-*.yaml）

@@ -67,6 +67,20 @@ class RouteServiceTest {
         Mockito.verify(routeDao, Mockito.never()).deleteById(any(RouteEntity.class));
     }
 
+    @Test
+    void enableRejectsRouteWithoutEnabledCandidates() {
+        // D-01：已发布规格无启用候选时不得重新启用（Runtime 将无可选模型）
+        RouteEntity entity = route("r-1", "general", "DISABLED", specJson("general", 1));
+        entity.setPublishedRouteSpec("{\"alias\":\"general\",\"candidates\":[]}");
+        when(routeDao.selectById("r-1")).thenReturn(entity);
+
+        assertThatThrownBy(() -> routeService.enable("r-1"))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(
+                                NexmuxStatusCode.OPERATION_PRECONDITION_FAILED.fullCode()));
+        assertThat(entity.getStatus()).isEqualTo("DISABLED");
+    }
+
     private static String specJson(String alias, int candidates) {
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < candidates; i++) {
@@ -156,6 +170,8 @@ class RouteServiceTest {
     @Test
     void enableRestoresDisabledToPublished() {
         RouteEntity entity = route("rt-1", "general-chat", "DISABLED", specJson("general", 1));
+        // enable 校验的是已发布规格（D-01）：DISABLED 路由必有历史发布快照
+        entity.setPublishedRouteSpec(specJson("general", 1));
         when(routeDao.selectById("rt-1")).thenReturn(entity);
 
         var vo = routeService.enable("rt-1");

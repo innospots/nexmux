@@ -11,8 +11,8 @@ import "@pactor-app/ui/styles.css";
 import "./login.css";
 
 export const metadata: Metadata = {
-  title: "Model Console",
-  description: "Model Console 管理台",
+  title: "Nexmux Model Console",
+  description: "Nexmux Model Console 管理台",
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

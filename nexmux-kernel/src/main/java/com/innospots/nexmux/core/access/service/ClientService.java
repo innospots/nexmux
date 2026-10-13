@@ -226,8 +226,10 @@ public class ClientService {
     /** 到期时间解析：日期（yyyy-MM-dd）视为当天 23:59:59；带时间按 ISO / 空格分隔解析。 */
     private static LocalDateTime parseExpiry(String raw) {
         String trimmed = raw.trim();
+        // 纯日期取当日 23:59:59（秒精度）：H2 TIMESTAMP 默认微秒精度会把
+        // LocalTime.MAX（999999999 纳秒）四舍五入进位到次日 00:00（D-03）
         return trimmed.length() == 10
-                ? LocalDate.parse(trimmed).atTime(LocalTime.MAX)
+                ? LocalDate.parse(trimmed).atTime(23, 59, 59)
                 : LocalDateTime.parse(trimmed.replace(" ", "T"));
     }
 

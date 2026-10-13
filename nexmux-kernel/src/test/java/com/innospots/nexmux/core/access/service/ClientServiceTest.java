@@ -88,6 +88,19 @@ class ClientServiceTest {
     // ── create（模板复制） ─────────────────────────────────────
 
     @Test
+    void createWithDateOnlyExpiryStoresEndOfDayAtSecondPrecision() {
+        // D-03：日历选 2026-10-31 须存 2026-10-31 23:59:59；H2 TIMESTAMP 微秒舍入会把
+        // LocalTime.MAX（999999999 纳秒）进位到次日 00:00，故持久化统一用秒精度
+        when(clientDao.selectCount(any())).thenReturn(0L);
+
+        clientService.create(new ClientCreateRequest(
+                "mobile-app", "移动 App", null, null, null, "2026-10-31", null, null));
+
+        Mockito.verify(clientDao).insert(Mockito.<ClientEntity>argThat(e ->
+                LocalDateTime.of(2026, 10, 31, 23, 59, 59).equals(e.getExpiresAt())));
+    }
+
+    @Test
     void createFromTemplateCopiesPolicyAndComputesExpiry() {
         when(clientDao.selectCount(any())).thenReturn(0L);
         ClientTemplateEntity template = new ClientTemplateEntity();

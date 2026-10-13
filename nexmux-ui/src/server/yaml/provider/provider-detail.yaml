@@ -245,6 +245,12 @@ body:
                                           props:
                                             text: · Route Target 引用：${data.detail.routes.total} 个
                                             type: secondary
+                                    # D-05：存在有效引用时阻断删除——提示 + 禁用确认按钮（后端 delete 二次校验兑底）
+                                    - type: Text
+                                      when: ${data.detail.modelCount > 0 || data.detail.routes.total > 0}
+                                      props:
+                                        text: 存在模型 / 路由引用，不可删除；请先解除引用后再试。
+                                        type: danger
                                     - type: Flex
                                       props:
                                         justify: end
@@ -261,6 +267,7 @@ body:
                                             text: 确认删除
                                             variant: primary
                                             danger: true
+                                            disabled: ${data.detail.modelCount > 0 || data.detail.routes.total > 0}
                                           events:
                                             onClick:
                                               - action: overlay.close

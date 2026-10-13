@@ -125,6 +125,7 @@ public class RouteService {
 
     /**
      * 启用：仅 DISABLED → PUBLISHED；草稿须先发布。
+     * 前置校验（D-01）：已发布规格须含 ≥1 条启用态候选模型。
      */
     public RouteVo enable(String routeId) {
         RouteEntity entity = require(routeId);
@@ -133,6 +134,7 @@ public class RouteService {
                     NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
                     "only a disabled route can be enabled; publish drafts instead");
         }
+        requireEnabledCandidate(entity.getPublishedRouteSpec());
         entity.setStatus(STATUS_PUBLISHED);
         routeDao.updateById(entity);
         configAuditService.record("ROUTE", routeId, "ENABLE", null,
@@ -175,6 +177,8 @@ public class RouteService {
         RouteEntity entity = require(routeId);
         dependencyImpactAnalyzer.requireSafe(
                 dependencyImpactAnalyzer.analyzeDisable("ROUTE", routeId));
+        // D-01：发布即生效 Runtime 选路，候选模型 ≥1 且至少 1 条启用态方可发布
+        requireEnabledCandidate(entity.getRouteSpec());
         String before = entity.getPublishedRouteSpec() == null ? "null" : entity.getPublishedRouteSpec();
         entity.setPublishedRouteSpec(entity.getRouteSpec());
         entity.setStatus(STATUS_PUBLISHED);
@@ -189,6 +193,22 @@ public class RouteService {
                 "{\"before\":" + before + ",\"after\":" + entity.getPublishedRouteSpec() + "}",
                 request.operatorId());
         return toVo(entity);
+    }
+
+    /**
+     * 发布/启用前置校验（D-01）：候选模型 ≥1 且至少 1 条为启用态
+     * （与 Runtime 选路口径一致：{@code enabled} 为 null 视为启用）。
+     */
+    private static void requireEnabledCandidate(String specJson) {
+        RouteSpec spec = specJson == null || specJson.isBlank()
+                ? null : NexmuxJson.read(specJson, RouteSpec.class);
+        long enabled = spec == null ? 0 : spec.candidates().stream()
+                .filter(c -> !Boolean.FALSE.equals(c.enabled()))
+                .count();
+        if (enabled == 0) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "请先添加至少 1 个启用状态的候选模型，再启用/发布路由");
+        }
     }
 
     private boolean matchesType(RouteEntity entity, String type) {

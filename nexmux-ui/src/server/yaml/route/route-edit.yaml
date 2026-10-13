@@ -74,12 +74,14 @@ body:
           healthFilter: "${data.detail.healthFilter ? 'on' : 'off'}"
       events:
         onSubmit:
+          # D-01/D-07：guardMode=publish 时 submit 动作内部校验候选（同 route-create）
           - id: saveResult
             action: routeCandidates.submit
             params:
               method: POST
               url: /api/d/ops/route-save?code=${route.params.code}
               values: ${event}
+              guardMode: ${state.submitMode}
           - action: if
             params:
               condition: ${actions.saveResult == null || actions.saveResult.ok == false}

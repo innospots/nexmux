@@ -126,7 +126,7 @@ public class ProviderService {
     public ProviderVo create(ProviderCreateRequest request) {
         if (providerDao.selectCount(new LambdaQueryWrapper<ProviderEntity>()
                 .eq(ProviderEntity::getProviderCode, request.providerCode())) > 0) {
-            throw NexusException.build(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY, "provider code exists");
+            throw NexusException.build(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY, "Provider Code 已存在");
         }
         ProviderEntity entity = new ProviderEntity();
         entity.setProviderCode(request.providerCode());
@@ -189,16 +189,19 @@ public class ProviderService {
     }
 
     /**
-     * 删除提供方（含凭证）；存在模型引用时拒绝（前置检查）。
+     * 删除提供方（含凭证）；存在模型引用时拒绝（前置检查，D-05）：
+     * 覆盖主绑定（{@code primary_provider_id}）与扩展绑定（{@code extra_bindings} 中的 providerId）。
      */
     public void delete(String providerId) {
         ProviderEntity entity = require(providerId);
         long modelRefs = modelDao.selectCount(new LambdaQueryWrapper<ModelEntity>()
                 .eq(ModelEntity::getPrimaryProviderId, providerId));
-        if (modelRefs > 0) {
+        long bindingRefs = modelDao.selectCount(new LambdaQueryWrapper<ModelEntity>()
+                .like(ModelEntity::getExtraBindings, "\"providerId\":\"" + providerId + "\""));
+        if (modelRefs + bindingRefs > 0) {
             throw NexusException.build(
                     NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
-                    "provider has " + modelRefs + " model reference(s), remove them before delete");
+                    "该供应商仍被 " + (modelRefs + bindingRefs) + " 个模型引用，请先解除引用后再删除");
         }
         ProviderCredentialEntity credential = credentialOf(providerId);
         if (credential != null) {

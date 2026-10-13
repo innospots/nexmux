@@ -154,11 +154,12 @@ class ProviderServiceTest {
     @Test
     void deleteRejectsWhenModelsReference() {
         when(providerDao.selectById("pv-1")).thenReturn(provider("pv-1", "dashscope"));
-        when(modelDao.selectCount(any())).thenReturn(3L);
+        // D-05：引用检查 = 主绑定（3）+ 扩展绑定 extra_bindings（2），合并计数
+        when(modelDao.selectCount(any())).thenReturn(3L, 2L);
 
         assertThatThrownBy(() -> providerService.delete("pv-1"))
                 .isInstanceOf(NexusException.class)
-                .hasMessageContaining("3");
+                .hasMessageContaining("5");
         Mockito.verify(providerDao, Mockito.never()).deleteById(any(ProviderEntity.class));
     }
 

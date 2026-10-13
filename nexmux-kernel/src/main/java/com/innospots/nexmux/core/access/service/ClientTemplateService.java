@@ -205,7 +205,8 @@ public class ClientTemplateService {
         if (fixedDate == null || fixedDate.isBlank()) {
             return null;
         }
-        return LocalDate.parse(fixedDate.trim()).atTime(LocalTime.MAX);
+        // 当日 23:59:59（秒精度）：避免 H2 TIMESTAMP 微秒舍入把 LocalTime.MAX 进位到次日（D-03）
+        return LocalDate.parse(fixedDate.trim()).atTime(23, 59, 59);
     }
 
     private ClientTemplateVo toVo(ClientTemplateEntity entity) {

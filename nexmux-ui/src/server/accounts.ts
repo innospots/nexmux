@@ -17,7 +17,23 @@ export const DEMO_ACCOUNTS: (DemoUser & { password: string })[] = [
     password: "pactor123",
     name: "演示管理员",
     roles: ["admin"],
-    permissions: ["report:view", "user:view"],
+    // 管理员：全部 Nexmux 页面权限（键定义见 docs/design/nexmux-console-entry-plugin-design.md §6）
+    permissions: [
+      "nexmux.provider.view",
+      "nexmux.provider.manage",
+      "nexmux.model.view",
+      "nexmux.model.manage",
+      "nexmux.route.view",
+      "nexmux.route.manage",
+      "nexmux.route.publish",
+      "nexmux.client.view",
+      "nexmux.client.manage",
+      "nexmux.client.secret",
+      "nexmux.ops.logs.view",
+      "nexmux.debug.invoke",
+      "nexmux.settings.manage",
+      "nexmux.audit.view",
+    ],
   },
   {
     id: "u-2",
@@ -25,7 +41,14 @@ export const DEMO_ACCOUNTS: (DemoUser & { password: string })[] = [
     password: "guest123",
     name: "访客",
     roles: ["guest"],
-    permissions: [],
+    // 观察者：仅只读查看权限；无 manage / secret / debug / settings / audit
+    permissions: [
+      "nexmux.provider.view",
+      "nexmux.model.view",
+      "nexmux.route.view",
+      "nexmux.client.view",
+      "nexmux.ops.logs.view",
+    ],
   },
 ];
 

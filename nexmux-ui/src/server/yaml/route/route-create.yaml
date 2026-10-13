@@ -49,12 +49,15 @@ body:
           healthFilter: on
       events:
         onSubmit:
+          # D-01/D-07：guardMode=publish 时 submit 动作内部校验候选（0 候选/全停用
+          # 返回失败），由下方失败分支统一弹出错误文案，不创建草稿
           - id: createResult
             action: routeCandidates.submit
             params:
               method: POST
               url: /api/d/ops/route-create
               values: ${event}
+              guardMode: ${state.submitMode}
           - action: if
             params:
               condition: ${actions.createResult == null || actions.createResult.ok == false}

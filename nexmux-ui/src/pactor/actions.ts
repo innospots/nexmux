@@ -606,6 +606,20 @@ function createRouteCandidateActions(): Record<string, DebugAction> {
      */
     "routeCandidates.submit": async (action, ctx) => {
       const p = action.params ?? {};
+      // D-01/D-07：guardMode=publish 时前置校验候选（≥1 且至少 1 条启用态，
+      // 与后端 RouteService.publish/enable 同一口径）；不满足直接返回失败，
+      // 由调用方既有「失败提示 if」分支弹出错误文案，不创建草稿
+      if (str(p.guardMode) === "publish") {
+        const list = read(ctx);
+        if (list.length === 0 || !list.some((x) => x.status !== "disabled")) {
+          return {
+            ok: false,
+            error: new Error(
+              "请先在「③ 模型与路由策略」添加至少 1 个启用状态的候选模型，再保存并启用",
+            ),
+          };
+        }
+      }
       const body = {
         ...((p.values as Record<string, unknown>) ?? {}),
         candidates: read(ctx),

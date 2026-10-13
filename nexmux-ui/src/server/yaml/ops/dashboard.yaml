@@ -3,7 +3,7 @@ page:
   id: dashboard
   title: 仪表盘
   name: dashboard
-  description: GateWeave 运营概览：核心指标、趋势分析、用量构成
+  description: Nexmux 运营概览：核心指标、趋势分析、用量构成
 state:
   # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
   range:
@@ -47,7 +47,7 @@ body:
             - type: Typography
               props:
                 variant: muted
-                text: GateWeave — 运营概览
+                text: Nexmux — 运营概览
         - type: Flex
           props:
             align: center

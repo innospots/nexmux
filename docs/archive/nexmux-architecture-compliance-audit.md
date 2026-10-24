@@ -2,13 +2,14 @@
 
 ## 1. 文档定位
 
-- **状态**：已提出（待修复）
+- **状态**：历史归档（2026-10-10 时点审计，非当前合规结论）
 - **日期**：2026-10-10
+- **替代文档**：`nexmux-console-runtime-e2e-plan.md`
 - **审计对象**：`nexmux-kernel`、`nexmux-spring`、`nexmux-ui`
 - **架构基线**：
-  - [ADR-0001 Console / Runtime 配置边界](./adr/0001-console-runtime-configuration-boundary.md)
-  - [nexmux-architecture-design.md](./nexmux-architecture-design.md)（§2、§4、§5.2、§6、§8）
-- **关联**：[nexmux-p0-console-design.md](./nexmux-p0-console-design.md)、[nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)
+  - [ADR-0001 Console / Runtime 配置边界](../design/adr/0001-console-runtime-configuration-boundary.md)
+  - [nexmux-architecture-design.md](../design/nexmux-architecture-design.md)（§2、§4、§5.2、§6、§8）
+- **关联**：[nexmux-p0-console-design.md](./nexmux-p0-console-design.md)、[nexmux-domain-layer-design.md](../design/nexmux-domain-layer-design.md)
 
 ### 审计范围与方法
 

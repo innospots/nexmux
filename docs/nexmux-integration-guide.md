@@ -26,9 +26,13 @@ resp = client.chat.completions.create(model="general",
 |------|------|------|
 | `GET` | `/v1/models` | 列出**本 AppKey 已授权**的可用模型别名（OpenAI list 形状） |
 | `POST` | `/v1/chat/completions` | 对话调用，支持非流式与 `"stream": true`（SSE） |
+| `POST` | `/v1/responses` | OpenAI Responses 非流式调用 |
+| `POST` | `/v1/messages` | Anthropic Messages 非流式调用 |
+| `POST` | `/v1/embeddings` | OpenAI Embeddings 调用 |
 
-机器可读契约：构建产物 `META-INF/nexus-openapi/nexmux-kernel.yaml` 中含上述两个端点
-（operationId：`nexmuxRuntimeChatCompletions` / `nexmuxRuntimeModels`）。
+Responses、Messages、Embeddings 当前不支持 Streaming；传 `stream=true` 返回 400 `NMX010001`。
+
+机器可读契约：构建产物 `META-INF/nexus-openapi/nexmux-kernel.yaml` 中含上述端点。
 
 ## 3. 响应与排障
 
@@ -52,14 +56,45 @@ resp = client.chat.completions.create(model="general",
 | 502 `NMX060001` | 上游供应商故障（5xx/网络），网关侧问题 | 可重试；持续出现请报障（附 x-request-id） |
 | 503 `NMX020005` | 路由当前无可用候选模型 | 报障 |
 
-## 5. 配额与限流
+## 5. 其他协议示例
+
+### OpenAI Responses
+
+```bash
+curl http://localhost:8083/v1/responses \
+  -H "Authorization: Bearer <AppKeySecret>" \
+  -H 'content-type: application/json' \
+  -d '{"model":"<RouteAlias>","input":"你好"}'
+```
+
+### Anthropic Messages
+
+```bash
+curl http://localhost:8083/v1/messages \
+  -H "Authorization: Bearer <AppKeySecret>" \
+  -H 'content-type: application/json' \
+  -d '{"model":"<RouteAlias>","messages":[{"role":"user","content":"你好"}]}'
+```
+
+### Embeddings
+
+```bash
+curl http://localhost:8083/v1/embeddings \
+  -H "Authorization: Bearer <AppKeySecret>" \
+  -H 'content-type: application/json' \
+  -d '{"model":"<RouteAlias>","input":"你好"}'
+```
+
+这些入口与 Chat Completions 共用 AppKey 鉴权、Route 授权、配额、限流、选路和日志计量。
+
+## 6. 配额与限流
 
 - 配额（日/月窗口累计）与限流（RPM/TPM/并发）由管理员按 AppKey 配置；
   被任一关口拒绝的请求**不消耗**请求数配额。
 - 当前限制（P0）：无接入方自助用量查询、AppKey 轮换旧 key 立即失效
   （轮换请安排在低峰并快速切换配置）。
 
-## 6. 数据合规提示
+## 7. 数据合规提示
 
 网关默认不落请求/响应原文（`promptPolicy=masked`）；若管理员开启 `full` 留存，
 接入方会被告知其数据处理方式。请勿在 prompt 中放置超出约定等级的敏感数据。

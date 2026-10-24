@@ -2,10 +2,11 @@
 
 ## 1. 文档定位
 
-- **状态**：草案
+- **状态**：历史归档（P0 阶段设计，当前实现已超出该范围）
 - **日期**：2026-09-26
+- **替代文档**：`design/nexmux-architecture-design.md`、`design/nexmux-runtime-design.md`
 - **归属模块**：`nexmux-kernel`、`nexmux-spring`、`nexmux-ui`
-- **上级文档**：[nexmux-architecture-design.md](./nexmux-architecture-design.md)
+- **上级文档**：[nexmux-architecture-design.md](../design/nexmux-architecture-design.md)
 - **产品依据**：PRD §25.1、[控制台设计 §25.1](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
 
 ## 2. P0 目标（可调用闭环）
@@ -143,11 +144,11 @@
 | `nexmux.audit.view` | 审计 |
 | `nexmux.debug.execute` | 调试台 |
 
-菜单、`pageKey`、路由与 Entity 对照见 [nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)；权限 key 与上表一致。
+菜单、`pageKey`、路由与 Entity 对照见 [nexmux-console-entry-plugin-design.md](../design/nexmux-console-entry-plugin-design.md)；权限 key 与上表一致。
 
 ## 7. 配置项（`nexus/nexmux.yaml`）
 
-源码：`nexmux-spring/src/main/resources/nexus/nexmux.yaml`；发行包建议 `config/nexus/nexmux.yaml`。键约束与禁止项见 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) §5。
+源码：`nexmux-spring/src/main/resources/nexus/nexmux.yaml`；发行包建议 `config/nexus/nexmux.yaml`。键约束与禁止项见 [nexmux-yaml-configuration-design.md](../design/nexmux-yaml-configuration-design.md) §5。
 
 ```yaml
 nexmux:

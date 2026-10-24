@@ -21,11 +21,11 @@
 | 模型资产 | 编辑模型 | `/models/:code/edit` | 同上（编辑态） | 保存、删除模型、返回列表 | `GET /api/d/models/{code}`；`GET /api/d/provider-options` |
 | 模型路由 | 路由 | `/routes` | 对外请求路径、协议与调度策略（卡片列表） | 状态 / 类型 / 标签筛选、新建、启停、编辑 | `GET /api/d/routes` |
 | 模型路由 | 新增路由 | `/routes/new` | 基本信息、入口配置、模型与路由策略 | 查看协议说明、添加模型、模拟调用、保存草稿、保存并启用 | `GET /api/d/model-options` |
-| 模型路由 | 路由详情 | `/routes/:code` | 单页纵向三区块（无 Tab） | 编辑、启停、模拟调用、复制路由标识、导出配置 JSON | `GET /api/d/routes/{code}` |
+| 模型路由 | 路由详情 | `/routes/:code` | 基本信息、入口配置、模型与策略、运行版本 | 编辑、启停、模拟调用、复制路由标识、导出配置 JSON、版本列表、回滚 | `GET /api/d/routes/{code}`；`GET /api/d/routes/{code}/versions`；`POST /api/d/routes/{code}/rollback` |
 | 模型路由 | 编辑路由 | `/routes/:code/edit` | 同上（编辑态） | 添加模型、模拟调用、保存草稿 / 保存并启用、删除路由 | `GET /api/d/routes/{code}`；`GET /api/d/model-options` |
 | 访问治理 | 客户端 | `/clients` | 调用实例与 AppKey（表格） | 标签 / 关键字筛选、新建客户端、从模板创建、启停、编辑、Rotate Secret、调试客户端 | `GET /api/d/clients` |
 | 访问治理 | 新建客户端 | `/clients/new` | ① 基本信息 ② AppKey ③ 路由授权 ④ 配额 ⑤ 限流 | 添加路由 / 配额 / 限流、保存并启用、取消 | —（提交） |
-| 访问治理 | 客户端详情 | `/clients/:code` | 单页分区（无 Tab） | 编辑、启停、Rotate Secret、复制 AppKey ID、导出配置、查看模板、返回列表 | `GET /api/d/clients/{code}` |
+| 访问治理 | 客户端详情 | `/clients/:code` | 基本信息、AppKey、授权、配额、限流、策略修订 | 编辑、启停、Rotate Secret、复制 AppKey ID、导出配置、查看模板、策略版本查询 | `GET /api/d/clients/{code}`；`POST /api/d/clients/{id}/publish` |
 | 访问治理 | 编辑客户端 | `/clients/:code/edit` | 同上（编辑态） | 添加路由 / 配额 / 限流、保存并启用、删除客户端 | `GET /api/d/clients/{code}` |
 | 访问治理 | 客户端模板 | `/client-templates` | 预置路由 / 配额 / 限流（卡片列表） | 状态 / 标签 / 搜索、新建模板、启停、编辑 | `GET /api/d/client-templates` |
 | 访问治理 | 新建客户端模板 | `/client-templates/new` | ① 基本信息 ③ 路由授权 ④ 配额 ⑤ 限流（无 AppKey） | 添加路由 / 配额 / 限流、保存并启用 | —（提交） |
@@ -100,6 +100,8 @@
 | Model Type | 大语言模型 (LLM)、文生图 (Image)、音频 (Audio)、Embedding |
 | 路由类型 | 单模型、多模型池、条件路由（计划中）、灰度发布（计划中）、智能路由（计划中） |
 | 路由策略 | 固定 (FIXED)、轮询 (ROUND_ROBIN)、加权轮询 (WEIGHTED)、哈希分配 (HASH)、优先级 (PRIORITY)、随机 (RANDOM) |
+| Runtime API | Chat Completions（含 SSE）、Responses、Messages、Embeddings（后三者非流式） |
+| 运行版本 | Route `config_revision`、版本列表与回滚；Client 策略 `config_revision` 与前后快照 |
 | 候选优先级 | P0 / P1 / P2 |
 | 配额类型 | 总配额、周期循环配额（每 24 小时 / 每 7 天 / 每月自然月） |
 | 配额计量指标 | Request、Input Token、Output Token、Total Token、Cost、Concurrent |

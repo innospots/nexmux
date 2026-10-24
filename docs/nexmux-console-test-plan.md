@@ -6,7 +6,9 @@
 >
 > 配套文档：[功能说明书](./nexmux-functional-guide.md)、[功能页面清单](./nexmux-functional-catalog.md)。
 >
-> 执行结果与结论见 [测试报告](./nexmux-console-test-report.md)。
+> 执行结果与结论见 [历史测试报告](./archive/nexmux-console-test-report.md)。当前 Runtime 端测另见 [Console → Runtime 端测计划](./nexmux-console-runtime-e2e-plan.md)。
+>
+> 当前补充范围（2026-10-24）：默认参数与 Metadata、主/扩展 Binding、定价版本与 Pricing Snapshot、Responses/Messages/Embeddings、Route 版本/回滚、Client 策略修订、Capability 校验、确定性 sample 与日志清理。
 
 ---
 
@@ -291,4 +293,4 @@
 
 ---
 
-*本测试方案用于控制面使用者视角的验收/回归；执行结果见 [测试报告](./nexmux-console-test-report.md)。*
+*本测试方案用于控制面使用者视角的验收/回归；执行结果见 [历史测试报告](./archive/nexmux-console-test-report.md)。*

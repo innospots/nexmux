@@ -2,9 +2,9 @@
 
 ## 1. 文档定位
 
-- **状态**：已采纳（与 [nexmux-yaml-configuration-design.md](./nexmux-yaml-configuration-design.md) 同步）
-- **日期**：2026-09-27
-- **归属**：`nexmux-kernel/src/main/resources/ui-pages/nexmux/{moduleKey}/`（`domainKey=nexmux`；`moduleKey` 为 provider / model / …）
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-09-27（最近修订：2026-10-24）
+- **归属**：`nexmux-ui/src/server/yaml/{module}/`（`domainKey=nexmux`；`module` 为 provider / model / route / client / ops / audit / debug）
 - **关联**：
   - 产品统一详情 §17–§18：[管理控制台产品功能设计文档](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
   - 线框通用说明：[prd-diagram/README.md](../../../product-design/nexmux/prd-diagram/README.md)
@@ -248,7 +248,7 @@ body: null
 | page.id | 等于 pageKey |
 | meta.routePath | 等于 Entry `pagePath` |
 | 主键路由参数 | 与 Entity 稳定键名一致：`providerCode`、`modelCode`、`alias`、`clientCode`、`requestId`、`auditId` |
-| 写操作 permission | `actions` 内 `permission` 与 [P0 §6](./nexmux-p0-console-design.md) 一致 |
+| 写操作 permission | `actions` 内 `permission` 与 [P0 §6](../archive/nexmux-p0-console-design.md) 一致 |
 | 字段命名 | 绑定 API 使用 camelCase；**禁止** `*_json` 键名（对齐 [domain-layer](./nexmux-domain-layer-design.md) G15） |
 
 ## 11. 测试与交付

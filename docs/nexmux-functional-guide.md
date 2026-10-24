@@ -731,10 +731,9 @@ Model 定价 / 版本历史
 
 ### 6.5 配置发布与运行版本
 
-- **需要显式发布的运行时策略**：Route（含 Alias、Ingress、候选 Model、策略）、Client 路由授权、Client Quota / Rate Limit。
-- 页面操作：保存 → 校验 → 发布 → 查看当前运行版本 / 历史版本 / 回滚。
-- 发布粒度为「一个 Route」或「一个 Client」；**发布失败不替换当前运行版本**；发布成功产生 `config_revision`。
-- Provider、Model 基础资料保存后立即更新控制面；启用 / 停用单独审计。
+- **Route 发布**：保存并校验后写入 `published_route_spec`，每次发布递增 `config_revision`，可查看版本并回滚；发布失败不替换当前运行版本，回滚本身也生成新修订。
+- **Client 策略发布**：路由授权、Quota、Rate Limit 作为同一策略版本更新并递增 `config_revision`，同时记录前后快照；`POST /api/d/clients/{id}/publish` 查询当前策略版本。
+- Provider、Model 基础资料保存后立即更新控制面；启用 / 停用单独审计。默认参数按「Model 默认值 < 客户端显式参数」合并进 Runtime 上游请求。
 
 ### 6.6 统一筛选上下文与跳转联动
 
@@ -765,20 +764,19 @@ Model 定价 / 版本历史
 | 能力 | 阶段 | 说明 |
 |------|------|------|
 | 目录批量导入 | — | Provider / Model 列表的「导入」当前提示暂未开放；可改用 Provider 详情页逐个拉取 |
-| Model Profile（参数预设） | P1 | Model 内可复用执行参数预设与 revision |
+| Model Profile（参数预设） | P1 | Model 内可复用执行参数预设与 revision；**不同于已生效的 Model 默认参数** |
 | Provider 模型目录同步 | P1 | 对支持枚举 API 的 Provider 拉取并同步差异 |
+| 定价 JSON 与 Binding 行级编辑器 | — | 当前支持整包 API 保存与详情回显，页面行级编辑入口仍待开放 |
+| Responses / Messages / Embeddings Streaming | — | 三个协议入口已支持非流式；SSE 目前仅 Chat Completions 开放 |
 | 条件路由 / 灰度发布 | P1 | 有序规则、稳定分桶、模拟命中与回滚 |
 | 最低成本 / 最低延迟 / 健康优先 | P1 | 成本 / 延迟 / 健康数据驱动排序 |
 | Circuit Breaker 与有界 Failover | P1 | 熔断状态机与同 Model 内 Binding 级故障转移；Failover 指标自启用后统计 |
 | 分布式限流 | P1 | 多 Runtime 实例共享计数 |
 | Provider SLA 与告警 | P1 | 阈值、观测窗口、最小样本、通知中心 |
+| 其他上游 Adapter | P1 | 当前为 OpenAI Compatible；其他协议不会按 OpenAI 报文静默转发 |
 | 智能路由（Quality / Capability / Region / A/B / 动态权重 / 自动优化 / 智能异常分析） | P2 | 质量、能力、地域、实验与自动优化 |
-| 模型调用测试落地 | — | 详情页入口与占位接口存在，后端功能待落地 |
-| 删除接口（Model / Client / Client Template） | — | 页面提交闭环可用，服务端删除接口待补齐 |
-| 定价历史版本 | — | 定价 Tab 版本历史的数据源待补齐 |
-| 品牌统一 | — | 仪表盘副标题与页面标题仍显示旧名「GateWeave」，与产品名 Nexmux 待统一 |
 
-> 说明：P1 / P2 是 **落地优先级**，不是功能删减；即使未开放，信息架构与对象关系已在产品线框与设计中保留完整定义。
+> 说明：P1 / P2 是 **落地优先级**，不是功能删减；即使未开放，信息架构与对象关系已在产品线框与设计中保留完整定义。Model 默认参数、真实调用测试、删除接口、定价版本、Route 版本/回滚和 Client 策略修订均已开放，不再列入未开放项。
 
 ---
 

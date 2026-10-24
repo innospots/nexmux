@@ -2,14 +2,14 @@
 
 ## 1. 文档定位
 
-- **状态**：已接受
-- **日期**：2026-10-10
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-10-10（最近修订：2026-10-24）
 - **归属模块**：`nexmux-kernel`（`com.innospots.nexmux.inbound` 包）+ `nexmux-spring`（`runtime` profile 装配）
 - **关联文档**：
   - [ADR-0001 Console / Runtime 配置边界](./adr/0001-console-runtime-configuration-boundary.md)
   - [ADR-0002 Runtime 工程形态与库共用](./adr/0002-runtime-deployment-form.md)（本设计的工程形态决策，修订 ADR-0001 决策 5）
   - [nexmux-architecture-design.md](./nexmux-architecture-design.md)（§2 控制面/数据面、§5.2 包结构、§8 运行库归属）
-  - [nexmux-p0-console-design.md](./nexmux-p0-console-design.md) §9（P0 联调最小契约）
+  - [nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md) §9（P0 联调最小契约）
   - [nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)（实体与 Binding 结构）
   - PRD：[需求说明书](../../../product-design/nexmux/模型管理系统产品功能需求说明书.md) §16–19、§27、§28、§31、§33–36
 
@@ -20,7 +20,7 @@
 | 1 | Runtime 工程形态 | **不新增 Maven 模块**；在 `nexmux-spring` 内以 **独立 profile（`runtime`）启动独立 JVM 进程**（见 ADR-0002） |
 | 2 | 运行库 | **共用数据库实例**；按表级写责分离（运行表仅 Runtime 写，配置表仅 Console 写），退出条件见 ADR-0002 |
 | 3 | AppKey 鉴权 | OK——Runtime 侧 `app_key_hash` + 盐校验，内存 Credential Cache |
-| 4 | 协议范围 | P0：OpenAI 兼容 **`POST /v1/chat/completions`**（含 SSE 流式）+ **`GET /v1/models`**（模型发现，2026-10-22 增补） |
+| 4 | 协议范围 | OpenAI Chat Completions（含 SSE）+ Responses / Messages / Embeddings（非流式）+ `GET /v1/models`；均复用同一 Runtime 调用链 |
 | 5 | 计量 | **全量**：tokens、成本估算、`pricing_snapshot`、`route_trace`、`prompt_snapshot`（按 promptPolicy） |
 | 6 | 健康 | **主动探活**：定时探测上游，维护 Binding 健康视图并参与选路过滤 |
 
@@ -39,7 +39,7 @@ Console（控制面）P0 已交付，但模型调用尚无真实数据面：当�
 
 | 排除项 | 理由 / 归属 |
 |--------|------------|
-| `/v1/responses`、`/v1/messages`、`/v1/embeddings`、rerank/images/audio | PRD §16 后续阶段；第二协议接入时再评 |
+| Responses / Messages / Embeddings Streaming、rerank/images/audio | 三个协议入口已支持非流式；Streaming 与其他模态仍属后续阶段 |
 | Anthropic / Gemini / Bedrock Adapter | PRD §18 后续；单协议期**不建**统一协议抽象（见 §13） |
 | 内部统一模型协议（ModelRequest/ModelResponse 全套，PRD §17） | 单一协议下抽象无第二消费者；第二 adapter 立项时落地 |
 | 条件路由 / 灰度 / 智能路由 | PRD §19.2 P1/P2 |
@@ -172,6 +172,8 @@ public record InvocationContext(
 | `health-unhealthy-threshold` | 3 | 连续失败判 UNAVAILABLE |
 | `health-degraded-latency-ms` | 10000 | 探测延迟超此判 DEGRADED |
 | `quota-resync-interval-seconds` | 300 | 配额内存计数与库聚合校准周期 |
+| `log-retention-initial-delay-minutes` | 10 | 日志清理首跑延迟，测试可设 0 |
+| `log-retention-period-minutes` | 1440 | 日志清理周期，默认每日 |
 
 ## 7. 接口与 API（四步法 ④）
 
@@ -179,7 +181,10 @@ public record InvocationContext(
 
 | 方法 | 路径 | 请求 | 响应 | 委托 |
 |------|------|------|------|------|
-| POST | `/v1/chat/completions` | `ChatCompletionIngressRequest`（`Authorization: Bearer gw-sk-*` 或 `X-API-Key`） | OpenAI chat.completion JSON；`stream=true` 时 `text/event-stream`；非流式带 `x-request-id` 响应头 | `InvocationPipeline` |
+| POST | `/v1/chat/completions` | Chat Completions 请求 | OpenAI chat.completion JSON；SSE；非流式带 `x-request-id` | `InvocationPipeline.invoke` |
+| POST | `/v1/responses` | OpenAI Responses 请求（非流式） | OpenAI response JSON + output_text | `InvocationPipeline.invokeOperation` |
+| POST | `/v1/messages` | Anthropic Messages 请求（非流式） | Anthropic message JSON + stop_reason | `InvocationPipeline.invokeOperation` |
+| POST | `/v1/embeddings` | OpenAI Embeddings 请求 | 上游 Embeddings 原始 JSON | `InvocationPipeline.invokeOperation` |
 | GET | `/v1/models` | 同上鉴权头 | OpenAI list 形状：本 AppKey 已授权且已发布的别名清单 | `InvocationPipeline.listModels` |
 
 - **alias 解析**：请求体 `model` 字段 = Route `alias`（PRD §15/§16）；同时校验请求路径与快照 `ingress` 一致（不一致 → 404）。P0 不支持路径参数化 ingress。
@@ -233,7 +238,9 @@ ingress.RuntimeIngressEndpoint
 | 配额计数 | 进程内 `ConcurrentHashMap` + `LongAdder`；启动与每 `quota-resync-interval-seconds` 以 `mux_request_log` 聚合（`source='RUNTIME'`）校准；hard 超限拒绝。cyclic 窗口按 `cycleUnit`（hour/day/自然月）推算起点。**计量指标不含 CONCURRENT**（配额为窗口累计语义；并发控制归限流信号量），存量 CONCURRENT 配额规则忽略 |
 | 限流 | 进程内令牌桶（RPM/TPM，`burst` 为桶容量）+ 并发信号量（CONCURRENT）；多实例部署时为**实例级**限流（文档注明，分布式计数后续评） |
 | 探活 | 单调度线程顺序探测；探测请求不计入 `mux_request_log`、不消耗客户端配额 |
-| 计费 | 请求结束后同步计算（pricing_spec × 命中倍率：候选行 C/M 优先，留空继承 Binding C/M），与日志同事务插入 |
+| 默参与能力 | Model `default_params` 先合并已知 OpenAI 参数，客户端显式值覆盖；未声明 Tool Calling 的 Model 对 Tools 请求前置返回 400；非 OpenAI 上游协议明确拒绝 |
+| 计费 | 请求结束后按 input_tokens 命中档，计算 input/output/cache read/cache write 标准金额，应用 Model 时段倍率，再分别应用 Binding C/M；`standard_usd`、`billing_usd`、`cost_usd` 分列落库，Pricing Snapshot 含版本、生效时间、命中档、C/M 与实际 Binding |
+| 日志留存 | `promptPolicy` 支持 none/masked/full/sample；sample 为确定性系统抽样（每 4 条保留 1 条），日志清理首跑与周期可配置 |
 | 日志保留 | `RequestLogRetentionCleaner` 按服务设置 `logRetentionDays` 每日清理超期行（≤0 不清理；启动 10 分钟后首跑避让启动高峰） |
 | 超时与代理 | 读取超时：`Provider.timeoutMs` → 服务设置 `requestTimeoutMs` → 常量 30s；连接超时：`upstreamConnectTimeoutMs`（缺省 10s）；Provider `proxy` 配置 HTTP 代理（`host:port`），`region` 仅元数据不参与调用。服务设置为秒级 TTL 缓存近实时读取（`PlatformSettingService.getAll`，2026-10-22 起，避免热路径每请求多次全表读） |
 
@@ -291,7 +298,7 @@ ingress.RuntimeIngressEndpoint
 - [x] 分层方向：`ingress → pipeline → runtime/protocol → core.ops`；无 `inbound → console`
 - [x] request/vo 为 record；`RouteSpec` 既有防御拷贝
 - [x] 接口仅 `UpstreamChatAdapter`（有第二消费者演进点）；其余具体类
-- [x] 端点 2 个（chat/completions、models），远低于 7 个复审线
+- [x] 端点 5 个（chat/completions、responses、messages、embeddings、models），非流式协议映射复用同一调用链
 - [x] 每个应用可见失败有状态码行；统一 `NexusException`
 - [x] 事务/幂等/并发已声明（§9）
 - [x] 兼容面：`source` 列口径、新表迁移、§5.1 口径废止均已写（§10）

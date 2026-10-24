@@ -1,7 +1,11 @@
-# Nexmux UI 数据接口清单（已实现部分）
+# Nexmux Console API Reference（原 UI 数据接口清单）
 
-- **日期**：2026-10-05（随实现批次滚动更新）
-- **设计依据**：[nexmux-ui-data-api-design.md](./nexmux-ui-data-api-design.md)
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-10-05（随实现批次滚动更新，最近修订：2026-10-24）
+- **响应契约提示**：本文早期 B1–B7 记录以 `R<T>` 为主；当前 UI 还存在直接返回 record/list/map 的接口（如页面列表、详情、Service Settings 与 Ops 写结果），阅读时以各端点实际契约和 OpenAPI 为准，不能统一理解为 `R<T>`。
+- **当前补充端点**：`GET /routes/{code}/versions`、`POST /routes/{code}/rollback`、`POST /clients/{id}/publish`；Runtime `POST /v1/responses`、`/v1/messages`、`/v1/embeddings`（均非流式）。
+- **当前补充配置**：Model Metadata、默认参数、主/扩展 Binding、分档/缓存/时段定价与版本、Provider Proxy、Route/Client `config_revision` 均已开放。
+- **设计依据**：[nexmux-ui-data-api-design.md](../archive/nexmux-ui-data-api-design.md)
 - **覆盖范围**：**全部 7 个批次已完成（B1–B7），35 页全部真实，mock 已退役删除**。域：Provider（B1）、Model、Route（B2）、Client + ClientTemplate（B4）、调用日志/审计/成本（B5）、Dashboard/用量/可用性（B6）、调试台（B7）
 - **分层**：
 

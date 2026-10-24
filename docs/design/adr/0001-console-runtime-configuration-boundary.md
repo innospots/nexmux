@@ -45,4 +45,4 @@
 ## 关联
 
 - [nexmux-architecture-design.md](../nexmux-architecture-design.md)
-- [nexmux-p0-console-design.md](../nexmux-p0-console-design.md)
+- [nexmux-p0-console-design.md](../../archive/nexmux-p0-console-design.md)

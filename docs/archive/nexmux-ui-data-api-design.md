@@ -2,11 +2,12 @@
 
 ## 1. 文档定位
 
-- **状态**：草案（grill-me 两轮已确认，待评审）
+- **状态**：历史归档（BFF 迁移批次设计，不作为当前 API 参考）
 - **日期**：2026-10-05
+- **替代文档**：`design/nexmux-ui-data-api-inventory.md`、`nexmux-engineering.md`
 - **归属模块**：`nexmux-kernel`、`nexmux-spring`、`nexmux-ui`
-- **上级文档**：[nexmux-architecture-design.md](./nexmux-architecture-design.md)、[nexmux-p0-console-design.md](./nexmux-p0-console-design.md)
-- **关联文档**：[nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)、ADR-[0001](./adr/0001-console-runtime-configuration-boundary.md)
+- **上级文档**：[nexmux-architecture-design.md](../design/nexmux-architecture-design.md)、[nexmux-p0-console-design.md](./nexmux-p0-console-design.md)
+- **关联文档**：[nexmux-domain-layer-design.md](../design/nexmux-domain-layer-design.md)、ADR-[0001](../design/adr/0001-console-runtime-configuration-boundary.md)
 - **页面事实源**：`nexmux-ui/src/server/yaml/**`（35 页，grill-me Q2 确认）
 
 ## 2. 背景与目标

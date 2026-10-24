@@ -4,7 +4,7 @@
  * 由 action handler 转为页面错误消息展示。
  *
  * 路径即契约：/api/d/* 路径即服务端接口路径（docs/design/
- * nexmux-ui-missing-api.md §〇）；接口未实现时转发层回退空数据，
+ * docs/archive/nexmux-ui-missing-api.md §〇（历史对接说明）；接口未实现时转发层回退空数据，
  * 相关选项为空、写操作按成功占位处理。
  */
 

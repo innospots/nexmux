@@ -70,7 +70,23 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 
 所有 runtime 组合：`spring.sql.init.mode=never`（DDL/种子归 Console），且 prod 下必须注入 `CONSOLE_TOKEN_SECRET`。
 
-## 4. 关键配置（`config/nexus/nexmux.yaml`）
+## 4. Runtime API 与运行版本
+
+| 端点 | 当前能力 |
+|---|---|
+| `GET /v1/models` | 返回当前 AppKey 已授权且已发布的 Alias |
+| `POST /v1/chat/completions` | OpenAI Chat Completions，非流式与 SSE |
+| `POST /v1/responses` | OpenAI Responses，非流式 |
+| `POST /v1/messages` | Anthropic Messages，非流式 |
+| `POST /v1/embeddings` | OpenAI Embeddings |
+
+- `model` 始终是 Route Alias，不是上游 Provider Model ID。
+- Responses、Messages、Embeddings 的 Streaming 尚未开放；`stream=true` 会明确返回 400。
+- Route 每次发布递增 `config_revision`，版本接口为 `GET /api/d/routes/{code}/versions`，回滚为 `POST /api/d/routes/{code}/rollback?revision=N`。
+- 回滚使用历史发布规格并生成新修订，不修改历史审计；发布失败保留当前运行版本。
+- Client 授权、配额、限流作为同一策略版本更新，版本查询为 `POST /api/d/clients/{id}/publish`。
+
+## 5. 关键配置（`config/nexus/nexmux.yaml`）
 
 | 键 | 默认 | 说明 |
 |----|------|------|
@@ -80,34 +96,39 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 | `nexmux.runtime.health-unhealthy-threshold` | 3 | 连续失败判 UNAVAILABLE |
 | `nexmux.runtime.health-degraded-latency-ms` | 10000 | 延迟超此判 DEGRADED |
 | `nexmux.runtime.quota-resync-interval-seconds` | 300 | 配额计数与库校准周期 |
+| `nexmux.runtime.log-retention-initial-delay-minutes` | 10 | 日志清理首次执行延迟，测试可设 0 |
+| `nexmux.runtime.log-retention-period-minutes` | 1440 | 日志清理周期，默认每日 |
 
 调试台限域（Console 服务设置页或 `mux_platform_setting` 表）：`debugInvokeEnabled`、`debugDailyQuota`。
 
-## 5. 健康检查与监控（仅内网/本机）
+## 6. 健康检查与监控（仅内网/本机）
 
 - actuator 绑定回环地址（`management.server.address=127.0.0.1`）+ 独立管理端口：
   Console `127.0.0.1:19090`、Runtime `127.0.0.1:19091`（runtime profile 覆盖；可分别用 `CONSOLE_MANAGEMENT_PORT` / `RUNTIME_MANAGEMENT_PORT` env 再改）。
   **业务端口（8082/18082/8083）不再暴露 `/actuator/**`**，公网不可达。
 - `GET /actuator/health`（liveness/readiness 已启用）；Prometheus：`/actuator/prometheus`。
 
-## 6. 升级与迁移
+## 7. 升级与迁移
 
 - 库结构演进幂等：新包启动自动执行 `CREATE/ALTER IF NOT EXISTS`（H2），无需手工迁移。
 - 配置变更热生效边界：Runtime 侧 Provider/Model/Route/Client 改动在快照周期内生效（默认 30s）；
   Route 须「发布」才对 Runtime 可见（草稿不影响线上）。
 
-## 7. 已知限制（P0）
+## 8. 已知限制与生产边界
 
 - **nexmux-ui 的 `NEXT_PUBLIC_*` 为构建期内联变量**：改动 API 上游地址必须「改环境变量 + 重新 `pnpm build` + 重启」，仅改 systemd unit 重启无效（部署实测教训）。
 
 - 配额/限流为 Runtime **实例级**计数（多实例非全局精确；多实例部署前评审 ADR-0002 退出条件）。
 - AppKey 轮换后旧 key 立即失效（宽限期未实现）。
-- 仅 OpenAI 兼容 `/v1/chat/completions`（含 SSE）；`/v1/responses` 等后续阶段。
+- `/v1/chat/completions` 支持 SSE；`/v1/responses`、`/v1/messages`、`/v1/embeddings` 当前仅非流式。
+- 当前上游 Adapter 为 OpenAI Compatible；其他上游协议在调用前明确拒绝。
+- 多实例配额与限流为实例级语义，不是分布式一致。
+- 连接超时的毫秒级计时需在无透明代理环境验收；保留 IP 被透明网关代理时不能作为有效超时用例。
 - 供应商凭证支持落库加密（`NEXMUX_CREDENTIAL_SECRET`，AES-GCM，`aesgcm:v1` 前缀密文）；未配置时明文存储并启动告警——生产必配，并保证库文件与备份的访问控制。
 - 调试台穿透会产生真实上游调用与费用：生产建议 `debugInvokeEnabled=false` 或收紧配额。
 - 本地双进程共用 H2（`AUTO_SERVER`）：进程被强杀（如超时杀进程组）后 `.lock.db` 残留会使另一进程的 AUTO_SERVER TCP 握手 EOF——停全部进程、删 `out/db/*.lock.db` 后重启。系统 SOCKS 代理不可用时需加 `-Djava.net.useSystemProxies=false`（H2 AUTO_SERVER 与上游调用都会走路径代理）。
 
-## 8. 发布检查单
+## 9. 发布检查单
 
 - [ ] `CONSOLE_TOKEN_SECRET` 已注入（非示例值）
 - [ ] `DB_URL` 为绝对路径，两进程指向同一库文件

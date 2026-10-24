@@ -1,6 +1,9 @@
-# Nexmux Model Console 管理控制面 测试报告
+# Nexmux Model Console 管理控制面 测试报告（历史归档）
 
-> **对应测试方案**：[nexmux-console-test-plan.md](./nexmux-console-test-plan.md)（149 个测试点）
+> **状态**：历史归档（2026-10-13 一次执行结果，D-01~D-06 多数已修复，不代表当前质量结论）。
+> **当前端测基线**：`nexmux-console-runtime-e2e-plan.md`。
+
+> **对应测试方案**：[nexmux-console-test-plan.md](../nexmux-console-test-plan.md)（149 个测试点）
 > **被测版本**：`localhost:9011`（前端 Next.js dev）/ `localhost:8082`（Console 服务端）
 > **执行时间**：2026-10-13
 > **执行方式**：Playwright Chromium 无头浏览器，使用者操作路径（含真实写操作与真实上游调用）

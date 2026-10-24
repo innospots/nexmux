@@ -2,9 +2,10 @@
 
 ## 1. 文档定位
 
-- **状态**：草案（2026-09-26 字段与 PRD 对齐修订）
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **最近修订**：2026-10-24
 - **归属模块**：`nexmux-kernel`
-- **上级文档**：[nexmux-architecture-design.md](./nexmux-architecture-design.md)、[nexmux-p0-console-design.md](./nexmux-p0-console-design.md)
+- **上级文档**：[nexmux-architecture-design.md](./nexmux-architecture-design.md)、[nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md)
 - **控制台入口**：[nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)（Entity 与菜单/pageKey 映射）
 - **产品依据**：《管理控制台产品功能设计文档》§7.1–§7.2、线框 Provider/Model 页
 
@@ -143,6 +144,7 @@ Binding 层 C/M 仍在主绑定列与 `extra_bindings` 内；Runtime 计费时�
 | status | status | varchar(16) | N | DRAFT / PUBLISHED / DISABLED |
 | routeSpec | route_spec | clob | N | 编辑中 `RouteSpec` |
 | publishedRouteSpec | published_route_spec | clob | Y | Runtime 读取 |
+| configRevision | config_revision | bigint | Y | 发布/回滚递增的运行修订号 |
 | publishedAt | published_at | timestamp | Y | |
 | publishedBy | published_by | varchar(64) | Y | |
 
@@ -154,8 +156,8 @@ Binding 层 C/M 仍在主绑定列与 `extra_bindings` 内；Runtime 计费时�
 
 - 持久化：`mux_model.pricing_spec`（CLOB）。
 - 内存结构：`ModelPricingSpec`（`domain.value`），含 `currency`、`versionLabel`、`effectiveAt`、`tiers[]`、`timeRules[]` 等，与 UI 表单/「JSON 模式」一致。
-- 保存定价：更新 `pricing_spec` + 写 `mux_config_audit_log`（`change_diff` 可支撑「版本历史 Diff」；**不**另建价格版本表）。
-- P1 成本明细：`pricing_snapshot` 仍由 Runtime 在请求侧落库（列名沿用 PRD），内容为当时 Model `pricing_spec` + Binding 倍率的快照。
+- 保存定价：更新 `pricing_spec`，生成 `priceVersion`、`priceEffective` 和历史 `priceVersions`，同时写 `mux_config_audit_log`；**不**另建价格版本表。
+- 成本明细：Runtime 按 input_tokens 命中档，计算 input/output/cache read/cache write 标准金额，应用 Model 时段倍率，再分别应用 Binding C/M；`pricing_snapshot` 含版本、生效时间、命中档、C/M 与实际 Binding。
 
 ---
 
@@ -176,6 +178,7 @@ Binding 层 C/M 仍在主绑定列与 `extra_bindings` 内；Runtime 计费时�
 | quotaSpec | quota_spec | clob | Y | |
 | rateLimitSpec | rate_limit_spec | clob | Y | |
 | sourceTemplateId | source_template_id | varchar(32) | Y | P1 |
+| configRevision | config_revision | bigint | Y | 授权/配额/限流共用策略修订号 |
 
 ### 8.2 `ClientTemplateEntity` → `mux_client_template`
 
@@ -188,7 +191,7 @@ Binding 层 C/M 仍在主绑定列与 `extra_bindings` 内；Runtime 计费时�
 | Entity | 表 | 要点 |
 |--------|-----|------|
 | ConfigAuditLogEntity | mux_config_audit_log | `change_diff`（原 diff_json 命名已废） |
-| RequestLogEntity | mux_request_log | `route_trace`；P1 成本可加 `pricing_snapshot` |
+| RequestLogEntity | mux_request_log | `route_trace`、`pricing_snapshot`、`standard_usd`（标准参考金额）、`billing_usd`（内部参考消费金额）、`cost_usd`（供应商成本估算） |
 
 ---
 

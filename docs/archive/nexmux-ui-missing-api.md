@@ -1,4 +1,7 @@
-# Nexmux UI 缺失服务端接口清单（剩余缺口）
+# Nexmux UI 缺失服务端接口清单（历史归档）
+
+> **状态**：历史归档（本文多数缺口已关闭，不再作为当前缺失清单）。模型调用测试、删除接口、默参、Binding 整包、定价版本均已实现；剩余细粒度行级编辑需求以功能清单和端测计划为准。
+> **替代文档**：`nexmux-console-runtime-feature-inventory.md`、`design/nexmux-ui-data-api-inventory.md`。
 
 > 初核：2026-10-06；**复核：2026-10-12**；**二次复核：2026-10-13**（补正：model / client / client-template 删除经实体端点 `@DELETE /api/d/{models,clients,client-templates}/{id}` 实现，上一轮漏查误判为缺失）。
 > 数据接口层约定：**按 pactor-prd template 最新版**（skill v1.4.0+，commit `dfd9342`，2026-10-08）——mock/services 层已移除，页面数据一律 `type: http` 经纯转发层 `app/api/d/[...parts]/route.ts` 直连服务端，**路径即契约**。

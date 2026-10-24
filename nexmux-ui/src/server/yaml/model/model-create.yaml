@@ -269,7 +269,7 @@ body:
                           showIcon: true
                           variant: info
                           className: mb-4
-                          message: 调用时的默认执行参数；客户端可在允许范围内覆盖。max_tokens 默认值不得超过基本信息中的 Max Tokens。【暂不支持】默认参数当前仅作登记展示，暂未合并进 Runtime 转发请求（P1 批次接入）。
+                          message: 调用时的默认执行参数；客户端显式参数优先于 Model 默认值。max_tokens 默认值不得超过基本信息中的 Max Tokens。
                       - type: Grid
                         props:
                           columns: 2

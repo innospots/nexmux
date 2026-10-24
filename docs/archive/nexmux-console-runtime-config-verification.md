@@ -1,4 +1,7 @@
-# Model Console → Model Runtime 配置生效性核查
+# Model Console → Model Runtime 配置生效性核查（历史归档）
+
+> **状态**：历史归档（早期配置核查与修复记录，已被 100 项端测计划和修复记录取代）。
+> **当前端测基线**：`nexmux-console-runtime-e2e-plan.md`。
 
 > **目的**：找出 Model Console 中「用于控制 Model Runtime 行为」的配置项，并逐项验证它们是否真正影响 Runtime。
 > **被测**：Console `:8082`、Runtime `:8083`（`local,runtime`，共用 H2 配置库）、控制台 UI `:9011`。
@@ -7,7 +10,7 @@
 >
 > **修复状态**：§4 缺口 G-01/G-03~G-08 已于 2026-10-13 修复并实测复验（commit `d9fae6c`；G-02 刻意延后 P1）；2026-10-22 另有 4 项 Runtime 行为变更影响本文口径，详见 **§7 修复状态与变更附录**（阅读 §2~§4 时请以 §7 为准）。
 >
-> 相关：[Runtime 设计](./design/nexmux-runtime-design.md)、[Console/Runtime 边界 ADR](./design/adr/0001-console-runtime-configuration-boundary.md)、[功能说明书](./nexmux-functional-guide.md)。
+> 相关：[Runtime 设计](../design/nexmux-runtime-design.md)、[Console/Runtime 边界 ADR](../design/adr/0001-console-runtime-configuration-boundary.md)、[功能说明书](../nexmux-functional-guide.md)。
 
 ---
 

@@ -2,14 +2,14 @@
 
 ## 1. 文档定位
 
-- **状态**：草案
-- **日期**：2026-09-26
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-09-26（最近修订：2026-10-24）
 - **归属**：`nexmux-kernel` → `com.innospots.nexmux.console.entry` / `console.catalog`
 - **关联**：
   - 产品信息架构 §5：[管理控制台产品功能设计文档](../../../product-design/nexmux/模型管理系统-管理控制台产品功能设计文档.md)
   - 线框索引：[prd-diagram/README.md](../../../product-design/nexmux/prd-diagram/README.md)
   - 领域实体：[nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)
-  - 权限 key：[nexmux-p0-console-design.md](./nexmux-p0-console-design.md) §6
+  - 权限 key：[nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md) §6
 - **规范参考**：Nexus `ConsoleModuleDescriptor`、`ConsolePluginContribution`、`MenuDeclaration`（`innospots-nexus-console` / `innospots-nexus-plugin`）
 
 ## 2. 概念边界
@@ -121,11 +121,12 @@ nexmux（MODULE，不在侧栏单独显示时可作为根 module）
 |--------|-----------|---------------|-------------------|----------------------|
 | ProviderEntity | `providerCode` | `/providers` | `nexmux.provider.view` | `nexmux.provider.manage` |
 | ModelEntity | `modelCode` | `/models` | `nexmux.provider.view`（复用资产查看）或 `nexmux.model.view`（若拆分） | `nexmux.model.manage` |
-| RouteEntity | `alias` | `/routes` | `nexmux.provider.view` | `nexmux.route.publish` + 编辑同 manage |
+| RouteEntity | `alias` | `/routes` | `nexmux.route.view` | `nexmux.route.manage` + `nexmux.route.publish` |
 | ClientEntity | `clientCode` | `/clients` | `nexmux.provider.view` | `nexmux.client.secret`（轮换）+ 策略编辑 |
 | RequestLogEntity | `requestId` | `/request-logs` | `nexmux.ops.logs.view` | — |
 | ConfigAuditLogEntity | `auditId` | `/audit-logs` | `nexmux.audit.view` | — |
-| ClientTemplateEntity | `templateCode` | `/client-templates`（P1） | P1 同 client 查看 | P1 manage |
+| ClientTemplateEntity | `templateCode` | `/client-templates` | `nexmux.client.view` | `nexmux.client.manage` |
+| DebugInvoke | `modelCode` / `clientCode` | `/debug` | `nexmux.debug.invoke` | 同左 |
 
 **页面级鉴权**：列表/详情请求携带 `X-Nexus-Page-Key: {pageKey}`；与 `nexmux.console.web` 配置一致（见 `nexmux-spring` `console-web.yaml`）。
 

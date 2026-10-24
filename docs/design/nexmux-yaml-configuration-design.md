@@ -2,13 +2,13 @@
 
 ## 1. 文档定位
 
-- **状态**：已采纳（与 `innospots-nexus-plugin` PageDsl、`ConsoleModuleDeclaration` 现行契约对齐）
-- **日期**：2026-09-27
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-09-27（最近修订：2026-10-24）
 - **归属**：`nexmux-kernel`（PageDsl）、`nexmux-spring`（Spring / Nexus 宿主配置）
 - **关联**：
   - [nexmux-ui-spec-pages-design.md](./nexmux-ui-spec-pages-design.md) — 页面方案与线框映射
   - [nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md) — Entry、`pagePath`、权限
-  - [nexmux-p0-console-design.md](./nexmux-p0-console-design.md) — `nexmux.*` 业务配置键
+  - [nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md) — `nexmux.*` 业务配置键
   - [ADR-0001](./adr/0001-console-runtime-configuration-boundary.md) — Console / Runtime 配置边界
   - Nexus：`PageDslConfig`、`ClasspathPageDslLoader`、`ConsoleCatalogSyncService`
 
@@ -63,6 +63,8 @@
 | `nexmux.client.app-key-grace-seconds` | int | AppKey 轮换宽限期（秒） | `ClientService` |
 | `nexmux.debug.max-response-body-bytes` | int | 调试台响应体上限 | `DebugService` |
 | `nexmux.runtime.snapshot-poll-interval-seconds` | int | Runtime 拉取 `published_route_spec` 间隔 | **仅 Runtime/inbound**；Console 只写库 |
+| `nexmux.runtime.log-retention-initial-delay-minutes` | int | 日志清理首跑延迟，默认 10 分钟 | Runtime `RequestLogRetentionCleaner`；测试可设 0 |
+| `nexmux.runtime.log-retention-period-minutes` | int | 日志清理周期，默认 1440（每日） | 同上 |
 
 **约束**：
 
@@ -132,7 +134,7 @@ nexmux-kernel/src/main/resources/ui-pages/nexmux/provider/nexmux-provider-list.y
 | `dsl` | 字面量 `'1.0'`（与 Nexus 一致） |
 | 未知字段 | 默认 **严格**：`PageDslConfig.failOnUnknownProperties=true`，拼写错误即启动/同步失败 |
 | 最小 P0 壳 | 须含 `page`、`meta`、`route`；`dataSources` / `actions` 可为 `{}`；`body` 可省略或 `null` |
-| `page.permission` | 与 [P0 §6](./nexmux-p0-console-design.md) 的 `nexmux.*` key 一致 |
+| `page.permission` | 与 [P0 §6](../archive/nexmux-p0-console-design.md) 的 `nexmux.*` key 一致 |
 | `regions` | Nexmux 文档扩展段；解析器可忽略，**不得**与 PageDsl 标准段键名冲突 |
 
 ### 6.4 数据绑定与领域命名

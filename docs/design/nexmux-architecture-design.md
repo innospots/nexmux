@@ -2,13 +2,13 @@
 
 ## 1. 文档定位
 
-- **状态**：草案（待 grill-me 评审关闭开放问题）
-- **日期**：2026-09-26
+- **状态**：定稿（当前实现，2026-10-24 核验）
+- **日期**：2026-09-26（最近修订：2026-10-24）
 - **归属模块**：`nexmux-kernel`、`nexmux-spring`、`nexmux-ui`（前端仅引用，本稿不展开 UI 实现）
 - **关联文档**：
   - [nexmux-design-catalog.md](../nexmux-design-catalog.md)
   - [ADR-0001 Console/Runtime 边界](./adr/0001-console-runtime-configuration-boundary.md)
-  - [nexmux-p0-console-design.md](./nexmux-p0-console-design.md)
+  - [nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md)
   - [nexmux-domain-layer-design.md](./nexmux-domain-layer-design.md)
   - [nexmux-console-entry-plugin-design.md](./nexmux-console-entry-plugin-design.md)
   - [nexmux-ui-spec-pages-design.md](./nexmux-ui-spec-pages-design.md)
@@ -16,11 +16,11 @@
 
 ## 2. 背景与目标
 
-**Nexmux** 是企业级 **模型资源管理 + 网关 + 运行治理** 平台。本仓库实现 **Model Console**（管理控制面），并预留 **Model Runtime**（数据面）在 `inbound` 包的代码归属。
+**Nexmux** 是企业级 **模型资源管理 + 网关 + 运行治理** 平台。本仓库实现 **Model Console**（管理控制面）与 **Model Runtime**（数据面）：Console 负责配置、发布和审计，Runtime 在 `inbound` 包通过独立 profile 进程提供 `/v1/**` 调用。
 
 **成功标准（工程侧）**
 
-1. P0 完成 PRD §25.1「可调用闭环」所需的 Console API、配置持久化、发布与审计（Runtime 联调可滞后但契约先行）。
+1. 完成 Console API、配置持久化、发布与审计，以及真实 Runtime 调用闭环；配置变更经快照生效，Console 离线不影响已加载流量。当前 Runtime 提供 Chat Completions（含 SSE）、Responses、Messages、Embeddings（后三者非流式）与模型发现。
 2. 控制面仅依赖 `innospots-nexus-platform`（内核）+ `innospots-nexus-spring-platform`（组装），不复制 Nexus 模块树。
 3. 配置对象平台级统一治理，**不**在 Nexmux 域模型引入 Tenant/Workspace 隔离字段。
 
@@ -289,7 +289,7 @@ public record ClientRotateAppKeyRequest(
 
 | 阶段 | 工程交付物 |
 |------|------------|
-| **P0** | [nexmux-p0-console-design.md](./nexmux-p0-console-design.md) 全部管理 API + 发布 + 审计 + 日志只读 + 调试台 API；`nexmux-ui` P0 页面 |
+| **P0** | [nexmux-p0-console-design.md](../archive/nexmux-p0-console-design.md) 全部管理 API + 发布 + 审计 + 日志只读 + 调试台 API；`nexmux-ui` P0 页面 |
 | **P1** | Dashboard、Template、多维用量、成本明细、条件路由/灰度/Failover 等；可能引入只读 OLAP 或导出任务 |
 | **P2** | 智能路由策略包；`inbound` 内策略扩展点 |
 

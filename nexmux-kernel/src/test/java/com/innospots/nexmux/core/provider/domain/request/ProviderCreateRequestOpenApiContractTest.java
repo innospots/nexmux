@@ -26,6 +26,7 @@ class ProviderCreateRequestOpenApiContractTest {
                 String.class,
                 Integer.class,
                 String.class,
+                String.class,
                 String.class);
         assertThat(constructor.getParameters()[0].getAnnotation(Schema.class).description()).isEqualTo("唯一编码");
     }
@@ -46,6 +47,7 @@ class ProviderCreateRequestOpenApiContractTest {
                         "region",
                         "timeoutMs",
                         "apiKey",
-                        "description");
+                        "description",
+                        "proxy");
     }
 }

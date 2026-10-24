@@ -151,6 +151,7 @@ public class RouteViewAssembler {
                 enabledModelCount,
                 weightTotal,
                 detail == null || detail.updatedAt() == null ? "" : formats.shortDate(detail.updatedAt()),
+                detail == null ? null : detail.configRevision(),
                 hasUnpublishedChanges);
     }
 

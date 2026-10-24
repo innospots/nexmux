@@ -3,7 +3,11 @@ package com.innospots.nexmux.inbound.ingress;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexmux.inbound.pipeline.InvocationPipeline;
 import com.innospots.nexus.base.exception.NexusException;
+import com.innospots.nexus.base.thread.TLC;
+import com.innospots.nexus.core.jaxrs.support.RequestProperties;
+import com.innospots.nexus.core.jaxrs.support.RequestScope;
 import jakarta.ws.rs.POST;
+import jakarta.ws.rs.container.ContainerRequestContext;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.StreamingOutput;
@@ -98,6 +102,59 @@ class RuntimeIngressEndpointContractTest {
         assertThat(response.getStatus()).isEqualTo(400);
         assertThat((String) response.getEntity()).contains("context too long");
         assertThat(response.getHeaderString("x-request-id")).isEqualTo("rq-x1");
+    }
+
+    @Test
+    void alignsPlatformRequestIdWithRuntimeLogId() {
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+        Map<String, Object> body = Map.of("model", "general", "messages", List.of());
+        InvocationPipeline.InvocationContext context = new InvocationPipeline.InvocationContext(
+                "rq-aligned", "trace-aligned", null, null, null, null, null, null, List.of());
+        Mockito.when(pipeline.invoke(Mockito.any(), Mockito.any(), Mockito.anyString()))
+                .thenReturn(new InvocationPipeline.InvocationResult(
+                        200, "{\"ok\":true}", 5, 5, null, null, context));
+        ContainerRequestContext request = Mockito.mock(ContainerRequestContext.class);
+        RequestScope.bind(request);
+        try {
+            endpoint.chatCompletions("Bearer gw-sk-a", null, body);
+
+            Mockito.verify(request).setProperty(RequestProperties.REQUEST_ID, "rq-aligned");
+            assertThat(TLC.getString(TLC.TRACE_ID)).isEqualTo("rq-aligned");
+        } finally {
+            RequestScope.clear();
+            TLC.clear();
+        }
+    }
+
+    @Test
+    void mapsResponsesMessagesAndEmbeddingsContracts() {
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+        InvocationPipeline.InvocationContext context = new InvocationPipeline.InvocationContext(
+                "rq-protocol", "trace-protocol", null, null, null, null, null, null, List.of());
+        String chat = "{\"id\":\"c1\",\"model\":\"stub-a\",\"choices\":[{\"message\":{\"content\":\"pong\"}}],"
+                + "\"usage\":{\"prompt_tokens\":2,\"completion_tokens\":3}}";
+        Mockito.when(pipeline.invokeOperation(Mockito.any(), Mockito.any(), Mockito.eq("/v1/responses"), Mockito.eq("/responses")))
+                .thenReturn(new InvocationPipeline.InvocationResult(200, chat, 1, 1, 2L, 3L, context));
+        Mockito.when(pipeline.invokeOperation(Mockito.any(), Mockito.any(), Mockito.eq("/v1/messages"), Mockito.eq("/messages")))
+                .thenReturn(new InvocationPipeline.InvocationResult(200, chat, 1, 1, 2L, 3L, context));
+        Mockito.when(pipeline.invokeOperation(Mockito.any(), Mockito.any(), Mockito.eq("/v1/embeddings"), Mockito.eq("/embeddings")))
+                .thenReturn(new InvocationPipeline.InvocationResult(200,
+                        "{\"object\":\"list\",\"data\":[{\"embedding\":[0.1]}]}", 1, 1, null, null, context));
+
+        Response responses = endpoint.responses("Bearer gw-sk-a", null,
+                Map.of("model", "general", "input", "ping"));
+        Response messages = endpoint.messages("Bearer gw-sk-a", null,
+                Map.of("model", "general", "messages", List.of(Map.of("role", "user", "content", "ping"))));
+        Response embeddings = endpoint.embeddings("Bearer gw-sk-a", null,
+                Map.of("model", "general", "input", "ping"));
+
+        assertThat((String) responses.getEntity()).contains("\"object\":\"response\"")
+                .contains("\"type\":\"output_text\"").contains("pong");
+        assertThat((String) messages.getEntity()).contains("\"type\":\"message\"")
+                .contains("\"stop_reason\":\"end_turn\"");
+        assertThat((String) embeddings.getEntity()).contains("\"embedding\":[0.1]");
     }
 
     @Test

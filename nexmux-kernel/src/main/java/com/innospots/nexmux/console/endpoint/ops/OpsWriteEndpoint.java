@@ -18,6 +18,7 @@ import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
 import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.route.service.RouteService;
+import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -25,7 +26,9 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import org.eclipse.microprofile.openapi.annotations.Operation;
 import org.eclipse.microprofile.openapi.annotations.media.Schema;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
@@ -93,7 +96,8 @@ public class OpsWriteEndpoint {
                 body != null && body.has("timeoutMs") && body.get("timeoutMs").isNumber()
                         ? body.get("timeoutMs").asInt() : null,
                 textOrNull(body, "apiKey"),
-                textOrNull(body, "description")));
+                textOrNull(body, "description"),
+                textOrNull(body, "proxy")));
         return OpsResult.OK;
     }
 
@@ -120,7 +124,8 @@ public class OpsWriteEndpoint {
                 body != null && body.has("timeoutMs") && body.get("timeoutMs").isNumber()
                         ? body.get("timeoutMs").asInt() : null,
                 textOrNull(body, "apiKey"),
-                textOrNull(body, "description")));
+                textOrNull(body, "description"),
+                textOrNull(body, "proxy")));
         return OpsResult.OK;
     }
 
@@ -162,7 +167,16 @@ public class OpsWriteEndpoint {
                 positiveLongOrNull(body, "maxOutputTokens"),
                 stringListOrNull(body, "inputModalities"),
                 stringListOrNull(body, "outputModalities"),
-                stringListOrNull(body, "tags")));
+                stringListOrNull(body, "tags"),
+                jsonTextOrNull(body, "metadata"),
+                defaultParamsOf(body),
+                capabilityTagsOf(body),
+                integerOrNull(body, "primaryBindingWeight"),
+                decimalOrNull(body, "primaryCostMultiplier"),
+                decimalOrNull(body, "primaryReferenceMultiplier"),
+                flagOrNull(body, "primaryBindingEnabled"),
+                jsonTextOrNull(body, "extraBindings"),
+                jsonTextOrNull(body, "pricingSpec")));
         return OpsResult.OK;
     }
 
@@ -183,7 +197,16 @@ public class OpsWriteEndpoint {
                 stringListOrNull(body, "inputModalities"),
                 stringListOrNull(body, "outputModalities"),
                 stringListOrNull(body, "tags"),
-                textOrNull(body, "description")));
+                textOrNull(body, "description"),
+                jsonTextOrNull(body, "metadata"),
+                defaultParamsOf(body),
+                capabilityTagsOf(body),
+                integerOrNull(body, "primaryBindingWeight"),
+                decimalOrNull(body, "primaryCostMultiplier"),
+                decimalOrNull(body, "primaryReferenceMultiplier"),
+                flagOrNull(body, "primaryBindingEnabled"),
+                jsonTextOrNull(body, "extraBindings"),
+                jsonTextOrNull(body, "pricingSpec")));
         if ("enabled".equals(textOrNull(body, "status")) && created.modelId() != null) {
             modelService.setEnabled(created.modelId(), true);
         }
@@ -290,6 +313,55 @@ public class OpsWriteEndpoint {
 
     // ── 表单字段提取（数组 / 逗号·中文顿号分隔文本兼容） ──────
 
+    private static String jsonTextOrNull(JsonNode body, String field) {
+        if (body == null || !body.hasNonNull(field)) {
+            return null;
+        }
+        JsonNode value = body.get(field);
+        if (value.isObject() || value.isArray()) {
+            return NexmuxJson.write(value);
+        }
+        String text = value.asText().trim();
+        return text.isEmpty() || "—".equals(text) ? null : text;
+    }
+
+    /** 同时接受结构化 defaultParams 与页面平铺参数。 */
+    private static String defaultParamsOf(JsonNode body) {
+        String direct = jsonTextOrNull(body, "defaultParams");
+        if (direct != null) {
+            return direct;
+        }
+        Map<String, Object> params = new LinkedHashMap<>();
+        putParam(body, params, "temperature", "temperature");
+        putParam(body, params, "topP", "topP");
+        putParam(body, params, "topK", "topK");
+        putParam(body, params, "maxTokensParam", "maxTokens");
+        putParam(body, params, "frequencyPenalty", "frequencyPenalty");
+        putParam(body, params, "presencePenalty", "presencePenalty");
+        putParam(body, params, "reasoningEffort", "reasoningEffort");
+        putParam(body, params, "seed", "seed");
+        putParam(body, params, "stopSequences", "stopSequences");
+        putParam(body, params, "responseFormat", "responseFormat");
+        return params.isEmpty() ? null : NexmuxJson.write(params);
+    }
+
+    private static void putParam(JsonNode body, Map<String, Object> params,
+                                 String field, String target) {
+        if (body == null || !body.hasNonNull(field)) {
+            return;
+        }
+        JsonNode value = body.get(field);
+        if (value.isTextual() && (value.asText().isBlank() || "—".equals(value.asText()))) {
+            return;
+        }
+        params.put(target, value);
+    }
+
+    private static String capabilityTagsOf(JsonNode body) {
+        List<String> capabilities = stringListOrNull(body, "capabilities");
+        return capabilities == null ? null : NexmuxJson.write(capabilities);
+    }
+
     static String textOrNull(JsonNode body, String field) {
         if (body == null) {
             return null;
@@ -321,6 +393,11 @@ public class OpsWriteEndpoint {
 
     private static List<String> orElse(List<String> value, List<String> fallback) {
         return value == null ? fallback : value;
+    }
+
+    private static Integer integerOrNull(JsonNode body, String field) {
+        return body != null && body.hasNonNull(field) && body.get(field).isNumber()
+                ? body.get(field).intValue() : null;
     }
 
     static Long positiveLongOrNull(JsonNode body, String field) {

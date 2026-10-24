@@ -52,6 +52,8 @@ public record ClientDetailVo(
         List<String> tags,
         @Schema(description = "到期时间", format = "date-time")
         LocalDateTime expiresAt,
+        @Schema(description = "策略配置修订号")
+        Long configRevision,
         @Schema(description = "创建时间", format = "date-time")
         LocalDateTime createdAt,
         @Schema(description = "更新时间", format = "date-time")

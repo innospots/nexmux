@@ -7,10 +7,18 @@ import com.innospots.nexmux.core.model.domain.request.ModelCreateRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelPageRequest;
 import com.innospots.nexmux.core.model.domain.request.ModelUpdateRequest;
 import com.innospots.nexmux.core.model.domain.vo.ModelDetailVo;
+import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderEntity;
+import com.innospots.nexmux.core.provider.service.ProviderService;
+import com.innospots.nexmux.core.debug.service.DebugService;
+import com.innospots.nexmux.core.debug.domain.vo.DebugInvokeResultVo;
+import com.innospots.nexmux.core.provider.domain.vo.ConnectionTestVo;
+import com.innospots.nexmux.core.route.dao.RouteDao;
+import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
+import java.math.BigDecimal;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +33,9 @@ class ModelServiceTest {
 
     private ModelDao modelDao;
     private ProviderDao providerDao;
+    private RouteDao routeDao;
+    private ProviderService providerService;
+    private DebugService debugService;
     private ModelService modelService;
 
     @BeforeEach
@@ -36,7 +47,11 @@ class ModelServiceTest {
                 com.innospots.nexmux.core.model.domain.entity.ModelEntity.class);
         modelDao = Mockito.mock(ModelDao.class);
         providerDao = Mockito.mock(ProviderDao.class);
-        modelService = new ModelService(modelDao, providerDao, Mockito.mock(ConfigAuditService.class));
+        routeDao = Mockito.mock(RouteDao.class);
+        providerService = Mockito.mock(ProviderService.class);
+        debugService = Mockito.mock(DebugService.class);
+        modelService = new ModelService(modelDao, providerDao, routeDao,
+                Mockito.mock(ConfigAuditService.class), providerService, debugService);
     }
 
     private ProviderEntity provider(String id, String code) {
@@ -80,7 +95,7 @@ class ModelServiceTest {
                 "qwen3.5-flash", "Qwen3.5 Flash", "LLM",
                 "dashscope", "qwen3.5-flash", null,
                 262144L, 32768L, List.of("text", "image"), List.of("text"),
-                List.of("general"), "轻量通用模型"));
+                List.of("general"), "轻量通用模型", null, null, null, null, null, null, null, null, null));
 
         assertThat(vo.modelCode()).isEqualTo("qwen3.5-flash");
         Mockito.verify(modelDao).insert(Mockito.<ModelEntity>argThat(e ->
@@ -96,7 +111,8 @@ class ModelServiceTest {
 
         assertThatThrownBy(() -> modelService.create(new ModelCreateRequest(
                 "m1", "M1", "LLM", "ghost", null, null,
-                null, null, null, null, null, null)))
+                null, null, null, null, null, null, null, null, null, null, null, null,
+                null, null, null)))
                 .isInstanceOfSatisfying(NexusException.class, e ->
                         assertThat(e.code()).isEqualTo(
                                 NexmuxStatusCode.RESOURCE_NOT_FOUND.fullCode()));
@@ -137,7 +153,8 @@ class ModelServiceTest {
 
         modelService.update("md-1", new ModelUpdateRequest(
                 "Qwen3.5 Flash（新）", "更新描述", 128000L, 8192L,
-                List.of("text"), List.of("text"), List.of("fast")));
+                List.of("text"), List.of("text"), List.of("fast"), null, null, null,
+                null, null, null, null, null, null));
 
         assertThat(entity.getDisplayName()).isEqualTo("Qwen3.5 Flash（新）");
         assertThat(entity.getContextLength()).isEqualTo(128000L);
@@ -155,6 +172,125 @@ class ModelServiceTest {
 
         assertThat(entity.getStatus()).isEqualTo("DISABLED");
         assertThat(vo.status()).isEqualTo("DISABLED");
+    }
+
+    @Test
+    void enableRejectsUnavailableProvider() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        entity.setStatus("DRAFT");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        when(providerDao.selectById("pv-1")).thenReturn(null);
+
+        assertThatThrownBy(() -> modelService.setEnabled("md-1", true))
+                .isInstanceOf(NexusException.class);
+        assertThat(entity.getStatus()).isEqualTo("DRAFT");
+    }
+
+    @Test
+    void invokeTestRejectsUnavailableProvider() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        when(providerDao.selectById("pv-1")).thenReturn(null);
+
+        assertThatThrownBy(() -> modelService.invokeTest("md-1"))
+                .isInstanceOf(NexusException.class);
+    }
+
+    @Test
+    void enableChecksReadinessBeforeEnabling() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        entity.setStatus("DRAFT");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        stubReadyProvider();
+
+        ModelVo result = modelService.setEnabled("md-1", true);
+
+        assertThat(result.status()).isEqualTo("ENABLED");
+        Mockito.verify(providerService).connectionTest("pv-1");
+    }
+
+    @Test
+    void enableRejectsFailedConnectionTest() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        entity.setStatus("DRAFT");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        when(providerDao.selectById("pv-1")).thenReturn(provider("pv-1", "dashscope"));
+        when(providerService.connectionTest("pv-1"))
+                .thenReturn(new ConnectionTestVo(false, 1, "unavailable"));
+
+        assertThatThrownBy(() -> modelService.setEnabled("md-1", true))
+                .isInstanceOf(NexusException.class);
+        assertThat(entity.getStatus()).isEqualTo("DRAFT");
+    }
+
+    @Test
+    void invokeTestUsesRealDebugCall() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        stubReadyProvider();
+        DebugInvokeResultVo debugResult = Mockito.mock(DebugInvokeResultVo.class);
+        when(debugResult.status()).thenReturn(200);
+        when(debugService.modelInvoke(Mockito.any())).thenReturn(debugResult);
+
+        boolean result = modelService.invokeTest("md-1");
+
+        assertThat(result).isTrue();
+        Mockito.verify(debugService).modelInvoke(Mockito.argThat(request ->
+                "qwen3.5-flash".equals(request.modelCode())));
+    }
+
+    @Test
+    void deleteRejectsRouteReference() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+        RouteEntity route = new RouteEntity();
+        route.setRouteSpec("{\"candidates\":[{\"modelCode\":\"qwen3.5-flash\",\"weight\":100}]}");
+        when(routeDao.selectList(null)).thenReturn(List.of(route));
+
+        assertThatThrownBy(() -> modelService.delete("md-1"))
+                .isInstanceOf(NexusException.class);
+        Mockito.verify(modelDao, Mockito.never()).deleteById("md-1");
+    }
+
+    @Test
+    void updateAppliesBindingConfiguration() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+
+        modelService.update("md-1", new ModelUpdateRequest(
+                null, null, null, null, null, null, null, null, null, null,
+                80, new BigDecimal("2"), new BigDecimal("3"), false,
+                "[{\"providerId\":\"pv-2\",\"providerModelId\":\"stub-b\",\"weight\":20}]", null));
+
+        assertThat(entity.getPrimaryBindingWeight()).isEqualTo(80);
+        assertThat(entity.getPrimaryCostMultiplier()).isEqualByComparingTo("2");
+        assertThat(entity.getPrimaryReferenceMultiplier()).isEqualByComparingTo("3");
+        assertThat(entity.getPrimaryBindingEnabled()).isFalse();
+        assertThat(entity.getExtraBindings()).contains("stub-b");
+    }
+
+    @Test
+    void updateCreatesPricingVersionAndHistory() {
+        ModelEntity entity = model("md-1", "qwen3.5-flash");
+        entity.setPricingSpec("{\"input\":10,\"output\":20,\"priceVersion\":\"v1\","
+                + "\"priceEffective\":\"2026-01-01T00:00:00\"}");
+        when(modelDao.selectById("md-1")).thenReturn(entity);
+
+        modelService.update("md-1", new ModelUpdateRequest(
+                null, null, null, null, null, null, null, null, null, null,
+                null, null, null, null, null,
+                "{\"input\":30,\"output\":40,\"priceVersion\":\"v2\"}"));
+
+        assertThat(entity.getPricingSpec()).contains("\"priceVersion\":\"v2\"")
+                .contains("\"current\":true")
+                .contains("\"version\":\"v1\"")
+                .contains("\"current\":false");
+    }
+
+    private void stubReadyProvider() {
+        when(providerDao.selectById("pv-1")).thenReturn(provider("pv-1", "dashscope"));
+        when(providerService.connectionTest("pv-1"))
+                .thenReturn(new ConnectionTestVo(true, 1, "ok"));
     }
 
     // ── page 筛选 ─────────────────────────────────────────────

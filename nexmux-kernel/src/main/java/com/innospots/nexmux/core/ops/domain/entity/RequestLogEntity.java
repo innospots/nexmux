@@ -85,6 +85,9 @@ public class RequestLogEntity extends BaseEntity {
     private Long cacheWriteTokens;
 
     @Column(precision = 18, scale = 8)
+    private java.math.BigDecimal standardUsd;
+
+    @Column(precision = 18, scale = 8)
     private java.math.BigDecimal costUsd;
 
     @Column(precision = 18, scale = 8)

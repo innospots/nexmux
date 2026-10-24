@@ -166,7 +166,8 @@ public class ClientViewAssembler {
                 expiresAt.isEmpty()
                         ? appKeyId + " · 永不过期 · " + authRoutes.size() + " 路由 · " + rateLimitSummary
                         : appKeyId + " · 到期 " + expiresAt.substring(0, 10)
-                                + " · " + authRoutes.size() + " 路由 · " + rateLimitSummary);
+                                + " · " + authRoutes.size() + " 路由 · " + rateLimitSummary,
+                detail == null ? null : detail.configRevision());
     }
 
     private static AuthRoute authRouteOf(RouteVo route) {

@@ -5,6 +5,7 @@ import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.route.domain.request.RoutePublishRequest;
 import com.innospots.nexmux.core.shared.analysis.DependencyImpactAnalyzer;
+import com.innospots.nexmux.core.audit.dao.ConfigAuditLogDao;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
 import java.util.List;
@@ -30,7 +31,8 @@ class RoutePublishServiceTest {
         routeDao = Mockito.mock(RouteDao.class);
         configAuditService = Mockito.mock(ConfigAuditService.class);
         dependencyImpactAnalyzer = Mockito.mock(DependencyImpactAnalyzer.class);
-        routeService = new RouteService(routeDao, configAuditService, dependencyImpactAnalyzer);
+        routeService = new RouteService(routeDao, configAuditService, dependencyImpactAnalyzer,
+                Mockito.mock(ConfigAuditLogDao.class));
     }
 
     @Test
@@ -47,6 +49,7 @@ class RoutePublishServiceTest {
 
         assertThat(result.status()).isEqualTo("PUBLISHED");
         assertThat(entity.getPublishedRouteSpec()).isEqualTo(entity.getRouteSpec());
+        assertThat(entity.getConfigRevision()).isEqualTo(1L);
         verify(configAuditService).record("ROUTE", "rt-1", "PUBLISH", "publish",
                 "{\"before\":null,\"after\":" + entity.getRouteSpec() + "}", "op-1");
     }

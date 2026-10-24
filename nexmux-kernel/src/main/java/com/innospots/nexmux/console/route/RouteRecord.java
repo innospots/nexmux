@@ -69,6 +69,8 @@ public record RouteRecord(
         long enabledModelCount,
         long weightTotal,
         String shortDate,
+        @Schema(description = "当前运行配置修订号")
+        Long configRevision,
         @Schema(description = "是否存在未发布的草稿变更（草稿规格 ≠ 发布快照）")
         boolean hasUnpublishedChanges) {
 

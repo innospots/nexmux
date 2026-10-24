@@ -60,7 +60,7 @@ final class StatsMapping {
                 longOf(row, "inputTokens"),
                 longOf(row, "outputTokens"),
                 longOf(row, "cacheReadTokens"),
-                cost,
+                decimalOf(row, "standardUsd"),
                 decimalOf(row, "billedUsd"),
                 cost,
                 rate(longOf(row, "successCount"), requests),

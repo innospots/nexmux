@@ -41,6 +41,8 @@ public record RouteDetailVo(
         LocalDateTime publishedAt,
         @Schema(description = "最近发布人")
         String publishedBy,
+        @Schema(description = "当前运行配置修订号")
+        Long configRevision,
         @Schema(description = "创建时间", format = "date-time")
         LocalDateTime createdAt,
         @Schema(description = "更新时间", format = "date-time")

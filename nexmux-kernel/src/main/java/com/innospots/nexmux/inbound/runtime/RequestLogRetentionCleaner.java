@@ -29,6 +29,8 @@ public final class RequestLogRetentionCleaner implements AutoCloseable {
 
     private final RequestLogDao requestLogDao;
     private final PlatformSettingService platformSettingService;
+    private final long initialDelayMinutes;
+    private final long periodMinutes;
     private volatile boolean started;
     private final ScheduledExecutorService executor =
             Executors.newSingleThreadScheduledExecutor(r -> {
@@ -39,8 +41,17 @@ public final class RequestLogRetentionCleaner implements AutoCloseable {
 
     public RequestLogRetentionCleaner(RequestLogDao requestLogDao,
                                       PlatformSettingService platformSettingService) {
+        this(requestLogDao, platformSettingService, INITIAL_DELAY_MINUTES, PERIOD_MINUTES);
+    }
+
+    /** 可配置调度，生产默认不变；测试环境可缩短首跑和周期。 */
+    public RequestLogRetentionCleaner(RequestLogDao requestLogDao,
+                                      PlatformSettingService platformSettingService,
+                                      long initialDelayMinutes, long periodMinutes) {
         this.requestLogDao = requestLogDao;
         this.platformSettingService = platformSettingService;
+        this.initialDelayMinutes = initialDelayMinutes;
+        this.periodMinutes = periodMinutes;
     }
 
     /** 启动周期清理（幂等）。 */
@@ -50,7 +61,7 @@ public final class RequestLogRetentionCleaner implements AutoCloseable {
         }
         started = true;
         executor.scheduleWithFixedDelay(this::cleanQuietly,
-                INITIAL_DELAY_MINUTES, PERIOD_MINUTES, TimeUnit.MINUTES);
+                initialDelayMinutes, periodMinutes, TimeUnit.MINUTES);
     }
 
     private void cleanQuietly() {

@@ -11,6 +11,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param timeoutMs   超时（毫秒）
  * @param apiKey      上游 API Key（null/空 = 不修改；明文仅传输，库内按现有 ciphertext 列存放）
  * @param description 描述
+ * @param proxy       HTTP 代理（空字符串 = 清除）
  */
 @Schema(name = "ProviderUpdateRequest", description = "更新模型服务提供方")
 public record ProviderUpdateRequest(
@@ -25,5 +26,7 @@ public record ProviderUpdateRequest(
         @Schema(description = "上游 API Key（空 = 不修改）")
         String apiKey,
         @Schema(description = "描述")
-        String description) {
+        String description,
+        @Schema(description = "HTTP 代理（host:port；空字符串 = 清除）")
+        String proxy) {
 }

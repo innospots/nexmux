@@ -20,5 +20,7 @@ public record ClientUpdateRequest(
         @Schema(description = "限流规格")
         String rateLimitSpec,
         @Schema(description = "标签")
-        List<String> tags) {
+        List<String> tags,
+        @Schema(description = "授权路由 ID；与其他策略字段作为同一版本发布")
+        java.util.List<String> routeIds) {
 }

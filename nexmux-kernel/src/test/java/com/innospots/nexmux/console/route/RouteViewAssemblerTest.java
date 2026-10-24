@@ -152,7 +152,7 @@ class RouteViewAssemblerTest {
                 "r-chat", "chat", "chat-alias", "Chat 路由", "PUBLISHED",
                 spec("/v1/chat/completions", "OpenAI / Chat Completions", "WEIGHTED",
                         List.of("prod"), candidate("gpt-4o", 60), disabled),
-                null, null, "publisher",
+                null, null, "publisher", 1L,
                 java.time.LocalDateTime.of(2026, 10, 1, 12, 30),
                 java.time.LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
         when(routeService.getByCode("chat")).thenReturn(detail);
@@ -191,7 +191,7 @@ class RouteViewAssemblerTest {
                         List.of("prod"), candidate("gpt-4o", 100)),
                 spec("/v1/chat/completions", "OpenAI / Chat Completions", "WEIGHTED",
                         List.of("prod"), candidate("gpt-4o", 100)),
-                null, "publisher",
+                null, "publisher", 1L,
                 java.time.LocalDateTime.of(2026, 10, 1, 12, 30),
                 java.time.LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
         when(routeService.getByCode("chat")).thenReturn(detail);
@@ -207,7 +207,7 @@ class RouteViewAssemblerTest {
         RouteDetailVo detail = new RouteDetailVo(
                 "r-chat", "chat", "chat-alias", "Chat 路由", "PUBLISHED",
                 same, same,
-                null, "publisher",
+                null, "publisher", 1L,
                 java.time.LocalDateTime.of(2026, 10, 1, 12, 30),
                 java.time.LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
         when(routeService.getByCode("chat")).thenReturn(detail);

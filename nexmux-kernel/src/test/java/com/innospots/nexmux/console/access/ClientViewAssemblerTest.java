@@ -176,7 +176,7 @@ class ClientViewAssemblerTest {
                 "[{\"name\":\"q1\",\"quotaType\":\"cyclic\",\"metric\":\"COST\",\"limit\":500,"
                         + "\"mode\":\"soft\",\"cycleUnit\":\"month\",\"status\":\"enabled\"}]",
                 "[]", "t1", List.of("prod", "team"),
-                LocalDateTime.of(2027, 1, 31, 0, 0),
+                LocalDateTime.of(2027, 1, 31, 0, 0), 1L,
                 LocalDateTime.of(2026, 10, 1, 12, 30),
                 LocalDateTime.of(2026, 10, 5, 8, 0), "admin");
         when(clientService.getByCode("app-web")).thenReturn(detail);

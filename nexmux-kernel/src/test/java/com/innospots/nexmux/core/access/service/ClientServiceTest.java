@@ -7,6 +7,7 @@ import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
 import com.innospots.nexmux.core.access.domain.entity.ClientTemplateEntity;
 import com.innospots.nexmux.core.access.domain.request.ClientCreateRequest;
 import com.innospots.nexmux.core.access.domain.request.ClientPageRequest;
+import com.innospots.nexmux.core.access.domain.request.ClientUpdateRequest;
 import com.innospots.nexmux.core.access.domain.vo.ClientDetailVo;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
@@ -25,13 +26,15 @@ class ClientServiceTest {
 
     private ClientDao clientDao;
     private ClientTemplateDao clientTemplateDao;
+    private ConfigAuditService configAuditService;
     private ClientService clientService;
 
     @BeforeEach
     void setUp() {
         clientDao = Mockito.mock(ClientDao.class);
         clientTemplateDao = Mockito.mock(ClientTemplateDao.class);
-        clientService = new ClientService(clientDao, clientTemplateDao, Mockito.mock(ConfigAuditService.class));
+        configAuditService = Mockito.mock(ConfigAuditService.class);
+        clientService = new ClientService(clientDao, clientTemplateDao, configAuditService);
     }
 
     private ClientEntity client(String id, String code, String status) {
@@ -83,6 +86,23 @@ class ClientServiceTest {
 
         assertThat(entity.getStatus()).isEqualTo("DISABLED");
         assertThat(vo.status()).isEqualTo("DISABLED");
+    }
+
+    @Test
+    void updatePublishesAtomicPolicyRevision() {
+        ClientEntity entity = client("cl-1", "mobile-app", "ENABLED");
+        entity.setConfigRevision(1L);
+        when(clientDao.selectById("cl-1")).thenReturn(entity);
+
+        clientService.update("cl-1", new ClientUpdateRequest(
+                null, "[]", "[]", null, List.of("rt-2")));
+
+        assertThat(entity.getConfigRevision()).isEqualTo(2L);
+        assertThat(entity.getAuthorizedRouteIds()).isEqualTo("[\"rt-2\"]");
+        assertThat(clientService.publish("cl-1").configRevision()).isEqualTo(2L);
+        Mockito.verify(configAuditService).record(
+                Mockito.eq("CLIENT"), Mockito.eq("cl-1"), Mockito.eq("UPDATE"),
+                Mockito.any(), Mockito.argThat(diff -> diff.contains("\"before\"") && diff.contains("\"after\"")));
     }
 
     // ── create（模板复制） ─────────────────────────────────────

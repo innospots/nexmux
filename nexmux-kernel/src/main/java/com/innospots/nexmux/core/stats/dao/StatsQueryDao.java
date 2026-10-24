@@ -21,6 +21,7 @@ public interface StatsQueryDao {
             COALESCE(SUM(output_tokens), 0) AS "outputTokens",
             COALESCE(SUM(input_tokens + output_tokens), 0) AS "tokens",
             COALESCE(SUM(cache_read_tokens), 0) AS "cacheReadTokens",
+            COALESCE(SUM(COALESCE(standard_usd, cost_usd)), 0) AS "standardUsd",
             COALESCE(SUM(cost_usd), 0) AS "costUsd",
             COALESCE(SUM(billing_usd), 0) AS "billedUsd",
             COALESCE(SUM(CASE WHEN status = 'SUCCESS' THEN 1 ELSE 0 END), 0) AS "successCount",

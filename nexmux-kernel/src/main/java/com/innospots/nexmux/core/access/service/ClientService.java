@@ -16,6 +16,7 @@ import com.innospots.nexmux.core.access.domain.vo.ClientCreateResultVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientDetailVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientRotateResultVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.core.access.domain.vo.ClientPolicyRevisionVo;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.security.AppKeySupport;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
@@ -23,6 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -94,6 +96,7 @@ public class ClientService {
                 entity.getSourceTemplateId(),
                 NexmuxJson.readStringList(entity.getTags()),
                 entity.getExpiresAt(),
+                entity.getConfigRevision(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getUpdatedBy());
@@ -112,6 +115,7 @@ public class ClientService {
         entity.setAppKeyHash(material.hash());
         entity.setAppKeySalt(material.salt());
         entity.setAppKeyVersion(1);
+        entity.setConfigRevision(1L);
         entity.setAppKeyRotatedAt(LocalDateTime.now());
         entity.setTags(request.tags() == null ? null : NexmuxJson.write(request.tags()));
         applyTemplateOrBlank(entity, request);
@@ -162,6 +166,7 @@ public class ClientService {
 
     public ClientVo update(String clientId, ClientUpdateRequest request) {
         ClientEntity entity = require(clientId);
+        String before = policySnapshot(entity);
         if (request.displayName() != null) {
             entity.setDisplayName(request.displayName());
         }
@@ -174,9 +179,14 @@ public class ClientService {
         if (request.tags() != null) {
             entity.setTags(NexmuxJson.write(request.tags()));
         }
+        if (request.routeIds() != null) {
+            entity.setAuthorizedRouteIds(NexmuxJson.write(request.routeIds()));
+        }
+        entity.setConfigRevision(nextRevision(entity));
         clientDao.updateById(entity);
         configAuditService.record("CLIENT", entity.getClientId(), "UPDATE",
-                "更新客户端 " + entity.getClientCode(), null);
+                "更新客户端 " + entity.getClientCode(),
+                "{\"before\":" + before + ",\"after\":" + policySnapshot(entity) + "}");
         return toVo(entity);
     }
 
@@ -216,11 +226,32 @@ public class ClientService {
 
     public ClientVo updateRouteGrants(String clientId, ClientRouteGrantsRequest request) {
         ClientEntity entity = require(clientId);
+        String before = policySnapshot(entity);
         entity.setAuthorizedRouteIds(NexmuxJson.write(request.routeIds()));
+        entity.setConfigRevision(nextRevision(entity));
         clientDao.updateById(entity);
         configAuditService.record("CLIENT", entity.getClientId(), "UPDATE",
-                "更新路由授权（" + request.routeIds().size() + " 条）", null);
+                "更新路由授权（" + request.routeIds().size() + " 条）",
+                "{\"before\":" + before + ",\"after\":" + policySnapshot(entity) + "}");
         return toVo(entity);
+    }
+
+    /** 返回当前策略发布版本；策略更新已作为同一原子版本写入。 */
+    public ClientPolicyRevisionVo publish(String clientId) {
+        ClientEntity entity = require(clientId);
+        return new ClientPolicyRevisionVo(
+                entity.getConfigRevision() == null ? 1 : entity.getConfigRevision(), entity.getUpdatedAt());
+    }
+
+    private static long nextRevision(ClientEntity entity) {
+        return entity.getConfigRevision() == null ? 1 : entity.getConfigRevision() + 1;
+    }
+
+    private static String policySnapshot(ClientEntity entity) {
+        return NexmuxJson.write(Map.of(
+                "authorizedRouteIds", NexmuxJson.readStringList(entity.getAuthorizedRouteIds()),
+                "quotaSpec", entity.getQuotaSpec() == null ? "" : entity.getQuotaSpec(),
+                "rateLimitSpec", entity.getRateLimitSpec() == null ? "" : entity.getRateLimitSpec()));
     }
 
     /** 到期时间解析：日期（yyyy-MM-dd）视为当天 23:59:59；带时间按 ISO / 空格分隔解析。 */

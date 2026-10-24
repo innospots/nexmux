@@ -109,8 +109,11 @@ public class NexmuxRuntimeConfiguration {
      */
     @Bean(destroyMethod = "close")
     RequestLogRetentionCleaner requestLogRetentionCleaner(
-            RequestLogDao requestLogDao, PlatformSettingService platformSettingService) {
-        return new RequestLogRetentionCleaner(requestLogDao, platformSettingService);
+            RequestLogDao requestLogDao, PlatformSettingService platformSettingService,
+            @Value("${nexmux.runtime.log-retention-initial-delay-minutes:10}") long initialDelayMinutes,
+            @Value("${nexmux.runtime.log-retention-period-minutes:1440}") long periodMinutes) {
+        return new RequestLogRetentionCleaner(requestLogDao, platformSettingService,
+                initialDelayMinutes, periodMinutes);
     }
 
     @Bean

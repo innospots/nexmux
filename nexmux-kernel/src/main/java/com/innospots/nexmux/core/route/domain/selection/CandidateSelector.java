@@ -57,12 +57,29 @@ public final class CandidateSelector {
      * @return 命中结果；候选池为空时 {@link Optional#empty()}
      */
     public Optional<Selection> select(RouteSpec spec, Set<String> unhealthyModelCodes, String sessionKey) {
+        return select(spec, Set.of(), unhealthyModelCodes, sessionKey);
+    }
+
+    /**
+     * 选择候选，将强制不可用状态与可选健康过滤分开处理。
+     *
+     * @param spec                   已发布路由快照
+     * @param unavailableModelCodes  强制不可用模型（如已停用），不受健康过滤开关影响
+     * @param unhealthyModelCodes    已知不健康模型，仅在路由开启健康过滤时剔除
+     * @param sessionKey             会话键
+     * @return 命中结果；候选池为空时 {@link Optional#empty()}
+     */
+    public Optional<Selection> select(RouteSpec spec, Set<String> unavailableModelCodes,
+                                      Set<String> unhealthyModelCodes, String sessionKey) {
         if (spec == null) {
             return Optional.empty();
         }
         List<RouteCandidate> pool = spec.candidates().stream()
                 .filter(c -> c.enabled() == null || c.enabled())
                 .collect(java.util.stream.Collectors.toCollection(ArrayList::new));
+        if (unavailableModelCodes != null && !unavailableModelCodes.isEmpty()) {
+            pool.removeIf(c -> unavailableModelCodes.contains(c.modelCode()));
+        }
         boolean healthFilterApplied = false;
         if (spec.filterUnhealthyBindings() && unhealthyModelCodes != null && !unhealthyModelCodes.isEmpty()) {
             healthFilterApplied = pool.removeIf(c -> unhealthyModelCodes.contains(c.modelCode()));

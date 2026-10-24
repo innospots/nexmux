@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.innospots.nexus.base.domain.response.PageResult;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexmux.core.audit.service.ConfigAuditService;
+import com.innospots.nexmux.core.audit.dao.ConfigAuditLogDao;
+import com.innospots.nexmux.core.audit.domain.entity.ConfigAuditLogEntity;
+import com.innospots.nexmux.core.route.domain.vo.RouteVersionVo;
 import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
@@ -31,6 +34,7 @@ public class RouteService {
     private final RouteDao routeDao;
     private final ConfigAuditService configAuditService;
     private final DependencyImpactAnalyzer dependencyImpactAnalyzer;
+    private final ConfigAuditLogDao configAuditLogDao;
 
     public PageResult<RouteVo> page(RoutePageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -87,6 +91,7 @@ public class RouteService {
                 NexmuxJson.read(entity.getPublishedRouteSpec(), RouteSpec.class),
                 entity.getPublishedAt(),
                 entity.getPublishedBy(),
+                entity.getConfigRevision(),
                 entity.getCreatedAt(),
                 entity.getUpdatedAt(),
                 entity.getUpdatedBy());
@@ -196,6 +201,7 @@ public class RouteService {
         entity.setStatus(STATUS_PUBLISHED);
         entity.setPublishedAt(LocalDateTime.now());
         entity.setPublishedBy(request.operatorId());
+        entity.setConfigRevision(entity.getConfigRevision() == null ? 1 : entity.getConfigRevision() + 1);
         routeDao.updateById(entity);
         configAuditService.record(
                 "ROUTE",
@@ -205,6 +211,72 @@ public class RouteService {
                 "{\"before\":" + before + ",\"after\":" + entity.getPublishedRouteSpec() + "}",
                 request.operatorId());
         return toVo(entity);
+    }
+
+    /** 查询发布历史，当前版本在前。 */
+    public List<RouteVersionVo> versions(String routeCode) {
+        RouteEntity entity = requireByCode(routeCode);
+        List<ConfigAuditLogEntity> history = publishHistory(entity.getRouteId());
+        long current = entity.getConfigRevision() == null ? history.size() : entity.getConfigRevision();
+        if (history.isEmpty()) {
+            return List.of(new RouteVersionVo(current, entity.getPublishedAt(),
+                    entity.getPublishedBy(), "当前运行版本", true));
+        }
+        List<RouteVersionVo> versions = new java.util.ArrayList<>();
+        for (int i = 0; i < history.size(); i++) {
+            ConfigAuditLogEntity audit = history.get(i);
+            versions.add(new RouteVersionVo(current - i, audit.getCreatedAt(), audit.getOperatorId(),
+                    audit.getChangeSummary(), i == 0));
+        }
+        return List.copyOf(versions);
+    }
+
+    /** 回滚到历史发布规格，并作为新修订记录。 */
+    public RouteVo rollback(String routeCode, Long targetRevision, String operatorId) {
+        RouteEntity entity = requireByCode(routeCode);
+        List<ConfigAuditLogEntity> history = publishHistory(entity.getRouteId());
+        long current = entity.getConfigRevision() == null ? history.size() : entity.getConfigRevision();
+        long target = targetRevision == null ? current - 1 : targetRevision;
+        int index = (int) (current - target);
+        if (target <= 0 || target >= current || index < 0 || index >= history.size()) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "route revision is not available for rollback");
+        }
+        var diff = NexmuxJson.read(history.get(index).getChangeDiff(),
+                com.fasterxml.jackson.databind.JsonNode.class);
+        String restored = diff == null || diff.get("after") == null ? null : diff.get("after").toString();
+        if (restored == null || restored.isBlank()) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "route revision has no published spec");
+        }
+        String before = entity.getPublishedRouteSpec();
+        entity.setRouteSpec(restored);
+        entity.setPublishedRouteSpec(restored);
+        entity.setStatus(STATUS_PUBLISHED);
+        entity.setPublishedAt(LocalDateTime.now());
+        entity.setPublishedBy(operatorId);
+        entity.setConfigRevision(current + 1);
+        routeDao.updateById(entity);
+        configAuditService.record("ROUTE", entity.getRouteId(), "ROLLBACK", "回滚运行配置",
+                "{\"before\":" + before + ",\"after\":" + restored + "}", operatorId);
+        return toVo(entity);
+    }
+
+    private List<ConfigAuditLogEntity> publishHistory(String routeId) {
+        return configAuditLogDao.selectList(new LambdaQueryWrapper<ConfigAuditLogEntity>()
+                .eq(ConfigAuditLogEntity::getResourceType, "ROUTE")
+                .eq(ConfigAuditLogEntity::getResourceId, routeId)
+                .eq(ConfigAuditLogEntity::getOperation, "PUBLISH")
+                .orderByDesc(ConfigAuditLogEntity::getCreatedAt));
+    }
+
+    private RouteEntity requireByCode(String routeCode) {
+        RouteEntity entity = routeDao.selectOne(new LambdaQueryWrapper<RouteEntity>()
+                .eq(RouteEntity::getRouteCode, routeCode));
+        if (entity == null) {
+            throw NexusException.build(NexmuxStatusCode.RESOURCE_NOT_FOUND, "route not found");
+        }
+        return entity;
     }
 
     /**

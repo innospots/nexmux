@@ -202,6 +202,7 @@ CREATE TABLE IF NOT EXISTS mux_request_log (
     output_tokens BIGINT,
     cache_read_tokens BIGINT,
     cache_write_tokens BIGINT,
+    standard_usd DECIMAL(18,8),
     cost_usd DECIMAL(18,8),
     billing_usd DECIMAL(18,8),
     ttft_ms BIGINT,
@@ -237,6 +238,7 @@ ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS input_tokens BIGINT;
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS output_tokens BIGINT;
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS cache_read_tokens BIGINT;
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS cache_write_tokens BIGINT;
+ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS standard_usd DECIMAL(18,8);
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS cost_usd DECIMAL(18,8);
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS billing_usd DECIMAL(18,8);
 ALTER TABLE mux_request_log ADD COLUMN IF NOT EXISTS ttft_ms BIGINT;
@@ -277,3 +279,6 @@ CREATE TABLE IF NOT EXISTS mux_binding_health (
 CREATE UNIQUE INDEX IF NOT EXISTS uk_mux_binding_health_target
     ON mux_binding_health(provider_id, provider_model_id);
 CREATE INDEX IF NOT EXISTS idx_mux_binding_health_model ON mux_binding_health(model_code);
+
+ALTER TABLE mux_route ADD COLUMN IF NOT EXISTS config_revision BIGINT;
+ALTER TABLE mux_client ADD COLUMN IF NOT EXISTS config_revision BIGINT;

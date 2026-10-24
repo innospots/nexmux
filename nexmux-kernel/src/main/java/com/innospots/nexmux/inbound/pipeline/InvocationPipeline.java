@@ -91,7 +91,7 @@ public final class InvocationPipeline {
                 continue;
             }
             LocalDateTime earliest = rules.stream()
-                    .map(QuotaGate::windowStart)
+                    .map(quotaGate::windowStart)
                     .min(LocalDateTime::compareTo)
                     .orElse(LocalDateTime.of(1970, 1, 1, 0, 0));
             // 聚合别名须加双引号保留大小写（同 StatsQueryDao 约定）：
@@ -155,18 +155,29 @@ public final class InvocationPipeline {
                                    Long tokensIn, Long tokensOut, InvocationContext context) {
     }
 
-    /** 非流式调用。 */
+    /** 非流式 Chat Completions 调用。 */
     public InvocationResult invoke(String presentedKey, Map<String, Object> requestBody,
                                    String ingressPath) {
+        return invokeOperation(presentedKey, requestBody, ingressPath, "/chat/completions");
+    }
+
+    /** 非流式 OpenAI 兼容操作调用，完整复用鉴权、治理与计量链。 */
+    public InvocationResult invokeOperation(String presentedKey, Map<String, Object> requestBody,
+                                            String ingressPath, String upstreamOperation) {
         InvocationContext context = resolve(presentedKey, requestBody, ingressPath);
+        requireSupportedCapabilities(context.model(), requestBody);
         List<java.util.concurrent.Semaphore> permits = rateLimitGate.check(context.client(), context.route().routeId());
         quotaGate.recordRequest(context.client());
         long start = System.currentTimeMillis();
         try {
-            Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), false);
-            String body = chatAdapter.chatCompletions(
-                    context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
-                    readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy());
+            Map<String, Object> upstreamBody = upstreamBody(requestBody, context.model(), context.binding(), false);
+            String body = "/chat/completions".equals(upstreamOperation)
+                    ? chatAdapter.chatCompletions(
+                            context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
+                            readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy())
+                    : chatAdapter.post(upstreamOperation,
+                            context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
+                            readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy());
             long latency = System.currentTimeMillis() - start;
             JsonNode parsed = readJsonTolerant(body);
             JsonNode usage = parsed == null ? null : parsed.get("usage");
@@ -198,11 +209,12 @@ public final class InvocationPipeline {
     public InvocationResult invokeStream(String presentedKey, Map<String, Object> requestBody,
                                          String ingressPath, OutputStream out) throws IOException {
         InvocationContext context = resolve(presentedKey, requestBody, ingressPath);
+        requireSupportedCapabilities(context.model(), requestBody);
         List<java.util.concurrent.Semaphore> permits = rateLimitGate.check(context.client(), context.route().routeId());
         quotaGate.recordRequest(context.client());
         long start = System.currentTimeMillis();
         try {
-            Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), true);
+            Map<String, Object> upstreamBody = upstreamBody(requestBody, context.model(), context.binding(), true);
             UpstreamChatAdapter.StreamOutcome outcome = chatAdapter.streamChatCompletions(
                     context.provider().getBaseUrl(), credentialOf(context), NexmuxJson.write(upstreamBody),
                     readTimeoutOf(context.provider()), connectTimeoutOf(), context.provider().getProxy(), out);
@@ -236,6 +248,36 @@ public final class InvocationPipeline {
         settle(context, failure, requestBody);
         return NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
                 "upstream call failed: " + abbreviate(e.getMessage()));
+    }
+
+    /** 单协议阶段明确拒绝其他协议，避免以错误报文格式调用上游。 */
+    private static void requireOpenAiProtocol(ProviderEntity provider, ResolvedBinding binding) {
+        String configured = binding.upstreamProtocol() == null || binding.upstreamProtocol().isBlank()
+                ? provider.getDefaultProtocol() : binding.upstreamProtocol();
+        String protocol = configured == null ? "openai-completions"
+                : configured.trim().toLowerCase(java.util.Locale.ROOT).replace(" ", "");
+        if (!"openai-completions".equals(protocol) && !"openai-chat-completions".equals(protocol)
+                && !"openai".equals(protocol) && !"openai/chatcompletions".equals(protocol)) {
+            throw NexusException.build(NexmuxStatusCode.INVALID_REQUEST,
+                    "upstream protocol is not supported by the OpenAI chat adapter");
+        }
+    }
+
+    /** 请求级能力校验在限流和上游调用之前执行，避免不支持的能力被静默透传。 */
+    private static void requireSupportedCapabilities(ModelEntity model, Map<String, Object> requestBody) {
+        Object tools = requestBody.get("tools");
+        boolean toolsRequested = tools instanceof List<?> list && !list.isEmpty();
+        if (!toolsRequested) {
+            return;
+        }
+        boolean supported = NexmuxJson.readStringList(model.getCapabilityTags()).stream()
+                .map(value -> value.trim().toLowerCase(java.util.Locale.ROOT))
+                .anyMatch(value -> value.equals("tool calling") || value.equals("function calling")
+                        || value.equals("tools") || value.equals("function call"));
+        if (!supported) {
+            throw NexusException.build(NexmuxStatusCode.INVALID_REQUEST,
+                    "model does not support function calling");
+        }
     }
 
     /**
@@ -280,18 +322,18 @@ public final class InvocationPipeline {
         Set<String> unhealthy = unhealthyModelCodes(spec);
         // G-06：停用 Model 不参与选路（即时止损，与 Binding 健康过滤独立、恒生效）；
         // 全部被剔除时 resolveByAlias 返回 empty → 503 NO_AVAILABLE_CANDIDATE
-        Set<String> excluded = new HashSet<>(unhealthy);
+        Set<String> disabledModels = new HashSet<>();
         spec.candidates().forEach(candidate -> {
             if (candidate.enabled() != null && !candidate.enabled()) {
                 return;
             }
             catalogCache.findModel(candidate.modelCode())
                     .filter(m -> !"ENABLED".equals(m.getStatus()))
-                    .ifPresent(m -> excluded.add(m.getModelCode()));
+                    .ifPresent(m -> disabledModels.add(m.getModelCode()));
         });
         String sessionKey = textValue(requestBody.get("user")) != null
                 ? textValue(requestBody.get("user")) : client.getClientCode();
-        CandidateSelector.Selection selection = router.resolveByAlias(alias, excluded, sessionKey)
+        CandidateSelector.Selection selection = router.resolveByAlias(alias, disabledModels, unhealthy, sessionKey)
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE,
                         "no available candidate in route: " + alias));
         ModelEntity model = catalogCache.findModel(selection.candidate().modelCode())
@@ -307,6 +349,7 @@ public final class InvocationPipeline {
                 .filter(p -> "ENABLED".equals(p.getStatus()))
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
                         "provider not available: " + binding.providerId()));
+        requireOpenAiProtocol(provider, binding);
 
         return new InvocationContext(newRequestId(), UUID.randomUUID().toString().replace("-", ""),
                 client, route, selection, model, binding, provider, softQuota);
@@ -351,10 +394,12 @@ public final class InvocationPipeline {
         return unhealthy;
     }
 
-    /** 上游请求体：透传客户端参数，model 替换为绑定上游 ID，按需置 stream。 */
-    private static Map<String, Object> upstreamBody(Map<String, Object> requestBody,
+    /** 先合并 Model 默认参数，再以客户端显式参数覆盖，最后替换上游 model/stream。 */
+    private static Map<String, Object> upstreamBody(Map<String, Object> requestBody, ModelEntity model,
                                                     ResolvedBinding binding, boolean stream) {
-        Map<String, Object> body = new LinkedHashMap<>(requestBody);
+        Map<String, Object> body = new LinkedHashMap<>();
+        mergeDefaultParams(body, model.getDefaultParams());
+        body.putAll(requestBody);
         body.put("model", binding.providerModelId());
         body.put("stream", stream);
         if (stream) {
@@ -363,6 +408,45 @@ public final class InvocationPipeline {
             body.remove("stream_options");
         }
         return body;
+    }
+
+    private static void mergeDefaultParams(Map<String, Object> body, String defaultParams) {
+        JsonNode defaults = readJsonTolerant(defaultParams);
+        if (defaults == null || !defaults.isObject()) {
+            return;
+        }
+        putDefault(body, defaults, "temperature", "temperature");
+        putDefault(body, defaults, "topP", "top_p");
+        putDefault(body, defaults, "topK", "top_k");
+        putDefault(body, defaults, "maxTokens", "max_tokens");
+        putDefault(body, defaults, "max_tokens", "max_tokens");
+        putDefault(body, defaults, "frequencyPenalty", "frequency_penalty");
+        putDefault(body, defaults, "presencePenalty", "presence_penalty");
+        putDefault(body, defaults, "reasoningEffort", "reasoning_effort");
+        putDefault(body, defaults, "seed", "seed");
+        if (!body.containsKey("stop") && defaults.has("stopSequences")) {
+            JsonNode value = defaults.get("stopSequences");
+            if (value.isArray()) {
+                body.put("stop", value);
+            } else if (value.isTextual() && !value.asText().isBlank()) {
+                body.put("stop", NexmuxJson.read(value.asText(), Object.class));
+            }
+        }
+        if (!body.containsKey("response_format") && defaults.has("responseFormat")) {
+            JsonNode value = defaults.get("responseFormat");
+            if (value.isObject()) {
+                body.put("response_format", value);
+            } else if (value.isTextual() && !value.asText().isBlank()) {
+                body.put("response_format", Map.of("type", value.asText()));
+            }
+        }
+    }
+
+    private static void putDefault(Map<String, Object> body, JsonNode defaults,
+                                   String sourceField, String targetField) {
+        if (!body.containsKey(targetField) && defaults.hasNonNull(sourceField)) {
+            body.put(targetField, defaults.get(sourceField));
+        }
     }
 
     private String credentialOf(InvocationContext context) {
@@ -450,7 +534,8 @@ public final class InvocationPipeline {
         entity.setRouteTrace(routeTrace(context));
         requestLogWriter.write(entity, context.model().getPricingSpec(),
                 context.binding().costMultiplier(), context.binding().referenceMultiplier(),
-                NexmuxJson.write(requestBody), result.body());
+                NexmuxJson.write(requestBody), result.body(),
+                provider.getProviderId(), context.binding().providerModelId(), context.binding().primary());
         // 成本回填配额（COST 指标）
         if (result.httpStatus() == 200 && entity.getCostUsd() != null) {
             quotaGate.recordUsage(client, 0, 0, entity.getCostUsd());

@@ -612,7 +612,8 @@ public class DebugService {
         entity.setRouteTrace(NexmuxJson.write(trace));
 
         // 派生字段（usage / 成本与定价快照 / prompt 快照）与落库统一走共享写入器
-        requestLogWriter.write(entity, model.getPricingSpec(), null, null, payload, result.body());
+        requestLogWriter.write(entity, model.getPricingSpec(), null, null, payload, result.body(),
+                provider.getProviderId(), target.upstreamModelId(), true);
     }
 
     private static JsonNode readJsonTolerant(String json) {

@@ -53,6 +53,8 @@ public class RouteEntity extends BaseEntity {
     @Column(columnDefinition = "CLOB")
     private String publishedRouteSpec;
 
+    private Long configRevision;
+
     private LocalDateTime publishedAt;
 
     @Column(length = 64)

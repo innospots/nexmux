@@ -1,6 +1,8 @@
 package com.innospots.nexmux.core.route.service;
 
 import com.innospots.nexmux.core.audit.service.ConfigAuditService;
+import com.innospots.nexmux.core.audit.dao.ConfigAuditLogDao;
+import com.innospots.nexmux.core.audit.domain.entity.ConfigAuditLogEntity;
 import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
@@ -28,13 +30,15 @@ class RouteServiceTest {
 
     private RouteDao routeDao;
     private ConfigAuditService configAuditService;
+    private ConfigAuditLogDao configAuditLogDao;
     private RouteService routeService;
 
     @BeforeEach
     void setUp() {
         routeDao = Mockito.mock(RouteDao.class);
         configAuditService = Mockito.mock(ConfigAuditService.class);
-        routeService = new RouteService(routeDao, configAuditService, new DependencyImpactAnalyzer());
+        configAuditLogDao = Mockito.mock(ConfigAuditLogDao.class);
+        routeService = new RouteService(routeDao, configAuditService, new DependencyImpactAnalyzer(), configAuditLogDao);
     }
 
     private RouteEntity route(String id, String code, String status, String specJson) {
@@ -235,6 +239,27 @@ class RouteServiceTest {
                 .isInstanceOfSatisfying(NexusException.class, e ->
                         assertThat(e.code()).isEqualTo(
                                 NexmuxStatusCode.OPERATION_PRECONDITION_FAILED.fullCode()));
+    }
+
+    @Test
+    void rollbackRestoresHistoricalPublishedSpecAsNewRevision() {
+        String previous = specJson("general", 1);
+        String current = specJson("general", 2);
+        RouteEntity entity = route("r-1", "general", "PUBLISHED", current);
+        entity.setPublishedRouteSpec(current);
+        entity.setConfigRevision(2L);
+        when(routeDao.selectOne(any())).thenReturn(entity);
+        ConfigAuditLogEntity v2 = new ConfigAuditLogEntity();
+        v2.setChangeDiff("{\"before\":null,\"after\":" + current + "}");
+        ConfigAuditLogEntity v1 = new ConfigAuditLogEntity();
+        v1.setChangeDiff("{\"before\":null,\"after\":" + previous + "}");
+        when(configAuditLogDao.selectList(any())).thenReturn(List.of(v2, v1));
+
+        var result = routeService.rollback("general", 1L, "operator-1");
+
+        assertThat(result.routeSpec()).isEqualTo(NexmuxJson.read(previous, RouteSpec.class));
+        assertThat(entity.getConfigRevision()).isEqualTo(3L);
+        assertThat(routeService.versions("general")).hasSize(2);
     }
 
     // ── page 筛选 ─────────────────────────────────────────────

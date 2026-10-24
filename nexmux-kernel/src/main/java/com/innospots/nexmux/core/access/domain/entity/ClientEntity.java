@@ -68,5 +68,7 @@ public class ClientEntity extends BaseEntity {
 
     private java.time.LocalDateTime expiresAt;
 
+    private Long configRevision;
+
     private java.time.LocalDateTime appKeyRotatedAt;
 }

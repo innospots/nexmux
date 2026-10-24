@@ -96,7 +96,38 @@ class QuotaGateTest {
 
         // 窗口起点按天截断：验证窗口推算函数本身
         var rule = QuotaGate.enabledRules(client).get(0);
-        assertThat(QuotaGate.windowStart(rule).getHour()).isZero();
+        assertThat(gate.windowStart(rule).getHour()).isZero();
+    }
+
+    @Test
+    void cyclicWindowResetsWhenClockAdvancesPastWindow() {
+        java.util.concurrent.atomic.AtomicReference<java.time.Instant> now =
+                new java.util.concurrent.atomic.AtomicReference<>(java.time.Instant.parse("2026-10-24T10:30:00Z"));
+        java.time.Clock clock = new java.time.Clock() {
+            @Override
+            public java.time.ZoneId getZone() {
+                return java.time.ZoneId.of("UTC");
+            }
+
+            @Override
+            public java.time.Clock withZone(java.time.ZoneId zone) {
+                return this;
+            }
+
+            @Override
+            public java.time.Instant instant() {
+                return now.get();
+            }
+        };
+        gate = new QuotaGate(clock);
+        ClientEntity client = client("[{\"name\":\"hq\",\"quotaType\":\"cyclic\",\"metric\":\"REQUEST\","
+                + "\"limit\":1,\"mode\":\"hard\",\"cycleUnit\":\"hour\",\"status\":\"enabled\"}]");
+        gate.recordRequest(client);
+        assertThatThrownBy(() -> gate.check(client)).isInstanceOf(NexusException.class);
+
+        now.set(java.time.Instant.parse("2026-10-24T11:00:00Z"));
+
+        assertThat(gate.check(client)).isEmpty();
     }
 
     @Test

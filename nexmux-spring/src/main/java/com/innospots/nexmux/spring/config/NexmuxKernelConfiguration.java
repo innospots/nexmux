@@ -95,15 +95,18 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
-    ModelService modelService(ModelDao modelDao, ProviderDao providerDao,
-            ConfigAuditService configAuditService) {
-        return new ModelService(modelDao, providerDao, configAuditService);
+    ModelService modelService(ModelDao modelDao, ProviderDao providerDao, RouteDao routeDao,
+            ConfigAuditService configAuditService,
+            ProviderService providerService, DebugService debugService) {
+        return new ModelService(modelDao, providerDao, routeDao, configAuditService,
+                providerService, debugService);
     }
 
     @Bean
     RouteService routeService(
-            RouteDao routeDao, ConfigAuditService configAuditService, DependencyImpactAnalyzer analyzer) {
-        return new RouteService(routeDao, configAuditService, analyzer);
+            RouteDao routeDao, ConfigAuditService configAuditService, DependencyImpactAnalyzer analyzer,
+            ConfigAuditLogDao configAuditLogDao) {
+        return new RouteService(routeDao, configAuditService, analyzer, configAuditLogDao);
     }
 
     @Bean

@@ -15,6 +15,7 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param baseUrl            服务基址
  * @param region             区域
  * @param timeoutMs          超时（毫秒）
+ * @param proxy              HTTP 代理（host:port，可空）
  */
 @Schema(name = "ProviderCreateRequest", description = "创建模型服务提供方")
 public record ProviderCreateRequest(
@@ -41,5 +42,7 @@ public record ProviderCreateRequest(
         @Schema(description = "上游 API Key（可空，创建即配置）")
         String apiKey,
         @Schema(description = "描述")
-        String description) {
+        String description,
+        @Schema(description = "HTTP 代理（host:port）")
+        String proxy) {
 }

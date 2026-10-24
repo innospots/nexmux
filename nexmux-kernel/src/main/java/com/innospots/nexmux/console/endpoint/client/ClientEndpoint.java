@@ -11,6 +11,7 @@ import com.innospots.nexmux.core.access.domain.request.ClientUpdateRequest;
 import com.innospots.nexmux.core.access.domain.vo.ClientCreateResultVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientRotateResultVo;
 import com.innospots.nexmux.core.access.domain.vo.ClientVo;
+import com.innospots.nexmux.core.access.domain.vo.ClientPolicyRevisionVo;
 import com.innospots.nexmux.core.access.service.ClientService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
@@ -132,6 +133,13 @@ public class ClientEndpoint {
     public R<ClientVo> disable(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.disable(clientId));
+    }
+
+    @POST
+    @Path("/{clientId}/publish")
+    @Operation(operationId = "nexmuxClientPublish", summary = "查询当前 Client 策略发布版本")
+    public R<ClientPolicyRevisionVo> publish(@PathParam("clientId") String clientId) {
+        return R.ok(clientService.publish(clientId));
     }
 
     @DELETE

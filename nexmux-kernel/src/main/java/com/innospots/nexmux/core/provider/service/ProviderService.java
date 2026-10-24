@@ -142,6 +142,7 @@ public class ProviderService {
         entity.setRegion(request.region());
         entity.setTimeoutMs(request.timeoutMs() == null ? 60000 : request.timeoutMs());
         entity.setDescription(request.description());
+        entity.setProxy(request.proxy());
         entity.setStatus("ENABLED");
         providerDao.insert(entity);
         if (request.apiKey() != null && !request.apiKey().isBlank()) {
@@ -160,6 +161,9 @@ public class ProviderService {
         }
         if (request.description() != null) {
             entity.setDescription(request.description());
+        }
+        if (request.proxy() != null) {
+            entity.setProxy(request.proxy());
         }
         providerDao.updateById(entity);
         if (request.apiKey() != null && !request.apiKey().isBlank()) {

@@ -83,6 +83,7 @@ class OpsWriteEndpointTest {
         assertThat(request.baseUrl()).isEqualTo("https://b");
         assertThat(request.region()).isEqualTo("cn");
         assertThat(request.timeoutMs()).isEqualTo(30000);
+        assertThat(request.proxy()).isEqualTo("ignored");
     }
 
     @Test
@@ -116,6 +117,42 @@ class OpsWriteEndpointTest {
         assertThat(request.inputModalities()).containsExactly("text", "image");
         assertThat(request.outputModalities()).containsExactly("text");
         assertThat(request.tags()).containsExactly("fast", "cheap");
+    }
+
+    @Test
+    void modelSaveParsesDefaultParamsMetadataAndCapabilities() {
+        endpoint.modelSave("zai~glm-5", json("""
+                {"metadata":{"owner":"e2e"},
+                 "temperature":0.42,"maxTokensParam":3,"topP":0.7,
+                 "capabilities":"Streaming, Tool Calling"}
+                """));
+
+        ArgumentCaptor<ModelUpdateRequest> captor = ArgumentCaptor.forClass(ModelUpdateRequest.class);
+        verify(modelService).update(Mockito.eq("m1"), captor.capture());
+        ModelUpdateRequest request = captor.getValue();
+        assertThat(request.metadataSpec()).contains("owner");
+        assertThat(request.defaultParams()).contains("\"temperature\":0.42")
+                .contains("\"maxTokens\":3").contains("\"topP\":0.7");
+        assertThat(request.capabilityTags()).contains("Streaming").contains("Tool Calling");
+    }
+
+    @Test
+    void modelSaveParsesBindingAndPricingConfiguration() {
+        endpoint.modelSave("zai~glm-5", json("""
+                {"primaryBindingWeight":80,"primaryCostMultiplier":2,"primaryReferenceMultiplier":3,
+                 "primaryBindingEnabled":"off","extraBindings":[{"providerModelId":"stub-b","weight":20}],
+                 "pricingSpec":{"currency":"USD","tiers":[{"upto":10,"input":1,"output":2}]}}
+                """));
+
+        ArgumentCaptor<ModelUpdateRequest> captor = ArgumentCaptor.forClass(ModelUpdateRequest.class);
+        verify(modelService).update(Mockito.eq("m1"), captor.capture());
+        ModelUpdateRequest request = captor.getValue();
+        assertThat(request.primaryBindingWeight()).isEqualTo(80);
+        assertThat(request.primaryCostMultiplier()).isEqualByComparingTo("2");
+        assertThat(request.primaryReferenceMultiplier()).isEqualByComparingTo("3");
+        assertThat(request.primaryBindingEnabled()).isFalse();
+        assertThat(request.extraBindings()).contains("stub-b");
+        assertThat(request.pricingSpec()).contains("tiers");
     }
 
     @Test
@@ -158,7 +195,7 @@ class OpsWriteEndpointTest {
                 "old-desc", "OpenAI / Chat Completions", java.util.List.of("prod"), null);
         when(routeService.getByCode("general")).thenReturn(new RouteDetailVo(
                 "r1", "general", "general", "通用", "DRAFT", existing, null,
-                null, null, null, null, null));
+                null, null, null, null, null, null));
 
         endpoint.routeSave("general", json(
                 "{\"name\":\"通用 v2\",\"strategy\":\"WEIGHTED\",\"stickySession\":\"on\"}"));
@@ -180,7 +217,7 @@ class OpsWriteEndpointTest {
     void routeMutationsResolveCodeToId() {
         when(routeService.getByCode("general")).thenReturn(new RouteDetailVo(
                 "r1", "general", "general", "通用", "DISABLED", null, null,
-                null, null, null, null, null));
+                null, null, null, null, null, null));
 
         endpoint.routeEnable("general");
         verify(routeService).enable("r1");

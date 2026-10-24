@@ -12,9 +12,9 @@ import org.eclipse.microprofile.openapi.annotations.media.Schema;
  * @param inputTokens   输入 tokens
  * @param outputTokens  输出 tokens
  * @param cacheReadTokens 缓存读 tokens
- * @param standardUsd   标准（供应）成本合计
- * @param billedUsd     用户计费合计
- * @param costUsd       供应成本合计（同 standardUsd 口径，占位区分）
+ * @param standardUsd   标准参考金额合计
+ * @param billedUsd     内部参考消费金额合计
+ * @param costUsd       供应商成本估算合计
  * @param successRate   成功率（0-1）
  * @param avgLatencyMs  平均延迟
  * @param avgTtftMs     平均 TTFT

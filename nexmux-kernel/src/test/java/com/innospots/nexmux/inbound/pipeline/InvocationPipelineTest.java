@@ -1,5 +1,6 @@
 package com.innospots.nexmux.inbound.pipeline;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.domain.entity.ClientEntity;
 import com.innospots.nexmux.core.model.dao.ModelDao;
@@ -50,23 +51,29 @@ class InvocationPipelineTest {
     private UpstreamChatAdapter chatAdapter;
     private BindingHealthRegistry healthRegistry;
     private InvocationPipeline pipeline;
+    private ModelDao modelDao;
+    private RuntimeCatalogCache catalogCache;
+    private ModelEntity model;
+    private RouteDao routeDao;
+    private PublishedRouteCache routeCache;
 
     @BeforeEach
     void setUp() {
-        RouteDao routeDao = Mockito.mock(RouteDao.class);
+        routeDao = Mockito.mock(RouteDao.class);
         when(routeDao.selectList(any())).thenReturn(List.of(publishedRoute()));
-        PublishedRouteCache routeCache = new PublishedRouteCache(routeDao);
+        routeCache = new PublishedRouteCache(routeDao);
         routeCache.refresh();
 
-        ModelDao modelDao = Mockito.mock(ModelDao.class);
+        modelDao = Mockito.mock(ModelDao.class);
         ProviderDao providerDao = Mockito.mock(ProviderDao.class);
         ProviderCredentialDao credentialDao = Mockito.mock(ProviderCredentialDao.class);
         ClientDao clientDao = Mockito.mock(ClientDao.class);
-        when(modelDao.selectList(null)).thenReturn(List.of(model()));
+        model = model();
+        when(modelDao.selectList(null)).thenReturn(List.of(model));
         when(providerDao.selectList(null)).thenReturn(List.of(provider()));
         when(credentialDao.selectList(null)).thenReturn(List.of(credential()));
         when(clientDao.selectList(null)).thenReturn(List.of(client()));
-        RuntimeCatalogCache catalogCache = new RuntimeCatalogCache(modelDao, providerDao, credentialDao, clientDao);
+        catalogCache = new RuntimeCatalogCache(modelDao, providerDao, credentialDao, clientDao);
         catalogCache.refresh();
 
         requestLogDao = Mockito.mock(RequestLogDao.class);
@@ -146,6 +153,72 @@ class InvocationPipelineTest {
         when(chatAdapter.chatCompletions(anyString(), anyString(), anyString(), anyInt(), anyInt(), any()))
                 .thenReturn("{\"id\":\"c1\",\"choices\":[{\"message\":{\"role\":\"assistant\","
                         + "\"content\":\"你好！\"}}],\"usage\":{\"prompt_tokens\":10,\"completion_tokens\":5}}");
+    }
+
+    @Test
+    void invokeRejectsDisabledModelWhenHealthFilterDisabled() {
+        model.setStatus("DISABLED");
+        catalogCache.refresh();
+        when(routeDao.selectList(any())).thenReturn(List.of(publishedRoute(false)));
+        routeCache.refresh();
+
+        assertThatThrownBy(() -> pipeline.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, error ->
+                        assertThat(error.code()).isEqualTo(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE.fullCode()));
+    }
+
+    @Test
+    void invokeMergesModelDefaultsBeforeExplicitParameters() throws IOException {
+        model.setDefaultParams("{\"temperature\":0.42,\"maxTokens\":3,\"topP\":0.7}");
+        catalogCache.refresh();
+        stubUpstreamOk();
+        Map<String, Object> body = chatBody();
+        body.put("temperature", 0.9);
+
+        pipeline.invoke(PLAIN_KEY, body, INGRESS);
+
+        org.mockito.ArgumentCaptor<String> bodyCaptor = org.mockito.ArgumentCaptor.forClass(String.class);
+        Mockito.verify(chatAdapter).chatCompletions(anyString(), anyString(), bodyCaptor.capture(),
+                anyInt(), anyInt(), any());
+        JsonNode upstream = new com.fasterxml.jackson.databind.ObjectMapper().readTree(bodyCaptor.getValue());
+        assertThat(upstream.get("temperature").decimalValue()).isEqualByComparingTo("0.9");
+        assertThat(upstream.get("max_tokens").intValue()).isEqualTo(3);
+        assertThat(upstream.get("top_p").decimalValue()).isEqualByComparingTo("0.7");
+    }
+
+    @Test
+    void invokeRejectsToolsWhenModelHasNoToolCapability() {
+        Map<String, Object> body = chatBody();
+        body.put("tools", List.of(Map.of("type", "function")));
+
+        assertThatThrownBy(() -> pipeline.invoke(PLAIN_KEY, body, INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, error ->
+                        assertThat(error.code()).isEqualTo(NexmuxStatusCode.INVALID_REQUEST.fullCode()));
+        Mockito.verifyNoInteractions(chatAdapter);
+    }
+
+    @Test
+    void invokeAllowsToolsWhenModelDeclaresToolCapability() throws IOException {
+        model.setCapabilityTags("[\"Tool Calling\"]");
+        catalogCache.refresh();
+        stubUpstreamOk();
+        Map<String, Object> body = chatBody();
+        body.put("tools", List.of(Map.of("type", "function")));
+
+        InvocationPipeline.InvocationResult result = pipeline.invoke(PLAIN_KEY, body, INGRESS);
+
+        assertThat(result.httpStatus()).isEqualTo(200);
+    }
+
+    @Test
+    void invokeRejectsUnsupportedUpstreamProtocol() {
+        model.setPrimaryUpstreamProtocol("anthropic-messages");
+        catalogCache.refresh();
+
+        assertThatThrownBy(() -> pipeline.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, error ->
+                        assertThat(error.code()).isEqualTo(NexmuxStatusCode.INVALID_REQUEST.fullCode()));
+        Mockito.verifyNoInteractions(chatAdapter);
     }
 
     @Test

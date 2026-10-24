@@ -26,6 +26,10 @@ public interface UpstreamChatAdapter {
     String chatCompletions(String baseUrl, String apiKey, String requestBodyJson,
                            int readTimeoutMs, int connectTimeoutMs, String proxy) throws IOException;
 
+    /** 调用其他 OpenAI 兼容操作（如 /responses、/embeddings），返回原始响应体。 */
+    String post(String operation, String baseUrl, String apiKey, String requestBodyJson,
+                int readTimeoutMs, int connectTimeoutMs, String proxy) throws IOException;
+
     /**
      * POST {@code {baseUrl}/chat/completions}（SSE 流式）：上游 SSE 逐行原样透传至
      * {@code out}（含上游 {@code [DONE]}），同时聚合 reply 与 usage 供计量落库。

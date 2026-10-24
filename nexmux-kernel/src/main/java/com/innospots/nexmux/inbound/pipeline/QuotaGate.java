@@ -39,6 +39,15 @@ public final class QuotaGate {
     }
 
     private final Map<BucketKey, LongAdder> counters = new ConcurrentHashMap<>();
+    private final java.time.Clock clock;
+
+    public QuotaGate() {
+        this(java.time.Clock.systemDefaultZone());
+    }
+
+    QuotaGate(java.time.Clock clock) {
+        this.clock = clock;
+    }
 
     /**
      * 请求前检查：任一 enabled hard 规则超限 → 429。
@@ -150,7 +159,7 @@ public final class QuotaGate {
     }
 
     /** 桶键含窗口起点：cyclic 窗口滚动后自然落到新桶（旧桶随内存常驻，P0 规模可接受）。 */
-    private static BucketKey bucketKey(String clientId, QuotaRuleSpec rule) {
+    private BucketKey bucketKey(String clientId, QuotaRuleSpec rule) {
         return new BucketKey(clientId, ruleKey(rule), windowStart(rule));
     }
 
@@ -159,11 +168,11 @@ public final class QuotaGate {
     }
 
     /** 窗口起点：lifetime → 纪元；cyclic → 按周期对齐（hour/day 截断，month 自然月）。 */
-    static LocalDateTime windowStart(QuotaRuleSpec rule) {
+    LocalDateTime windowStart(QuotaRuleSpec rule) {
         if (!"cyclic".equals(rule.quotaType())) {
             return LocalDateTime.of(1970, 1, 1, 0, 0);
         }
-        LocalDateTime now = LocalDateTime.now(ZoneId.systemDefault());
+        LocalDateTime now = LocalDateTime.now(clock);
         int value = rule.cycleValue() == null || rule.cycleValue() <= 0 ? 1 : rule.cycleValue();
         return switch (rule.cycleUnit() == null ? "day" : rule.cycleUnit()) {
             case "hour" -> now.truncatedTo(ChronoUnit.HOURS);

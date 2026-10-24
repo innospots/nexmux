@@ -51,7 +51,7 @@ class ProviderServiceTest {
         when(providerDao.selectCount(any())).thenReturn(0L);
 
         encrypting.create(new ProviderCreateRequest("openai", "OpenAI", "openai", "openai-chat",
-                "openai", null, null, "https://api.openai.com/v1", null, null, "sk-live-key", null));
+                "openai", null, null, "https://api.openai.com/v1", null, null, "sk-live-key", null, null));
 
         org.mockito.ArgumentCaptor<ProviderCredentialEntity> captor =
                 org.mockito.ArgumentCaptor.forClass(ProviderCredentialEntity.class);
@@ -59,6 +59,23 @@ class ProviderServiceTest {
         String stored = captor.getValue().getCiphertext();
         assertThat(stored).startsWith("aesgcm:v1:").doesNotContain("sk-live-key");
         assertThat(cipher.decrypt(stored)).isEqualTo("sk-live-key");
+    }
+
+    @Test
+    void createAndUpdatePersistProxy() {
+        when(providerDao.selectCount(any())).thenReturn(0L);
+        when(providerDao.selectById("pv-1")).thenReturn(provider("pv-1", "openai"));
+
+        providerService.create(new ProviderCreateRequest("openai", "OpenAI", "COMMERCIAL",
+                "openai-completions", "openai", null, null, "https://api.openai.com/v1",
+                null, 60000, null, null, "127.0.0.1:18097"));
+        providerService.update("pv-1", new ProviderUpdateRequest(
+                "OpenAI", "https://api.openai.com/v1", null, 60000, null, null, "127.0.0.1:18098"));
+
+        org.mockito.ArgumentCaptor<ProviderEntity> captor = org.mockito.ArgumentCaptor.forClass(ProviderEntity.class);
+        Mockito.verify(providerDao).insert(captor.capture());
+        assertThat(captor.getValue().getProxy()).isEqualTo("127.0.0.1:18097");
+        assertThat(providerDao.selectById("pv-1").getProxy()).isEqualTo("127.0.0.1:18098");
     }
 
     private ProviderEntity provider(String id, String code) {
@@ -261,7 +278,7 @@ class ProviderServiceTest {
         when(providerCredentialDao.selectOne(any())).thenReturn(null);
 
         providerService.update("pv-1", new ProviderUpdateRequest(
-                "DeepSeek", "https://api.deepseek.com", null, null, "sk-test", null));
+                "DeepSeek", "https://api.deepseek.com", null, null, "sk-test", null, null));
 
         Mockito.verify(providerCredentialDao).insert(Mockito.<ProviderCredentialEntity>argThat(c ->
                 "pv-1".equals(c.getProviderId())
@@ -281,7 +298,7 @@ class ProviderServiceTest {
         when(providerCredentialDao.selectOne(any())).thenReturn(existing);
 
         providerService.update("pv-1", new ProviderUpdateRequest(
-                "DeepSeek", "https://api.deepseek.com", null, null, "sk-new", null));
+                "DeepSeek", "https://api.deepseek.com", null, null, "sk-new", null, null));
 
         assertThat(existing.getKeyVersion()).isEqualTo(4);
         assertThat(existing.getCiphertext()).isEqualTo("sk-new");
@@ -294,7 +311,7 @@ class ProviderServiceTest {
         when(providerDao.selectById("pv-1")).thenReturn(entity);
 
         providerService.update("pv-1", new ProviderUpdateRequest(
-                "DeepSeek", "https://api.deepseek.com", null, null, null, null));
+                "DeepSeek", "https://api.deepseek.com", null, null, null, null, null));
 
         Mockito.verify(providerCredentialDao, Mockito.never()).insert(any(ProviderCredentialEntity.class));
         Mockito.verify(providerCredentialDao, Mockito.never()).updateById(any(ProviderCredentialEntity.class));

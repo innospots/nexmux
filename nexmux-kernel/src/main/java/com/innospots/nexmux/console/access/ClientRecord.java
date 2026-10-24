@@ -55,5 +55,7 @@ public record ClientRecord(
         String quotaSummary,
         String rateLimitSummary,
         String tagsText,
-        String appKeySummary) {
+        String appKeySummary,
+        @Schema(description = "策略配置修订号")
+        Long configRevision) {
 }

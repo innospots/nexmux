@@ -10,13 +10,25 @@ import com.innospots.nexmux.core.model.domain.vo.ModelDetailVo;
 import com.innospots.nexmux.core.model.domain.vo.ModelVo;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderEntity;
+import com.innospots.nexmux.core.provider.service.ProviderService;
+import com.innospots.nexmux.core.debug.service.DebugService;
+import com.innospots.nexmux.core.debug.domain.request.ModelInvokeDebugRequest;
+import com.innospots.nexmux.core.debug.domain.vo.DebugInvokeResultVo;
+import com.innospots.nexmux.core.route.dao.RouteDao;
+import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
+import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.domain.response.PageResult;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.innospots.nexus.base.exception.NexusException;
 import com.innospots.nexmux.core.audit.service.ConfigAuditService;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -24,7 +36,10 @@ public class ModelService {
 
     private final ModelDao modelDao;
     private final ProviderDao providerDao;
+    private final RouteDao routeDao;
     private final ConfigAuditService configAuditService;
+    private final ProviderService providerService;
+    private final DebugService debugService;
 
     public PageResult<ModelVo> page(ModelPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -117,14 +132,22 @@ public class ModelService {
         entity.setOutputModalities(joinCsv(request.outputModalities()));
         entity.setTags(request.tags() == null ? null : NexmuxJson.write(request.tags()));
         entity.setDescription(request.description());
+        entity.setMetadataSpec(request.metadataSpec());
+        entity.setDefaultParams(request.defaultParams());
+        entity.setCapabilityTags(request.capabilityTags());
         entity.setPrimaryProviderId(primaryProvider.getProviderId());
         entity.setPrimaryProviderModelId(request.primaryProviderModelId());
         entity.setPrimaryUpstreamProtocol(request.primaryUpstreamProtocol());
-        entity.setPrimaryBindingEnabled(true);
-        entity.setExtraBindings("[]");
-        entity.setPrimaryCostMultiplier(BigDecimal.ONE);
-        entity.setPrimaryReferenceMultiplier(BigDecimal.ONE);
-        entity.setPrimaryBindingWeight(100);
+        entity.setPrimaryBindingEnabled(request.primaryBindingEnabled() == null
+                || request.primaryBindingEnabled());
+        entity.setExtraBindings(request.extraBindings() == null ? "[]" : request.extraBindings());
+        entity.setPrimaryCostMultiplier(request.primaryCostMultiplier() == null
+                ? BigDecimal.ONE : request.primaryCostMultiplier());
+        entity.setPrimaryReferenceMultiplier(request.primaryReferenceMultiplier() == null
+                ? BigDecimal.ONE : request.primaryReferenceMultiplier());
+        entity.setPrimaryBindingWeight(request.primaryBindingWeight() == null
+                ? 100 : request.primaryBindingWeight());
+        entity.setPricingSpec(initialPricing(request.pricingSpec()));
         modelDao.insert(entity);
         configAuditService.record("MODEL", entity.getModelId(), "CREATE",
                 "创建模型 " + entity.getModelCode(), null);
@@ -154,6 +177,34 @@ public class ModelService {
         if (request.tags() != null) {
             entity.setTags(NexmuxJson.write(request.tags()));
         }
+        if (request.metadataSpec() != null) {
+            entity.setMetadataSpec(request.metadataSpec());
+        }
+        if (request.defaultParams() != null) {
+            entity.setDefaultParams(request.defaultParams());
+        }
+        if (request.capabilityTags() != null) {
+            entity.setCapabilityTags(request.capabilityTags());
+        }
+        if (request.primaryBindingWeight() != null) {
+            entity.setPrimaryBindingWeight(request.primaryBindingWeight());
+        }
+        if (request.primaryCostMultiplier() != null) {
+            entity.setPrimaryCostMultiplier(request.primaryCostMultiplier());
+        }
+        if (request.primaryReferenceMultiplier() != null) {
+            entity.setPrimaryReferenceMultiplier(request.primaryReferenceMultiplier());
+        }
+        if (request.primaryBindingEnabled() != null) {
+            entity.setPrimaryBindingEnabled(request.primaryBindingEnabled());
+        }
+        if (request.extraBindings() != null) {
+            entity.setExtraBindings(request.extraBindings());
+        }
+        if (request.pricingSpec() != null
+                && !request.pricingSpec().equals(entity.getPricingSpec())) {
+            entity.setPricingSpec(versionedPricing(entity.getPricingSpec(), request.pricingSpec()));
+        }
         modelDao.updateById(entity);
         configAuditService.record("MODEL", entity.getModelId(), "UPDATE",
                 "更新模型 " + entity.getModelCode(), null);
@@ -162,6 +213,9 @@ public class ModelService {
 
     public ModelVo setEnabled(String modelId, boolean enabled) {
         ModelEntity entity = require(modelId);
+        if (enabled) {
+            requireReady(entity);
+        }
         entity.setStatus(enabled ? "ENABLED" : "DISABLED");
         modelDao.updateById(entity);
         configAuditService.record("MODEL", entity.getModelId(),
@@ -176,14 +230,64 @@ public class ModelService {
 
     public void delete(String modelId) {
         ModelEntity entity = require(modelId);
+        requireNoRouteReference(entity.getModelCode());
         modelDao.deleteById(modelId);
         configAuditService.record("MODEL", entity.getModelId(), "DELETE",
                 "删除模型 " + entity.getModelCode(), null);
     }
 
     public boolean invokeTest(String modelId) {
-        require(modelId);
-        return true;
+        ModelEntity entity = require(modelId);
+        requireReady(entity);
+        DebugInvokeResultVo result = debugService.modelInvoke(
+                new ModelInvokeDebugRequest(entity.getModelCode(), null,
+                        "Nexmux model invocation test", Map.of("max_tokens", 1)));
+        return result != null && result.status() >= 200 && result.status() < 300;
+    }
+
+    /** 启用与调用测试共用前置检查，避免无效模型被伪装为可用。 */
+    private void requireReady(ModelEntity entity) {
+        ProviderEntity provider = entity.getPrimaryProviderId() == null
+                ? null : providerDao.selectById(entity.getPrimaryProviderId());
+        if (provider == null || !"ENABLED".equals(provider.getStatus())
+                || !Boolean.TRUE.equals(entity.getPrimaryBindingEnabled())
+                || entity.getPrimaryProviderModelId() == null
+                || entity.getPrimaryProviderModelId().isBlank()) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "模型启用前检查失败：Provider 或 Provider Model Binding 不可用");
+        }
+        var connection = providerService.connectionTest(provider.getProviderId());
+        if (connection == null || !connection.ok()) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                    "模型启用前检查失败：Provider 连接测试未通过");
+        }
+    }
+
+    private void requireNoRouteReference(String modelCode) {
+        try {
+            boolean referenced = routeDao.selectList(null).stream()
+                    .anyMatch(route -> referencesModel(route, modelCode));
+            if (referenced) {
+                throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED,
+                        "该模型仍被路由引用，请先解除引用后再删除");
+            }
+        } catch (IllegalArgumentException error) {
+            throw NexusException.build(NexmuxStatusCode.OPERATION_PRECONDITION_FAILED, error);
+        }
+    }
+
+    private static boolean referencesModel(RouteEntity route, String modelCode) {
+        return referencesModel(route.getRouteSpec(), modelCode)
+                || referencesModel(route.getPublishedRouteSpec(), modelCode);
+    }
+
+    private static boolean referencesModel(String specJson, String modelCode) {
+        if (specJson == null || specJson.isBlank()) {
+            return false;
+        }
+        RouteSpec spec = NexmuxJson.read(specJson, RouteSpec.class);
+        return spec != null && spec.candidates().stream()
+                .anyMatch(candidate -> modelCode.equals(candidate.modelCode()));
     }
 
     private LambdaQueryWrapper<ModelEntity> buildPageWrapper(ModelPageRequest request) {
@@ -218,6 +322,57 @@ public class ModelService {
             throw NexusException.build(NexmuxStatusCode.RESOURCE_NOT_FOUND, "model not found");
         }
         return entity;
+    }
+
+    private static String initialPricing(String pricingSpec) {
+        if (pricingSpec == null || pricingSpec.isBlank()) {
+            return pricingSpec;
+        }
+        ObjectNode pricing = NexmuxJson.read(pricingSpec, ObjectNode.class);
+        String version = pricing.path("priceVersion").asText("v1");
+        pricing.put("priceVersion", version);
+        pricing.put("priceEffective", pricing.path("priceEffective").asText(LocalDateTime.now().toString()));
+        if (!pricing.has("priceVersions")) {
+            pricing.set("priceVersions", NexmuxJson.read("[]", ArrayNode.class));
+        }
+        ArrayNode history = (ArrayNode) pricing.get("priceVersions");
+        if (history.isEmpty()) {
+            history.add(priceHistoryEntry(pricing, version, true));
+        }
+        return NexmuxJson.write(pricing);
+    }
+
+    private static String versionedPricing(String previousSpec, String nextSpec) {
+        ObjectNode previous = previousSpec == null || previousSpec.isBlank()
+                ? null : NexmuxJson.read(previousSpec, ObjectNode.class);
+        ObjectNode next = NexmuxJson.read(nextSpec, ObjectNode.class);
+        String previousVersion = previous == null ? null : previous.path("priceVersion").asText(null);
+        String nextVersion = next.path("priceVersion").asText(null);
+        if (nextVersion == null || nextVersion.isBlank() || nextVersion.equals(previousVersion)) {
+            nextVersion = "v-" + UUID.randomUUID().toString().replace("-", "").substring(0, 8);
+        }
+        next.put("priceVersion", nextVersion);
+        next.put("priceEffective", next.path("priceEffective").asText(LocalDateTime.now().toString()));
+        if (!next.has("priceVersions")) {
+            next.set("priceVersions", NexmuxJson.read("[]", ArrayNode.class));
+        }
+        ArrayNode history = (ArrayNode) next.get("priceVersions");
+        history.forEach(entry -> ((ObjectNode) entry).put("current", false));
+        if (previous != null) {
+            history.add(priceHistoryEntry(previous,
+                    previousVersion == null ? "v-legacy" : previousVersion, false));
+        }
+        history.add(priceHistoryEntry(next, nextVersion, true));
+        return NexmuxJson.write(next);
+    }
+
+    private static ObjectNode priceHistoryEntry(ObjectNode pricing, String version, boolean current) {
+        ObjectNode entry = pricing.deepCopy();
+        entry.put("version", version);
+        entry.put("current", current);
+        entry.put("effective", pricing.path("priceEffective").asText(null));
+        entry.put("summary", pricing.toString());
+        return entry;
     }
 
     private static String joinCsv(List<String> values) {

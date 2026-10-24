@@ -42,7 +42,15 @@ public final class RuntimeRouter {
     /** 按别名解析目标候选（客户端以 alias 调用时）。 */
     public Optional<CandidateSelector.Selection> resolveByAlias(
             String alias, Set<String> unhealthyModelCodes, String sessionKey) {
+        return resolveByAlias(alias, Set.of(), unhealthyModelCodes, sessionKey);
+    }
+
+    /** 按别名解析目标候选，强制不可用模型与Binding健康视图分别过滤。 */
+    public Optional<CandidateSelector.Selection> resolveByAlias(
+            String alias, Set<String> unavailableModelCodes,
+            Set<String> unhealthyModelCodes, String sessionKey) {
         return routeCache.findByAlias(alias)
-                .flatMap(route -> candidateSelector.select(route.spec(), unhealthyModelCodes, sessionKey));
+                .flatMap(route -> candidateSelector.select(
+                        route.spec(), unavailableModelCodes, unhealthyModelCodes, sessionKey));
     }
 }

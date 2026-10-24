@@ -9,6 +9,7 @@ import com.innospots.nexmux.core.route.domain.request.RoutePageRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePublishRequest;
 import com.innospots.nexmux.core.route.domain.request.RouteUpdateRequest;
 import com.innospots.nexmux.core.route.domain.vo.RouteVo;
+import com.innospots.nexmux.core.route.domain.vo.RouteVersionVo;
 import com.innospots.nexmux.core.route.service.RouteService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
@@ -106,6 +107,22 @@ public class RouteEndpoint {
             @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId,
             @RequestBody(description = "发布路由", required = true) RoutePublishRequest request) {
         return R.ok(routeService.publish(routeId, request));
+    }
+
+    @GET
+    @Path("/{routeCode}/versions")
+    @Operation(operationId = "nexmuxRouteVersions", summary = "查询 Route 运行配置版本")
+    public R<java.util.List<RouteVersionVo>> versions(@PathParam("routeCode") String routeCode) {
+        return R.ok(routeService.versions(routeCode));
+    }
+
+    @POST
+    @Path("/{routeCode}/rollback")
+    @Operation(operationId = "nexmuxRouteRollback", summary = "回滚 Route 到历史运行版本")
+    public R<RouteVo> rollback(@PathParam("routeCode") String routeCode,
+                               @QueryParam("revision") Long revision,
+                               @QueryParam("operatorId") String operatorId) {
+        return R.ok(routeService.rollback(routeCode, revision, operatorId));
     }
 
     @POST

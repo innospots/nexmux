@@ -24,7 +24,14 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
     public String chatCompletions(String baseUrl, String apiKey, String requestBodyJson,
                                   int readTimeoutMs, int connectTimeoutMs, String proxy)
             throws IOException {
-        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson,
+        return post("/chat/completions", baseUrl, apiKey, requestBodyJson,
+                readTimeoutMs, connectTimeoutMs, proxy);
+    }
+
+    @Override
+    public String post(String operation, String baseUrl, String apiKey, String requestBodyJson,
+                       int readTimeoutMs, int connectTimeoutMs, String proxy) throws IOException {
+        HttpURLConnection connection = connect(operation, baseUrl, apiKey, requestBodyJson,
                 readTimeoutMs, connectTimeoutMs, proxy);
         try {
             InputStream in = connection.getInputStream();
@@ -41,7 +48,7 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
                                                int readTimeoutMs, int connectTimeoutMs, String proxy,
                                                OutputStream out) throws IOException {
         long start = System.currentTimeMillis();
-        HttpURLConnection connection = connect(baseUrl, apiKey, requestBodyJson,
+        HttpURLConnection connection = connect("/chat/completions", baseUrl, apiKey, requestBodyJson,
                 readTimeoutMs, connectTimeoutMs, proxy);
         long ttftMs = -1;
         StringBuilder reply = new StringBuilder();
@@ -83,10 +90,10 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
     }
 
     /** 建立连接并写请求体；HTTP &ge; 400 读错误流抛 {@link UpstreamCallException}（连接已断开，未向下游写字节）。 */
-    private HttpURLConnection connect(String baseUrl, String apiKey, String requestBodyJson,
+    private HttpURLConnection connect(String operation, String baseUrl, String apiKey, String requestBodyJson,
                                       int readTimeoutMs, int connectTimeoutMs, String proxy)
             throws IOException {
-        URI uri = URI.create(baseUrl.replaceAll("/+$", "") + "/chat/completions");
+        URI uri = URI.create(baseUrl.replaceAll("/+$", "") + operation);
         // G-08：Provider proxy 生效（仅 HTTP 代理，host:port / http://host:port）
         HttpURLConnection connection = proxy == null || proxy.isBlank()
                 ? (HttpURLConnection) uri.toURL().openConnection()

@@ -5,6 +5,8 @@
 > **方法**：阅读 Console→Runtime 契约代码（快照缓存 / 流水线 / 关口），再以真实调用（DeepSeek 上游）+ 配置变更做 A/B 验证。
 > **日期**：2026-10-13
 >
+> **修复状态**：§4 缺口 G-01/G-03~G-08 已于 2026-10-13 修复并实测复验（commit `d9fae6c`；G-02 刻意延后 P1）；2026-10-22 另有 4 项 Runtime 行为变更影响本文口径，详见 **§7 修复状态与变更附录**（阅读 §2~§4 时请以 §7 为准）。
+>
 > 相关：[Runtime 设计](./design/nexmux-runtime-design.md)、[Console/Runtime 边界 ADR](./design/adr/0001-console-runtime-configuration-boundary.md)、[功能说明书](./nexmux-functional-guide.md)。
 
 ---
@@ -28,7 +30,7 @@ POST /v1/chat/completions → InvocationPipeline
 要点：
 - **只有「已发布」的路由**进入 Runtime（`PUBLISHED` + `published_route_spec`）；草稿/停用不可见。
 - 配置变更经 **周期快照**生效（默认 30s，本次验证临时调为 5s 以加速；已还原）。
-- `promptPolicy` 不走快照，Runtime 落库时实时读 `mux_platform_setting`。
+- `promptPolicy` 不走快照，Runtime 落库时近实时读 `mux_platform_setting`（`PlatformSettingService` 秒级 TTL 缓存，2026-10-22 起；此前为每请求实时读库）。
 
 ---
 
@@ -172,3 +174,33 @@ curl -s -X POST http://localhost:8083/v1/chat/completions \
 ---
 
 *本核查以代码契约 + 真实调用为准；🟡 项建议在后续批次补齐构造性用例。*
+
+---
+
+## 7. 修复状态与变更附录（2026-10-22 补记）
+
+### 7.1 §4 缺口修复状态（commit `d9fae6c`，2026-10-13）
+
+| # | 缺口 | 修复 | 复验 |
+|---|------|------|------|
+| G-01 | 候选行 C/M 倍率不生效 | ✅ `resolve()` 以候选行 `costRate`/`billingRate` 覆盖 `ResolvedBinding` | 实测 C=3 → costUsd 精确 3×（5.85e-05 vs 基线 1.95e-05） |
+| G-02 | Model 默认参数不合并 | ⏸ 刻意延后（P1 接入）；模型编辑页默认参数 Tab 已标注「暂未合并进 Runtime 转发请求」 | — |
+| G-03 | `requestTimeoutMs` 形同虚设 | ✅ 回退链 `Provider.timeoutMs → 服务设置 → 常量 30s` | 实测 requestTimeoutMs=1 → 502 读超时 |
+| G-04 | `upstreamConnectTimeoutMs` Runtime 未引用 | ✅ 适配器连接/读取超时拆分，与调试台同口径 | 代码 + 联调确认 |
+| G-05 | `logRetentionDays` 无消费者 | ✅ `RequestLogRetentionCleaner`（runtime profile，启动 10 分钟后首跑、每日一轮） | 单测 4 例 |
+| G-06 | Model 停用不即时生效 | ✅ 选路恒剔除 `status=DISABLED`，全剔除 → 503 `NMX020005` | 实测停用 → 503 |
+| G-07 | 配额 CONCURRENT 指标无效 | ✅ 配额侧移除 CONCURRENT（并发归 `RateLimitGate` 信号量）；存量规则忽略；前端选项同步移除 | 单测 + 联调 |
+| G-08 | Provider `proxy`/`region` 未消费 | ✅ 转发接入 HTTP 代理；`region` 标注「仅元数据」 | 单测 + 联调 |
+
+### 7.2 2026-10-22 Runtime 行为变更（影响本文口径）
+
+| 项 | 本文原口径 | 现口径 |
+|----|-----------|--------|
+| 上游错误分层 | 上游失败一律 502 `NMX060001`（§5 证据中 502 行均为 5xx/网络场景，仍成立） | **上游 4xx 透传**（接入方输入类错误，状态与错误体原样返回；流式以 SSE 事件带内透传）；仅 5xx/网络/超时归约 502 |
+| 响应头 | 未提及 | 非流式响应带 `x-request-id`（与 `mux_request_log.request_id` 对应）；限流 429 带 `Retry-After`（分钟窗口余秒） |
+| 端点 | 仅 `POST /v1/chat/completions` | 增加 `GET /v1/models`（AppKey 鉴权，返回本客户端已授权的已发布别名，OpenAI list 形状） |
+| 配额记账时机 | §2.2 配额行实测的是正常超限，不受影响 | 被鉴权/授权/配额/限流/选路任一关口**拒绝**的请求不消耗 REQUEST 配额（`recordRequest` 挪至全部关口通过后）；落库日志口径与 `resync` 回填口径一致 |
+| 凭证明文 | §3 判断「供应商状态与连接实测有效」不变 | 新增 `CredentialCipher`（AES-GCM，`NEXMUX_CREDENTIAL_SECRET`）：凭证可加密落库，存量明文兼容；未配密钥维持明文 + 启动告警 |
+| 服务设置读取 | §1「实时读」 | 秒级 TTL 缓存近实时（热路径去全表读） |
+
+以上变更均有对应单元测试（nexmux-kernel 单测 311 全绿）与 OpenAPI 契约（`inbound` 包已纳入构建期扫描，`/v1/models` 与 `/v1/chat/completions` 均入 `nexmux-kernel.yaml`）。

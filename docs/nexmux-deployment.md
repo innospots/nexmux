@@ -34,6 +34,11 @@ tar -xzf nexmux-spring.tar.gz && cd nexmux-spring
 # 必填：控制台令牌密钥（16 字节）
 export CONSOLE_TOKEN_SECRET='<16-byte-secret>'
 
+# 可选但生产强烈建议：Provider 上游凭证落库加密密钥（AES-GCM，任意长原文）
+# 不配置则凭证明文落库（启动告警）；配置后新写/轮换自动加密，存量明文行兼容读取、
+# 下次保存即升级为密文。两进程必须同值；更换密钥前须先用旧密钥轮换全部凭证
+export NEXMUX_CREDENTIAL_SECRET='<random-long-secret>'
+
 # 可选：库路径（默认 /var/lib/nexmux/nexus-platform-console）
 export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE'
 
@@ -98,7 +103,7 @@ export DB_URL='jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreS
 - 配额/限流为 Runtime **实例级**计数（多实例非全局精确；多实例部署前评审 ADR-0002 退出条件）。
 - AppKey 轮换后旧 key 立即失效（宽限期未实现）。
 - 仅 OpenAI 兼容 `/v1/chat/completions`（含 SSE）；`/v1/responses` 等后续阶段。
-- 供应商凭证列当前为明文存储（平台级密钥管理另行评审）；请确保库文件与备份的访问控制。
+- 供应商凭证支持落库加密（`NEXMUX_CREDENTIAL_SECRET`，AES-GCM，`aesgcm:v1` 前缀密文）；未配置时明文存储并启动告警——生产必配，并保证库文件与备份的访问控制。
 - 调试台穿透会产生真实上游调用与费用：生产建议 `debugInvokeEnabled=false` 或收紧配额。
 - 本地双进程共用 H2（`AUTO_SERVER`）：进程被强杀（如超时杀进程组）后 `.lock.db` 残留会使另一进程的 AUTO_SERVER TCP 握手 EOF——停全部进程、删 `out/db/*.lock.db` 后重启。系统 SOCKS 代理不可用时需加 `-Djava.net.useSystemProxies=false`（H2 AUTO_SERVER 与上游调用都会走路径代理）。
 

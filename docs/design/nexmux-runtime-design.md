@@ -20,7 +20,7 @@
 | 1 | Runtime 工程形态 | **不新增 Maven 模块**；在 `nexmux-spring` 内以 **独立 profile（`runtime`）启动独立 JVM 进程**（见 ADR-0002） |
 | 2 | 运行库 | **共用数据库实例**；按表级写责分离（运行表仅 Runtime 写，配置表仅 Console 写），退出条件见 ADR-0002 |
 | 3 | AppKey 鉴权 | OK——Runtime 侧 `app_key_hash` + 盐校验，内存 Credential Cache |
-| 4 | 协议范围 | P0 只做 **OpenAI 兼容 `POST /v1/chat/completions`**（含 SSE 流式） |
+| 4 | 协议范围 | P0：OpenAI 兼容 **`POST /v1/chat/completions`**（含 SSE 流式）+ **`GET /v1/models`**（模型发现，2026-10-22 增补） |
 | 5 | 计量 | **全量**：tokens、成本估算、`pricing_snapshot`、`route_trace`、`prompt_snapshot`（按 promptPolicy） |
 | 6 | 健康 | **主动探活**：定时探测上游，维护 Binding 健康视图并参与选路过滤 |
 
@@ -54,7 +54,7 @@ Console（控制面）P0 已交付，但模型调用尚无真实数据面：当�
 | 概念 | 英文名 | 归属模块/包 | 技术 ID | 稳定业务键 | 备注 |
 |------|--------|------------|---------|-----------|------|
 | 数据面运行时 | Model Runtime | `inbound`（kernel）+ `runtime` profile（spring） | — | — | 独立 JVM 进程 |
-| 入站端点 | Ingress Endpoint | `inbound.ingress` | `/v1/chat/completions` | — | OpenAI 兼容 |
+| 入站端点 | Ingress Endpoint | `inbound.ingress` | `/v1/chat/completions`、`/v1/models` | — | OpenAI 兼容 |
 | 已发布路由快照 | Published Route Spec | `core.route`（表）/ `inbound.runtime`（缓存） | `route_id` | `alias` / `ingress` | 已有 `PublishedRouteCache` |
 | 候选选择器 | CandidateSelector | `core.route.domain.selection` | — | — | **已有**，调试台/Runtime 共用 |
 | Binding 选择 | Binding Selection | `inbound.pipeline` | — | `provider_id + provider_model_id` | Model 内健康过滤 + 权重 |
@@ -179,10 +179,11 @@ public record InvocationContext(
 
 | 方法 | 路径 | 请求 | 响应 | 委托 |
 |------|------|------|------|------|
-| POST | `/v1/chat/completions` | `ChatCompletionIngressRequest`（`Authorization: Bearer gw-sk-*` 或 `X-API-Key`） | OpenAI chat.completion JSON；`stream=true` 时 `text/event-stream` | `InvocationPipeline` |
+| POST | `/v1/chat/completions` | `ChatCompletionIngressRequest`（`Authorization: Bearer gw-sk-*` 或 `X-API-Key`） | OpenAI chat.completion JSON；`stream=true` 时 `text/event-stream`；非流式带 `x-request-id` 响应头 | `InvocationPipeline` |
+| GET | `/v1/models` | 同上鉴权头 | OpenAI list 形状：本 AppKey 已授权且已发布的别名清单 | `InvocationPipeline.listModels` |
 
 - **alias 解析**：请求体 `model` 字段 = Route `alias`（PRD §15/§16）；同时校验请求路径与快照 `ingress` 一致（不一致 → 404）。P0 不支持路径参数化 ingress。
-- **错误体**：OpenAI 兼容 `{"error": {"message", "type", "code"}}`，`code` 填 Nexmux 状态码 fullCode；由 `inbound.ingress.RuntimeErrorExceptionMapper`（`ExceptionMapper<NexusException>`，仅 runtime profile 装配）统一映射，端点本身不持有错误分支。非流式成功直接透传上游原始 JSON 文本；流式失败在字节写出前以 SSE 错误事件收尾。
+- **错误体**：OpenAI 兼容 `{"error": {"message", "type", "code"}}`，`code` 填 Nexmux 状态码 fullCode。端点自捕获 `NexusException` 经 `inbound.ingress.RuntimeErrorResponses` 映射（不走平台全局 R<T> 异常映射，避免 Console 语义渗入数据面）；限流 429 附 `Retry-After`（分钟窗口余秒）。**上游错误分层（2026-10-22 修订）**：上游 4xx 为接入方输入类错误，非流式透传上游状态与错误体（不归约 502；流式状态行已提交，错误体以 SSE 事件带内透传）；上游 5xx/网络/超时才归约 502 `NMX060001`。非流式成功直接透传上游原始 JSON 文本；流式失败在字节写出前以 SSE 错误事件收尾。
 - **鉴权豁免**：`/v1/**` 不走控制台会话鉴权（`@NexusAuthenticatedApi` 不适用）；`application-runtime.yaml` 已配置 `nexus.console.web.security.permit-all-patterns: [/v1/**]`（ConsoleAuthenticationFilter 放行，security.enabled=true 时生效）。
 
 ### 7.2 Java 接口（非 HTTP）
@@ -217,7 +218,8 @@ ingress.RuntimeIngressEndpoint
 | 配额超限（hard） | `QUOTA_EXCEEDED`（RESOURCE_LIMIT `0001`） | `NMX100001` | 429 | QuotaGate |
 | 限流触发 | `RATE_LIMITED`（RESOURCE_LIMIT `0002`） | `NMX100002` | 429 | RateLimitGate |
 | 候选池为空（全停用/全不健康） | `NO_AVAILABLE_CANDIDATE`（BUSINESS_RULE `0005`） | `NMX020005` | 503 | InvocationPipeline |
-| 上游调用失败（网络/超时/4xx/5xx） | `UPSTREAM_FAILURE`（EXTERNAL_FAILURE `0001`） | `NMX060001` | 502 | InvocationPipeline（流式已开始则截断流并记日志，不回错误码） |
+| 上游 5xx / 网络 / 超时 | `UPSTREAM_FAILURE`（EXTERNAL_FAILURE `0001`） | `NMX060001` | 502 | InvocationPipeline（流式已开始则截断流并记日志，不回错误码） |
+| 上游 4xx（接入方输入类错误） | 不映射状态码——透传上游状态与错误体 | 上游原码 | 4xx | InvocationPipeline / OpenAiCompatibleChatAdapter（`UpstreamCallException` 携带上游状态与截断错误体；流式以 SSE 事件带内透传） |
 
 失败语义：链路前置失败（401/403/404/429/503）抛 `NexusException` 由 ingress 映射为 OpenAI 错误体；上游失败同样落 `mux_request_log`（status=ERROR）。SSE 流式中途失败按 PRD §19.7「已开始输出的流式响应不重试」，截断并记日志。
 
@@ -233,7 +235,7 @@ ingress.RuntimeIngressEndpoint
 | 探活 | 单调度线程顺序探测；探测请求不计入 `mux_request_log`、不消耗客户端配额 |
 | 计费 | 请求结束后同步计算（pricing_spec × 命中倍率：候选行 C/M 优先，留空继承 Binding C/M），与日志同事务插入 |
 | 日志保留 | `RequestLogRetentionCleaner` 按服务设置 `logRetentionDays` 每日清理超期行（≤0 不清理；启动 10 分钟后首跑避让启动高峰） |
-| 超时与代理 | 读取超时：`Provider.timeoutMs` → 服务设置 `requestTimeoutMs` → 常量 30s；连接超时：`upstreamConnectTimeoutMs`（缺省 10s）；Provider `proxy` 配置 HTTP 代理（`host:port`），`region` 仅元数据不参与调用 |
+| 超时与代理 | 读取超时：`Provider.timeoutMs` → 服务设置 `requestTimeoutMs` → 常量 30s；连接超时：`upstreamConnectTimeoutMs`（缺省 10s）；Provider `proxy` 配置 HTTP 代理（`host:port`），`region` 仅元数据不参与调用。服务设置为秒级 TTL 缓存近实时读取（`PlatformSettingService.getAll`，2026-10-22 起，避免热路径每请求多次全表读） |
 
 ## 10. 兼容与迁移
 
@@ -276,7 +278,7 @@ ingress.RuntimeIngressEndpoint
 
 - **不建**统一模型协议抽象层（ModelRequest/ModelResponse/ModelStreamEvent 全套）：单协议期无第二消费者，P0 直接 OpenAI 透传 + usage 抽取；第二 adapter 立项时再抽象。
 - **不建** `nexmux-runtime` Maven 模块、不改根 POM / BOM。
-- **不建** Credential 加解密层：沿用现状（`ciphertext` 列即凭证明文，与调试台一致）；平台级密钥管理另评。
+- ~~不建 Credential 加解密层~~（2026-10-22 决策翻案，已补建）：`core.shared.security.CredentialCipher`（AES-GCM，密钥取 `NEXMUX_CREDENTIAL_SECRET` / 系统属性），写入加密、读取方（Runtime 转发 / 探活 / 连接测试 / 调试台）解密；存量明文行兼容读取、下次保存自动升级；未配密钥时维持明文 + 启动告警。翻案理由：`ciphertext` 列存明文名不副实且为实质安全缺口。
 - **不建** Redis / 分布式计数、不建熔断与 Failover（P1）。
 - **不建** Binding 健康回写配置表、不建价格版本表、不建 Runtime 独立 OpenAPI 文档站点（端点随既有 OpenAPI 输出即可）。
 - **不引入** Reactor/WebFlux：SSE 用 `StreamingOutput`（与调试台一致）。
@@ -289,7 +291,7 @@ ingress.RuntimeIngressEndpoint
 - [x] 分层方向：`ingress → pipeline → runtime/protocol → core.ops`；无 `inbound → console`
 - [x] request/vo 为 record；`RouteSpec` 既有防御拷贝
 - [x] 接口仅 `UpstreamChatAdapter`（有第二消费者演进点）；其余具体类
-- [x] 端点 1 个，远低于 7 个复审线
+- [x] 端点 2 个（chat/completions、models），远低于 7 个复审线
 - [x] 每个应用可见失败有状态码行；统一 `NexusException`
 - [x] 事务/幂等/并发已声明（§9）
 - [x] 兼容面：`source` 列口径、新表迁移、§5.1 口径废止均已写（§10）

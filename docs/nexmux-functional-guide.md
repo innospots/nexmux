@@ -11,7 +11,7 @@
 > | 编写依据 | 产品需求说明书 V2.1、管理控制台设计 V1.0、线框图，以及 `localhost:9011` 实际运行页面 |
 > | 状态口径 | 标注「**计划中**」的为产品已定义但当前版本未开放的能力 |
 >
-> **配套文档**：[功能页面清单](./nexmux-functional-catalog.md)（菜单 / 路径 / 字段 / 数据来源一览）、[设计文档目录](./nexmux-design-catalog.md)、[运行与部署](./nexmux-deployment.md)。
+> **配套文档**：[功能页面清单](./nexmux-functional-catalog.md)（菜单 / 路径 / 字段 / 数据来源一览）、[设计文档目录](./nexmux-design-catalog.md)、[运行与部署](./nexmux-deployment.md)、[模型接入指南](./nexmux-integration-guide.md)（接入方视角）。
 
 ---
 

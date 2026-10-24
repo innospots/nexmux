@@ -34,3 +34,6 @@ coverage/
 .DS_Store
 logs
 *.log
+out/
+logsscripts/__pycache__/
+nexmux-ui/tsconfig.tsbuildinfo

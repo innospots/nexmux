@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# spring.profiles.active=local,runtime / prod,runtime —— Model Runtime 数据面进程（ADR-0002）
+#
+# 与 Console 进程（默认 profile）共用 artifact 与数据库实例，但：
+#   - 独立端口（默认 8083）；独立 JVM 进程启动
+#   - 仅装配 inbound 链路（/v1/** Ingress + 快照/探活/配额调度），不装配 /api/d/** 管理端点
+#   - 运行表（mux_request_log / mux_binding_health）由本进程写入；Console 只读
+#
+# 本文件为「角色差分」：环境差分（数据源 / sql.init 明细 / 安全基线）仍在
+# application-local.yaml / application-prod.yaml，本文件后加载、覆盖优先。
+#
+# 注意：
+#   1. sql.init 收口为 never——DDL 与种子数据由 Console 进程负责（配置表仅 Console 写，
+#      ADR-0002 决策 2）。fresh 库须先启动 Console 再启动 Runtime。
+#   2. 宿主 ConsoleAuthConfiguration 无 profile 守卫（@EnableNexusPlatform 导入链），
+#      prod 下本进程同样会绑定 nexus.console.auth.token-secret，
+#      因此 prod Runtime 也必须注入 CONSOLE_TOKEN_SECRET（与 Console 同值）。
+# ---------------------------------------------------------------------------
+server:
+  port: ${RUNTIME_PORT:8083}
+
+management:
+  server:
+    port: ${RUNTIME_MANAGEMENT_PORT:19091}
+
+spring:
+  sql:
+    init:
+      # 覆盖 env 文件的 always：Runtime 不执行 DDL/种子，只消费快照
+      mode: never
+
+nexus:
+  console:
+    web:
+      security:
+        # /v1/** 由 AppKey 鉴权（inbound AppKeyVerifier），不走控制台 Bearer 会话；
+        # security.enabled=true 时该前缀跳过 ConsoleAuthenticationFilter
+        permit-all-patterns:
+          - /v1/**
+          - /actuator/**
+          - /openapi/**

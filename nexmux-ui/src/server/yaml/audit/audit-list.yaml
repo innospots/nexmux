@@ -1,0 +1,329 @@
+dsl: "1.0"
+page:
+  id: audit-list
+  title: 审计
+  name: auditList
+  description: 系统管理 / 审计：Provider / Model / Route / Client / 配额 / 限流 / 定价 / 服务设置 /
+    AppKey 等全部管理操作记录
+state:
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
+  range:
+    start: 2026-09-22
+    end: 2026-09-28
+  operator: all
+  operation: all
+  resourceType: all
+  resourceIdKeyword: ""
+dataSources:
+  audits:
+    type: http
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/audit-logs
+      params:
+        start: ${state.range.start}
+        end: ${state.range.end}
+        operator: ${state.operator}
+        operation: ${state.operation}
+        resourceType: ${state.resourceType}
+        resourceId: ${state.resourceIdKeyword}
+  # 操作人筛选项经接口获取（Select options 绑定 ${data.operators.items}）
+  operators:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/audit-operators
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: audits
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 系统管理
+          - label: 审计
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 审计日志
+        - type: Typography
+          props:
+            variant: muted
+            text: 平台全部管理操作留痕（敏感数据脱敏显示）
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: middle
+            className: mb-2
+          children:
+            - type: Text
+              props:
+                text: 时间范围
+                strong: true
+            - type: DatePicker
+              props:
+                mode: range
+                value: ${state.range}
+                placeholder: 选择时间范围
+                presets:
+                  - label: 今天
+                    days: 1
+                  - key: thisWeek
+                  - key: thisMonth
+                  - label: 近3天
+                    days: 3
+                  - label: 近7天
+                    days: 7
+                  - label: 近14天
+                    days: 14
+                  - label: 近30天
+                    days: 30
+                style:
+                  width: 280
+              events:
+                onChange:
+                  - action: setState
+                    condition: ${event}
+                    params:
+                      range: ${event}
+                  - action: reload
+                    condition: ${event}
+                    params:
+                      dataSource: audits
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 操作人
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.operator}
+                options: ${data.operators.items}
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      operator: ${event}
+                  - action: reload
+                    params:
+                      dataSource: audits
+            - type: Text
+              props:
+                text: 操作类型
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.operation}
+                options:
+                  - label: 全部操作类型
+                    value: all
+                  - label: 创建
+                    value: create
+                  - label: 修改
+                    value: update
+                  - label: 删除
+                    value: delete
+                  - label: 启用
+                    value: enable
+                  - label: 停用
+                    value: disable
+                  - label: 创建AppKey
+                    value: appkey-create
+                  - label: 停用AppKey
+                    value: appkey-disable
+                  - label: Rotate Secret
+                    value: secret-rotate
+                  - label: 修改服务设置
+                    value: settings-update
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      operation: ${event}
+                  - action: reload
+                    params:
+                      dataSource: audits
+            - type: Text
+              props:
+                text: 资源类型
+                strong: true
+                className: shrink-0
+            - type: Select
+              props:
+                value: ${state.resourceType}
+                options:
+                  - label: 全部资源类型
+                    value: all
+                  - label: Provider
+                    value: provider
+                  - label: Model
+                    value: model
+                  - label: Model Alias
+                    value: alias
+                  - label: Route
+                    value: route
+                  - label: Route Policy
+                    value: route-policy
+                  - label: API Client
+                    value: client
+                  - label: Client Template
+                    value: client_template
+                  - label: AppKey
+                    value: appkey
+                  - label: Quota Policy
+                    value: quota
+                  - label: RateLimit Policy
+                    value: ratelimit
+                  - label: Pricing
+                    value: pricing
+                  - label: 服务设置
+                    value: settings
+                className: w-44 shrink-0 [&>span]:w-full [&_[data-slot=select-trigger]]:w-full
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      resourceType: ${event}
+                  - action: reload
+                    params:
+                      dataSource: audits
+            - type: Text
+              props:
+                text: Resource ID
+                strong: true
+                className: shrink-0
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.resourceIdKeyword}
+                    placeholder: 按 Resource ID 筛选...
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          resourceIdKeyword: ${event}
+                      - action: reload
+                        params:
+                          dataSource: audits
+            - type: Button
+              props:
+                text: 清除筛选
+                icon: x-circle
+                size: small
+              events:
+                onClick:
+                  - action: setState
+                    params:
+                      operator: all
+                      operation: all
+                      resourceType: all
+                      resourceIdKeyword: ""
+                  - action: reload
+                    params:
+                      dataSource: audits
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+      children:
+        - type: Text
+          props:
+            text: "总计: ${data.audits.filteredText} 条记录"
+            strong: true
+        - type: Text
+          props:
+            text: 审计范围：Provider / Model / Alias / Route / Client / Quota / RateLimit /
+              Pricing / 服务设置 / AppKey
+            type: secondary
+            className: text-xs
+    - type: Card
+      children:
+        - type: Table
+          props:
+            dataSource: ${data.audits.items}
+            rowKey: id
+            loading: ${dataStatus.audits.loading}
+            pagination: false
+            columns:
+              - title: 时间
+                cell:
+                  type: Button
+                  props:
+                    variant: link
+                    size: small
+                    className: p-0 h-auto tabular-nums
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /audit/${row.id}
+                  children:
+                    - type: Text
+                      props:
+                        text: ${row.timeShort}
+              - title: 操作人
+                dataIndex: operator
+              - title: 操作
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.operation}
+                    strong: true
+              - title: 资源类型
+                dataIndex: resourceType
+              - title: Resource ID
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.resourceId}
+                    className: font-mono
+              - title: IP
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.ip}
+                    className: tabular-nums
+    - type: Empty
+      when: ${data.audits.items != null && data.audits.items.length == 0}
+      props:
+        title: 未找到审计记录
+        description: 调整时间范围或筛选条件后重试

@@ -1,0 +1,28 @@
+# spring.profiles.active=local — 仅数据源差异化（公共项见 application.yaml）
+spring:
+  # ADR-0001 §3/§4 边界：生产部署须拆分为——配置库（Console 可写）与运行库（mux_request_log 等，
+  # Console 账号只读、仅 Runtime 可写）。本地 H2 单库同账号 sa 仅为开发便利（审计 A4 注记），
+  # 不得作为生产部署形态；调试台过渡写入一律 source=DEBUG。
+  datasource:
+    # 嵌入式文件库，落盘至 ./out/db/（相对进程工作目录，通常为模块根目录）
+    # ⚠️ 本地 Console + Runtime 双进程必须指向同一库文件（ADR-0002 单库形态）：
+    # 从其他目录启动 runtime 时，用 SPRING_DATASOURCE_URL 覆盖为绝对路径，否则两进程各用各的库。
+    url: jdbc:h2:file:./out/db/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  sql:
+    init:
+      # Spring Boot 4 的 embedded 模式仅识别 jdbc:h2:mem，file 库须用 always（脚本均为 CREATE IF NOT EXISTS）
+      mode: always
+      # 本模块 src/main/resources/schema/ 下：宿主平台 DDL 在根（core → plugin → console → platform），
+      # 产品脚本（mux_* 表 DDL 与种子数据）在 schema/nexmux/
+      schema-locations:
+        - classpath:schema/nexus-core-h2.sql
+        - classpath:schema/nexus-plugin-h2.sql
+        - classpath:schema/nexus-console-h2.sql
+        - classpath:schema/nexus-platform-h2.sql
+        - classpath:schema/nexmux/nexmux-h2.sql
+      # 种子数据：pi-ai 提供商/模型 catalog（MERGE 幂等，可重复执行）
+      data-locations:
+        - classpath:schema/nexmux/nexmux-catalog-data-h2.sql

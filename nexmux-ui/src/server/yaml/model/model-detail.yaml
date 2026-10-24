@@ -1,0 +1,2304 @@
+dsl: "1.0"
+page:
+  id: model-detail
+  title: 模型详情
+  name: modelDetail
+  description: 模型资产 / 模型详情：基本信息、默认参数、定价、多供应商上游绑定与路由引用
+state:
+  metaExpanded: false
+dataSources:
+  detail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/models/${route.params.code}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 模型资产
+          - label: 模型
+            href: /models
+          - label: ${route.params.code}
+    - type: Flex
+      when: ${data.detail != null}
+      props:
+        direction: vertical
+        gap: middle
+        align: stretch
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: middle
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        className: size-12 shrink-0 rounded-full bg-(--muted)
+                      children:
+                        - type: Icon
+                          props:
+                            name: ${data.detail.providerIcon}
+                            size: 24
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                      children:
+                        - type: Flex
+                          props:
+                            align: center
+                            gap: middle
+                          children:
+                            - type: Typography
+                              props:
+                                variant: h3
+                                text: ${data.detail.name}
+                            - type: StatusBadge
+                              props:
+                                status: ${data.detail.status}
+                        - type: Text
+                          props:
+                            text: ${data.detail.code} · ${data.detail.providerName} · ${data.detail.type}
+                            type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 编辑
+                        icon: edit
+                        variant: primary
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /models/${route.params.code}/edit
+                    - type: Button
+                      props:
+                        text: "${data.detail.status == 'enabled' ? '停用' : '启用'}"
+                        icon: "${data.detail.status == 'enabled' ? 'x-circle' : 'check-circle'}"
+                        size: small
+                      events:
+                        onClick:
+                          - id: statusCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: "${data.detail.status == 'enabled' ? '确认停用 Model' : '确认启用 Model'}"
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: "${data.detail.status == 'enabled' ? '停用后，该模型将不再参与路由调度，客户端通过路由调用该模型将失败。' :
+                                          '启用后，该模型可被路由引用与调度。'}"
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: small
+                                      children:
+                                        - type: Text
+                                          props:
+                                            text: 影响范围：
+                                            strong: true
+                                        - type: Text
+                                          props:
+                                            text: · 供应商模型绑定：${data.detail.suppliers.length} 个
+                                            type: secondary
+                                        - type: Text
+                                          props:
+                                            text: · 路由引用：${data.detail.routes.total} 条路由（${data.detail.routes.active} 条活跃）
+                                            type: secondary
+                                    - type: Text
+                                      when: ${data.detail.status == 'enabled' && data.detail.routes.active > 0}
+                                      props:
+                                        size: small
+                                        text: ⚠ 存在活跃路由引用时，建议先完成切换再停用。
+                                        type: warning
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: "${data.detail.status == 'enabled' ? '确认停用' : '确认启用'}"
+                                            variant: primary
+                                            danger: ${data.detail.status == 'enabled'}
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.statusCfm.ok}
+                              then:
+                                - id: toggleResult
+                                  action: util.request
+                                  params:
+                                    method: POST
+                                    url: "/api/d/ops/model-${data.detail.status
+                                      == 'enabled' ? 'disable' : 'enable'}?code=${route.params.code}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult == null || actions.toggleResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.toggleResult != null && actions.toggleResult.error
+                                            != null ? actions.toggleResult.error.message
+                                            : '操作失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.toggleResult != null && actions.toggleResult.ok
+                                      != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${data.detail.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
+                    - type: Button
+                      props:
+                        text: 模型调用测试
+                        icon: zap
+                        size: small
+                      events:
+                        onClick:
+                          - id: testResult
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 模型调用测试
+                                width: 560
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        text: 将向 ${data.detail.name} 发送一条测试请求，验证上游连接与模型可用性。
+                                        type: secondary
+                                        className: text-sm
+                                    - type: Field
+                                      props:
+                                        label: 测试 Prompt
+                                      children:
+                                        - type: Textarea
+                                          props:
+                                            rows: 4
+                                            className: w-full
+                                            placeholder: Say hello in one short sentence.
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 发送测试
+                                            icon: send
+                                            variant: primary
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                              - id: invokeResult
+                                                action: util.request
+                                                params:
+                                                  method: POST
+                                                  url: /api/d/ops/model-invoke-test?code=${route.params.code}
+                                              - action: if
+                                                params:
+                                                  condition: ${actions.invokeResult == null || actions.invokeResult.ok
+                                                    == false}
+                                                  then:
+                                                    - action: message
+                                                      params:
+                                                        messageType: error
+                                                        text: "${actions.invokeResult != null && actions.invokeResult.error
+                                                          != null ? actions.invokeResult.error.message
+                                                          : '调用测试失败'}"
+                                              - action: if
+                                                params:
+                                                  condition: ${actions.invokeResult != null && actions.invokeResult.ok
+                                                    != false}
+                                                  then:
+                                                    - action: message
+                                                      params:
+                                                        messageType: success
+                                                        text: 调用测试成功
+                    - type: Button
+                      props:
+                        text: 查看路由
+                        icon: list-filter
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /routes?model=${route.params.code}
+                    - type: DropdownMenu
+                      props:
+                        items:
+                          - label: 导出
+                            value: export
+                            icon: download
+                          - label: 复制 Code
+                            value: copy
+                            icon: copy
+                      events:
+                        onSelect:
+                          - action: if
+                            params:
+                              condition: ${event == 'copy'}
+                              then:
+                                - action: util.copy
+                                  params:
+                                    text: ${data.detail.code}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 模型标识已复制
+                          - action: if
+                            params:
+                              condition: ${event == 'export'}
+                              then:
+                                - action: util.copyJson
+                                  params:
+                                    data: ${data.detail}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 配置 JSON 已复制到剪贴板
+                      children:
+                        - type: Button
+                          props:
+                            text: ···
+                            variant: text
+        - type: Card
+          children:
+            - type: Grid
+              props:
+                columns: 5
+                gap: 16
+              children:
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.detail.specSummary}
+                        strong: true
+                        className: text-lg tabular-nums
+                    - type: Text
+                      props:
+                        text: 上下文 · 输出窗口
+                        type: secondary
+                        className: text-xs
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.detail.pricingSummary}
+                        strong: true
+                        className: text-lg tabular-nums
+                    - type: Text
+                      props:
+                        text: 标准定价（$/1M）
+                        type: secondary
+                        className: text-xs
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: v${data.detail.priceVersion} · ${data.detail.priceEffective}
+                        strong: true
+                        className: text-lg tabular-nums
+                    - type: Text
+                      props:
+                        text: 当前定价版本
+                        type: secondary
+                        className: text-xs
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.detail.routeSummary}
+                        strong: true
+                        className: text-lg tabular-nums
+                    - type: Text
+                      props:
+                        text: 路由引用
+                        type: secondary
+                        className: text-xs
+                - type: Flex
+                  props:
+                    direction: vertical
+                    gap: 2
+                    align: start
+                  children:
+                    - type: Text
+                      props:
+                        text: ${data.detail.shortDate}
+                        strong: true
+                        className: text-lg tabular-nums
+                    - type: Text
+                      props:
+                        text: 最近更新
+                        type: secondary
+                        className: text-xs
+        - type: Card
+          children:
+            - type: Tabs
+              props:
+                variant: line
+                items:
+                  - key: basic
+                    label: 基本信息
+                    className: p-2
+                    children:
+                      - type: Table
+                        props:
+                          rowKey: label
+                          pagination: false
+                          dataSource:
+                            - label: Model Code
+                              value: ${data.detail.code}（创建后不可修改）
+                            - label: Model Name
+                              value: ${data.detail.name}
+                            - label: Provider
+                              value: ${data.detail.providerSummary}
+                            - label: Provider Model Name
+                              value: ${data.detail.primaryUpstreamId}（主供应商上游 ID，完整列表见「提供商」Tab）
+                            - label: Model Type
+                              value: ${data.detail.typeLabel}
+                            - label: 发布日期
+                              value: ${data.detail.releaseDate}
+                            - label: 上下文窗口
+                              value: ${data.detail.contextWindow}
+                            - label: Max Tokens
+                              value: ${data.detail.maxTokens}
+                            - label: INPUT
+                              value: ${data.detail.inputModalitiesText}
+                            - label: OUTPUT
+                              value: ${data.detail.outputModalitiesText}
+                            - label: 模态预览
+                              value: ${data.detail.modalityPreview}
+                            - label: Tags
+                              value: ${data.detail.tagsText}
+                            - label: Description
+                              value: ${data.detail.description}
+                            - label: 元数据 (JSON)
+                              value: ${data.detail.metadata}
+                              pre: true
+                            - label: Status
+                              value: "${data.detail.status == 'enabled' ? '● 启用' : '● 停用'}"
+                            - label: Created At
+                              value: ${data.detail.createdAt}
+                            - label: Updated At
+                              value: ${data.detail.updatedAt}
+                            - label: Operator
+                              value: ${data.detail.operator}
+                          columns:
+                            - title: 字段
+                              dataIndex: label
+                              width: 220
+                            - title: 值
+                              dataIndex: value
+                              cell:
+                                type: Flex
+                                props:
+                                  direction: vertical
+                                  gap: small
+                                  align: start
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: ${row.value}
+                                      className: "${row.pre ? (state.metaExpanded ? 'font-mono text-sm
+                                        whitespace-pre-wrap break-all block' :
+                                        'font-mono text-sm block line-clamp-1
+                                        whitespace-normal break-all') : ''}"
+                                  - type: Button
+                                    props:
+                                      text: "${state.metaExpanded ? '收起' : '展开'}"
+                                      variant: link
+                                      size: small
+                                      className: h-auto p-0
+                                    when: ${row.pre}
+                                    events:
+                                      onClick:
+                                        - action: setState
+                                          params:
+                                            metaExpanded: ${!state.metaExpanded}
+                      - type: Flex
+                        props:
+                          justify: end
+                          className: mt-4
+                        children:
+                          - type: Button
+                            props:
+                              text: 编辑基本信息
+                              icon: edit
+                              variant: primary
+                            events:
+                              onClick:
+                                - action: navigate
+                                  params:
+                                    to: /models/${route.params.code}/edit
+                  - key: params
+                    label: 默认参数
+                    className: p-2
+                    children:
+                      - type: Text
+                        props:
+                          text: 调用时的默认执行参数；客户端可在允许范围内覆盖。
+                          type: secondary
+                          className: text-sm
+                      - type: Grid
+                        props:
+                          columns: 2
+                          gap: 16
+                          className: mt-4
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: temperature
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.temperature}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: top_p
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.topP}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: top_k
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.topK}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: max_tokens
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.maxTokens}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: frequency_penalty
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.frequencyPenalty}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: presence_penalty
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.presencePenalty}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: reasoning_effort
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.reasoningEffort}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: seed
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.seed}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: stop_sequences
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.stopSequences}
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: response_format
+                                  type: secondary
+                                  style:
+                                    width: 180
+                                    flexShrink: 0
+                              - type: Text
+                                props:
+                                  text: ${data.detail.params.responseFormat}
+                      - type: Flex
+                        props:
+                          align: center
+                          gap: small
+                          className: mt-4
+                          style:
+                            flexWrap: wrap
+                        children:
+                          - type: Text
+                            props:
+                              text: 能力开关：
+                              strong: true
+                              className: w-24 shrink-0
+                          - type: Badge
+                            when: ${data.detail.params.capabilities[0] != null}
+                            props:
+                              text: ${data.detail.params.capabilities[0]}
+                              variant: outline
+                          - type: Badge
+                            when: ${data.detail.params.capabilities[1] != null}
+                            props:
+                              text: ${data.detail.params.capabilities[1]}
+                              variant: outline
+                          - type: Badge
+                            when: ${data.detail.params.capabilities[2] != null}
+                            props:
+                              text: ${data.detail.params.capabilities[2]}
+                              variant: outline
+                          - type: Badge
+                            when: ${data.detail.params.capabilities[3] != null}
+                            props:
+                              text: ${data.detail.params.capabilities[3]}
+                              variant: outline
+                          - type: Text
+                            when: ${data.detail.params.capabilities.length == 0}
+                            props:
+                              text: —
+                              type: secondary
+                      - type: Flex
+                        props:
+                          justify: end
+                          className: mt-4
+                        children:
+                          - type: Button
+                            props:
+                              text: 编辑参数
+                              icon: edit
+                              variant: primary
+                            events:
+                              onClick:
+                                - action: navigate
+                                  params:
+                                    to: /models/${route.params.code}/edit
+                  - key: pricing
+                    label: 定价
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          justify: space-between
+                          align: center
+                        children:
+                          - type: Flex
+                            props:
+                              align: baseline
+                              gap: middle
+                            children:
+                              - type: Text
+                                props:
+                                  text: 标准价格
+                                  strong: true
+                              - type: Text
+                                props:
+                                  text: 单位 $/1M · 按 input_tokens 分档（最后一行无上限）
+                                  type: secondary
+                                  className: text-sm
+                          - type: Button
+                            props:
+                              text: </> JSON
+                              icon: code
+                              size: small
+                            events:
+                              onClick:
+                                - action: message
+                                  params:
+                                    messageType: info
+                                    text: 定价 JSON 批量编辑暂未开放（后端定价端点未建，已列入任务清单）
+                      - type: Table
+                        props:
+                          dataSource: ${data.detail.tiers}
+                          rowKey: upto
+                          pagination: false
+                          className: mt-4
+                          columns:
+                            - title: UPTO
+                              cell:
+                                type: Text
+                                props:
+                                  text: "${row.upto == null ? '∞' : row.upto}"
+                                  className: tabular-nums
+                            - title: INPUT
+                              dataIndex: input
+                            - title: OUTPUT
+                              dataIndex: output
+                            - title: CACHE READ
+                              cell:
+                                type: Text
+                                props:
+                                  text: "${row.cacheRead == null ? '—' : row.cacheRead}"
+                                  className: tabular-nums
+                            - title: CACHE WRITE
+                              cell:
+                                type: Text
+                                props:
+                                  text: "${row.cacheWrite == null ? '—' : row.cacheWrite}"
+                                  className: tabular-nums
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: small
+                          className: mt-2
+                        children:
+                          - type: Text
+                            props:
+                              text: 时段倍率
+                              strong: true
+                              className: mt-4
+                          - type: Table
+                            when: ${data.detail.timeMultipliers.length > 0}
+                            props:
+                              dataSource: ${data.detail.timeMultipliers}
+                              rowKey: days
+                              pagination: false
+                              className: mt-2
+                              columns:
+                                - title: 适用日
+                                  dataIndex: days
+                                - title: 开始
+                                  dataIndex: start
+                                - title: 结束
+                                  dataIndex: end
+                                - title: 倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.rate}
+                                      className: tabular-nums
+                          - type: Text
+                            when: ${data.detail.timeMultipliers.length == 0}
+                            props:
+                              text: 未配置时段倍率，全天按标准价格计费
+                              type: secondary
+                              className: text-sm mt-2
+                      - type: Flex
+                        props:
+                          align: center
+                          gap: middle
+                          className: my-4
+                        children:
+                          - type: Text
+                            props:
+                              text: "Currency: ${data.detail.currency}    当前版本:
+                                v${data.detail.priceVersion}    生效:
+                                ${data.detail.priceEffective}"
+                              type: secondary
+                              className: text-sm
+                      - type: Text
+                        props:
+                          text: 版本历史
+                          strong: true
+                          className: mt-6
+                      - type: Table
+                        props:
+                          dataSource: ${data.detail.priceVersions}
+                          rowKey: version
+                          pagination: false
+                          className: mt-2
+                          columns:
+                            - title: 版本
+                              cell:
+                                type: Text
+                                props:
+                                  text: "${row.version + (row.current ? '（当前）' : '（历史）')}"
+                            - title: 生效日期
+                              dataIndex: effective
+                            - title: 构成
+                              dataIndex: summary
+                            - title: 操作
+                              cell:
+                                type: Flex
+                                props:
+                                  align: center
+                                  gap: small
+                                children:
+                                  - type: Button
+                                    props:
+                                      text: 查看快照
+                                      variant: link
+                                      size: small
+                                      className: p-0 h-auto
+                                    events:
+                                      onClick:
+                                        - action: message
+                                          params:
+                                            messageType: info
+                                            text: 定价版本快照暂未开放（后端定价端点未建，已列入任务清单）
+                                  - type: Button
+                                    props:
+                                      text: Diff
+                                      variant: link
+                                      size: small
+                                      className: p-0 h-auto
+                                    events:
+                                      onClick:
+                                        - action: message
+                                          params:
+                                            messageType: info
+                                            text: 定价版本 Diff 暂未开放（后端定价端点未建，已列入任务清单）
+                      - type: Flex
+                        props:
+                          justify: end
+                          gap: middle
+                          className: mt-4
+                        children:
+                          - type: Button
+                            props:
+                              text: 查看价格历史
+                              icon: history
+                            events:
+                              onClick:
+                                - action: message
+                                  params:
+                                    messageType: info
+                                    text: 价格历史台账即上方版本历史（快照 / Diff 开放后此处提供导出）
+                          - type: Button
+                            props:
+                              text: 编辑定价
+                              icon: edit
+                              variant: primary
+                            events:
+                              onClick:
+                                - action: navigate
+                                  params:
+                                    to: /models/${data.detail.code}/edit
+                  - key: suppliers
+                    label: 提供商
+                    className: p-2
+                    children:
+                      - type: Flex
+                        props:
+                          justify: space-between
+                          align: center
+                          className: my-2
+                        children:
+                          - type: Text
+                            props:
+                              text: 逻辑模型 ${data.detail.code} 可映射到多个上游供应商；路由调度时按权重与倍率选用具体实例。
+                              type: secondary
+                              className: text-sm
+                          - type: Button
+                            props:
+                              text: 添加供应商模型
+                              icon: plus
+                              variant: primary
+                              size: small
+                            events:
+                              onClick:
+                                - id: supplierResult
+                                  action: overlay.open
+                                  params:
+                                    overlay:
+                                      type: modal
+                                      title: 添加供应商模型
+                                      width: 840
+                                      content:
+                                        type: Form
+                                        props:
+                                          name: supplierModel
+                                        events:
+                                          onSubmit:
+                                            - action: overlay.close
+                                              params:
+                                                payload:
+                                                  ok: true
+                                        children:
+                                          - type: Flex
+                                            props:
+                                              direction: vertical
+                                              gap: middle
+                                              align: stretch
+                                            children:
+                                              - type: Grid
+                                                props:
+                                                  columns: 2
+                                                  gap: 16
+                                                children:
+                                                  - type: Field
+                                                    props:
+                                                      label: Provider
+                                                      required: true
+                                                    children:
+                                                      - type: Select
+                                                        props:
+                                                          name: provider
+                                                          options:
+                                                            - label: OpenAI
+                                                              value: openai
+                                                            - label: Azure OpenAI
+                                                              value: azure-openai
+                                                            - label: Anthropic
+                                                              value: anthropic
+                                                            - label: 阿里云百炼
+                                                              value: dashscope
+                                                            - label: DeepSeek (2)
+                                                              value: deepseek
+                                                          controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                          rules:
+                                                            - required: true
+                                                              message: 请选择 Provider
+                                                  - type: Field
+                                                    props:
+                                                      label: Provider Model ID
+                                                      required: true
+                                                    children:
+                                                      - type: Input
+                                                        props:
+                                                          name: providerModelId
+                                                          className: w-full
+                                                          placeholder: 上游 API 实际调用的模型 ID
+                                                          rules:
+                                                            - required: true
+                                                              message: 请输入 Provider Model ID
+                                                  - type: Field
+                                                    props:
+                                                      label: 权重 Weight
+                                                      required: true
+                                                      description: 同模型下启用实例的权重之和建议为 100
+                                                    children:
+                                                      - type: NumberInput
+                                                        props:
+                                                          name: weight
+                                                          className: w-full
+                                                          min: 0
+                                                          precision: 0
+                                                          placeholder: "60"
+                                                          rules:
+                                                            - required: true
+                                                              message: 请输入权重
+                                                  - type: Field
+                                                    props:
+                                                      label: Status
+                                                    children:
+                                                      - type: RadioGroup
+                                                        props:
+                                                          name: status
+                                                          direction: horizontal
+                                                          options:
+                                                            - label: 启用
+                                                              value: enabled
+                                                            - label: 停用
+                                                              value: disabled
+                                                          className: mt-2
+                                                  - type: Field
+                                                    props:
+                                                      label: 供应商成本倍率 C
+                                                      required: true
+                                                      description: 相对「定价」Tab 标准价的成本侧乘数，默认 1
+                                                    children:
+                                                      - type: NumberInput
+                                                        props:
+                                                          name: costRate
+                                                          className: w-full
+                                                          min: 0
+                                                          step: 0.1
+                                                          placeholder: "1.0"
+                                                          rules:
+                                                            - required: true
+                                                              message: 请输入成本倍率 C
+                                                  - type: Field
+                                                    props:
+                                                      label: 模型计费倍率 M
+                                                      required: true
+                                                      description: 相对「定价」Tab 标准价的计费侧乘数，默认 1
+                                                    children:
+                                                      - type: NumberInput
+                                                        props:
+                                                          name: billingRate
+                                                          className: w-full
+                                                          min: 0
+                                                          step: 0.1
+                                                          placeholder: "1.0"
+                                                          rules:
+                                                            - required: true
+                                                              message: 请输入计费倍率 M
+                                              - type: Text
+                                                props:
+                                                  text: 时段倍率（可选，按请求发生时间覆盖默认 C / M）
+                                                  strong: true
+                                              - type: Alert
+                                                props:
+                                                  showIcon: true
+                                                  variant: info
+                                                  message: 未命中任何时段规则时，使用上方默认 C、M。时段规则支持 每天 / 工作日 / 周末 与跨日区间。
+                                              - type: Flex
+                                                props:
+                                                  justify: end
+                                                  gap: middle
+                                                children:
+                                                  - type: Button
+                                                    props:
+                                                      text: 取消
+                                                    events:
+                                                      onClick:
+                                                        - action: overlay.close
+                                                  - type: Button
+                                                    props:
+                                                      text: 保存
+                                                      variant: primary
+                                                      submit: true
+                                - action: if
+                                  params:
+                                    condition: ${actions.supplierResult.ok}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: info
+                                          text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                      - type: Card
+                        when: ${data.detail.suppliers[0] != null}
+                        props:
+                          className: my-2
+                        children:
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                            children:
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: middle
+                                children:
+                                  - type: Icon
+                                    props:
+                                      name: ${data.detail.suppliers[0].providerIcon}
+                                      size: lg
+                                  - type: Flex
+                                    props:
+                                      direction: vertical
+                                      gap: 0
+                                      align: start
+                                    children:
+                                      - type: Text
+                                        props:
+                                          text: ${data.detail.suppliers[0].providerName}
+                                          strong: true
+                                      - type: Text
+                                        props:
+                                          text: "Provider Model ID: ${data.detail.suppliers[0].providerModelId}"
+                                          type: secondary
+                                          className: text-sm
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: small
+                                children:
+                                  - type: StatusBadge
+                                    props:
+                                      status: ${data.detail.suppliers[0].status}
+                                  - type: Button
+                                    props:
+                                      text: 编辑
+                                      icon: pencil
+                                      size: small
+                                    events:
+                                      onClick:
+                                        - id: supplierResult
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 编辑供应商模型
+                                              width: 840
+                                              content:
+                                                type: Form
+                                                props:
+                                                  name: supplierModel
+                                                events:
+                                                  onSubmit:
+                                                    - action: overlay.close
+                                                      params:
+                                                        payload:
+                                                          ok: true
+                                                children:
+                                                  - type: Flex
+                                                    props:
+                                                      direction: vertical
+                                                      gap: middle
+                                                      align: stretch
+                                                    children:
+                                                      - type: Grid
+                                                        props:
+                                                          columns: 2
+                                                          gap: 16
+                                                        children:
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider
+                                                              required: true
+                                                            children:
+                                                              - type: Select
+                                                                props:
+                                                                  name: provider
+                                                                  options:
+                                                                    - label: OpenAI
+                                                                      value: openai
+                                                                    - label: Azure OpenAI
+                                                                      value: azure-openai
+                                                                    - label: Anthropic
+                                                                      value: anthropic
+                                                                    - label: 阿里云百炼
+                                                                      value: dashscope
+                                                                    - label: DeepSeek (2)
+                                                                      value: deepseek
+                                                                  controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请选择 Provider
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider Model ID
+                                                              required: true
+                                                            children:
+                                                              - type: Input
+                                                                props:
+                                                                  name: providerModelId
+                                                                  className: w-full
+                                                                  placeholder: 上游 API 实际调用的模型 ID
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入 Provider Model ID
+                                                          - type: Field
+                                                            props:
+                                                              label: 权重 Weight
+                                                              required: true
+                                                              description: 同模型下启用实例的权重之和建议为 100
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: weight
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  precision: 0
+                                                                  placeholder: "60"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入权重
+                                                          - type: Field
+                                                            props:
+                                                              label: Status
+                                                            children:
+                                                              - type: RadioGroup
+                                                                props:
+                                                                  name: status
+                                                                  direction: horizontal
+                                                                  options:
+                                                                    - label: 启用
+                                                                      value: enabled
+                                                                    - label: 停用
+                                                                      value: disabled
+                                                                  className: mt-2
+                                                          - type: Field
+                                                            props:
+                                                              label: 供应商成本倍率 C
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的成本侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: costRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入成本倍率 C
+                                                          - type: Field
+                                                            props:
+                                                              label: 模型计费倍率 M
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的计费侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: billingRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入计费倍率 M
+                                                      - type: Text
+                                                        props:
+                                                          text: 时段倍率（可选，按请求发生时间覆盖默认 C / M）
+                                                          strong: true
+                                                      - type: Alert
+                                                        props:
+                                                          showIcon: true
+                                                          variant: info
+                                                          message: 未命中任何时段规则时，使用上方默认 C、M。时段规则支持 每天 / 工作日 / 周末 与跨日区间。
+                                                      - type: Flex
+                                                        props:
+                                                          justify: end
+                                                          gap: middle
+                                                        children:
+                                                          - type: Button
+                                                            props:
+                                                              text: 取消
+                                                            events:
+                                                              onClick:
+                                                                - action: overlay.close
+                                                          - type: Button
+                                                            props:
+                                                              text: 保存
+                                                              variant: primary
+                                                              submit: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.supplierResult.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                                  - type: Button
+                                    props:
+                                      text: 删除
+                                      icon: trash-2
+                                      size: small
+                                      danger: true
+                                    events:
+                                      onClick:
+                                        - id: delSupplier
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 确认删除供应商模型
+                                              width: 480
+                                              content:
+                                                type: Flex
+                                                props:
+                                                  direction: vertical
+                                                  gap: middle
+                                                children:
+                                                  - type: Text
+                                                    props:
+                                                      size: small
+                                                      text: 删除后，路由调度将不再使用该上游实例。
+                                                  - type: Text
+                                                    when: ${data.detail.routes.total > 0}
+                                                    props:
+                                                      size: small
+                                                      text: ⚠ 该模型存在路由引用，删除供应商模型可能导致引用失效，建议先调整路由权重。
+                                                      type: warning
+                                                  - type: Flex
+                                                    props:
+                                                      justify: end
+                                                      gap: middle
+                                                    children:
+                                                      - type: Button
+                                                        props:
+                                                          text: 取消
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                      - type: Button
+                                                        props:
+                                                          text: 确认删除
+                                                          variant: primary
+                                                          danger: true
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                              params:
+                                                                payload:
+                                                                  ok: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.delSupplier.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                          - type: Grid
+                            props:
+                              columns: 3
+                              gap: 16
+                              className: my-4
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 权重 Weight
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.suppliers[0].weight}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 供应商成本倍率 C
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[0].costRate}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 模型计费倍率 M
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[0].billingRate}
+                          - type: Text
+                            props:
+                              text: 时段倍率（计费 / 成本）
+                              strong: true
+                              className: text-sm
+                          - type: Table
+                            when: ${data.detail.suppliers[0].timeRates != null}
+                            props:
+                              dataSource: ${data.detail.suppliers[0].timeRates}
+                              rowKey: days
+                              pagination: false
+                              className: mt-2
+                              columns:
+                                - title: 适用日
+                                  dataIndex: days
+                                - title: 开始
+                                  dataIndex: start
+                                - title: 结束
+                                  dataIndex: end
+                                - title: 成本倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.cost}
+                                      className: tabular-nums
+                                - title: 计费倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.billing}
+                                      className: tabular-nums
+                          - type: Text
+                            when: ${data.detail.suppliers[0].timeRates == null}
+                            props:
+                              text: （未配置，使用默认 C / M）
+                              type: secondary
+                              className: text-sm
+                          - type: Flex
+                            props:
+                              align: center
+                              gap: middle
+                              className: mt-2
+                            children:
+                              - type: Text
+                                props:
+                                  text: "连接状态：${data.detail.suppliers[0].keyConfigured ? '● 已配置密钥' : '● 未配置密钥'}"
+                                  type: secondary
+                                  className: text-sm
+                              - type: Text
+                                when: ${data.detail.suppliers[0].lastProbe != null}
+                                props:
+                                  text: "最近探测 ${data.detail.suppliers[0].lastProbe.time}
+                                    ${data.detail.suppliers[0].lastProbe.ok ?
+                                    '成功' : '失败'}"
+                                  type: "${data.detail.suppliers[0].lastProbe.ok ? 'secondary' : 'danger'}"
+                                  className: text-sm
+                      - type: Card
+                        when: ${data.detail.suppliers[1] != null}
+                        props:
+                          className: my-2
+                        children:
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                            children:
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: middle
+                                children:
+                                  - type: Icon
+                                    props:
+                                      name: ${data.detail.suppliers[1].providerIcon}
+                                      size: lg
+                                  - type: Flex
+                                    props:
+                                      direction: vertical
+                                      gap: 0
+                                      align: start
+                                    children:
+                                      - type: Text
+                                        props:
+                                          text: ${data.detail.suppliers[1].providerName}
+                                          strong: true
+                                      - type: Text
+                                        props:
+                                          text: "Provider Model ID: ${data.detail.suppliers[1].providerModelId}"
+                                          type: secondary
+                                          className: text-sm
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: small
+                                children:
+                                  - type: StatusBadge
+                                    props:
+                                      status: ${data.detail.suppliers[1].status}
+                                  - type: Button
+                                    props:
+                                      text: 编辑
+                                      icon: pencil
+                                      size: small
+                                    events:
+                                      onClick:
+                                        - id: supplierResult
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 编辑供应商模型
+                                              width: 840
+                                              content:
+                                                type: Form
+                                                props:
+                                                  name: supplierModel
+                                                events:
+                                                  onSubmit:
+                                                    - action: overlay.close
+                                                      params:
+                                                        payload:
+                                                          ok: true
+                                                children:
+                                                  - type: Flex
+                                                    props:
+                                                      direction: vertical
+                                                      gap: middle
+                                                      align: stretch
+                                                    children:
+                                                      - type: Grid
+                                                        props:
+                                                          columns: 2
+                                                          gap: 16
+                                                        children:
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider
+                                                              required: true
+                                                            children:
+                                                              - type: Select
+                                                                props:
+                                                                  name: provider
+                                                                  options:
+                                                                    - label: OpenAI
+                                                                      value: openai
+                                                                    - label: Azure OpenAI
+                                                                      value: azure-openai
+                                                                    - label: Anthropic
+                                                                      value: anthropic
+                                                                    - label: 阿里云百炼
+                                                                      value: dashscope
+                                                                    - label: DeepSeek (2)
+                                                                      value: deepseek
+                                                                  controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请选择 Provider
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider Model ID
+                                                              required: true
+                                                            children:
+                                                              - type: Input
+                                                                props:
+                                                                  name: providerModelId
+                                                                  className: w-full
+                                                                  placeholder: 上游 API 实际调用的模型 ID
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入 Provider Model ID
+                                                          - type: Field
+                                                            props:
+                                                              label: 权重 Weight
+                                                              required: true
+                                                              description: 同模型下启用实例的权重之和建议为 100
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: weight
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  precision: 0
+                                                                  placeholder: "60"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入权重
+                                                          - type: Field
+                                                            props:
+                                                              label: Status
+                                                            children:
+                                                              - type: RadioGroup
+                                                                props:
+                                                                  name: status
+                                                                  direction: horizontal
+                                                                  options:
+                                                                    - label: 启用
+                                                                      value: enabled
+                                                                    - label: 停用
+                                                                      value: disabled
+                                                                  className: mt-2
+                                                          - type: Field
+                                                            props:
+                                                              label: 供应商成本倍率 C
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的成本侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: costRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入成本倍率 C
+                                                          - type: Field
+                                                            props:
+                                                              label: 模型计费倍率 M
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的计费侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: billingRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入计费倍率 M
+                                                      - type: Text
+                                                        props:
+                                                          text: 时段倍率（可选，按请求发生时间覆盖默认 C / M）
+                                                          strong: true
+                                                      - type: Alert
+                                                        props:
+                                                          showIcon: true
+                                                          variant: info
+                                                          message: 未命中任何时段规则时，使用上方默认 C、M。时段规则支持 每天 / 工作日 / 周末 与跨日区间。
+                                                      - type: Flex
+                                                        props:
+                                                          justify: end
+                                                          gap: middle
+                                                        children:
+                                                          - type: Button
+                                                            props:
+                                                              text: 取消
+                                                            events:
+                                                              onClick:
+                                                                - action: overlay.close
+                                                          - type: Button
+                                                            props:
+                                                              text: 保存
+                                                              variant: primary
+                                                              submit: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.supplierResult.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                                  - type: Button
+                                    props:
+                                      text: 删除
+                                      icon: trash-2
+                                      size: small
+                                      danger: true
+                                    events:
+                                      onClick:
+                                        - id: delSupplier
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 确认删除供应商模型
+                                              width: 480
+                                              content:
+                                                type: Flex
+                                                props:
+                                                  direction: vertical
+                                                  gap: middle
+                                                children:
+                                                  - type: Text
+                                                    props:
+                                                      size: small
+                                                      text: 删除后，路由调度将不再使用该上游实例。
+                                                  - type: Text
+                                                    when: ${data.detail.routes.total > 0}
+                                                    props:
+                                                      size: small
+                                                      text: ⚠ 该模型存在路由引用，删除供应商模型可能导致引用失效，建议先调整路由权重。
+                                                      type: warning
+                                                  - type: Flex
+                                                    props:
+                                                      justify: end
+                                                      gap: middle
+                                                    children:
+                                                      - type: Button
+                                                        props:
+                                                          text: 取消
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                      - type: Button
+                                                        props:
+                                                          text: 确认删除
+                                                          variant: primary
+                                                          danger: true
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                              params:
+                                                                payload:
+                                                                  ok: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.delSupplier.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                          - type: Grid
+                            props:
+                              columns: 3
+                              gap: 16
+                              className: my-4
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 权重 Weight
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.suppliers[1].weight}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 供应商成本倍率 C
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[1].costRate}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 模型计费倍率 M
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[1].billingRate}
+                          - type: Text
+                            props:
+                              text: 时段倍率（计费 / 成本）
+                              strong: true
+                              className: text-sm
+                          - type: Table
+                            when: ${data.detail.suppliers[1].timeRates != null}
+                            props:
+                              dataSource: ${data.detail.suppliers[1].timeRates}
+                              rowKey: days
+                              pagination: false
+                              className: mt-2
+                              columns:
+                                - title: 适用日
+                                  dataIndex: days
+                                - title: 开始
+                                  dataIndex: start
+                                - title: 结束
+                                  dataIndex: end
+                                - title: 成本倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.cost}
+                                      className: tabular-nums
+                                - title: 计费倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.billing}
+                                      className: tabular-nums
+                          - type: Text
+                            when: ${data.detail.suppliers[1].timeRates == null}
+                            props:
+                              text: （未配置，使用默认 C / M）
+                              type: secondary
+                              className: text-sm
+                          - type: Flex
+                            props:
+                              align: center
+                              gap: middle
+                              className: mt-2
+                            children:
+                              - type: Text
+                                props:
+                                  text: "连接状态：${data.detail.suppliers[1].keyConfigured ? '● 已配置密钥' : '● 未配置密钥'}"
+                                  type: secondary
+                                  className: text-sm
+                              - type: Text
+                                when: ${data.detail.suppliers[1].lastProbe != null}
+                                props:
+                                  text: "最近探测 ${data.detail.suppliers[1].lastProbe.time}
+                                    ${data.detail.suppliers[1].lastProbe.ok ?
+                                    '成功' : '失败'}"
+                                  type: "${data.detail.suppliers[1].lastProbe.ok ? 'secondary' : 'danger'}"
+                                  className: text-sm
+                      - type: Card
+                        when: ${data.detail.suppliers[2] != null}
+                        props:
+                          className: my-2
+                        children:
+                          - type: Flex
+                            props:
+                              justify: space-between
+                              align: center
+                            children:
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: middle
+                                children:
+                                  - type: Icon
+                                    props:
+                                      name: ${data.detail.suppliers[2].providerIcon}
+                                      size: lg
+                                  - type: Flex
+                                    props:
+                                      direction: vertical
+                                      gap: 0
+                                      align: start
+                                    children:
+                                      - type: Text
+                                        props:
+                                          text: ${data.detail.suppliers[2].providerName}
+                                          strong: true
+                                      - type: Text
+                                        props:
+                                          text: "Provider Model ID: ${data.detail.suppliers[2].providerModelId}"
+                                          type: secondary
+                                          className: text-sm
+                              - type: Flex
+                                props:
+                                  align: center
+                                  gap: small
+                                children:
+                                  - type: StatusBadge
+                                    props:
+                                      status: ${data.detail.suppliers[2].status}
+                                  - type: Button
+                                    props:
+                                      text: 编辑
+                                      icon: pencil
+                                      size: small
+                                    events:
+                                      onClick:
+                                        - id: supplierResult
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 编辑供应商模型
+                                              width: 840
+                                              content:
+                                                type: Form
+                                                props:
+                                                  name: supplierModel
+                                                events:
+                                                  onSubmit:
+                                                    - action: overlay.close
+                                                      params:
+                                                        payload:
+                                                          ok: true
+                                                children:
+                                                  - type: Flex
+                                                    props:
+                                                      direction: vertical
+                                                      gap: middle
+                                                      align: stretch
+                                                    children:
+                                                      - type: Grid
+                                                        props:
+                                                          columns: 2
+                                                          gap: 16
+                                                        children:
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider
+                                                              required: true
+                                                            children:
+                                                              - type: Select
+                                                                props:
+                                                                  name: provider
+                                                                  options:
+                                                                    - label: OpenAI
+                                                                      value: openai
+                                                                    - label: Azure OpenAI
+                                                                      value: azure-openai
+                                                                    - label: Anthropic
+                                                                      value: anthropic
+                                                                    - label: 阿里云百炼
+                                                                      value: dashscope
+                                                                    - label: DeepSeek (2)
+                                                                      value: deepseek
+                                                                  controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请选择 Provider
+                                                          - type: Field
+                                                            props:
+                                                              label: Provider Model ID
+                                                              required: true
+                                                            children:
+                                                              - type: Input
+                                                                props:
+                                                                  name: providerModelId
+                                                                  className: w-full
+                                                                  placeholder: 上游 API 实际调用的模型 ID
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入 Provider Model ID
+                                                          - type: Field
+                                                            props:
+                                                              label: 权重 Weight
+                                                              required: true
+                                                              description: 同模型下启用实例的权重之和建议为 100
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: weight
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  precision: 0
+                                                                  placeholder: "60"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入权重
+                                                          - type: Field
+                                                            props:
+                                                              label: Status
+                                                            children:
+                                                              - type: RadioGroup
+                                                                props:
+                                                                  name: status
+                                                                  direction: horizontal
+                                                                  options:
+                                                                    - label: 启用
+                                                                      value: enabled
+                                                                    - label: 停用
+                                                                      value: disabled
+                                                                  className: mt-2
+                                                          - type: Field
+                                                            props:
+                                                              label: 供应商成本倍率 C
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的成本侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: costRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入成本倍率 C
+                                                          - type: Field
+                                                            props:
+                                                              label: 模型计费倍率 M
+                                                              required: true
+                                                              description: 相对「定价」Tab 标准价的计费侧乘数，默认 1
+                                                            children:
+                                                              - type: NumberInput
+                                                                props:
+                                                                  name: billingRate
+                                                                  className: w-full
+                                                                  min: 0
+                                                                  step: 0.1
+                                                                  placeholder: "1.0"
+                                                                  rules:
+                                                                    - required: true
+                                                                      message: 请输入计费倍率 M
+                                                      - type: Text
+                                                        props:
+                                                          text: 时段倍率（可选，按请求发生时间覆盖默认 C / M）
+                                                          strong: true
+                                                      - type: Alert
+                                                        props:
+                                                          showIcon: true
+                                                          variant: info
+                                                          message: 未命中任何时段规则时，使用上方默认 C、M。时段规则支持 每天 / 工作日 / 周末 与跨日区间。
+                                                      - type: Flex
+                                                        props:
+                                                          justify: end
+                                                          gap: middle
+                                                        children:
+                                                          - type: Button
+                                                            props:
+                                                              text: 取消
+                                                            events:
+                                                              onClick:
+                                                                - action: overlay.close
+                                                          - type: Button
+                                                            props:
+                                                              text: 保存
+                                                              variant: primary
+                                                              submit: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.supplierResult.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                                  - type: Button
+                                    props:
+                                      text: 删除
+                                      icon: trash-2
+                                      size: small
+                                      danger: true
+                                    events:
+                                      onClick:
+                                        - id: delSupplier
+                                          action: overlay.open
+                                          params:
+                                            overlay:
+                                              type: modal
+                                              title: 确认删除供应商模型
+                                              width: 480
+                                              content:
+                                                type: Flex
+                                                props:
+                                                  direction: vertical
+                                                  gap: middle
+                                                children:
+                                                  - type: Text
+                                                    props:
+                                                      size: small
+                                                      text: 删除后，路由调度将不再使用该上游实例。
+                                                  - type: Text
+                                                    when: ${data.detail.routes.total > 0}
+                                                    props:
+                                                      size: small
+                                                      text: ⚠ 该模型存在路由引用，删除供应商模型可能导致引用失效，建议先调整路由权重。
+                                                      type: warning
+                                                  - type: Flex
+                                                    props:
+                                                      justify: end
+                                                      gap: middle
+                                                    children:
+                                                      - type: Button
+                                                        props:
+                                                          text: 取消
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                      - type: Button
+                                                        props:
+                                                          text: 确认删除
+                                                          variant: primary
+                                                          danger: true
+                                                        events:
+                                                          onClick:
+                                                            - action: overlay.close
+                                                              params:
+                                                                payload:
+                                                                  ok: true
+                                        - action: if
+                                          params:
+                                            condition: ${actions.delSupplier.ok}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: info
+                                                  text: 供应商模型绑定编辑暂未开放（后端绑定端点未建，已列入任务清单）
+                          - type: Grid
+                            props:
+                              columns: 3
+                              gap: 16
+                              className: my-4
+                            children:
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 权重 Weight
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ${data.detail.suppliers[2].weight}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 供应商成本倍率 C
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[2].costRate}
+                              - type: Flex
+                                props:
+                                  align: baseline
+                                  gap: middle
+                                children:
+                                  - type: Text
+                                    props:
+                                      text: 模型计费倍率 M
+                                      type: secondary
+                                      style:
+                                        width: 180
+                                        flexShrink: 0
+                                  - type: Text
+                                    props:
+                                      text: ×${data.detail.suppliers[2].billingRate}
+                          - type: Text
+                            props:
+                              text: 时段倍率（计费 / 成本）
+                              strong: true
+                              className: text-sm
+                          - type: Table
+                            when: ${data.detail.suppliers[2].timeRates != null}
+                            props:
+                              dataSource: ${data.detail.suppliers[2].timeRates}
+                              rowKey: days
+                              pagination: false
+                              className: mt-2
+                              columns:
+                                - title: 适用日
+                                  dataIndex: days
+                                - title: 开始
+                                  dataIndex: start
+                                - title: 结束
+                                  dataIndex: end
+                                - title: 成本倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.cost}
+                                      className: tabular-nums
+                                - title: 计费倍率
+                                  cell:
+                                    type: Text
+                                    props:
+                                      text: ×${row.billing}
+                                      className: tabular-nums
+                          - type: Text
+                            when: ${data.detail.suppliers[2].timeRates == null}
+                            props:
+                              text: （未配置，使用默认 C / M）
+                              type: secondary
+                              className: text-sm
+                          - type: Flex
+                            props:
+                              align: center
+                              gap: middle
+                              className: mt-2
+                            children:
+                              - type: Text
+                                props:
+                                  text: "连接状态：${data.detail.suppliers[2].keyConfigured ? '● 已配置密钥' : '● 未配置密钥'}"
+                                  type: secondary
+                                  className: text-sm
+                              - type: Text
+                                when: ${data.detail.suppliers[2].lastProbe != null}
+                                props:
+                                  text: "最近探测 ${data.detail.suppliers[2].lastProbe.time}
+                                    ${data.detail.suppliers[2].lastProbe.ok ?
+                                    '成功' : '失败'}"
+                                  type: "${data.detail.suppliers[2].lastProbe.ok ? 'secondary' : 'danger'}"
+                                  className: text-sm
+                      - type: Text
+                        when: ${data.detail.suppliers.length == 0}
+                        props:
+                          text: 尚未绑定供应商模型；路由添加该模型前需先配置至少一个供应商模型。
+                          type: secondary
+                          className: text-sm mt-4
+                      - type: Text
+                        props:
+                          text: 权重合计 ${data.detail.supplierWeightTotal}（启用项）；路由引用本模型时，模型行 C / M 可覆盖提供商 Tab
+                            默认值。
+                          type: secondary
+                          className: text-sm mt-4
+                  - key: routes
+                    label: 路由引用
+                    className: p-2
+                    children:
+                      - type: Text
+                        props:
+                          text: 引用此 Model 的路由
+                          type: secondary
+                          className: text-sm
+                      - type: Table
+                        props:
+                          dataSource: ${data.detail.routeRefs}
+                          rowKey: name
+                          pagination: false
+                          className: mt-4
+                          columns:
+                            - title: Route Name
+                              dataIndex: name
+                            - title: Alias
+                              dataIndex: alias
+                            - title: 类型
+                              dataIndex: type
+                            - title: Weight
+                              dataIndex: weight
+                            - title: Status
+                              cell:
+                                type: StatusBadge
+                                props:
+                                  status: ${row.status}
+                            - title: Health
+                              cell:
+                                type: Text
+                                props:
+                                  text: ● ${row.health}
+                                  type: "${row.health == 'HEALTHY' ? 'success' : 'danger'}"
+                            - title: 操作
+                              cell:
+                                type: Button
+                                props:
+                                  text: 跳转路由详情
+                                  variant: link
+                                  size: small
+                                  className: p-0 h-auto
+                                events:
+                                  onClick:
+                                    - action: navigate
+                                      params:
+                                        to: /routes/${row.name}
+    - type: Empty
+      when: ${data.detail == null && !dataStatus.detail.loading}
+      props:
+        title: 未找到模型
+        description: Model Code「${route.params.code}」不存在或已被删除
+      children:
+        - type: Button
+          props:
+            text: 返回列表
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /models

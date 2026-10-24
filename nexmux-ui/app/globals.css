@@ -43,6 +43,18 @@ body {
   overscroll-behavior: contain;
 }
 
+/* ── 侧栏二级菜单：项前加横杠（对齐 model-console 的 "-供应商" 形态）──
+   Menu 子级渲染为父级 menu-entry 内嵌套的 menu-entry（其直接子元素即
+   菜单按钮 menu-item）；收起态（icon rail）group 浮层 menu-flyout 内的
+   子项同样补横杠。横杠继承文字色，随 hover / 选中态一并变色；
+   横杠后留一个半角空格（\00a0），margin-right 抵掉按钮 flex
+   gap-2（0.5rem），使间距恰为一个空格。 */
+[data-slot="menu-entry"] [data-slot="menu-entry"] > [data-slot="menu-item"]::before,
+[data-slot="menu-flyout"] [data-slot="menu-item"]::before {
+  content: "-\00a0";
+  margin-right: -0.5rem;
+}
+
 /* ── 核心概览指标牌：Grid 项默认拉伸，卡片撑满网格 → 同高自适应 ── */
 .stat-card {
   height: 100%;

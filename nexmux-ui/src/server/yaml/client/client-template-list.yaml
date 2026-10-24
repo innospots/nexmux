@@ -1,0 +1,465 @@
+dsl: "1.0"
+page:
+  id: client-template-list
+  title: 客户端模板
+  name: clientTemplateList
+  description: 访问治理 / 客户端模板：预置路由、配额与限流的策略预设（卡片式列表）
+state:
+  keyword: ""
+  statusChip: all
+  tagChips: []
+  page: 1
+dataSources:
+  templates:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/client-templates
+      params:
+        status: ${state.statusChip}
+        keyword: ${state.keyword}
+        tags: ${state.tagChips}
+        page: ${state.page}
+        pageSize: 12
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 访问治理
+          - label: 客户端模板
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 客户端模板
+        - type: Typography
+          props:
+            variant: muted
+            text: 预置路由、配额与限流；基于模板创建客户端（含 AppKey）。
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+          children:
+            - type: Text
+              props:
+                text: 状态
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: single
+                value: ${state.statusChip}
+                items: ${data.templates.filters.status}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      statusChip: ${event}
+                  - action: setState
+                    params:
+                      page: 1
+                  - action: reload
+                    params:
+                      dataSource: templates
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            style:
+              flexWrap: wrap
+            className: mt-2
+          children:
+            - type: Text
+              props:
+                text: 标签
+                strong: true
+                className: w-10
+            - type: ChipFilter
+              props:
+                mode: multi
+                value: ${state.tagChips}
+                items: ${data.templates.filters.tags}
+              events:
+                onChange:
+                  - action: setState
+                    params:
+                      tagChips: ${event}
+                  - action: setState
+                    params:
+                      page: 1
+                  - action: reload
+                    params:
+                      dataSource: templates
+        - type: Flex
+          props:
+            align: center
+            gap: small
+            className: mt-2
+          children:
+            - type: Text
+              props:
+                text: 搜索
+                strong: true
+                className: w-10
+            - type: Flex
+              props:
+                align: center
+                gap: small
+                className: h-9 rounded-md border bg-background px-3
+                style:
+                  flex: 1
+              children:
+                - type: Icon
+                  props:
+                    name: search
+                    className: text-muted-foreground
+                - type: Input
+                  props:
+                    value: ${state.keyword}
+                    placeholder: 模板名称 / 标识
+                    className: border-0 bg-transparent px-0 shadow-none focus-visible:ring-0
+                    style:
+                      flex: 1
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          keyword: ${event}
+                      - action: setState
+                        params:
+                          page: 1
+                      - action: reload
+                        params:
+                          dataSource: templates
+            - type: Text
+              props:
+                text: 共 ${data.templates.total} 条
+                type: secondary
+                className: tabular-nums text-sm
+    - type: For
+      props:
+        items: ${data.templates.items}
+        keyField: code
+        columns: 3
+        gap: 16
+        before:
+          - type: Card
+            props:
+              className: border-dashed h-full bg-(--muted) border-2
+                border-[color-mix(in_srgb,var(--foreground)_30%,transparent)]
+                [&_[data-slot=card-content]]:h-full
+            children:
+              - type: Flex
+                props:
+                  direction: vertical
+                  gap: large
+                  align: stretch
+                  justify: space-between
+                  className: h-full
+                children:
+                  - type: Flex
+                    props:
+                      align: center
+                      gap: middle
+                    children:
+                      - type: Flex
+                        props:
+                          align: center
+                          justify: center
+                          className: size-10 shrink-0 rounded-full bg-primary
+                        children:
+                          - type: Icon
+                            props:
+                              name: plus
+                              size: 28
+                              color: var(--primary-foreground)
+                      - type: Flex
+                        props:
+                          direction: vertical
+                          gap: 2
+                        children:
+                          - type: Text
+                            props:
+                              text: 新建模板
+                              strong: true
+                              className: text-base
+                          - type: Text
+                            props:
+                              text: 预置路由、配额与限流，不含 AppKey
+                              type: secondary
+                              className: text-sm
+                  - type: Flex
+                    props:
+                      align: center
+                      gap: middle
+                    children:
+                      - type: Button
+                        props:
+                          text: 新建模板
+                          icon: plus
+                          variant: primary
+                          style:
+                            flex: 1
+                        events:
+                          onClick:
+                            - action: navigate
+                              params:
+                                to: /client-templates/new
+      children:
+        - type: TemplateCardLink
+          props:
+            href: /client-templates/${row.code}
+          children:
+            - type: Card
+              props:
+                className: h-full model-card relative
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        className: size-14 shrink-0 rounded-full bg-(--muted)
+                      children:
+                        - type: Icon
+                          props:
+                            name: bookmark
+                            size: 28
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                        style:
+                          alignItems: flex-start
+                      children:
+                        - type: Button
+                          props:
+                            text: ${row.name}
+                            variant: link
+                            className: p-0 font-semibold text-base
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /client-templates/${row.code}
+                        - type: Text
+                          props:
+                            text: ${row.code}
+                            type: secondary
+                            className: text-sm
+                - type: Flex
+                  props:
+                    align: center
+                    gap: 2
+                    className: absolute right-3 top-3 model-card-actions
+                  children:
+                    - type: Tooltip
+                      props:
+                        content: "${row.status == 'enabled' ? '停用' : '启用'}"
+                      children:
+                        - type: Button
+                          props:
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          children:
+                            - type: StatusToggleIcon
+                              props:
+                                enabled: ${row.status == 'enabled'}
+                          events:
+                            onClick:
+                              - id: statusCfm
+                                action: overlay.open
+                                params:
+                                  overlay:
+                                    type: modal
+                                    title: "${row.status == 'enabled' ? '确认停用模板' : '确认启用模板'}"
+                                    width: 480
+                                    content:
+                                      type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                      children:
+                                        - type: Text
+                                          props:
+                                            size: small
+                                            text: "${parent.row.status == 'enabled' ? '停用后，不可基于该模板创建客户端；已创建客户端的调用不受影响。' :
+                                              '启用后，可基于该模板创建客户端（创建时生成 AppKey）。'}"
+                                        - type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                          children:
+                                            - type: Text
+                                              props:
+                                                text: 影响范围：
+                                                strong: true
+                                            - type: Text
+                                              props:
+                                                text: · 已创建客户端：${parent.row.createdClientCount} 个
+                                                type: secondary
+                                            - type: Text
+                                              props:
+                                                text: · 授权路由：${parent.row.routeCount} 条
+                                                type: secondary
+                                        - type: Text
+                                          when: ${parent.row.status == 'enabled' && parent.row.createdClientCount > 0}
+                                          props:
+                                            size: small
+                                            text: ⚠ 停用仅阻止基于模板新建客户端，不回溯已创建的客户端。
+                                            type: warning
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: "${parent.row.status == 'enabled' ? '确认停用' : '确认启用'}"
+                                                variant: primary
+                                                danger: ${parent.row.status == 'enabled'}
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                                    params:
+                                                      payload:
+                                                        ok: true
+                              - action: if
+                                params:
+                                  condition: ${actions.statusCfm.ok}
+                                  then:
+                                    - id: statusResult
+                                      action: util.request
+                                      params:
+                                        method: POST
+                                        url: "/api/d/client-templates/${row.id}/${row.status == 'enabled' ? 'disable' : 'enable'}"
+                                        body: {}
+                                    - action: if
+                                      params:
+                                        condition: ${actions.statusResult == null || actions.statusResult.ok == false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: error
+                                              text: "${actions.statusResult != null && actions.statusResult.error != null ? actions.statusResult.error.message : '操作失败'}"
+                                    - action: if
+                                      params:
+                                        condition: ${actions.statusResult != null && actions.statusResult.ok != false}
+                                        then:
+                                          - action: message
+                                            params:
+                                              messageType: success
+                                              text: "${row.status == 'enabled' ? '已停用' : '已启用'}"
+                                          - action: reload
+                                            params:
+                                              dataSource: templates
+                    - type: Tooltip
+                      props:
+                        content: 编辑
+                      children:
+                        - type: Button
+                          props:
+                            icon: pencil
+                            variant: text
+                            size: small
+                            className: size-6 p-0
+                          events:
+                            onClick:
+                              - action: navigate
+                                params:
+                                  to: /client-templates/${row.code}/edit
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                    style:
+                      flexWrap: wrap
+                  children:
+                    - type: Badge
+                      when: ${row.tags[0] != null}
+                      props:
+                        text: ${row.tags[0]}
+                        variant: outline
+                    - type: Badge
+                      when: ${row.tags[1] != null}
+                      props:
+                        text: ${row.tags[1]}
+                        variant: outline
+                    - type: Badge
+                      when: ${row.tags[2] != null}
+                      props:
+                        text: ${row.tags[2]}
+                        variant: outline
+                    - type: Text
+                      when: ${row.tags.length > 3}
+                      props:
+                        text: +${row.tags.length - 3}
+                        type: secondary
+                    - type: Text
+                      when: ${row.tags.length == 0}
+                      props:
+                        text: —
+                        type: secondary
+                - type: Text
+                  props:
+                    text: ${row.policySummary}
+                    type: secondary
+                    className: text-sm
+                - type: Flex
+                  props:
+                    justify: space-between
+                    align: center
+                  children:
+                    - type: Text
+                      props:
+                        text: 有效期 ${row.validityLabel}
+                        type: secondary
+                        className: text-sm
+                    - type: Text
+                      props:
+                        text: 已创建 ${row.createdClientCount} 个客户端
+                        type: secondary
+                        className: tabular-nums text-sm
+    - type: Pagination
+      props:
+        total: ${data.templates.total}
+        pageSize: 12
+        page: ${state.page}
+        className: mt-4
+      events:
+        onChange:
+          - action: setState
+            params:
+              page: ${event}
+          - action: reload
+            params:
+              dataSource: templates
+    - type: Empty
+      when: ${data.templates.items != null && data.templates.items.length == 0}
+      props:
+        title: 无匹配模板
+        description: 调整状态、标签或搜索关键词后重试；也可以新建一个模板
+

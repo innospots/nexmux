@@ -1,0 +1,338 @@
+dsl: "1.0"
+page:
+  id: client-usage
+  title: 客户端用量
+  name: clientUsage
+  description: 运行管理 / 客户端用量：按客户端与 AppKey 的用量与成本
+state:
+  tokenMode: compact
+  # 占位值；onInit 的 util.defaultRange 按浏览器当天覆盖
+  range:
+    start: 2026-09-22
+    end: 2026-09-28
+dataSources:
+  usage:
+    type: http
+    # 时间范围由 onInit 动态计算，故不自动加载，交由 onInit 的 reload 触发
+    autoLoad: false
+    request:
+      method: GET
+      url: /api/d/stats-client-usage
+      params:
+        start: ${state.range.start}
+        end: ${state.range.end}
+  settings:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/service-settings
+lifecycle:
+  onInit:
+    - action: util.defaultRange
+    - action: reload
+      params:
+        dataSource: usage
+  onLoad:
+    - action: if
+      params:
+        condition: ${data.settings != null && data.settings.tokenDisplay != null}
+        then:
+          - action: setState
+            params:
+              tokenMode: "${data.settings.tokenDisplay == 'full' ? 'raw' : 'compact'}"
+
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 运行管理
+          - label: 客户端用量
+    - type: Flex
+      props:
+        align: baseline
+        gap: middle
+      children:
+        - type: Typography
+          props:
+            variant: h3
+            text: 客户端用量
+        - type: Typography
+          props:
+            variant: muted
+            text: 按客户端与 AppKey 的用量与成本
+    - type: Card
+      children:
+        - type: Flex
+          props:
+            justify: space-between
+            align: center
+            gap: middle
+            style:
+              flexWrap: wrap
+          children:
+            - type: Flex
+              props:
+                align: center
+                gap: middle
+              children:
+                - type: Text
+                  props:
+                    text: 时间范围 (UTC)
+                    strong: true
+                - type: DatePicker
+                  props:
+                    mode: range
+                    value: ${state.range}
+                    placeholder: 选择时间范围
+                    presets:
+                      - label: 今天
+                        days: 1
+                      - key: thisWeek
+                      - key: thisMonth
+                      - label: 近3天
+                        days: 3
+                      - label: 近7天
+                        days: 7
+                      - label: 近14天
+                        days: 14
+                      - label: 近30天
+                        days: 30
+                    style:
+                      width: 280
+                  events:
+                    onChange:
+                      - action: setState
+                        condition: ${event}
+                        params:
+                          range: ${event}
+                      - action: reload
+                        params:
+                          dataSource: usage
+                        condition: ${event}
+            - type: Flex
+              props:
+                align: center
+                gap: small
+              children:
+                - type: Text
+                  props:
+                    text: Token 显示
+                    type: secondary
+                - type: RadioGroup
+                  props:
+                    value: ${state.tokenMode}
+                    direction: horizontal
+                    options:
+                      - label: 紧凑(K/M/B)
+                        value: compact
+                      - label: 数字
+                        value: raw
+                  events:
+                    onChange:
+                      - action: setState
+                        params:
+                          tokenMode: ${event}
+    - type: Flex
+      props:
+        justify: space-between
+        align: center
+        gap: middle
+        style:
+          flexWrap: wrap
+      children:
+        - type: Button
+          props:
+            text: 导出 CSV
+            icon: download
+          events:
+            onClick:
+              - id: csvResult
+                action: util.exportCsv
+                params:
+                  filename: client-usage.csv
+                  rows: ${data.usage.items}
+                  headers:
+                        - key: name
+                          label: 客户端
+                        - key: appKeyId
+                          label: AppKey ID
+                        - key: requests
+                          label: 请求数
+                        - key: inputRaw
+                          label: 输入 Token
+                        - key: outputRaw
+                          label: 输出 Token
+                        - key: cacheHit
+                          label: 缓存命中率
+                        - key: standard
+                          label: 标准
+                        - key: billed
+                          label: 计费
+                        - key: cost
+                          label: 成本
+                        - key: quotaUsage
+                          label: 配额用量
+                        - key: avgBilled
+                          label: 平均计费/请求
+                        - key: successRate
+                          label: 成功率
+                        - key: avgLatency
+                          label: 平均延迟
+              - action: if
+                params:
+                  condition: ${actions.csvResult != null && actions.csvResult.ok != false}
+                  then:
+                    - action: message
+                      params:
+                        messageType: success
+                        text: 已导出 CSV
+        - type: Text
+          props:
+            text: "范围合计  标准: ${data.usage.summary.standard}  计费:
+              ${data.usage.summary.billed}  成本: ${data.usage.summary.cost}"
+            type: secondary
+            className: tabular-nums
+    - type: Card
+      children:
+        - type: Table
+          when: ${data.usage.items != null && data.usage.items.length > 0}
+          props:
+            dataSource: ${data.usage.items}
+            rowKey: key
+            loading: ${dataStatus.usage.loading}
+            pagination: false
+            columns:
+              - title: 客户端
+                cell:
+                  type: Button
+                  props:
+                    text: ${row.name}
+                    variant: link
+                    size: small
+                    className: p-0 h-auto font-semibold
+                  events:
+                    onClick:
+                      - action: navigate
+                        params:
+                          to: /clients/${row.code}
+              - title: AppKey ID
+                dataIndex: appKeyId
+              - title: 请求数
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.requests}
+                    className: tabular-nums
+              - title: 输入 Token
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: "${state.tokenMode == 'compact' ? row.inputCompact : row.inputRaw}"
+                    className: tabular-nums
+              - title: 输出 Token
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: "${state.tokenMode == 'compact' ? row.outputCompact : row.outputRaw}"
+                    className: tabular-nums
+              - title: 缓存命中率
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.cacheHit}
+                    className: tabular-nums
+              - title: 标准
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.standard}
+                    className: tabular-nums
+              - title: 计费
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.billed}
+                    className: tabular-nums
+              - title: 成本
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.cost}
+                    className: tabular-nums
+              - title: 配额用量
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.quotaUsage}
+                    className: tabular-nums
+              - title: 平均计费/请求
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.avgBilled}
+                    className: tabular-nums
+              - title: 成功率
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.successRate}
+                    className: tabular-nums
+              - title: 平均延迟
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.avgLatency}
+                    className: tabular-nums
+              - title: TTFT
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.ttft}
+                    className: tabular-nums
+              - title: 平均上游
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.avgUpstream}
+                    className: tabular-nums
+              - title: Token/秒
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.tps}
+                    className: tabular-nums
+              - title: Failover 率
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.failoverRate}
+                    className: tabular-nums
+              - title: 平均尝试
+                align: right
+                cell:
+                  type: Text
+                  props:
+                    text: ${row.avgAttempts}
+                    className: tabular-nums
+        - type: Empty
+          when: ${data.usage.items != null && data.usage.items.length == 0}
+          props:
+            title: 无数据

@@ -1,0 +1,56 @@
+# ---------------------------------------------------------------------------
+# spring.profiles.active=prod — 生产数据源与安全基线（公共项见 application.yaml）
+#
+# 生产默认同样使用 **H2 嵌入式文件库**（与 local 同引擎，DDL 脚本幂等：
+# CREATE/ALTER ... IF NOT EXISTS，启动自动迁移）。如需 MySQL 等外部库，
+# 替换 spring.datasource.* 并将 spring.sql.init.mode 置为 never（DDL 手工迁移，
+# 当前仅提供 H2 方言脚本）。
+#
+# 必填环境变量：CONSOLE_TOKEN_SECRET（16 字节 AES 密钥）。
+# 可选覆盖：DB_URL / DB_USER / DB_PASSWORD / CONSOLE_SECURITY_ENABLED。
+# ---------------------------------------------------------------------------
+spring:
+  datasource:
+    # ⚠️ 生产库必须为绝对路径：Console / Runtime 双进程 CWD 不同，
+    # 相对路径 ./out/db 会让两进程各用各的库（本地 E2E 已踩过）。
+    url: ${DB_URL:jdbc:h2:file:/var/lib/nexmux/nexus-platform-console;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;AUTO_SERVER=TRUE}
+    driver-class-name: org.h2.Driver
+    username: ${DB_USER:sa}
+    password: ${DB_PASSWORD:}
+    hikari:
+      maximum-pool-size: 32
+      minimum-idle: 2
+      pool-name: nexus-platform-db-pool
+      max-lifetime: 1800000
+      idle-timeout: 600000
+  sql:
+    init:
+      # 幂等脚本，启动自动建表/补列
+      mode: always
+      schema-locations:
+        - classpath:schema/nexus-core-h2.sql
+        - classpath:schema/nexus-plugin-h2.sql
+        - classpath:schema/nexus-console-h2.sql
+        - classpath:schema/nexus-platform-h2.sql
+        - classpath:schema/nexmux/nexmux-h2.sql
+      # 生产种子数据（均为幂等 MERGE「只插不更新」，可重复执行；页面/接口的改动重启后保留）：
+      #   - catalog ：47 providers / 1672 models（供应商、模型列表页基线）
+      #   - settings：服务设置页 14 个键（与 PlatformSettingService.DEFAULTS 一致）
+      # 关闭方式：环境变量 SPRING_SQL_INIT_DATA_LOCATIONS=（空值）可整体覆盖为空列表
+      data-locations:
+        - classpath:schema/nexmux/nexmux-catalog-data-h2.sql
+        - classpath:schema/nexmux/nexmux-settings-data-h2.sql
+
+# 生产安全基线（覆盖 nexus/console-*.yaml 的开发态默认值）
+nexus:
+  console:
+    auth:
+      # 生产必须经环境变量注入（16 字节 AES 密钥），无默认值，缺省启动失败
+      token-secret: ${CONSOLE_TOKEN_SECRET}
+    web:
+      security:
+        # 生产强制 Bearer 鉴权 + 页面权限判定（runtime profile 下 /v1/** 由
+        # application-runtime.yaml 的 permit-all-patterns 放行，走 AppKey 鉴权）
+        enabled: ${CONSOLE_SECURITY_ENABLED:true}
+        dev-session:
+          enabled: false

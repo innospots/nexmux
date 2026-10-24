@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 将 src/server/yaml/pages/*.page.yaml 中的 service 数据源改为 http 数据源：
+ * 将 src/server/yaml/<域>/*.yaml 中的 service 数据源改为 http 数据源：
  *   { type: service, service: provider.list, params: {...} }
  *   → { type: http, request: { method: GET, url: /api/data/providers, params: {...} } }
  *
@@ -13,7 +13,16 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseDocument, stringify } from "yaml";
 
-const PAGES_DIR = new URL("../src/server/yaml/pages", import.meta.url).pathname;
+const PAGES_DIR = new URL("../src/server/yaml", import.meta.url).pathname;
+
+/** 递归收集 yaml 下所有页面 DSL（页面按域分子目录存放；跳过 sitemap.yaml） */
+function collectPageFiles(dir) {
+  return readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const path = join(dir, entry.name);
+    if (entry.isDirectory()) return collectPageFiles(path);
+    return entry.name.endsWith(".yaml") && entry.name !== "sitemap.yaml" ? [path] : [];
+  });
+}
 
 /** service 名 → URL（${route.params.*} 表达式在客户端渲染期求值） */
 const SERVICE_URLS = {
@@ -37,6 +46,7 @@ const SERVICE_URLS = {
   "cost.detail": "/api/data/costs/${route.params.id}",
   "audit.list": "/api/data/audit",
   "audit.detail": "/api/data/audit/${route.params.id}",
+  "audit.operators": "/api/data/audit-operators",
   "ops.modelUsage": "/api/data/ops/model-usage",
   "ops.providerUsage": "/api/data/ops/provider-usage",
   "ops.clientUsage": "/api/data/ops/client-usage",
@@ -44,8 +54,8 @@ const SERVICE_URLS = {
 };
 
 let converted = 0;
-for (const file of readdirSync(PAGES_DIR).filter((f) => f.endsWith(".page.yaml"))) {
-  const path = join(PAGES_DIR, file);
+for (const path of collectPageFiles(PAGES_DIR)) {
+  const file = path.slice(PAGES_DIR.length + 1);
   const doc = parseDocument(readFileSync(path, "utf8"));
   if (doc.errors.length > 0) {
     console.error(`${file} 解析失败: ${doc.errors[0].message.split("\n")[0]}`);

@@ -30,10 +30,27 @@
             <artifactId>h2</artifactId>
             <scope>runtime</scope>
         </dependency>
+        <!-- 健康检查/监控端点（/actuator/health、prometheus；application.yaml 已配置暴露）。
+             排除 starter-logging：本项目用 log4j2，logback/log4j-to-slf4j 与 log4j-slf4j2-impl 互斥 -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-logging</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <!-- /actuator/prometheus 端点 -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+        </dependency>
     </dependencies>
 
     <build>
-        <!-- 与 sample 一致：资源进 classpath，供 IDE / spring-boot:run；发行包 config/ 仍由 assembly 从源码目录拷贝 -->
+        <!-- 与 sample 一致：资源进 classpath，供 IDE 运行 main；发行包 config/ 仍由 assembly 从源码目录拷贝 -->
         <resources>
             <resource>
                 <directory>src/main/resources</directory>

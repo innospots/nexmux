@@ -8,7 +8,7 @@ import { Button, ChatInput } from "@pactor-app/ui";
  * PRD《调试台/00-总览》：Chat 对话式左右分栏，左栏 = 对话记录 + 输入框 + 清空对话。
  * 纯展示组件：messages / sendDisabled / streaming 等经 DSL props 表达式下发，
  * 交互经 events 上行（onSend(text) / onStop / onClear / onSelectRound(round)），
- * 对话状态与流式模拟由页面注册的自定义 action 持有（见各页 *-actions.ts）。
+ * 对话状态与流式推送由页面注册的自定义 action 持有（见 pactor/actions.ts）。
  */
 
 export interface DebugChatMessage {
@@ -21,28 +21,6 @@ export interface DebugChatMessage {
   meta?: string;
   /** 流式输出中（内容边收边长，尾部带光标） */
   streaming?: boolean;
-}
-
-/** 模拟流式输出：按固定节奏把 full 逐段吐出；onChunk 收到的是累计文本。
- *  返回取消函数（停止生成 / 清空对话时调用）。 */
-export function streamText(
-  full: string,
-  onChunk: (text: string) => void,
-  onDone: () => void,
-  opts?: { interval?: number; chunkSize?: number },
-): () => void {
-  const interval = opts?.interval ?? 36;
-  const chunkSize = opts?.chunkSize ?? 3;
-  let pos = 0;
-  const timer = setInterval(() => {
-    pos = Math.min(full.length, pos + chunkSize);
-    onChunk(full.slice(0, pos));
-    if (pos >= full.length) {
-      clearInterval(timer);
-      onDone();
-    }
-  }, interval);
-  return () => clearInterval(timer);
 }
 
 const ROLE_CONFIG: Record<

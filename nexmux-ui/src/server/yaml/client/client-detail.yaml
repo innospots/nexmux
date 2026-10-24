@@ -1,0 +1,1941 @@
+dsl: "1.0"
+page:
+  id: client-detail
+  title: 客户端详情
+  name: clientDetail
+  description: 访问治理 / 客户端详情：基本信息、AppKey、路由授权、配额策略、限流策略（单页纵向，无 Tab）
+state:
+  pendingRouteId: ""
+  routeOptions: []
+  routeOptionRows: []
+  pendingScopeRouteId: ""
+  pendingScopeRoutes: []
+  scopeRouteOptions: []
+  rateLimitScope: all
+  record:
+    authRoutes: []
+    quotas: []
+    rateLimits: []
+dataSources:
+  detail:
+    type: http
+    autoLoad: true
+    request:
+      method: GET
+      url: /api/d/clients/${route.params.code}
+lifecycle:
+  onLoad:
+    - action: if
+      params:
+        condition: ${data.detail != null}
+        then:
+          - action: setState
+            params:
+              record: ${data.detail}
+body:
+  type: Page
+  children:
+    - type: Breadcrumb
+      props:
+        items:
+          - label: 访问治理
+          - label: 客户端
+            href: /clients
+          - label: ${route.params.code}
+    - type: Flex
+      when: ${data.detail != null}
+      props:
+        direction: vertical
+        gap: middle
+        align: stretch
+      children:
+        - type: Card
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: middle
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Flex
+                      props:
+                        align: center
+                        justify: center
+                        className: size-12 shrink-0 rounded-full bg-(--muted)
+                      children:
+                        - type: Icon
+                          props:
+                            name: users
+                            size: 24
+                    - type: Flex
+                      props:
+                        direction: vertical
+                        gap: 0
+                      children:
+                        - type: Flex
+                          props:
+                            align: center
+                            gap: middle
+                          children:
+                            - type: Typography
+                              props:
+                                variant: h3
+                                text: ${data.detail.name}
+                            - type: StatusBadge
+                              props:
+                                status: ${data.detail.status}
+                        - type: Text
+                          props:
+                            text: ${data.detail.appKeySummary}
+                            type: secondary
+                - type: Flex
+                  props:
+                    align: center
+                    gap: small
+                  children:
+                    - type: Button
+                      props:
+                        text: 编辑
+                        icon: edit
+                        variant: primary
+                        size: small
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /clients/${route.params.code}/edit
+                    - type: Button
+                      props:
+                        text: "${data.detail.status == 'enabled' ? '停用' : '启用'}"
+                        icon: "${data.detail.status == 'enabled' ? 'x-circle' : 'check-circle'}"
+                        size: small
+                      events:
+                        onClick:
+                          - id: clientStatusCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: "${data.detail.status == 'enabled' ? '确认停用客户端' : '确认启用客户端'}"
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: "${data.detail.status == 'enabled' ? '停用后，该客户端的 AppKey 调用将被拒绝，Runtime
+                                          不再为其匹配任何路由。' : '启用后，该客户端恢复使用 AppKey
+                                          调用授权路由。'}"
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: small
+                                      children:
+                                        - type: Text
+                                          props:
+                                            text: 影响范围：
+                                            strong: true
+                                        - type: Text
+                                          props:
+                                            text: · AppKey：${data.detail.appKeyId}
+                                            type: secondary
+                                        - type: Text
+                                          props:
+                                            text: · 授权路由：${data.detail.routeCount} 个
+                                            type: secondary
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: "${data.detail.status == 'enabled' ? '确认停用' : '确认启用'}"
+                                            variant: primary
+                                            danger: ${data.detail.status == 'enabled'}
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.clientStatusCfm.ok}
+                              then:
+                                - id: statusResult
+                                  action: util.request
+                                  params:
+                                    method: POST
+                                    url: "/api/d/clients/${data.detail.id}/${data.detail.status == 'enabled' ? 'disable' : 'enable'}"
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.statusResult == null || actions.statusResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.statusResult != null && actions.statusResult.error != null ? actions.statusResult.error.message : '操作失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.statusResult != null && actions.statusResult.ok != false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: "${data.detail.status == 'enabled' ? '已停用' : '已启用'}"
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
+                    - type: Button
+                      props:
+                        text: Rotate Secret
+                        icon: refresh
+                        size: small
+                      events:
+                        onClick:
+                          - id: rotateSecretCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 确认 Rotate Secret
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: 将为 AppKey ${data.detail.appKeyId} 轮换 Secret。
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: ⚠ 轮换后旧 Secret 立即失效，新 Secret 仅展示一次，请妥善保存。
+                                        type: warning
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认轮换
+                                            variant: primary
+                                            danger: true
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.rotateSecretCfm.ok}
+                              then:
+                                - id: rotateResult
+                                  action: util.request
+                                  params:
+                                    method: POST
+                                    url: /api/d/clients/${data.detail.id}/rotate-app-key
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult == null || actions.rotateResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.rotateResult != null && actions.rotateResult.error
+                                            != null ? actions.rotateResult.error.message
+                                            : '轮换失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult != null && actions.rotateResult.ok
+                                      != false}
+                                    then:
+                                      - id: secretShown
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 新 AppKey Secret（仅此一次展示）
+                                            width: 520
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Alert
+                                                  props:
+                                                    showIcon: true
+                                                    variant: warning
+                                                    message: 旧 Secret 已失效；新 Secret 请立即复制保存。
+                                                - type: Text
+                                                  props:
+                                                    strong: true
+                                                    className: font-mono
+                                                    text: ${actions.rotateResult.data.appKeyPlaintext}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 我已保存
+                                                        variant: primary
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
+                    - type: DropdownMenu
+                      props:
+                        items:
+                          - label: 复制 AppKey ID
+                            value: copy
+                            icon: copy
+                          - label: 导出配置
+                            value: export
+                            icon: download
+                      events:
+                        onSelect:
+                          - action: if
+                            params:
+                              condition: ${event == 'copy'}
+                              then:
+                                - action: util.copy
+                                  params:
+                                    text: ${data.detail.appKeyId}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: AppKey ID 已复制
+                          - action: if
+                            params:
+                              condition: ${event == 'export'}
+                              then:
+                                - action: util.copyJson
+                                  params:
+                                    data: ${data.detail}
+                                - action: message
+                                  params:
+                                    messageType: success
+                                    text: 配置 JSON 已复制到剪贴板
+                      children:
+                        - type: Button
+                          props:
+                            text: ···
+                            variant: text
+        - type: Card
+          props:
+            title: ① 基本信息
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 名称
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.name}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 标识
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.code}（创建后不可修改）
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 有效期
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.expiresAt}
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 描述
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: "${data.detail.description != '' ? data.detail.description : '—'}"
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 标签
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: "${data.detail.tagsText != '' ? data.detail.tagsText : '—'}"
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 状态
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: StatusBadge
+                      props:
+                        status: ${data.detail.status}
+                - type: Flex
+                  when: ${data.detail.templateCode != null}
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: 来源模板
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.templateName}
+                    - type: Button
+                      props:
+                        text: 查看模板
+                        variant: link
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /client-templates/${data.detail.templateCode}
+        - type: Card
+          props:
+            title: ② AppKey
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: AppKey ID
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: ${data.detail.appKeyId}
+                        className: font-mono
+                    - type: Button
+                      props:
+                        text: 复制 ID
+                        icon: copy
+                        variant: link
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: util.copy
+                            params:
+                              text: ${data.detail.appKeyId}
+                          - action: message
+                            params:
+                              messageType: success
+                              text: AppKey ID 已复制
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: AppKey Secret
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: "****************"
+                        className: font-mono
+                    - type: Text
+                      props:
+                        text: （不可查看明文）
+                        type: secondary
+                - type: Flex
+                  props:
+                    align: baseline
+                    gap: middle
+                  children:
+                    - type: Text
+                      props:
+                        text: Secret 状态
+                        type: secondary
+                        style:
+                          width: 120
+                          flexShrink: 0
+                    - type: Text
+                      props:
+                        text: 有效 · 上次轮换 ${data.detail.secretLastRotatedAt}
+                - type: Flex
+                  props:
+                    align: center
+                    gap: middle
+                  children:
+                    - type: Button
+                      props:
+                        text: Rotate Secret
+                        icon: refresh
+                        size: small
+                      events:
+                        onClick:
+                          - id: rotateSecretCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 确认 Rotate Secret
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: 将为 AppKey ${data.detail.appKeyId} 轮换 Secret。
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: ⚠ 轮换后旧 Secret 立即失效，新 Secret 仅展示一次，请妥善保存。
+                                        type: warning
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认轮换
+                                            variant: primary
+                                            danger: true
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.rotateSecretCfm.ok}
+                              then:
+                                - id: rotateResult
+                                  action: util.request
+                                  params:
+                                    method: POST
+                                    url: /api/d/clients/${data.detail.id}/rotate-app-key
+                                    body: {}
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult == null || actions.rotateResult.ok
+                                      == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.rotateResult != null && actions.rotateResult.error
+                                            != null ? actions.rotateResult.error.message
+                                            : '轮换失败'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.rotateResult != null && actions.rotateResult.ok
+                                      != false}
+                                    then:
+                                      - id: secretShown
+                                        action: overlay.open
+                                        params:
+                                          overlay:
+                                            type: modal
+                                            title: 新 AppKey Secret（仅此一次展示）
+                                            width: 520
+                                            content:
+                                              type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                              children:
+                                                - type: Alert
+                                                  props:
+                                                    showIcon: true
+                                                    variant: warning
+                                                    message: 旧 Secret 已失效；新 Secret 请立即复制保存。
+                                                - type: Text
+                                                  props:
+                                                    strong: true
+                                                    className: font-mono
+                                                    text: ${actions.rotateResult.data.appKeyPlaintext}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 我已保存
+                                                        variant: primary
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
+                    - type: Text
+                      props:
+                        text: ℹ 轮换后展示新 Secret 一次
+                        type: secondary
+                        size: small
+        - type: Card
+          props:
+            title: ③ 路由授权
+          children:
+            - type: Flex
+              props:
+                justify: space-between
+                align: center
+              children:
+                - type: Text
+                  props:
+                    text: 未授权 Route 拒绝调用。
+                    type: secondary
+                - type: Button
+                  props:
+                    text: + 添加路由
+                    size: small
+                  events:
+                    onClick:
+                      - id: routeOpts
+                        action: clientRoutes.loadOptions
+                      - id: addRoute
+                        action: overlay.open
+                        params:
+                          overlay:
+                            type: modal
+                            title: 添加路由授权
+                            width: 640
+                            content:
+                              type: Flex
+                              props:
+                                direction: vertical
+                                gap: middle
+                                align: stretch
+                              children:
+                                - type: Field
+                                  props:
+                                    label: 可选路由（仅已启用）
+                                    required: true
+                                  children:
+                                    - type: Select
+                                      props:
+                                        value: ${state.pendingRouteId}
+                                        placeholder: 选择要授权的路由
+                                        options: ${state.routeOptions}
+                                        controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                      events:
+                                        onChange:
+                                          - action: setState
+                                            params:
+                                              pendingRouteId: ${event}
+                                - type: Flex
+                                  props:
+                                    justify: end
+                                    gap: middle
+                                  children:
+                                    - type: Button
+                                      props:
+                                        text: 取消
+                                      events:
+                                        onClick:
+                                          - action: overlay.close
+                                    - type: Button
+                                      props:
+                                        text: 确认添加
+                                        variant: primary
+                                      events:
+                                        onClick:
+                                          - action: clientRoutes.add
+                                            params:
+                                              routeId: ${state.pendingRouteId}
+                                          - action: overlay.close
+                                          - id: persistResult
+                                            action: policy.persist
+                                            params:
+                                              url: /api/d/clients/${data.detail.id}
+                                              grantsUrl: /api/d/clients/${data.detail.id}/route-grants
+                                          - action: if
+                                            params:
+                                              condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                              then:
+                                                - action: message
+                                                  params:
+                                                    messageType: error
+                                                    text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                          - action: if
+                                            params:
+                                              condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                              then:
+                                                - action: reload
+                                                  params:
+                                                    dataSource: detail
+                                                - action: message
+                                                  params:
+                                                    messageType: success
+                                                    text: 已添加路由授权
+            - type: Table
+              props:
+                dataSource: ${state.record.authRoutes}
+                rowKey: code
+                pagination: false
+                className: mt-2
+                columns:
+                  - title: 路由名称
+                    cell:
+                      type: Button
+                      props:
+                        text: ${row.name}
+                        variant: link
+                        size: small
+                        className: p-0 h-auto
+                      events:
+                        onClick:
+                          - action: navigate
+                            params:
+                              to: /routes/${row.code}
+                  - title: Alias
+                    dataIndex: alias
+                  - title: 类型
+                    dataIndex: typeLabel
+                  - title: 请求路径
+                    dataIndex: path
+                  - title: 操作
+                    align: center
+                    width: 80
+                    cell:
+                      type: Button
+                      props:
+                        text: 移除
+                        variant: link
+                        size: small
+                        danger: true
+                      events:
+                        onClick:
+                          - id: removeRouteCfm
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 确认移除路由授权
+                                width: 480
+                                content:
+                                  type: Flex
+                                  props:
+                                    direction: vertical
+                                    gap: middle
+                                  children:
+                                    - type: Text
+                                      props:
+                                        size: small
+                                        text: 移除后，该主体对「${parent.row.name}」（${parent.row.path}）的调用将被拒绝；重新添加授权即可恢复。
+                                    - type: Flex
+                                      props:
+                                        justify: end
+                                        gap: middle
+                                      children:
+                                        - type: Button
+                                          props:
+                                            text: 取消
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                        - type: Button
+                                          props:
+                                            text: 确认移除
+                                            variant: primary
+                                            danger: true
+                                          events:
+                                            onClick:
+                                              - action: overlay.close
+                                                params:
+                                                  payload:
+                                                    ok: true
+                          - action: if
+                            params:
+                              condition: ${actions.removeRouteCfm.ok}
+                              then:
+                                - action: clientRoutes.remove
+                                  params:
+                                    routeId: ${row.routeId}
+                                - id: persistResult
+                                  action: policy.persist
+                                  params:
+                                    url: /api/d/clients/${data.detail.id}
+                                    grantsUrl: /api/d/clients/${data.detail.id}/route-grants
+                                - action: if
+                                  params:
+                                    condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                    then:
+                                      - action: message
+                                        params:
+                                          messageType: error
+                                          text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                - action: if
+                                  params:
+                                    condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                    then:
+                                      - action: reload
+                                        params:
+                                          dataSource: detail
+                                      - action: message
+                                        params:
+                                          messageType: success
+                                          text: 已移除路由授权
+            - type: Text
+              when: ${state.record.authRoutes.length == 0}
+              props:
+                text: 尚未授权路由；未授权 Route 拒绝调用。
+                type: secondary
+        - type: Card
+          props:
+            title: ④ 配额策略
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    justify: space-between
+                    align: center
+                  children:
+                    - type: Text
+                      props:
+                        text: 可配置多条；总配额与周期循环可并存。
+                        type: secondary
+                    - type: Button
+                      props:
+                        text: + 添加配额规则
+                        size: small
+                      events:
+                        onClick:
+                          - id: addQuota
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 添加配额规则
+                                width: 560
+                                content:
+                                  type: Form
+                                  props:
+                                    name: quotaRule
+                                    initialValues:
+                                      quotaType: lifetime
+                                      metric: TOTAL_TOKEN
+                                      cycle: hour24
+                                      mode: soft
+                                  events:
+                                    onSubmit:
+                                      - action: policy.upsertQuota
+                                        params:
+                                          quota: ${event}
+                                      - action: overlay.close
+                                      - id: persistResult
+                                        action: policy.persist
+                                        params:
+                                          url: /api/d/clients/${data.detail.id}
+                                      - action: if
+                                        params:
+                                          condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                          then:
+                                            - action: message
+                                              params:
+                                                messageType: error
+                                                text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                      - action: if
+                                        params:
+                                          condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                          then:
+                                            - action: reload
+                                              params:
+                                                dataSource: detail
+                                            - action: message
+                                              params:
+                                                messageType: success
+                                                text: 配额规则已保存
+                                  children:
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                        align: stretch
+                                      children:
+                                        - type: Field
+                                          props:
+                                            label: 规则名称
+                                            required: true
+                                          children:
+                                            - type: Input
+                                              props:
+                                                name: name
+                                                className: w-full
+                                                placeholder: 如 daily-token-cap
+                                                rules:
+                                                  - required: true
+                                                    message: 请输入规则名称
+                                        - type: Field
+                                          props:
+                                            label: 配额类型
+                                            required: true
+                                          children:
+                                            - type: RadioGroup
+                                              props:
+                                                name: quotaType
+                                                direction: horizontal
+                                                options:
+                                                  - label: 总配额
+                                                    value: lifetime
+                                                  - label: 周期循环配额
+                                                    value: cyclic
+                                        - type: Field
+                                          props:
+                                            label: 计量指标
+                                            required: true
+                                          children:
+                                            - type: Select
+                                              props:
+                                                name: metric
+                                                className: w-full
+                                                options:
+                                                  - label: Request
+                                                    value: REQUEST
+                                                  - label: Input Token
+                                                    value: INPUT_TOKEN
+                                                  - label: Output Token
+                                                    value: OUTPUT_TOKEN
+                                                  - label: Total Token
+                                                    value: TOTAL_TOKEN
+                                                  - label: Cost
+                                                    value: COST
+                                                  - label: Concurrent
+                                                    value: CONCURRENT
+                                        - type: Field
+                                          props:
+                                            label: 上限
+                                            required: true
+                                          children:
+                                            - type: NumberInput
+                                              props:
+                                                name: limit
+                                                className: w-full
+                                                min: 1
+                                                precision: 0
+                                                placeholder: 如 500000
+                                                rules:
+                                                  - required: true
+                                                    message: 请输入上限
+                                        - type: Field
+                                          props:
+                                            label: 循环周期（仅周期循环配额）
+                                          children:
+                                            - type: RadioGroup
+                                              props:
+                                                name: cycle
+                                                direction: vertical
+                                                options:
+                                                  - label: 每 24 小时
+                                                    value: hour24
+                                                  - label: 每 7 天
+                                                    value: day7
+                                                  - label: 每月（自然月，每月 1 日 00:00 重置）
+                                                    value: month
+                                        - type: Field
+                                          props:
+                                            label: 模式
+                                            required: true
+                                          children:
+                                            - type: Select
+                                              props:
+                                                name: mode
+                                                className: w-full
+                                                options:
+                                                  - label: Soft Limit
+                                                    value: soft
+                                                  - label: Hard Limit
+                                                    value: hard
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: 保存
+                                                variant: primary
+                                                submit: true
+                - type: Table
+                  when: ${state.record.quotas.length > 0}
+                  props:
+                    dataSource: ${state.record.quotas}
+                    rowKey: name
+                    pagination: false
+                    className: mt-2
+                    columns:
+                      - title: 规则名称
+                        dataIndex: name
+                      - title: 配额类型
+                        dataIndex: quotaTypeLabel
+                      - title: 计量指标
+                        dataIndex: metricLabel
+                      - title: 上限
+                        dataIndex: limitText
+                      - title: 循环周期
+                        cell:
+                          type: Text
+                          props:
+                            text: "${row.cycleLabel == null ? '—' : row.cycleLabel}"
+                      - title: 模式
+                        dataIndex: modeLabel
+                      - title: 状态
+                        cell:
+                          type: StatusBadge
+                          props:
+                            status: ${row.status}
+                      - title: 操作
+                        align: center
+                        width: 130
+                        cell:
+                          type: Flex
+                          props:
+                            gap: small
+                            justify: center
+                          children:
+                            - type: Button
+                              props:
+                                text: 编辑
+                                variant: link
+                                size: small
+                                className: p-0 h-auto
+                              events:
+                                onClick:
+                                  - id: editQuota
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 编辑配额规则
+                                        width: 560
+                                        content:
+                                          type: Form
+                                          props:
+                                              name: quotaRule
+                                              initialValues:
+                                                name: ${parent.row.name}
+                                                quotaType: ${parent.row.quotaType}
+                                                metric: ${parent.row.metric}
+                                                limit: ${parent.row.limit}
+                                                mode: ${parent.row.mode}
+                                                cycle: "${parent.row.cycleUnit == 'month' ? 'month' : parent.row.cycleUnit == 'day' ? 'day7' : 'hour24'}"
+                                          events:
+                                            onSubmit:
+                                                - action: policy.upsertQuota
+                                                  params:
+                                                    original: ${parent.row.name}
+                                                    quota: ${event}
+                                                - action: overlay.close
+                                                - id: persistResult
+                                                  action: policy.persist
+                                                  params:
+                                                    url: /api/d/clients/${data.detail.id}
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                                    then:
+                                                      - action: message
+                                                        params:
+                                                          messageType: error
+                                                          text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                                    then:
+                                                      - action: reload
+                                                        params:
+                                                          dataSource: detail
+                                                      - action: message
+                                                        params:
+                                                          messageType: success
+                                                          text: 配额规则已更新
+                                          children:
+                                            - type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                                align: stretch
+                                              children:
+                                                - type: Field
+                                                  props:
+                                                    label: 规则名称
+                                                    required: true
+                                                  children:
+                                                    - type: Input
+                                                      props:
+                                                        name: name
+                                                        className: w-full
+                                                        placeholder: 如 daily-token-cap
+                                                        rules:
+                                                          - required: true
+                                                            message: 请输入规则名称
+                                                - type: Field
+                                                  props:
+                                                    label: 配额类型
+                                                    required: true
+                                                  children:
+                                                    - type: RadioGroup
+                                                      props:
+                                                        name: quotaType
+                                                        direction: horizontal
+                                                        options:
+                                                          - label: 总配额
+                                                            value: lifetime
+                                                          - label: 周期循环配额
+                                                            value: cyclic
+                                                - type: Field
+                                                  props:
+                                                    label: 计量指标
+                                                    required: true
+                                                  children:
+                                                    - type: Select
+                                                      props:
+                                                        name: metric
+                                                        className: w-full
+                                                        options:
+                                                          - label: Request
+                                                            value: REQUEST
+                                                          - label: Input Token
+                                                            value: INPUT_TOKEN
+                                                          - label: Output Token
+                                                            value: OUTPUT_TOKEN
+                                                          - label: Total Token
+                                                            value: TOTAL_TOKEN
+                                                          - label: Cost
+                                                            value: COST
+                                                          - label: Concurrent
+                                                            value: CONCURRENT
+                                                - type: Field
+                                                  props:
+                                                    label: 上限
+                                                    required: true
+                                                  children:
+                                                    - type: NumberInput
+                                                      props:
+                                                        name: limit
+                                                        className: w-full
+                                                        min: 1
+                                                        precision: 0
+                                                        placeholder: 如 500000
+                                                        rules:
+                                                          - required: true
+                                                            message: 请输入上限
+                                                - type: Field
+                                                  props:
+                                                    label: 循环周期（仅周期循环配额）
+                                                  children:
+                                                    - type: RadioGroup
+                                                      props:
+                                                        name: cycle
+                                                        direction: vertical
+                                                        options:
+                                                          - label: 每 24 小时
+                                                            value: hour24
+                                                          - label: 每 7 天
+                                                            value: day7
+                                                          - label: 每月（自然月，每月 1 日 00:00 重置）
+                                                            value: month
+                                                - type: Field
+                                                  props:
+                                                    label: 模式
+                                                    required: true
+                                                  children:
+                                                    - type: Select
+                                                      props:
+                                                        name: mode
+                                                        className: w-full
+                                                        options:
+                                                          - label: Soft Limit
+                                                            value: soft
+                                                          - label: Hard Limit
+                                                            value: hard
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                    gap: middle
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 取消
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                    - type: Button
+                                                      props:
+                                                        text: 保存
+                                                        variant: primary
+                                                        submit: true
+                            - type: Button
+                              props:
+                                text: 删除
+                                variant: link
+                                size: small
+                                danger: true
+                                className: p-0 h-auto
+                              events:
+                                onClick:
+                                  - id: delQuotaCfm
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 确认删除配额规则
+                                        width: 480
+                                        content:
+                                          type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: middle
+                                          children:
+                                            - type: Text
+                                              props:
+                                                size: small
+                                                text: 删除后，配额规则「${parent.row.name}」将立即失效且不可恢复。
+                                            - type: Flex
+                                              props:
+                                                justify: end
+                                                gap: middle
+                                              children:
+                                                - type: Button
+                                                  props:
+                                                    text: 取消
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
+                                                - type: Button
+                                                  props:
+                                                    text: 确认删除
+                                                    variant: primary
+                                                    danger: true
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
+                                                        params:
+                                                          payload:
+                                                            ok: true
+                                  - action: if
+                                    params:
+                                      condition: ${actions.delQuotaCfm.ok}
+                                      then:
+                                        - action: policy.removeQuota
+                                          params:
+                                            name: ${row.name}
+                                        - id: persistResult
+                                          action: policy.persist
+                                          params:
+                                            url: /api/d/clients/${data.detail.id}
+                                        - action: if
+                                          params:
+                                            condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: error
+                                                  text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                        - action: if
+                                          params:
+                                            condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                            then:
+                                              - action: reload
+                                                params:
+                                                  dataSource: detail
+                                              - action: message
+                                                params:
+                                                  messageType: success
+                                                  text: 已删除配额规则
+                - type: Text
+                  when: ${state.record.quotas.length == 0}
+                  props:
+                    text: 尚未配置配额规则。
+                    type: secondary
+                - type: Text
+                  props:
+                    text: ℹ 运行计数由 Runtime 维护，控制台近实时展示，Counter 不写入业务库
+                    type: secondary
+                    size: small
+        - type: Card
+          props:
+            title: ⑤ 限流策略
+          children:
+            - type: Flex
+              props:
+                direction: vertical
+                gap: middle
+                align: stretch
+              children:
+                - type: Flex
+                  props:
+                    justify: space-between
+                    align: center
+                  children:
+                    - type: Text
+                      props:
+                        text: 未配置规则时不限流；作用范围可取当前授权路由。
+                        type: secondary
+                    - type: Button
+                      props:
+                        text: + 添加限流规则
+                        size: small
+                      events:
+                        onClick:
+                          - action: policy.beginRateLimitAdd
+                          - action: policy.scopeRouteOptions
+                          - id: addRateLimit
+                            action: overlay.open
+                            params:
+                              overlay:
+                                type: modal
+                                title: 添加限流规则
+                                width: 560
+                                content:
+                                  type: Form
+                                  props:
+                                    name: rateLimitRule
+                                    initialValues:
+                                      limitType: RPM
+                                      scope: all
+                                  events:
+                                    onSubmit:
+                                      - action: policy.upsertRateLimit
+                                        params:
+                                          rateLimit: ${event}
+                                      - action: overlay.close
+                                      - id: persistResult
+                                        action: policy.persist
+                                        params:
+                                          url: /api/d/clients/${data.detail.id}
+                                      - action: if
+                                        params:
+                                          condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                          then:
+                                            - action: message
+                                              params:
+                                                messageType: error
+                                                text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                      - action: if
+                                        params:
+                                          condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                          then:
+                                            - action: reload
+                                              params:
+                                                dataSource: detail
+                                            - action: message
+                                              params:
+                                                messageType: success
+                                                text: 限流规则已保存
+                                  children:
+                                    - type: Flex
+                                      props:
+                                        direction: vertical
+                                        gap: middle
+                                        align: stretch
+                                      children:
+                                        - type: Field
+                                          props:
+                                            label: 规则名称
+                                            required: true
+                                          children:
+                                            - type: Input
+                                              props:
+                                                name: name
+                                                className: w-full
+                                                placeholder: 如 app-rpm
+                                                rules:
+                                                  - required: true
+                                                    message: 请输入规则名称
+                                        - type: Field
+                                          props:
+                                            label: 限流类型
+                                            required: true
+                                          children:
+                                            - type: Select
+                                              props:
+                                                name: limitType
+                                                className: w-full
+                                                options:
+                                                  - label: RPM（每分钟请求数）
+                                                    value: RPM
+                                                  - label: TPM（每分钟 Token 数）
+                                                    value: TPM
+                                                  - label: Concurrent（并发连接数）
+                                                    value: CONCURRENT
+                                        - type: Field
+                                          props:
+                                            label: 上限
+                                            required: true
+                                          children:
+                                            - type: NumberInput
+                                              props:
+                                                name: limit
+                                                className: w-full
+                                                min: 1
+                                                precision: 0
+                                                placeholder: 如 1000
+                                                rules:
+                                                  - required: true
+                                                    message: 请输入上限
+                                        - type: Field
+                                          props:
+                                            label: Burst（Concurrent 时不适用）
+                                          children:
+                                            - type: NumberInput
+                                              props:
+                                                name: burst
+                                                className: w-full
+                                                min: 1
+                                                precision: 0
+                                                placeholder: 可选，如 100
+                                        - type: Field
+                                          props:
+                                            label: 作用范围
+                                          children:
+                                            - type: RadioGroup
+                                              props:
+                                                name: scope
+                                                direction: horizontal
+                                                options:
+                                                  - label: 全部授权路由
+                                                    value: all
+                                                  - label: 指定路由
+                                                    value: routes
+                                              events:
+                                                onChange:
+                                                  - action: setState
+                                                    params:
+                                                      rateLimitScope: ${event}
+                                        - type: Flex
+                                          when: ${state.rateLimitScope == 'routes'}
+                                          props:
+                                            direction: vertical
+                                            gap: small
+                                            align: stretch
+                                          children:
+                                            - type: Flex
+                                              props:
+                                                gap: small
+                                                align: center
+                                              children:
+                                                - type: Select
+                                                  props:
+                                                    value: ${state.pendingScopeRouteId}
+                                                    placeholder: 选择授权路由（来自当前授权列表）
+                                                    options: ${state.scopeRouteOptions}
+                                                    controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                  events:
+                                                    onChange:
+                                                      - action: setState
+                                                        params:
+                                                          pendingScopeRouteId: ${event}
+                                                - type: Button
+                                                  props:
+                                                    text: 添加
+                                                    size: small
+                                                  events:
+                                                    onClick:
+                                                      - action: policy.addScopeRoute
+                                                        params:
+                                                          routeId: ${state.pendingScopeRouteId}
+                                            - type: Table
+                                              when: ${state.pendingScopeRoutes.length > 0}
+                                              props:
+                                                dataSource: ${state.pendingScopeRoutes}
+                                                rowKey: routeId
+                                                pagination: false
+                                                columns:
+                                                  - title: 路由名称
+                                                    dataIndex: name
+                                                  - title: 操作
+                                                    align: center
+                                                    width: 80
+                                                    cell:
+                                                      type: Button
+                                                      props:
+                                                        text: 移除
+                                                        variant: link
+                                                        size: small
+                                                        danger: true
+                                                        className: p-0 h-auto
+                                                      events:
+                                                        onClick:
+                                                          - action: policy.removeScopeRoute
+                                                            params:
+                                                              routeId: ${row.routeId}
+                                        - type: Flex
+                                          props:
+                                            justify: end
+                                            gap: middle
+                                          children:
+                                            - type: Button
+                                              props:
+                                                text: 取消
+                                              events:
+                                                onClick:
+                                                  - action: overlay.close
+                                            - type: Button
+                                              props:
+                                                text: 保存
+                                                variant: primary
+                                                submit: true
+                - type: Table
+                  when: ${state.record.rateLimits.length > 0}
+                  props:
+                    dataSource: ${state.record.rateLimits}
+                    rowKey: name
+                    pagination: false
+                    className: mt-2
+                    columns:
+                      - title: 规则名称
+                        dataIndex: name
+                      - title: 限流类型
+                        dataIndex: limitTypeLabel
+                      - title: 上限
+                        cell:
+                          type: Text
+                          props:
+                            text: "${row.limitType == 'CONCURRENT' ? row.limitText + ' 并发' : row.limitText + ' / 分钟'}"
+                      - title: Burst
+                        cell:
+                          type: Text
+                          props:
+                            text: "${row.burst == null ? '—' : row.burst}"
+                      - title: 作用范围
+                        dataIndex: scopeLabel
+                      - title: 状态
+                        cell:
+                          type: StatusBadge
+                          props:
+                            status: ${row.status}
+                      - title: 操作
+                        align: center
+                        width: 130
+                        cell:
+                          type: Flex
+                          props:
+                            gap: small
+                            justify: center
+                          children:
+                            - type: Button
+                              props:
+                                text: 编辑
+                                variant: link
+                                size: small
+                                className: p-0 h-auto
+                              events:
+                                onClick:
+                                  - action: policy.beginRateLimitEdit
+                                    params:
+                                      scopeRoutes: ${row.scopeRoutes}
+                                      scopeAll: ${row.scopeAll}
+                                  - action: policy.scopeRouteOptions
+                                  - id: editRateLimit
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 编辑限流规则
+                                        width: 560
+                                        content:
+                                          type: Form
+                                          props:
+                                              name: rateLimitRule
+                                              initialValues:
+                                                name: ${parent.row.name}
+                                                limitType: ${parent.row.limitType}
+                                                limit: ${parent.row.limit}
+                                                burst: ${parent.row.burst}
+                                                scope: "${parent.row.scopeAll ? 'all' : 'routes'}"
+                                          events:
+                                            onSubmit:
+                                                - action: policy.upsertRateLimit
+                                                  params:
+                                                    original: ${parent.row.name}
+                                                    rateLimit: ${event}
+                                                - action: overlay.close
+                                                - id: persistResult
+                                                  action: policy.persist
+                                                  params:
+                                                    url: /api/d/clients/${data.detail.id}
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                                    then:
+                                                      - action: message
+                                                        params:
+                                                          messageType: error
+                                                          text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                                - action: if
+                                                  params:
+                                                    condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                                    then:
+                                                      - action: reload
+                                                        params:
+                                                          dataSource: detail
+                                                      - action: message
+                                                        params:
+                                                          messageType: success
+                                                          text: 限流规则已更新
+                                          children:
+                                            - type: Flex
+                                              props:
+                                                direction: vertical
+                                                gap: middle
+                                                align: stretch
+                                              children:
+                                                - type: Field
+                                                  props:
+                                                    label: 规则名称
+                                                    required: true
+                                                  children:
+                                                    - type: Input
+                                                      props:
+                                                        name: name
+                                                        className: w-full
+                                                        placeholder: 如 app-rpm
+                                                        rules:
+                                                          - required: true
+                                                            message: 请输入规则名称
+                                                - type: Field
+                                                  props:
+                                                    label: 限流类型
+                                                    required: true
+                                                  children:
+                                                    - type: Select
+                                                      props:
+                                                        name: limitType
+                                                        className: w-full
+                                                        options:
+                                                          - label: RPM（每分钟请求数）
+                                                            value: RPM
+                                                          - label: TPM（每分钟 Token 数）
+                                                            value: TPM
+                                                          - label: Concurrent（并发连接数）
+                                                            value: CONCURRENT
+                                                - type: Field
+                                                  props:
+                                                    label: 上限
+                                                    required: true
+                                                  children:
+                                                    - type: NumberInput
+                                                      props:
+                                                        name: limit
+                                                        className: w-full
+                                                        min: 1
+                                                        precision: 0
+                                                        placeholder: 如 1000
+                                                        rules:
+                                                          - required: true
+                                                            message: 请输入上限
+                                                - type: Field
+                                                  props:
+                                                    label: Burst（Concurrent 时不适用）
+                                                  children:
+                                                    - type: NumberInput
+                                                      props:
+                                                        name: burst
+                                                        className: w-full
+                                                        min: 1
+                                                        precision: 0
+                                                        placeholder: 可选，如 100
+                                                - type: Field
+                                                  props:
+                                                    label: 作用范围
+                                                  children:
+                                                    - type: RadioGroup
+                                                      props:
+                                                        name: scope
+                                                        direction: horizontal
+                                                        options:
+                                                          - label: 全部授权路由
+                                                            value: all
+                                                          - label: 指定路由
+                                                            value: routes
+                                                      events:
+                                                        onChange:
+                                                          - action: setState
+                                                            params:
+                                                              rateLimitScope: ${event}
+                                                - type: Flex
+                                                  when: ${state.rateLimitScope == 'routes'}
+                                                  props:
+                                                    direction: vertical
+                                                    gap: small
+                                                    align: stretch
+                                                  children:
+                                                    - type: Flex
+                                                      props:
+                                                        gap: small
+                                                        align: center
+                                                      children:
+                                                        - type: Select
+                                                          props:
+                                                            value: ${state.pendingScopeRouteId}
+                                                            placeholder: 选择授权路由（来自当前授权列表）
+                                                            options: ${state.scopeRouteOptions}
+                                                            controlClassName: w-full [&_[data-slot=select-trigger]]:w-full
+                                                          events:
+                                                            onChange:
+                                                              - action: setState
+                                                                params:
+                                                                  pendingScopeRouteId: ${event}
+                                                        - type: Button
+                                                          props:
+                                                            text: 添加
+                                                            size: small
+                                                          events:
+                                                            onClick:
+                                                              - action: policy.addScopeRoute
+                                                                params:
+                                                                  routeId: ${state.pendingScopeRouteId}
+                                                    - type: Table
+                                                      when: ${state.pendingScopeRoutes.length > 0}
+                                                      props:
+                                                        dataSource: ${state.pendingScopeRoutes}
+                                                        rowKey: routeId
+                                                        pagination: false
+                                                        columns:
+                                                          - title: 路由名称
+                                                            dataIndex: name
+                                                          - title: 操作
+                                                            align: center
+                                                            width: 80
+                                                            cell:
+                                                              type: Button
+                                                              props:
+                                                                text: 移除
+                                                                variant: link
+                                                                size: small
+                                                                danger: true
+                                                                className: p-0 h-auto
+                                                              events:
+                                                                onClick:
+                                                                  - action: policy.removeScopeRoute
+                                                                    params:
+                                                                      routeId: ${row.routeId}
+                                                - type: Flex
+                                                  props:
+                                                    justify: end
+                                                    gap: middle
+                                                  children:
+                                                    - type: Button
+                                                      props:
+                                                        text: 取消
+                                                      events:
+                                                        onClick:
+                                                          - action: overlay.close
+                                                    - type: Button
+                                                      props:
+                                                        text: 保存
+                                                        variant: primary
+                                                        submit: true
+                            - type: Button
+                              props:
+                                text: 删除
+                                variant: link
+                                size: small
+                                danger: true
+                                className: p-0 h-auto
+                              events:
+                                onClick:
+                                  - id: delRateLimitCfm
+                                    action: overlay.open
+                                    params:
+                                      overlay:
+                                        type: modal
+                                        title: 确认删除限流规则
+                                        width: 480
+                                        content:
+                                          type: Flex
+                                          props:
+                                            direction: vertical
+                                            gap: middle
+                                          children:
+                                            - type: Text
+                                              props:
+                                                size: small
+                                                text: 删除后，限流规则「${parent.row.name}」将立即失效且不可恢复。
+                                            - type: Flex
+                                              props:
+                                                justify: end
+                                                gap: middle
+                                              children:
+                                                - type: Button
+                                                  props:
+                                                    text: 取消
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
+                                                - type: Button
+                                                  props:
+                                                    text: 确认删除
+                                                    variant: primary
+                                                    danger: true
+                                                  events:
+                                                    onClick:
+                                                      - action: overlay.close
+                                                        params:
+                                                          payload:
+                                                            ok: true
+                                  - action: if
+                                    params:
+                                      condition: ${actions.delRateLimitCfm.ok}
+                                      then:
+                                        - action: policy.removeRateLimit
+                                          params:
+                                            name: ${row.name}
+                                        - id: persistResult
+                                          action: policy.persist
+                                          params:
+                                            url: /api/d/clients/${data.detail.id}
+                                        - action: if
+                                          params:
+                                            condition: ${actions.persistResult == null || actions.persistResult.ok == false}
+                                            then:
+                                              - action: message
+                                                params:
+                                                  messageType: error
+                                                  text: "${actions.persistResult != null && actions.persistResult.error != null ? actions.persistResult.error.message : '保存失败，请重试'}"
+                                        - action: if
+                                          params:
+                                            condition: ${actions.persistResult != null && actions.persistResult.ok != false}
+                                            then:
+                                              - action: reload
+                                                params:
+                                                  dataSource: detail
+                                              - action: message
+                                                params:
+                                                  messageType: success
+                                                  text: 已删除限流规则
+                - type: Text
+                  when: ${state.record.rateLimits.length == 0}
+                  props:
+                    text: 尚未配置限流规则。
+                    type: secondary
+        - type: Button
+          props:
+            text: 返回列表
+            variant: primary
+          events:
+            onClick:
+              - action: navigate
+                params:
+                  to: /clients
+

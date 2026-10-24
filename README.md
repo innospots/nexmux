@@ -283,6 +283,9 @@ pnpm build
 |---|---|
 | [工程结构](./docs/nexmux-engineering.md) | 模块、包、数据流、持久化与构建边界 |
 | [运行与部署](./docs/nexmux-deployment.md) | 双进程启动、配置、健康检查、升级和发布检查单 |
+| [生产运行手册](./docs/nexmux-runbook.md) | 进程巡检、备份恢复、故障处置、扩缩容与安全运维 |
+| [升级与迁移](./docs/nexmux-migration.md) | Schema、凭证、配置与协议兼容、回退策略 |
+| [排障指南](./docs/nexmux-troubleshooting.md) | 错误码、快照、Request ID、金额、代理与 H2 排查 |
 | [模型接入指南](./docs/nexmux-integration-guide.md) | 业务项目接入、API、错误语义和示例 |
 | [架构设计](./docs/design/nexmux-architecture-design.md) | 控制面/数据面、模块边界与阶段路线 |
 | [Runtime 设计](./docs/design/nexmux-runtime-design.md) | Ingress、调用流水线、快照、探活、计量与测试范围 |
@@ -298,6 +301,16 @@ pnpm build
 - AppKey 轮换后旧 Key 立即失效，应安排低峰轮换并同步更新调用方。
 - 调试台会产生真实上游调用和费用，生产应关闭或限制 `debugInvokeEnabled` / `debugDailyQuota`。
 - 连接超时需要在无透明代理的网络环境完成计时验收。
+
+## 社区与治理
+
+- [CONTRIBUTING.md](./CONTRIBUTING.md)：开发环境、工程约束、测试和 PR 检查单。
+- [CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)：社区行为规范。
+- [SUPPORT.md](./SUPPORT.md)：问题反馈、功能建议与支持边界。
+- [SECURITY.md](./SECURITY.md)：漏洞报告、凭证、数据与生产安全。
+- [CHANGELOG.md](./CHANGELOG.md)：版本变更与兼容性记录。
+- [RELEASE.md](./RELEASE.md)：版本、发行包、推送、部署和回滚流程。
+- [NOTICE](./NOTICE)：项目归属与第三方声明。
 
 ## 贡献
 

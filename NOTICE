@@ -1,0 +1,20 @@
+Nexmux
+Copyright 2026 Innospots
+
+This product is licensed under the Apache License, Version 2.0.
+See LICENSE for the full license text.
+
+This project includes or depends on third-party software, including but not limited to:
+
+- Innospots Nexus platform libraries
+- Spring Boot / Spring Framework
+- Jakarta REST / Jakarta Persistence
+- MyBatis-Plus / MyBatis
+- Jackson
+- H2 Database
+- Next.js / React
+- Pactor / Pactor App
+- Tailwind CSS
+- Maven and various build plugins
+
+Third-party software remains subject to its respective license terms. No third-party trademark is used to imply endorsement.

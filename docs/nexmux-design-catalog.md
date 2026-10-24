@@ -21,6 +21,9 @@
 | 文档 | 说明 | 状态 |
 |------|------|------|
 | [nexmux-engineering.md](./nexmux-engineering.md) | **工程结构指南**：模块职责、包边界、核心数据流、持久化、测试与发布边界 | 当前 / 定稿 |
+| [nexmux-runbook.md](./nexmux-runbook.md) | **生产运行手册**：巡检、备份恢复、故障处置、扩缩容与安全运维 | 当前 / 定稿 |
+| [nexmux-migration.md](./nexmux-migration.md) | **升级与迁移**：Schema、凭证、配置、协议兼容和回退策略 | 当前 / 定稿 |
+| [nexmux-troubleshooting.md](./nexmux-troubleshooting.md) | **排障指南**：错误码、快照、Request ID、金额、代理与 H2 | 当前 / 定稿 |
 | [nexmux-functional-guide.md](./nexmux-functional-guide.md) | **功能说明书（使用者视角）**：模块与页面功能、操作步骤、端到端流程、术语与通用规则 | 当前 / 定稿 |
 | [nexmux-functional-catalog.md](./nexmux-functional-catalog.md) | **功能页面清单**：菜单 / 路径 / 用途 / 主要操作 / 字段·列 / 数据来源速查 | 当前 / 定稿 |
 | [nexmux-console-test-plan.md](./nexmux-console-test-plan.md) | **管理控制面测试方案**：使用者视角 149 个测试点（通用/仪表盘/资产/路由/访问治理/运行/调试/系统/端到端/安全） | 当前 / 滚动更新 |
@@ -28,6 +31,18 @@
 | [nexmux-console-runtime-config-verification.md](./archive/nexmux-console-runtime-config-verification.md) | **历史配置核查**：早期配置项×生效矩阵与修复记录 | 历史归档 |
 | [nexmux-console-runtime-feature-inventory.md](./nexmux-console-runtime-feature-inventory.md) | **Console→Runtime 功能点清单**：Provider / Model / Route / Client / 设置 / 观测与韧性验收基线 | 当前 / 定稿 |
 | [nexmux-console-runtime-e2e-plan.md](./nexmux-console-runtime-e2e-plan.md) | **Console→Runtime 端测 TODO 与执行记录**：100 个编号检查点，逐项状态、证据、缺陷与清理记录 | 当前 / 滚动更新 |
+
+## 开源治理文档
+
+| 文档 | 说明 | 状态 |
+|------|------|------|
+| [SECURITY.md](../SECURITY.md) | 漏洞报告、凭证、数据与生产安全基线 | 当前 / 定稿 |
+| [CONTRIBUTING.md](../CONTRIBUTING.md) | 开发环境、测试先行、提交与 PR 检查单 | 当前 / 定稿 |
+| [CHANGELOG.md](../CHANGELOG.md) | 版本变更与兼容性记录 | 当前 / 滚动更新 |
+| [RELEASE.md](../RELEASE.md) | 版本、发行包、标签、部署与回滚流程 | 当前 / 定稿 |
+| [CODE_OF_CONDUCT.md](../CODE_OF_CONDUCT.md) | 社区行为规范 | 当前 / 定稿 |
+| [SUPPORT.md](../SUPPORT.md) | 问题反馈与支持边界 | 当前 / 定稿 |
+| [NOTICE](../NOTICE) | 项目归属与第三方声明 | 当前 / 定稿 |
 
 ## 本仓库设计文档索引
 

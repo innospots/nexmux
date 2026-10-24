@@ -46,6 +46,22 @@ class PlatformSettingServiceTest {
     }
 
     @Test
+    void getAllCoalescesReadsWithinTtlAndSaveInvalidates() {
+        // TTL 缓存：窗口内重复 getAll 只查一次库（Runtime 热路径每次调用多次 getAll）；
+        // save 后立即失效，下一次 getAll 读到新值
+        when(platformSettingDao.selectList(any())).thenReturn(List.of());
+
+        platformSettingService.getAll();
+        platformSettingService.getAll();
+        Mockito.verify(platformSettingDao, Mockito.times(1)).selectList(any());
+
+        when(platformSettingDao.selectList(any())).thenReturn(List.of(row("currency", "CNY")));
+        platformSettingService.save(Map.of("currency", "CNY"));
+
+        assertThat(platformSettingService.getAll().get("currency")).isEqualTo("CNY");
+    }
+
+    @Test
     void getAllOverlaysStoredValues() {
         when(platformSettingDao.selectList(any())).thenReturn(List.of(
                 row("currency", "CNY"), row("unknown-key", "x")));

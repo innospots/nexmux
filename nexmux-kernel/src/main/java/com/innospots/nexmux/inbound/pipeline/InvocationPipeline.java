@@ -59,11 +59,13 @@ public final class InvocationPipeline {
     private final RequestLogWriter requestLogWriter;
     private final RequestLogDao requestLogDao;
     private final PlatformSettingService platformSettingService;
+    private final com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher;
 
     public InvocationPipeline(RuntimeCatalogCache catalogCache, PublishedRouteCache routeCache,
                               BindingHealthRegistry healthRegistry,
                               UpstreamChatAdapter chatAdapter, RequestLogWriter requestLogWriter,
-                              RequestLogDao requestLogDao, PlatformSettingService platformSettingService) {
+                              RequestLogDao requestLogDao, PlatformSettingService platformSettingService,
+                              com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
         this.catalogCache = catalogCache;
         this.router = new RuntimeRouter(routeCache);
         this.appKeyVerifier = new AppKeyVerifier(catalogCache);
@@ -74,6 +76,7 @@ public final class InvocationPipeline {
         this.requestLogWriter = requestLogWriter;
         this.requestLogDao = requestLogDao;
         this.platformSettingService = platformSettingService;
+        this.credentialCipher = credentialCipher;
     }
 
     /**
@@ -156,7 +159,8 @@ public final class InvocationPipeline {
     public InvocationResult invoke(String presentedKey, Map<String, Object> requestBody,
                                    String ingressPath) {
         InvocationContext context = resolve(presentedKey, requestBody, ingressPath);
-        List<String> concurrentKeys = rateLimitGate.check(context.client(), context.route().routeId());
+        List<java.util.concurrent.Semaphore> permits = rateLimitGate.check(context.client(), context.route().routeId());
+        quotaGate.recordRequest(context.client());
         long start = System.currentTimeMillis();
         try {
             Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), false);
@@ -170,26 +174,32 @@ public final class InvocationPipeline {
                     longOrNull(usage, "prompt_tokens"), longOrNull(usage, "completion_tokens"), context);
             settle(context, result, requestBody);
             return result;
+        } catch (com.innospots.nexmux.inbound.protocol.UpstreamCallException e) {
+            if (e.isClientError()) {
+                // 上游 4xx = 接入方输入类错误：透传上游状态与错误体（不归约 502），落 ERROR 日志
+                InvocationResult failure = new InvocationResult(e.status(), e.responseBody(),
+                        System.currentTimeMillis() - start, -1, null, null, context);
+                settle(context, failure, requestBody);
+                return failure;
+            }
+            throw upstreamFailure(context, requestBody, start, e);
         } catch (IOException e) {
-            InvocationResult failure = new InvocationResult(502,
-                    "{\"error\":\"upstream call failed: " + abbreviate(e.getMessage()) + "\"}",
-                    System.currentTimeMillis() - start, -1, null, null, context);
-            settle(context, failure, requestBody);
-            throw NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
-                    "upstream call failed: " + abbreviate(e.getMessage()));
+            throw upstreamFailure(context, requestBody, start, e);
         } finally {
-            rateLimitGate.releaseConcurrent(context.client(), concurrentKeys);
+            rateLimitGate.releaseConcurrent(permits);
         }
     }
 
     /**
      * 流式调用（SSE）：上游 chunk 原样透传至 {@code out}；上游失败在写出字节前抛
-     * {@code NexusException(UPSTREAM_FAILURE)}，由 ingress 决定错误形态。
+     * {@code NexusException(UPSTREAM_FAILURE)}（5xx/IO）或 {@code UpstreamCallException}（4xx 透传），
+     * 由 ingress 决定错误形态。
      */
     public InvocationResult invokeStream(String presentedKey, Map<String, Object> requestBody,
-                                         String ingressPath, OutputStream out) {
+                                         String ingressPath, OutputStream out) throws IOException {
         InvocationContext context = resolve(presentedKey, requestBody, ingressPath);
-        List<String> concurrentKeys = rateLimitGate.check(context.client(), context.route().routeId());
+        List<java.util.concurrent.Semaphore> permits = rateLimitGate.check(context.client(), context.route().routeId());
+        quotaGate.recordRequest(context.client());
         long start = System.currentTimeMillis();
         try {
             Map<String, Object> upstreamBody = upstreamBody(requestBody, context.binding(), true);
@@ -201,16 +211,47 @@ public final class InvocationPipeline {
                     outcome.tokensIn(), outcome.tokensOut(), context);
             settle(context, result, requestBody);
             return result;
+        } catch (com.innospots.nexmux.inbound.protocol.UpstreamCallException e) {
+            if (e.isClientError()) {
+                // 上游 4xx：记账后原样抛给 ingress（响应状态行已提交 200，错误体以 SSE 事件带内透传）
+                InvocationResult failure = new InvocationResult(e.status(), e.responseBody(),
+                        System.currentTimeMillis() - start, -1, null, null, context);
+                settle(context, failure, requestBody);
+                throw e;
+            }
+            throw upstreamFailure(context, requestBody, start, e);
         } catch (IOException e) {
-            InvocationResult failure = new InvocationResult(502,
-                    "{\"error\":\"upstream call failed: " + abbreviate(e.getMessage()) + "\"}",
-                    System.currentTimeMillis() - start, -1, null, null, context);
-            settle(context, failure, requestBody);
-            throw NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
-                    "upstream call failed: " + abbreviate(e.getMessage()));
+            throw upstreamFailure(context, requestBody, start, e);
         } finally {
-            rateLimitGate.releaseConcurrent(context.client(), concurrentKeys);
+            rateLimitGate.releaseConcurrent(permits);
         }
+    }
+
+    /** 上游故障（5xx / IO）：落 ERROR 日志并归约 502。 */
+    private NexusException upstreamFailure(InvocationContext context, Map<String, Object> requestBody,
+                                           long start, IOException e) {
+        InvocationResult failure = new InvocationResult(502,
+                "{\"error\":\"upstream call failed: " + abbreviate(e.getMessage()) + "\"}",
+                System.currentTimeMillis() - start, -1, null, null, context);
+        settle(context, failure, requestBody);
+        return NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
+                "upstream call failed: " + abbreviate(e.getMessage()));
+    }
+
+    /**
+     * 模型发现（{@code GET /v1/models}，OpenAI 列表形状）：AppKey 鉴权后返回该客户端
+     * 已授权且当前已发布的别名清单——接入方自助发现可用模型，无需线下同步。
+     */
+    public String listModels(String presentedKey) {
+        ClientEntity client = appKeyVerifier.authenticate(presentedKey);
+        Set<String> granted = new HashSet<>(NexmuxJson.readStringList(client.getAuthorizedRouteIds()));
+        List<Map<String, Object>> data = routerCache().routes().stream()
+                .filter(r -> r.spec().alias() != null && granted.contains(r.routeId()))
+                .map(r -> Map.<String, Object>of(
+                        "id", r.spec().alias(), "object", "model", "owned_by", "nexmux"))
+                .sorted(java.util.Comparator.comparing(m -> (String) m.get("id")))
+                .toList();
+        return NexmuxJson.write(Map.of("object", "list", "data", data));
     }
 
     /** 解析链路：鉴权 → 路由 → 授权 → 配额 → 健康预过滤 → 候选 → Binding → 供应商。 */
@@ -230,9 +271,10 @@ public final class InvocationPipeline {
             throw NexusException.build(NexmuxStatusCode.ROUTE_ACCESS_DENIED,
                     "route is not granted to this client");
         }
-        // 先检查后记账：limit=N 允许 N 次成功调用（检查不含在途请求）
+        // 只检查不记账：REQUEST 计数在全部关口通过、即将调上游时记（invoke/invokeStream），
+        // 被鉴权 / 授权 / 配额 / 限流 / 选路任一关口拒绝的请求不消耗配额（与 resync 以
+        // mux_request_log 回填的口径一致——落库的请求恰是已过全部关口的请求）
         List<String> softQuota = quotaGate.check(client);
-        quotaGate.recordRequest(client);
 
         RouteSpec spec = route.spec();
         Set<String> unhealthy = unhealthyModelCodes(spec);
@@ -327,6 +369,7 @@ public final class InvocationPipeline {
         return catalogCache.findCredential(context.binding().providerId())
                 .map(ProviderCredentialEntity::getCiphertext)
                 .filter(c -> c != null && !c.isBlank())
+                .map(credentialCipher::decrypt)
                 .map(String::trim)
                 .orElseThrow(() -> NexusException.build(NexmuxStatusCode.UPSTREAM_FAILURE,
                         "provider credential not configured: " + context.binding().providerId()));
@@ -334,7 +377,7 @@ public final class InvocationPipeline {
 
     /**
      * 读取超时回退链（G-03）：Provider.timeoutMs → 服务设置 requestTimeoutMs → 常量。
-     * 设置项实时读取（与 promptPolicy 同一口径，不走快照）。
+     * 设置项近实时读取（PlatformSettingService 带秒级 TTL 缓存；与 promptPolicy 同一口径，不走路由快照）。
      */
     private int readTimeoutOf(ProviderEntity provider) {
         if (provider.getTimeoutMs() != null && provider.getTimeoutMs() > 0) {

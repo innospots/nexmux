@@ -117,6 +117,18 @@ public class RouteService {
             entity.setDisplayName(request.displayName());
         }
         if (request.routeSpec() != null) {
+            String alias = request.routeSpec().alias();
+            if (alias != null && !alias.isBlank() && !alias.equals(entity.getAlias())) {
+                // 草稿规格可改名 alias：与 create 同口径重查唯一性（排除自身）并同步路由列；
+                // 否则两条同 alias 路由发布后，Runtime 缓存后写覆盖先写，选路不确定
+                boolean taken = routeDao.selectCount(new LambdaQueryWrapper<RouteEntity>()
+                        .eq(RouteEntity::getAlias, alias)
+                        .ne(RouteEntity::getRouteId, routeId)) > 0;
+                if (taken) {
+                    throw NexusException.build(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY, "route alias exists");
+                }
+                entity.setAlias(alias);
+            }
             entity.setRouteSpec(NexmuxJson.write(request.routeSpec()));
         }
         routeDao.updateById(entity);

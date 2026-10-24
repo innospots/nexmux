@@ -38,8 +38,28 @@ public class PlatformSettingService {
     private final PlatformSettingDao platformSettingDao;
     private final ConfigAuditService configAuditService;
 
-    /** 全量设置（默认值 + 已落库覆盖），键序固定。 */
+    /** 设置快照缓存：TTL 内免查库（Runtime 热路径单次调用会多次 getAll）；save 立即失效。 */
+    private static final long CACHE_TTL_MS = 3000;
+
+    private final Object cacheLock = new Object();
+    private Map<String, String> cached;
+    private long cachedAtMs;
+
+    /** 全量设置（默认值 + 已落库覆盖），键序固定。TTL 缓存，返回防御性副本。 */
     public Map<String, String> getAll() {
+        synchronized (cacheLock) {
+            long now = System.currentTimeMillis();
+            if (cached != null && now - cachedAtMs < CACHE_TTL_MS) {
+                return new LinkedHashMap<>(cached);
+            }
+            Map<String, String> merged = loadAll();
+            cached = merged;
+            cachedAtMs = now;
+            return new LinkedHashMap<>(merged);
+        }
+    }
+
+    private Map<String, String> loadAll() {
         Map<String, String> merged = new LinkedHashMap<>(DEFAULTS);
         List<PlatformSettingEntity> rows = platformSettingDao.selectList(
                 new LambdaQueryWrapper<>());
@@ -69,6 +89,9 @@ public class PlatformSettingService {
                     upsert(key, entry.getValue());
                 }
             }
+        }
+        synchronized (cacheLock) {
+            cached = null;
         }
         Map<String, String> after = getAll();
         if (!before.equals(after)) {

@@ -5,6 +5,7 @@ import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexmux.inbound.pipeline.InvocationPipeline;
 import com.innospots.nexus.base.exception.NexusException;
 import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.GET;
 import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.Path;
@@ -48,6 +49,10 @@ public class RuntimeIngressEndpoint {
     public Response chatCompletions(@HeaderParam("Authorization") String authorization,
                                     @HeaderParam("X-API-Key") String apiKey,
                                     Map<String, Object> body) {
+        if (body == null) {
+            return RuntimeErrorResponses.toResponse(
+                    NexusException.build(NexmuxStatusCode.INVALID_REQUEST, "request body is required"));
+        }
         String presentedKey = extractKey(authorization, apiKey);
         if (Boolean.TRUE.equals(body.get("stream"))) {
             StreamingOutput output = out -> writeStream(presentedKey, body, out);
@@ -55,8 +60,30 @@ public class RuntimeIngressEndpoint {
         }
         try {
             InvocationPipeline.InvocationResult result = pipeline.invoke(presentedKey, body, INGRESS_PATH);
-            // 非流式：上游原始 JSON 文本直接透传（String 实体避免二次编码）
-            return Response.ok(result.body(), MediaType.APPLICATION_JSON).build();
+            // 上游原始 JSON 文本直接透传（String 实体避免二次编码）；状态码透传——
+            // 200 为成功，4xx 为上游判定的接入方输入类错误（网关不吞成 502）
+            Response.ResponseBuilder builder = Response.status(result.httpStatus())
+                    .type(MediaType.APPLICATION_JSON)
+                    .entity(result.body());
+            if (result.context() != null) {
+                // 排障对账头：与 mux_request_log.request_id 对应（仅已过关口、落库的请求有）
+                builder.header("x-request-id", result.context().requestId());
+            }
+            return builder.build();
+        } catch (NexusException e) {
+            return RuntimeErrorResponses.toResponse(e);
+        }
+    }
+
+    @GET
+    @Path("/models")
+    @Produces(MediaType.APPLICATION_JSON)
+    @Operation(operationId = "nexmuxRuntimeModels", summary = "可用模型清单（本 AppKey 已授权的已发布别名）")
+    public Response models(@HeaderParam("Authorization") String authorization,
+                           @HeaderParam("X-API-Key") String apiKey) {
+        try {
+            return Response.ok(pipeline.listModels(extractKey(authorization, apiKey)),
+                    MediaType.APPLICATION_JSON).build();
         } catch (NexusException e) {
             return RuntimeErrorResponses.toResponse(e);
         }
@@ -66,6 +93,11 @@ public class RuntimeIngressEndpoint {
             throws IOException {
         try {
             pipeline.invokeStream(presentedKey, body, INGRESS_PATH, out);
+        } catch (com.innospots.nexmux.inbound.protocol.UpstreamCallException e) {
+            // 上游 4xx：状态行已提交 200，上游错误体原样作为 SSE 事件带内透传
+            out.write(("data: " + e.responseBody() + "\n\n").getBytes(StandardCharsets.UTF_8));
+            out.write("data: [DONE]\n\n".getBytes(StandardCharsets.UTF_8));
+            out.flush();
         } catch (NexusException e) {
             // 流式失败：字节尚未写出时以 SSE 错误事件收尾（PRD §19.7 已开始输出不重试）
             out.write(("data: " + RuntimeErrorResponses.errorBodyJson(e) + "\n\n")

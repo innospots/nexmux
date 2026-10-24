@@ -6,6 +6,7 @@ import com.innospots.nexmux.core.provider.dao.ProviderCredentialDao;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderCredentialEntity;
 import com.innospots.nexmux.core.provider.domain.entity.ProviderEntity;
+import com.innospots.nexmux.core.provider.domain.request.ProviderCreateRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderPageRequest;
 import com.innospots.nexmux.core.provider.domain.request.ProviderUpdateRequest;
 import com.innospots.nexmux.core.provider.domain.vo.ConnectionTestVo;
@@ -36,7 +37,28 @@ class ProviderServiceTest {
         providerDao = Mockito.mock(ProviderDao.class);
         providerCredentialDao = Mockito.mock(ProviderCredentialDao.class);
         modelDao = Mockito.mock(ModelDao.class);
-        providerService = new ProviderService(providerDao, providerCredentialDao, modelDao, Mockito.mock(ConfigAuditService.class));
+        providerService = new ProviderService(providerDao, providerCredentialDao, modelDao, Mockito.mock(ConfigAuditService.class),
+                new com.innospots.nexmux.core.shared.security.CredentialCipher(null));
+    }
+
+    @Test
+    void createEncryptsCredentialAtRestWhenCipherEnabled() {
+        // 凭证加密：配置密钥后落库为 aesgcm:v1 密文且不含明文；可解密回原文
+        com.innospots.nexmux.core.shared.security.CredentialCipher cipher =
+                new com.innospots.nexmux.core.shared.security.CredentialCipher("test-secret");
+        ProviderService encrypting = new ProviderService(providerDao, providerCredentialDao, modelDao,
+                Mockito.mock(ConfigAuditService.class), cipher);
+        when(providerDao.selectCount(any())).thenReturn(0L);
+
+        encrypting.create(new ProviderCreateRequest("openai", "OpenAI", "openai", "openai-chat",
+                "openai", null, null, "https://api.openai.com/v1", null, null, "sk-live-key", null));
+
+        org.mockito.ArgumentCaptor<ProviderCredentialEntity> captor =
+                org.mockito.ArgumentCaptor.forClass(ProviderCredentialEntity.class);
+        Mockito.verify(providerCredentialDao).insert(captor.capture());
+        String stored = captor.getValue().getCiphertext();
+        assertThat(stored).startsWith("aesgcm:v1:").doesNotContain("sk-live-key");
+        assertThat(cipher.decrypt(stored)).isEqualTo("sk-live-key");
     }
 
     private ProviderEntity provider(String id, String code) {

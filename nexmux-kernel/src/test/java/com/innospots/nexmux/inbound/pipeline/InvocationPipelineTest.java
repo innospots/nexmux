@@ -15,6 +15,7 @@ import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.settings.service.PlatformSettingService;
 import com.innospots.nexmux.core.shared.security.AppKeySupport;
+import com.innospots.nexmux.core.shared.security.CredentialCipher;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexmux.inbound.protocol.UpstreamChatAdapter;
 import com.innospots.nexmux.inbound.runtime.BindingHealthRegistry;
@@ -74,7 +75,7 @@ class InvocationPipelineTest {
         chatAdapter = Mockito.mock(UpstreamChatAdapter.class);
         healthRegistry = new BindingHealthRegistry(3, 10000);
         pipeline = new InvocationPipeline(catalogCache, routeCache, healthRegistry,
-                chatAdapter, new RequestLogWriter(requestLogDao, settings), requestLogDao, settings);
+                chatAdapter, new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, new CredentialCipher(null));
     }
 
     private static RouteEntity publishedRoute() {
@@ -271,7 +272,7 @@ class InvocationPipelineTest {
         when(settings.getAll()).thenReturn(PlatformSettingService.DEFAULTS);
         InvocationPipeline limitedPipeline = new InvocationPipeline(limitedCatalog, routeCache,
                 new BindingHealthRegistry(3, 10000), chatAdapter,
-                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings);
+                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, new CredentialCipher(null));
 
         assertThatThrownBy(() -> limitedPipeline.invoke(PLAIN_KEY, chatBody(), INGRESS))
                 .isInstanceOfSatisfying(NexusException.class, e ->
@@ -286,6 +287,12 @@ class InvocationPipelineTest {
 
     /** 全夹具变体：可定制路由 / 模型 / 供应商（G-01/G-03/G-06 等场景）。 */
     private InvocationPipeline pipelineWith(RouteEntity route, ModelEntity model, ProviderEntity provider) {
+        return pipelineWith(route, model, provider, client());
+    }
+
+    /** 全夹具变体（含客户端定制：配额 / 限流场景）。 */
+    private InvocationPipeline pipelineWith(RouteEntity route, ModelEntity model,
+                                            ProviderEntity provider, ClientEntity client) {
         RouteDao routeDao = Mockito.mock(RouteDao.class);
         when(routeDao.selectList(any())).thenReturn(List.of(route));
         PublishedRouteCache routeCache = new PublishedRouteCache(routeDao);
@@ -297,13 +304,13 @@ class InvocationPipelineTest {
         when(modelDao.selectList(null)).thenReturn(List.of(model));
         when(providerDao.selectList(null)).thenReturn(List.of(provider));
         when(credentialDao.selectList(null)).thenReturn(List.of(credential()));
-        when(clientDao.selectList(null)).thenReturn(List.of(client()));
+        when(clientDao.selectList(null)).thenReturn(List.of(client));
         RuntimeCatalogCache catalog = new RuntimeCatalogCache(modelDao, providerDao, credentialDao, clientDao);
         catalog.refresh();
         PlatformSettingService settings = Mockito.mock(PlatformSettingService.class);
         when(settings.getAll()).thenReturn(PlatformSettingService.DEFAULTS);
         return new InvocationPipeline(catalog, routeCache, healthRegistry,
-                chatAdapter, new RequestLogWriter(requestLogDao, settings), requestLogDao, settings);
+                chatAdapter, new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, new CredentialCipher(null));
     }
 
     private void markBindingUnhealthy() {
@@ -367,7 +374,7 @@ class InvocationPipelineTest {
                 "requestCount", 5L, "inputTokens", 0L, "outputTokens", 0L, "costUsd", BigDecimal.ZERO)));
         InvocationPipeline resyncPipeline = new InvocationPipeline(limitedCatalog, routeCache,
                 new BindingHealthRegistry(3, 10000), chatAdapter,
-                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings);
+                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, new CredentialCipher(null));
 
         resyncPipeline.resyncQuotas();
 
@@ -405,7 +412,7 @@ class InvocationPipelineTest {
                 "requestcount", 5L, "inputtokens", 0L, "outputtokens", 0L, "costusd", BigDecimal.ZERO)));
         InvocationPipeline resyncPipeline = new InvocationPipeline(limitedCatalog, routeCache,
                 new BindingHealthRegistry(3, 10000), chatAdapter,
-                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings);
+                new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, new CredentialCipher(null));
 
         resyncPipeline.resyncQuotas();
 
@@ -413,6 +420,111 @@ class InvocationPipelineTest {
                 .isInstanceOfSatisfying(NexusException.class, e ->
                         assertThat(e.code()).isEqualTo(NexmuxStatusCode.QUOTA_EXCEEDED.fullCode()));
         Mockito.verifyNoInteractions(chatAdapter);
+    }
+
+    @Test
+    void rejectedRequestsDoNotConsumeRequestQuota() {
+        // 配额记账时机：被选路等后续关口拒绝的请求不得消耗 REQUEST 配额
+        // （limit=1 下连续两次 503 不得升级为 429）
+        ClientEntity limited = client();
+        limited.setQuotaSpec("[{\"name\":\"q\",\"quotaType\":\"lifetime\",\"metric\":\"REQUEST\","
+                + "\"limit\":1,\"mode\":\"hard\",\"status\":\"enabled\"}]");
+        InvocationPipeline p = pipelineWith(publishedRoute(true), model(), provider(), limited);
+        markBindingUnhealthy();
+
+        assertThatThrownBy(() -> p.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE.fullCode()));
+        assertThatThrownBy(() -> p.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.NO_AVAILABLE_CANDIDATE.fullCode()));
+    }
+
+    @Test
+    void admittedRequestsConsumeRequestQuota() throws IOException {
+        // 行为锁定：通过全部关口的调用正常消耗 REQUEST 配额（limit=1：首次成功，第二次 429）
+        ClientEntity limited = client();
+        limited.setQuotaSpec("[{\"name\":\"q\",\"quotaType\":\"lifetime\",\"metric\":\"REQUEST\","
+                + "\"limit\":1,\"mode\":\"hard\",\"status\":\"enabled\"}]");
+        InvocationPipeline p = pipelineWith(publishedRoute(true), model(), provider(), limited);
+        stubUpstreamOk();
+
+        assertThat(p.invoke(PLAIN_KEY, chatBody(), INGRESS).httpStatus()).isEqualTo(200);
+        assertThatThrownBy(() -> p.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.QUOTA_EXCEEDED.fullCode()));
+    }
+
+    @Test
+    void upstreamClientErrorPassesThroughStatusAndBody() throws IOException {
+        // 上游 4xx（接入方输入类错误）：状态与错误体透传，不包 502；落 ERROR 日志
+        when(chatAdapter.chatCompletions(anyString(), anyString(), anyString(), anyInt(), anyInt(), any()))
+                .thenThrow(new com.innospots.nexmux.inbound.protocol.UpstreamCallException(400,
+                        "{\"error\":{\"message\":\"context too long\"}}"));
+
+        InvocationPipeline.InvocationResult result = pipeline.invoke(PLAIN_KEY, chatBody(), INGRESS);
+
+        assertThat(result.httpStatus()).isEqualTo(400);
+        assertThat(result.body()).contains("context too long");
+        Mockito.verify(requestLogDao).insert(Mockito.<RequestLogEntity>argThat(log ->
+                "ERROR".equals(log.getStatus()) && "HTTP_400".equals(log.getErrorCode())));
+    }
+
+    @Test
+    void upstreamServerErrorStillMaps502() throws IOException {
+        // 上游 5xx 维持归约：502 NMX060001
+        when(chatAdapter.chatCompletions(anyString(), anyString(), anyString(), anyInt(), anyInt(), any()))
+                .thenThrow(new com.innospots.nexmux.inbound.protocol.UpstreamCallException(500,
+                        "{\"error\":\"internal\"}"));
+
+        assertThatThrownBy(() -> pipeline.invoke(PLAIN_KEY, chatBody(), INGRESS))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.UPSTREAM_FAILURE.fullCode()));
+    }
+
+    @Test
+    void listModelsReturnsOnlyGrantedAliases() {
+        // /v1/models：AppKey 鉴权 + 仅返回已授权的已发布别名（OpenAI 列表形状）
+        String body = pipeline.listModels(PLAIN_KEY);
+
+        assertThat(body).contains("\"object\":\"list\"")
+                .contains("\"id\":\"general\"")
+                .contains("\"owned_by\":\"nexmux\"");
+        assertThatThrownBy(() -> pipeline.listModels("gw-sk-bad"))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.APP_KEY_INVALID.fullCode()));
+    }
+
+    @Test
+    void decryptsEncryptedCredentialForUpstream() throws IOException {
+        // 凭证加密端到端：目录缓存中的密文凭证经管道解密后发给上游
+        CredentialCipher cipher = new CredentialCipher("test-secret");
+        RouteDao routeDao = Mockito.mock(RouteDao.class);
+        when(routeDao.selectList(any())).thenReturn(List.of(publishedRoute()));
+        PublishedRouteCache routeCache = new PublishedRouteCache(routeDao);
+        routeCache.refresh();
+        ModelDao modelDao = Mockito.mock(ModelDao.class);
+        ProviderDao providerDao = Mockito.mock(ProviderDao.class);
+        ProviderCredentialDao credentialDao = Mockito.mock(ProviderCredentialDao.class);
+        ClientDao clientDao = Mockito.mock(ClientDao.class);
+        when(modelDao.selectList(null)).thenReturn(List.of(model()));
+        when(providerDao.selectList(null)).thenReturn(List.of(provider()));
+        ProviderCredentialEntity encrypted = credential();
+        encrypted.setCiphertext(cipher.encrypt("sk-upstream"));
+        when(credentialDao.selectList(null)).thenReturn(List.of(encrypted));
+        when(clientDao.selectList(null)).thenReturn(List.of(client()));
+        RuntimeCatalogCache catalog = new RuntimeCatalogCache(modelDao, providerDao, credentialDao, clientDao);
+        catalog.refresh();
+        PlatformSettingService settings = Mockito.mock(PlatformSettingService.class);
+        when(settings.getAll()).thenReturn(PlatformSettingService.DEFAULTS);
+        InvocationPipeline p = new InvocationPipeline(catalog, routeCache, healthRegistry,
+                chatAdapter, new RequestLogWriter(requestLogDao, settings), requestLogDao, settings, cipher);
+        stubUpstreamOk();
+
+        p.invoke(PLAIN_KEY, chatBody(), INGRESS);
+
+        Mockito.verify(chatAdapter).chatCompletions(anyString(),
+                org.mockito.ArgumentMatchers.eq("sk-upstream"), anyString(), anyInt(), anyInt(), any());
     }
 
     @Test

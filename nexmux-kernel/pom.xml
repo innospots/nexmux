@@ -50,6 +50,7 @@
                             <scanPackages>
                                 com.innospots.nexmux.console,
                                 com.innospots.nexmux.core,
+                                com.innospots.nexmux.inbound,
                                 com.innospots.nexus.base.domain.response,
                                 com.innospots.nexus.base.i18n,
                                 com.innospots.nexus.base.domain.enums

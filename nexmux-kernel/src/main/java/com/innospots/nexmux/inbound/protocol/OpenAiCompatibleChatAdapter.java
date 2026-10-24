@@ -82,7 +82,7 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
         }
     }
 
-    /** 建立连接并写请求体；HTTP &ge; 400 读错误流抛 IOException（连接已断开，未向下游写字节）。 */
+    /** 建立连接并写请求体；HTTP &ge; 400 读错误流抛 {@link UpstreamCallException}（连接已断开，未向下游写字节）。 */
     private HttpURLConnection connect(String baseUrl, String apiKey, String requestBodyJson,
                                       int readTimeoutMs, int connectTimeoutMs, String proxy)
             throws IOException {
@@ -108,7 +108,7 @@ public final class OpenAiCompatibleChatAdapter implements UpstreamChatAdapter {
                     ? "{\"error\":\"empty upstream response\"}"
                     : new String(err.readAllBytes(), StandardCharsets.UTF_8);
             connection.disconnect();
-            throw new IOException("HTTP " + status + ": " + abbreviate(response));
+            throw new UpstreamCallException(status, abbreviate(response));
         }
         return connection;
     }

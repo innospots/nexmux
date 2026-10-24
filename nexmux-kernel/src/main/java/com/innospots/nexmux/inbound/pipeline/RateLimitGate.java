@@ -29,17 +29,21 @@ public final class RateLimitGate {
     private record WindowCounter(long minuteEpoch, LongAdder count) {
     }
 
+    /** 并发许可桶：规则限额变更时整体替换（旧许可仍释放回旧信号量，不膨胀新桶）。 */
+    private record ConcurrencyBucket(long limit, Semaphore semaphore) {
+    }
+
     private final Map<String, WindowCounter> windows = new ConcurrentHashMap<>();
-    private final Map<String, Semaphore> semaphores = new ConcurrentHashMap<>();
+    private final Map<String, ConcurrencyBucket> buckets = new ConcurrentHashMap<>();
 
     /**
      * 请求前检查（RPM / CONCURRENT；TPM 为记账式，见 {@link #recordTokens}）。
      * 命中超限 → 429 {@code RATE_LIMITED}。
      *
-     * @return 本次调用持有的并发许可（须 {@link #releaseConcurrent} 释放）；未启用 CONCURRENT 规则为 null
+     * @return 本次调用持有的并发许可（须 {@link #releaseConcurrent} 释放）；未启用 CONCURRENT 规则为空表
      */
-    public List<String> check(ClientEntity client, String routeId) {
-        List<String> acquired = new ArrayList<>();
+    public List<Semaphore> check(ClientEntity client, String routeId) {
+        List<Semaphore> acquired = new ArrayList<>();
         try {
             for (RateRuleSpec rule : enabledRules(client, routeId)) {
                 switch (rule.limitType() == null ? "" : rule.limitType()) {
@@ -53,7 +57,7 @@ public final class RateLimitGate {
             }
             return acquired;
         } catch (NexusException e) {
-            acquired.forEach(key -> release(client.getClientId(), key));
+            acquired.forEach(Semaphore::release);
             throw e;
         }
     }
@@ -71,11 +75,11 @@ public final class RateLimitGate {
     }
 
     /** 释放并发许可（finally 中调用）。 */
-    public void releaseConcurrent(ClientEntity client, List<String> acquiredKeys) {
-        if (acquiredKeys == null) {
+    public void releaseConcurrent(List<Semaphore> acquired) {
+        if (acquired == null) {
             return;
         }
-        acquiredKeys.forEach(key -> release(client.getClientId(), key));
+        acquired.forEach(Semaphore::release);
     }
 
     private void checkWindow(String clientId, RateRuleSpec rule, long increment) {
@@ -89,22 +93,19 @@ public final class RateLimitGate {
         }
     }
 
-    private void acquireConcurrent(String clientId, RateRuleSpec rule, List<String> acquired) {
+    private void acquireConcurrent(String clientId, RateRuleSpec rule, List<Semaphore> acquired) {
         String key = clientId + "|" + rule.name();
-        Semaphore semaphore = semaphores.computeIfAbsent(key,
-                k -> new Semaphore((int) Math.max(rule.limit(), 1)));
-        if (!semaphore.tryAcquire()) {
+        long limit = Math.max(rule.limit(), 1);
+        // 限额变更热生效（免重启）：桶限额与规则不一致时整体换新；换桶瞬间旧许可未归还，
+        // 短暂超发可接受，旧许可释放回旧信号量、不计入新桶
+        ConcurrencyBucket bucket = buckets.compute(key, (k, existing) ->
+                existing != null && existing.limit() == limit
+                        ? existing : new ConcurrencyBucket(limit, new Semaphore((int) limit)));
+        if (!bucket.semaphore().tryAcquire()) {
             throw NexusException.build(NexmuxStatusCode.RATE_LIMITED,
                     "concurrent limit reached: " + rule.name());
         }
-        acquired.add(key);
-    }
-
-    private void release(String clientId, String key) {
-        Semaphore semaphore = semaphores.get(key);
-        if (semaphore != null) {
-            semaphore.release();
-        }
+        acquired.add(bucket.semaphore());
     }
 
     /** 分钟窗口（过期自动新建）。 */

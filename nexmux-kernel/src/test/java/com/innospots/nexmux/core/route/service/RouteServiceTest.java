@@ -5,9 +5,12 @@ import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.route.domain.entity.RouteEntity;
 import com.innospots.nexmux.core.route.domain.request.RouteCreateRequest;
 import com.innospots.nexmux.core.route.domain.request.RoutePageRequest;
+import com.innospots.nexmux.core.route.domain.request.RouteUpdateRequest;
 import com.innospots.nexmux.core.route.domain.value.RouteCandidate;
+import com.innospots.nexmux.core.route.domain.value.RouteSpec;
 import com.innospots.nexmux.core.route.domain.vo.RouteDetailVo;
 import com.innospots.nexmux.core.shared.analysis.DependencyImpactAnalyzer;
+import com.innospots.nexmux.core.shared.json.NexmuxJson;
 import com.innospots.nexmux.core.shared.status.NexmuxStatusCode;
 import com.innospots.nexus.base.exception.NexusException;
 import java.math.BigDecimal;
@@ -56,6 +59,34 @@ class RouteServiceTest {
                 Mockito.eq("ROUTE"), Mockito.eq("r-1"), Mockito.eq("DELETE"),
                 any(), any());
         Mockito.verify(routeDao).deleteById(entity);
+    }
+
+    @Test
+    void updateDraftRejectsDuplicateAlias() {
+        // 别名唯一性：updateDraft 可改 routeSpec.alias，不得绕过 create 的唯一性校验
+        RouteEntity entity = route("r-1", "code-1", "DRAFT", specJson("general", 1));
+        when(routeDao.selectById("r-1")).thenReturn(entity);
+        when(routeDao.selectCount(any())).thenReturn(1L);
+
+        RouteSpec renamed = NexmuxJson.read(specJson("taken", 1), RouteSpec.class);
+        assertThatThrownBy(() -> routeService.updateDraft("r-1", new RouteUpdateRequest(null, renamed)))
+                .isInstanceOfSatisfying(NexusException.class, e ->
+                        assertThat(e.code()).isEqualTo(NexmuxStatusCode.DUPLICATE_BUSINESS_KEY.fullCode()));
+        Mockito.verify(routeDao, Mockito.never()).updateById(any(RouteEntity.class));
+    }
+
+    @Test
+    void updateDraftSyncsAliasColumnWhenRenamed() {
+        // 改名合法时同步 entity.alias 列，避免草稿规格与路由列不一致
+        RouteEntity entity = route("r-1", "code-1", "DRAFT", specJson("general", 1));
+        when(routeDao.selectById("r-1")).thenReturn(entity);
+        when(routeDao.selectCount(any())).thenReturn(0L);
+
+        RouteSpec renamed = NexmuxJson.read(specJson("renamed", 1), RouteSpec.class);
+        routeService.updateDraft("r-1", new RouteUpdateRequest(null, renamed));
+
+        assertThat(entity.getAlias()).isEqualTo("renamed");
+        Mockito.verify(routeDao).updateById(entity);
     }
 
     @Test

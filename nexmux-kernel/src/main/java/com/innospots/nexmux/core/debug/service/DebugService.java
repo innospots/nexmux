@@ -75,6 +75,7 @@ public class DebugService {
     private final PlatformSettingService platformSettingService;
     private final RequestLogDao requestLogDao;
     private final RequestLogWriter requestLogWriter;
+    private final com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher;
 
     /** 共享选路实现（调试与未来 Runtime 同一语义，见类注释）。 */
     private final CandidateSelector candidateSelector = new CandidateSelector();
@@ -284,7 +285,7 @@ public class DebugService {
         String requestId = newDebugRequestId();
         long start = System.currentTimeMillis();
         try {
-            String body = postChatCompletions(target, credential.getCiphertext().trim(), payload);
+            String body = postChatCompletions(target, credentialCipher.decrypt(credential.getCiphertext()).trim(), payload);
             int latency = (int) (System.currentTimeMillis() - start);
             JsonNode parsed = readJsonTolerant(body);
             JsonNode usage = parsed == null ? null : parsed.get("usage");
@@ -330,7 +331,7 @@ public class DebugService {
         body.put("stream_options", Map.of("include_usage", true));
         HttpURLConnection connection = null;
         try {
-            connection = connect(target, credential.getCiphertext().trim(), body);
+            connection = connect(target, credentialCipher.decrypt(credential.getCiphertext()).trim(), body);
             BufferedReader reader = new BufferedReader(
                     new InputStreamReader(connection.getInputStream(), StandardCharsets.UTF_8));
             String line;

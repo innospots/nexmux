@@ -62,6 +62,19 @@ import org.springframework.context.annotation.Profile;
         sqlSessionFactoryRef = "sqlSessionFactory")
 public class NexmuxKernelConfiguration {
 
+    private static final org.slf4j.Logger log =
+            org.slf4j.LoggerFactory.getLogger(NexmuxKernelConfiguration.class);
+
+    @Bean
+    com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher() {
+        com.innospots.nexmux.core.shared.security.CredentialCipher cipher =
+                com.innospots.nexmux.core.shared.security.CredentialCipher.fromEnvironment();
+        if (!cipher.enabled()) {
+            log.warn("NEXMUX_CREDENTIAL_SECRET not configured: provider credentials are stored as plaintext");
+        }
+        return cipher;
+    }
+
     @Bean
     DependencyImpactAnalyzer dependencyImpactAnalyzer() {
         return new DependencyImpactAnalyzer();
@@ -75,8 +88,10 @@ public class NexmuxKernelConfiguration {
     @Bean
     ProviderService providerService(
             ProviderDao providerDao, ProviderCredentialDao providerCredentialDao, ModelDao modelDao,
-            ConfigAuditService configAuditService) {
-        return new ProviderService(providerDao, providerCredentialDao, modelDao, configAuditService);
+            ConfigAuditService configAuditService,
+            com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
+        return new ProviderService(providerDao, providerCredentialDao, modelDao, configAuditService,
+                credentialCipher);
     }
 
     @Bean
@@ -172,10 +187,11 @@ public class NexmuxKernelConfiguration {
             ConfigAuditService configAuditService,
             PlatformSettingService platformSettingService,
             com.innospots.nexmux.core.ops.dao.RequestLogDao requestLogDao,
-            RequestLogWriter requestLogWriter) {
+            RequestLogWriter requestLogWriter,
+            com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
         return new DebugService(
                 modelDao, providerDao, providerCredentialDao, clientDao, routeDao, configAuditService,
-                platformSettingService, requestLogDao, requestLogWriter);
+                platformSettingService, requestLogDao, requestLogWriter, credentialCipher);
     }
 
     @Bean

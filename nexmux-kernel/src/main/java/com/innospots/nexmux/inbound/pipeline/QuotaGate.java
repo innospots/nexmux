@@ -81,7 +81,7 @@ public final class QuotaGate {
         }
     }
 
-    /** 请求数记账（检查通过后计；拒绝的请求不消耗配额）。 */
+    /** 请求数记账（全部关口通过、即将调上游时由调用方计；被任一关口拒绝的请求不消耗配额）。 */
     public void recordRequest(ClientEntity client) {
         for (QuotaRuleSpec rule : enabledRules(client)) {
             if ("REQUEST".equals(rule.metric())) {

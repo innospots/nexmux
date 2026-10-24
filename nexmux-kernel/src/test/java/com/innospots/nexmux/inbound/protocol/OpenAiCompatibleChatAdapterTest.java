@@ -106,6 +106,27 @@ class OpenAiCompatibleChatAdapterTest {
     }
 
     @Test
+    void httpErrorCarriesStatusAndBody() throws Exception {
+        // 4xx 透传语义：异常携带上游状态与错误体（管道据此分层：4xx 透传 / 5xx 归约 502）
+        AtomicReference<String> seenAuth = new AtomicReference<>();
+        AtomicReference<String> seenBody = new AtomicReference<>();
+        HttpServer server = upstream(400, seenAuth, seenBody);
+        try {
+            String baseUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/v1";
+
+            assertThatThrownBy(() ->
+                    adapter.chatCompletions(baseUrl, "sk-runtime", "{}", 5000, 5000, null))
+                    .isInstanceOfSatisfying(UpstreamCallException.class, e -> {
+                        assertThat(e.status()).isEqualTo(400);
+                        assertThat(e.isClientError()).isTrue();
+                        assertThat(e.responseBody()).contains("bad request");
+                    });
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
     void httpErrorBecomesIOExceptionWithTruncatedBody() throws Exception {
         AtomicReference<String> seenAuth = new AtomicReference<>();
         AtomicReference<String> seenBody = new AtomicReference<>();

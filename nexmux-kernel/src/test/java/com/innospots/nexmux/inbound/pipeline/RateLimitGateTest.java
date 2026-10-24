@@ -77,13 +77,26 @@ class RateLimitGateTest {
     void concurrentLimitBlocksAndReleaseRestores() {
         ClientEntity client = client("[{\"name\":\"c1\",\"limitType\":\"CONCURRENT\",\"limit\":1,"
                 + "\"scopeAll\":true,\"status\":\"enabled\"}]");
-        List<String> acquired = gate.check(client, "rt-1");
+        List<java.util.concurrent.Semaphore> acquired = gate.check(client, "rt-1");
         assertThat(acquired).isNotEmpty();
 
         assertThatThrownBy(() -> gate.check(client, "rt-1")).isInstanceOf(NexusException.class);
 
-        gate.releaseConcurrent(client, acquired);
+        gate.releaseConcurrent(acquired);
         assertThat(gate.check(client, "rt-1")).isNotEmpty();
+    }
+
+    @Test
+    void concurrentLimitChangeTakesEffectWithoutRestart() {
+        // 限额热更新：Console 把 CONCURRENT 从 1 调到 2 后，新限额立即生效（旧实现信号量缓存旧限额）
+        ClientEntity limitOne = client("[{\"name\":\"c1\",\"limitType\":\"CONCURRENT\",\"limit\":1,"
+                + "\"scopeAll\":true,\"status\":\"enabled\"}]");
+        gate.check(limitOne, "rt-1");
+        assertThatThrownBy(() -> gate.check(limitOne, "rt-1")).isInstanceOf(NexusException.class);
+
+        ClientEntity limitTwo = client("[{\"name\":\"c1\",\"limitType\":\"CONCURRENT\",\"limit\":2,"
+                + "\"scopeAll\":true,\"status\":\"enabled\"}]");
+        assertThat(gate.check(limitTwo, "rt-1")).hasSize(1);
     }
 
     @Test

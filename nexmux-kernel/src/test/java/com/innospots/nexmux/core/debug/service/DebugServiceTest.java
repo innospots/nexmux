@@ -59,7 +59,8 @@ class DebugServiceTest {
         debugService = new DebugService(
                 modelDao, providerDao, providerCredentialDao, clientDao, routeDao, configAuditService,
                 platformSettingService, requestLogDao,
-                new RequestLogWriter(requestLogDao, platformSettingService));
+                new RequestLogWriter(requestLogDao, platformSettingService),
+                new com.innospots.nexmux.core.shared.security.CredentialCipher(null));
     }
 
     private ModelEntity model() {
@@ -362,7 +363,8 @@ class DebugServiceTest {
     private DebugService serviceWithSettings(PlatformSettingService settings) {
         return new DebugService(modelDao, providerDao, providerCredentialDao, clientDao, routeDao,
                 configAuditService, settings, requestLogDao,
-                new RequestLogWriter(requestLogDao, settings));
+                new RequestLogWriter(requestLogDao, settings),
+                new com.innospots.nexmux.core.shared.security.CredentialCipher(null));
     }
 
     @Test

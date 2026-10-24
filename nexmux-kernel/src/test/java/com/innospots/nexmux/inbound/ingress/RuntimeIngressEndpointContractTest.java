@@ -68,6 +68,90 @@ class RuntimeIngressEndpointContractTest {
     }
 
     @Test
+    void nullBodyReturns400InvalidRequest() {
+        // 空请求体不得 NPE 漏到平台默认异常映射（数据面只出 OpenAI 形状错误体）
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+
+        Response response = endpoint.chatCompletions("Bearer gw-sk-a", null, null);
+
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat((String) response.getEntity())
+                .contains("\"code\":\"" + NexmuxStatusCode.INVALID_REQUEST.fullCode() + "\"");
+        Mockito.verifyNoInteractions(pipeline);
+    }
+
+    @Test
+    void passesThroughUpstream4xxWithRequestIdHeader() {
+        // 上游 4xx：状态与错误体原样透传；x-request-id 供接入方报障对账
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+        Map<String, Object> body = Map.of("model", "general", "messages", List.of());
+        InvocationPipeline.InvocationContext context = new InvocationPipeline.InvocationContext(
+                "rq-x1", "t1", null, null, null, null, null, null, List.of());
+        Mockito.when(pipeline.invoke(Mockito.any(), Mockito.any(), Mockito.anyString()))
+                .thenReturn(new InvocationPipeline.InvocationResult(
+                        400, "{\"error\":{\"message\":\"context too long\"}}", 5, -1, null, null, context));
+
+        Response response = endpoint.chatCompletions("Bearer gw-sk-a", null, body);
+
+        assertThat(response.getStatus()).isEqualTo(400);
+        assertThat((String) response.getEntity()).contains("context too long");
+        assertThat(response.getHeaderString("x-request-id")).isEqualTo("rq-x1");
+    }
+
+    @Test
+    void rateLimitedResponseCarriesRetryAfter() {
+        // 分钟窗口限流：Retry-After 指向下一窗口（1..60 秒）
+        NexusException e = NexusException.build(NexmuxStatusCode.RATE_LIMITED, "rate limited: r1");
+
+        Response response = RuntimeErrorResponses.toResponse(e);
+
+        assertThat(response.getStatus()).isEqualTo(429);
+        String retryAfter = response.getHeaderString("Retry-After");
+        assertThat(retryAfter).isNotNull();
+        assertThat(Long.parseLong(retryAfter)).isBetween(1L, 60L);
+    }
+
+    @Test
+    void modelsEndpointListsGrantedAliases() {
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+        Mockito.when(pipeline.listModels("gw-sk-a"))
+                .thenReturn("{\"object\":\"list\",\"data\":[{\"id\":\"general\"}]}");
+        Mockito.when(pipeline.listModels("gw-sk-bad"))
+                .thenThrow(NexusException.build(NexmuxStatusCode.APP_KEY_INVALID, "invalid app key"));
+
+        Response ok = endpoint.models("Bearer gw-sk-a", null);
+        assertThat(ok.getStatus()).isEqualTo(200);
+        assertThat((String) ok.getEntity()).contains("\"id\":\"general\"");
+
+        Response unauthorized = endpoint.models("Bearer gw-sk-bad", null);
+        assertThat(unauthorized.getStatus()).isEqualTo(401);
+        assertThat((String) unauthorized.getEntity()).contains("\"code\":\"NMX040002\"");
+    }
+
+    @Test
+    void streamPassesThroughUpstream4xxInBand() throws Exception {
+        // 流式上游 4xx：状态行已提交，上游错误体以 SSE 事件带内透传
+        InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
+        RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);
+        Map<String, Object> body = Map.of("model", "general", "messages", List.of(), "stream", true);
+        Mockito.doThrow(new com.innospots.nexmux.inbound.protocol.UpstreamCallException(400,
+                        "{\"error\":{\"message\":\"context too long\"}}"))
+                .when(pipeline).invokeStream(Mockito.any(), Mockito.any(), Mockito.any(), Mockito.any());
+
+        StreamingOutput output = (StreamingOutput) ((Response) endpoint.chatCompletions(null, "gw-sk-a", body))
+                .getEntity();
+        ByteArrayOutputStream out = new ByteArrayOutputStream();
+        output.write(out);
+
+        String sse = out.toString(StandardCharsets.UTF_8);
+        assertThat(sse).contains("context too long");
+        assertThat(sse.trim()).endsWith("data: [DONE]");
+    }
+
+    @Test
     void nonStreamDelegatesToPipelineAndReturnsRawBody() {
         InvocationPipeline pipeline = Mockito.mock(InvocationPipeline.class);
         RuntimeIngressEndpoint endpoint = new RuntimeIngressEndpoint(pipeline);

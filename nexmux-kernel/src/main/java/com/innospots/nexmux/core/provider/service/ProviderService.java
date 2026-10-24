@@ -50,6 +50,7 @@ public class ProviderService {
     private final ProviderCredentialDao providerCredentialDao;
     private final ModelDao modelDao;
     private final ConfigAuditService configAuditService;
+    private final com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher;
 
     public PageResult<ProviderVo> page(ProviderPageRequest request) {
         long pageNo = request.pageNo() == null ? 1L : request.pageNo();
@@ -179,7 +180,7 @@ public class ProviderService {
             credential.setKeyVersion(
                     (credential.getKeyVersion() == null ? 1 : credential.getKeyVersion()) + 1);
         }
-        credential.setCiphertext(apiKey);
+        credential.setCiphertext(credentialCipher.encrypt(apiKey));
         credential.setRotatedAt(LocalDateTime.now());
         if (credential.getCredentialId() == null) {
             providerCredentialDao.insert(credential);
@@ -287,7 +288,7 @@ public class ProviderService {
             URI uri = URI.create(entity.getBaseUrl().replaceAll("/+$", "") + "/models");
             connection = (HttpURLConnection) uri.toURL().openConnection();
             connection.setRequestMethod("GET");
-            connection.setRequestProperty("Authorization", "Bearer " + credential.getCiphertext().trim());
+            connection.setRequestProperty("Authorization", "Bearer " + credentialCipher.decrypt(credential.getCiphertext()).trim());
             connection.setConnectTimeout(UPSTREAM_FETCH_TIMEOUT_MS);
             connection.setReadTimeout(UPSTREAM_FETCH_TIMEOUT_MS);
             int status = connection.getResponseCode();

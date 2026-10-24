@@ -77,7 +77,8 @@ class BindingHealthProberTest {
         try {
             stubCatalog("http://127.0.0.1:" + server.getAddress().getPort() + "/v1", "ENABLED");
 
-            int probed = new BindingHealthProber(catalogCache, registry, healthDao, 3000).probeAll();
+            int probed = new BindingHealthProber(catalogCache, registry, healthDao, 3000,
+                    new com.innospots.nexmux.core.shared.security.CredentialCipher(null)).probeAll();
 
             assertThat(probed).isEqualTo(1);
             assertThat(registry.statusOf(new BindingHealthRegistry.Target("pv-1", "o4-mini")))
@@ -97,7 +98,8 @@ class BindingHealthProberTest {
         HttpServer server = modelsEndpoint(500);
         try {
             stubCatalog("http://127.0.0.1:" + server.getAddress().getPort() + "/v1", "ENABLED");
-            BindingHealthProber prober = new BindingHealthProber(catalogCache, registry, healthDao, 3000);
+            BindingHealthProber prober = new BindingHealthProber(catalogCache, registry, healthDao, 3000,
+                    new com.innospots.nexmux.core.shared.security.CredentialCipher(null));
 
             prober.probeAll();
             prober.probeAll();
@@ -121,7 +123,8 @@ class BindingHealthProberTest {
     void skipsDisabledProvider() {
         stubCatalog("http://127.0.0.1:1/v1", "DISABLED");
 
-        int probed = new BindingHealthProber(catalogCache, registry, healthDao, 3000).probeAll();
+        int probed = new BindingHealthProber(catalogCache, registry, healthDao, 3000,
+                    new com.innospots.nexmux.core.shared.security.CredentialCipher(null)).probeAll();
 
         assertThat(probed).isZero();
         Mockito.verifyNoInteractions(healthDao);

@@ -31,13 +31,16 @@ public final class BindingHealthProber {
     private final BindingHealthRegistry registry;
     private final BindingHealthDao healthDao;
     private final int probeTimeoutMs;
+    private final com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher;
 
     public BindingHealthProber(RuntimeCatalogCache catalogCache, BindingHealthRegistry registry,
-                               BindingHealthDao healthDao, int probeTimeoutMs) {
+                               BindingHealthDao healthDao, int probeTimeoutMs,
+                               com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
         this.catalogCache = catalogCache;
         this.registry = registry;
         this.healthDao = healthDao;
         this.probeTimeoutMs = probeTimeoutMs;
+        this.credentialCipher = credentialCipher;
     }
 
     /** 全量探测一轮；返回探测的 Provider 数。单 Provider 失败不影响其他。 */
@@ -56,7 +59,8 @@ public final class BindingHealthProber {
                 continue;
             }
             probed++;
-            ProbeOutcome outcome = probe(provider.get(), credential.get().getCiphertext().trim());
+            ProbeOutcome outcome = probe(provider.get(),
+                    credentialCipher.decrypt(credential.get().getCiphertext()).trim());
             for (TargetModel target : entry.getValue()) {
                 applyOutcome(target, outcome);
             }

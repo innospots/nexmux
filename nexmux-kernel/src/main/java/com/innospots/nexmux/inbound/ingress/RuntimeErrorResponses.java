@@ -18,12 +18,17 @@ public final class RuntimeErrorResponses {
     private RuntimeErrorResponses() {
     }
 
-    /** 构建 OpenAI 形状的错误 Response。 */
+    /** 构建 OpenAI 形状的错误 Response；限流（RPM/TPM 分钟窗口）附 {@code Retry-After}。 */
     public static Response toResponse(NexusException e) {
-        return Response.status(httpStatusOf(e.code()))
+        Response.ResponseBuilder builder = Response.status(httpStatusOf(e.code()))
                 .type(MediaType.APPLICATION_JSON)
-                .entity(errorBodyJson(e))
-                .build();
+                .entity(errorBodyJson(e));
+        if (NexmuxStatusCode.RATE_LIMITED.fullCode().equals(e.code())) {
+            // 分钟级固定窗口：告知距下一窗口的秒数，接入方据此退避
+            builder.header("Retry-After",
+                    String.valueOf(60 - java.time.Instant.now().getEpochSecond() % 60));
+        }
+        return builder.build();
     }
 
     /** OpenAI 兼容错误体 JSON（SSE 错误事件复用同一形状）。 */

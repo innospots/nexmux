@@ -75,6 +75,11 @@ public final class PublishedRouteCache {
         return Optional.ofNullable(snapshot.get().byIngress().get(ingress));
     }
 
+    /** 当前快照全部已发布路由（按 alias 去重后不定序，{@code /v1/models} 用）。 */
+    public List<PublishedRoute> routes() {
+        return List.copyOf(snapshot.get().byAlias().values());
+    }
+
     /** 最近一次刷新读取到的已发布路由数。 */
     public int size() {
         return snapshot.get().total();

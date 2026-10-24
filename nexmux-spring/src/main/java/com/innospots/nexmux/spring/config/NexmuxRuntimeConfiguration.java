@@ -61,8 +61,9 @@ public class NexmuxRuntimeConfiguration {
     @Bean
     BindingHealthProber bindingHealthProber(
             RuntimeCatalogCache catalogCache, BindingHealthRegistry registry, BindingHealthDao healthDao,
-            @Value("${nexmux.runtime.health-probe-timeout-ms:5000}") int probeTimeoutMs) {
-        return new BindingHealthProber(catalogCache, registry, healthDao, probeTimeoutMs);
+            @Value("${nexmux.runtime.health-probe-timeout-ms:5000}") int probeTimeoutMs,
+            com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
+        return new BindingHealthProber(catalogCache, registry, healthDao, probeTimeoutMs, credentialCipher);
     }
 
     @Bean(destroyMethod = "close")
@@ -95,10 +96,11 @@ public class NexmuxRuntimeConfiguration {
                                           BindingHealthRegistry healthRegistry,
                                           RequestLogWriter requestLogWriter,
                                           RequestLogDao requestLogDao,
-                                          PlatformSettingService platformSettingService) {
+                                          PlatformSettingService platformSettingService,
+                                          com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
         return new InvocationPipeline(catalogCache, routeCache, healthRegistry,
                 new OpenAiCompatibleChatAdapter(), requestLogWriter, requestLogDao,
-                platformSettingService);
+                platformSettingService, credentialCipher);
     }
 
     /**

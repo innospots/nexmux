@@ -32,6 +32,13 @@
 
 > Responses、Messages、Embeddings 的 Streaming 尚未开放。当前上游 Adapter 为 OpenAI Compatible；其他上游协议会明确拒绝，不会被错误地按 OpenAI 报文转发。
 
+## 控制台预览
+
+| 运营概览 | 模型资产 | 模型路由 |
+|---|---|---|
+| ![Nexmux 运营概览](./docs/images/nexmux-dashboard.png) | ![Nexmux 模型资产](./docs/images/nexmux-models.png) | ![Nexmux 模型路由](./docs/images/nexmux-routes.png) |
+| 核心指标、趋势与用量构成 | 模型目录、类型与供应商筛选 | Alias、协议、候选模型与调度策略 |
+
 ## 架构
 
 ```text

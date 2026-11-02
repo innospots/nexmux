@@ -64,9 +64,9 @@ const httpHooks = createHttpHooks();
 />
 ```
 
-> 依赖说明：`SitemapApp` 于 `@pactor-app/app` v1.19.0 引入。本模板开发期间
-> pactor 依赖经 `link:../../packages/*` 指向本仓；`v1.19.0` 发布到 npm 后
-> 改回 `^1.19.0` 版本号即可独立使用。
+> 依赖说明：`SitemapApp` 于 `@pactor-app/app` v1.19.0 引入。当前 pactor 系列
+> 依赖取自 npm 的 `^1.56.0`（`pactor-app` / `@pactor-app/{core,runtime,ui}`
+> 四包同版号），不再经 `link:` 指向本地 pactor 仓库。
 
 ## 接入真实后端
 

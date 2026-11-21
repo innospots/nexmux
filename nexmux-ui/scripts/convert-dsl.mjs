@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * 将 model-console 提取的静态页面 DSL（public/dsl/*.json）转换为本项目的
- * 页面 YAML（src/server/yaml/<域>/<id>.yaml，域划分参考 kernel ui-pages/nexmux）。
+ * 页面 YAML（src/backend/pages/yaml/<域>/<id>.yaml，域划分参考 kernel ui-pages/nexmux）。
  *
  * 转换规则：
  * - 字符串中的路由参数占位 `:code` / `:id` → `${route.params.code}` / `${route.params.id}`
@@ -18,7 +18,7 @@ const projectRoot = resolve(fileURLToPath(import.meta.url), "../..");
 const modelConsole =
   process.argv[2] ?? resolve(projectRoot, "../../model-console");
 const SRC_DIR = join(modelConsole, "public/dsl");
-const OUT_DIR = join(projectRoot, "src/server/yaml");
+const OUT_DIR = join(projectRoot, "src/backend/pages/yaml");
 
 /** 页面 id → 域子目录（route / provider / audit / model / ops / client / debug，
  * 划分参考 kernel ui-pages/nexmux；ops 域页面无统一前缀，显式枚举） */

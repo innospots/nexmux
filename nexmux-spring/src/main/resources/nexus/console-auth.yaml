@@ -17,10 +17,8 @@ nexus:
       access-token-ttl-seconds: 7200
       # 刷新令牌有效期（秒）；默认 604800
       refresh-token-ttl-seconds: 604800
-      # 租户域登录是否要求图形验证码；默认 true
-      tenant-login-captcha-enabled: true
-      # 平台域登录是否要求图形验证码；默认 true
-      platform-login-captcha-enabled: false
+      # 登录图形验证码。当前门禁不区分安全域，模型平台关闭后平台账号可直接登录。
+      login-captcha-enabled: false
       # 连续登录失败锁定阈值；默认 5
       login-max-failed-attempts: 5
       # 登录锁定时长（分钟）；默认 15

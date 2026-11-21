@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.model;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.console.model.ModelListResult;
 import com.innospots.nexmux.console.model.ModelRecord;
@@ -29,6 +32,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "model", domain = "nexmux")
 @Path("/api/d/models")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,6 +50,7 @@ public class ModelEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxModelPage", summary = "分页查询模型")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "model.page", group = "view")
     public ModelListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("page") @DefaultValue("1") Long page,
@@ -70,6 +75,7 @@ public class ModelEndpoint {
     @GET
     @Path("/{modelCode}")
     @Operation(operationId = "nexmuxModelGetByCode", summary = "按编码查询模型详情")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "model.get", group = "view")
     public ModelRecord detail(
             @Parameter(description = "模型编码（/ 以 ~ 替代）", required = true)
             @PathParam("modelCode") String modelCode) {
@@ -78,6 +84,7 @@ public class ModelEndpoint {
 
     @POST
     @Operation(operationId = "nexmuxModelCreate", summary = "创建模型")
+    @EndpointGrant(action = EndpointGrantAction.CREATE, name = "model.create", group = "create")
     public R<ModelVo> create(@RequestBody(description = "创建模型", required = true) ModelCreateRequest request) {
         return R.ok(modelService.create(request));
     }
@@ -85,6 +92,7 @@ public class ModelEndpoint {
     @POST
     @Path("/{modelId}/enable")
     @Operation(operationId = "nexmuxModelEnable", summary = "启用模型")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "model.enable", group = "status")
     public R<ModelVo> enable(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
         return R.ok(modelService.setEnabled(modelId, true));
@@ -93,6 +101,7 @@ public class ModelEndpoint {
     @POST
     @Path("/{modelId}/disable")
     @Operation(operationId = "nexmuxModelDisable", summary = "停用模型")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "model.disable", group = "status")
     public R<ModelVo> disable(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
         return R.ok(modelService.disable(modelId));
@@ -101,6 +110,7 @@ public class ModelEndpoint {
     @PUT
     @Path("/{modelId}")
     @Operation(operationId = "nexmuxModelUpdate", summary = "更新模型")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "model.update", group = "update")
     public R<ModelVo> update(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId,
             @RequestBody(description = "更新模型", required = true) ModelUpdateRequest request) {
@@ -110,6 +120,7 @@ public class ModelEndpoint {
     @POST
     @Path("/{modelId}/invoke-test")
     @Operation(operationId = "nexmuxModelInvokeTest", summary = "模型调用测试")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "model.invoke-test", group = "execute")
     public R<Boolean> invokeTest(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
         return R.ok(modelService.invokeTest(modelId));
@@ -118,6 +129,7 @@ public class ModelEndpoint {
     @DELETE
     @Path("/{modelId}")
     @Operation(operationId = "nexmuxModelDelete", summary = "删除模型")
+    @EndpointGrant(action = EndpointGrantAction.DELETE, name = "model.delete", group = "delete")
     public R<Void> delete(
             @Parameter(description = "模型 ID", required = true) @PathParam("modelId") String modelId) {
         modelService.delete(modelId);

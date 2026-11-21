@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.model;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexmux.console.model.ModelOption;
 import com.innospots.nexmux.console.model.ModelViewAssembler;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -17,6 +20,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 /**
  * Model 下拉选项端点（单段 kebab 路径约定；路由编辑「添加模型」Select 数据源）。
  */
+@EndpointModule(value = "model", domain = "nexmux")
 @Path("/api/d/model-options")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -32,6 +36,7 @@ public class ModelOptionsEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxModelOptions", summary = "启用模型下拉选项")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "model.options", group = "view")
     public OptionsResult options() {
         return new OptionsResult(modelViewAssembler.options());
     }

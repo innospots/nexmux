@@ -4,7 +4,7 @@
  *   node scripts/build.mjs <development|test|production>
  * 对应 package.json 的 build / build:dev / build:test 命令。
  * 环境经 APP_ENV 注入（构建期由 next.config.js 读取并解析
- * API_BASE_URLS，结果内联进客户端包，见 src/pactor/config.ts）。
+ * API_BASE_URLS，结果内联进客户端包，见 src/frontend/config.ts）。
  * 跨平台：Windows 下经 shell 解析 next.cmd。
  */
 import { spawn } from 'node:child_process';

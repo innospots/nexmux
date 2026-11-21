@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.client;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.console.access.ClientRecord;
 import com.innospots.nexmux.console.access.ClientTemplateListResult;
@@ -30,6 +33,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "client", domain = "nexmux")
 @Path("/api/d/client-templates")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -46,6 +50,7 @@ public class ClientTemplateEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxClientTemplatePage", summary = "分页查询客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "client-template.page", group = "view")
     public ClientTemplateListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("page") @DefaultValue("1") Long page,
@@ -75,6 +80,7 @@ public class ClientTemplateEndpoint {
     @GET
     @Path("/{templateCode}")
     @Operation(operationId = "nexmuxClientTemplateGetByCode", summary = "按编码查询模板详情")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "client-template.get", group = "view")
     public ClientTemplateRecord detail(
             @Parameter(description = "模板编码", required = true) @PathParam("templateCode") String templateCode) {
         return clientTemplateViewAssembler.detail(templateCode);
@@ -86,6 +92,7 @@ public class ClientTemplateEndpoint {
     @GET
     @Path("/{templateCode}/created-clients")
     @Operation(operationId = "nexmuxClientTemplateCreatedClients", summary = "基于模板创建的客户端")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "client-template.clients", group = "view")
     public List<ClientRecord> createdClients(
             @Parameter(description = "模板编码", required = true) @PathParam("templateCode") String templateCode) {
         return clientTemplateViewAssembler.createdClients(templateCode);
@@ -93,6 +100,7 @@ public class ClientTemplateEndpoint {
 
     @POST
     @Operation(operationId = "nexmuxClientTemplateCreate", summary = "创建客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.CREATE, name = "client-template.create", group = "create")
     public R<ClientTemplateVo> create(
             @RequestBody(description = "创建模板", required = true) ClientTemplateCreateRequest request) {
         return R.ok(clientTemplateService.create(request));
@@ -101,6 +109,7 @@ public class ClientTemplateEndpoint {
     @PUT
     @Path("/{templateId}")
     @Operation(operationId = "nexmuxClientTemplateUpdate", summary = "更新客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "client-template.update", group = "update")
     public R<ClientTemplateVo> update(
             @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId,
             @RequestBody(description = "更新模板", required = true) ClientTemplateUpdateRequest request) {
@@ -110,6 +119,7 @@ public class ClientTemplateEndpoint {
     @POST
     @Path("/{templateId}/enable")
     @Operation(operationId = "nexmuxClientTemplateEnable", summary = "启用客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "client-template.enable", group = "status")
     public R<ClientTemplateVo> enable(
             @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId) {
         return R.ok(clientTemplateService.setEnabled(templateId, true));
@@ -118,6 +128,7 @@ public class ClientTemplateEndpoint {
     @POST
     @Path("/{templateId}/disable")
     @Operation(operationId = "nexmuxClientTemplateDisable", summary = "停用客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "client-template.disable", group = "status")
     public R<ClientTemplateVo> disable(
             @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId) {
         return R.ok(clientTemplateService.disable(templateId));
@@ -126,6 +137,7 @@ public class ClientTemplateEndpoint {
     @DELETE
     @Path("/{templateId}")
     @Operation(operationId = "nexmuxClientTemplateDelete", summary = "删除客户端模板")
+    @EndpointGrant(action = EndpointGrantAction.DELETE, name = "client-template.delete", group = "delete")
     public R<Void> delete(
             @Parameter(description = "模板 ID", required = true) @PathParam("templateId") String templateId) {
         clientTemplateService.delete(templateId);

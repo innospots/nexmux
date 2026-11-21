@@ -14,7 +14,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseDocument, stringify } from "yaml";
 
-const YAML_DIR = new URL("../src/server/yaml", import.meta.url).pathname;
+const YAML_DIR = new URL("../src/backend/pages/yaml", import.meta.url).pathname;
 
 const PAGES = [
   { file: "provider/provider-list.yaml", ds: "providers", link: "ProviderCardLink", pageSize: 12 },

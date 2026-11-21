@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.route;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.console.route.RouteListResult;
 import com.innospots.nexmux.console.route.RouteRecord;
@@ -30,6 +33,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "route", domain = "nexmux")
 @Path("/api/d/routes")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -47,6 +51,7 @@ public class RouteEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxRoutePage", summary = "分页查询路由")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "route.page", group = "view")
     public RouteListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("page") @DefaultValue("1") Long page,
@@ -80,6 +85,7 @@ public class RouteEndpoint {
     @GET
     @Path("/{routeCode}")
     @Operation(operationId = "nexmuxRouteGetByCode", summary = "按编码查询路由详情")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "route.get", group = "view")
     public RouteRecord detail(
             @Parameter(description = "路由编码", required = true) @PathParam("routeCode") String routeCode) {
         return routeViewAssembler.detail(routeCode);
@@ -87,6 +93,7 @@ public class RouteEndpoint {
 
     @POST
     @Operation(operationId = "nexmuxRouteCreate", summary = "创建路由")
+    @EndpointGrant(action = EndpointGrantAction.CREATE, name = "route.create", group = "create")
     public R<RouteVo> create(@RequestBody(description = "创建路由", required = true) RouteCreateRequest request) {
         return R.ok(routeService.create(request));
     }
@@ -94,6 +101,7 @@ public class RouteEndpoint {
     @PUT
     @Path("/{routeId}")
     @Operation(operationId = "nexmuxRouteUpdate", summary = "更新路由草稿")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "route.update", group = "update")
     public R<RouteVo> update(
             @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId,
             @RequestBody(description = "更新路由草稿", required = true) RouteUpdateRequest request) {
@@ -103,6 +111,7 @@ public class RouteEndpoint {
     @POST
     @Path("/{routeId}/publish")
     @Operation(operationId = "nexmuxRoutePublish", summary = "发布路由")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "route.publish", group = "execute")
     public R<RouteVo> publish(
             @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId,
             @RequestBody(description = "发布路由", required = true) RoutePublishRequest request) {
@@ -112,6 +121,7 @@ public class RouteEndpoint {
     @GET
     @Path("/{routeCode}/versions")
     @Operation(operationId = "nexmuxRouteVersions", summary = "查询 Route 运行配置版本")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "route.versions", group = "view")
     public R<java.util.List<RouteVersionVo>> versions(@PathParam("routeCode") String routeCode) {
         return R.ok(routeService.versions(routeCode));
     }
@@ -119,6 +129,7 @@ public class RouteEndpoint {
     @POST
     @Path("/{routeCode}/rollback")
     @Operation(operationId = "nexmuxRouteRollback", summary = "回滚 Route 到历史运行版本")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "route.rollback", group = "execute")
     public R<RouteVo> rollback(@PathParam("routeCode") String routeCode,
                                @QueryParam("revision") Long revision,
                                @QueryParam("operatorId") String operatorId) {
@@ -128,6 +139,7 @@ public class RouteEndpoint {
     @POST
     @Path("/{routeId}/enable")
     @Operation(operationId = "nexmuxRouteEnable", summary = "启用路由（DISABLED → PUBLISHED）")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "route.enable", group = "status")
     public R<RouteVo> enable(
             @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId) {
         return R.ok(routeService.enable(routeId));
@@ -136,6 +148,7 @@ public class RouteEndpoint {
     @POST
     @Path("/{routeId}/disable")
     @Operation(operationId = "nexmuxRouteDisable", summary = "停用路由（PUBLISHED → DISABLED）")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "route.disable", group = "status")
     public R<RouteVo> disable(
             @Parameter(description = "路由 ID", required = true) @PathParam("routeId") String routeId) {
         return R.ok(routeService.disable(routeId));

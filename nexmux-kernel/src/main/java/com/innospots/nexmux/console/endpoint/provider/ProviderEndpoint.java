@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.provider;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.console.provider.ProviderOption;
 import com.innospots.nexmux.console.provider.ProviderListResult;
@@ -31,6 +34,7 @@ import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "provider", domain = "nexmux")
 @Path("/api/d/providers")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -48,6 +52,7 @@ public class ProviderEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxProviderPage", summary = "分页查询提供方")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "provider.page", group = "view")
     public ProviderListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("page") @DefaultValue("1") Long page,
@@ -78,6 +83,7 @@ public class ProviderEndpoint {
     @GET
     @Path("/{providerCode}")
     @Operation(operationId = "nexmuxProviderGetByCode", summary = "按编码查询提供方详情")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "provider.get", group = "view")
     public ProviderRecord detail(
             @Parameter(description = "提供方编码", required = true)
             @PathParam("providerCode") String providerCode) {
@@ -90,6 +96,7 @@ public class ProviderEndpoint {
     @GET
     @Path("/{providerCode}/pull-models")
     @Operation(operationId = "nexmuxProviderPullModels", summary = "拉取上游模型清单")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "provider.pull-models", group = "execute")
     public List<PullModelRow> pullModels(
             @Parameter(description = "提供方编码", required = true)
             @PathParam("providerCode") String providerCode) {
@@ -98,6 +105,7 @@ public class ProviderEndpoint {
 
     @POST
     @Operation(operationId = "nexmuxProviderCreate", summary = "创建提供方")
+    @EndpointGrant(action = EndpointGrantAction.CREATE, name = "provider.create", group = "create")
     public R<ProviderVo> create(@RequestBody(description = "创建提供方", required = true) ProviderCreateRequest request) {
         return R.ok(providerService.create(request));
     }
@@ -105,6 +113,7 @@ public class ProviderEndpoint {
     @PUT
     @Path("/{providerId}")
     @Operation(operationId = "nexmuxProviderUpdate", summary = "更新提供方")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "provider.update", group = "update")
     public R<ProviderVo> update(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId,
             @RequestBody(description = "更新提供方", required = true) ProviderUpdateRequest request) {
@@ -114,6 +123,7 @@ public class ProviderEndpoint {
     @POST
     @Path("/{providerId}/enable")
     @Operation(operationId = "nexmuxProviderEnable", summary = "启用提供方")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "provider.enable", group = "status")
     public R<ProviderVo> enable(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
         return R.ok(providerService.setEnabled(providerId, true));
@@ -122,6 +132,7 @@ public class ProviderEndpoint {
     @POST
     @Path("/{providerId}/disable")
     @Operation(operationId = "nexmuxProviderDisable", summary = "停用提供方")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "provider.disable", group = "status")
     public R<ProviderVo> disable(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
         return R.ok(providerService.disable(providerId));
@@ -130,6 +141,7 @@ public class ProviderEndpoint {
     @POST
     @Path("/{providerId}/connection-test")
     @Operation(operationId = "nexmuxProviderConnectionTest", summary = "提供方连通性测试")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "provider.connection-test", group = "execute")
     public R<ConnectionTestVo> connectionTest(
             @Parameter(description = "提供方 ID", required = true) @PathParam("providerId") String providerId) {
         return R.ok(providerService.connectionTest(providerId));

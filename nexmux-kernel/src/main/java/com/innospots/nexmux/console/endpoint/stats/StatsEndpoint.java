@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.stats;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexmux.console.stats.AvailabilityView;
 import com.innospots.nexmux.console.stats.DashboardView;
 import com.innospots.nexmux.console.stats.StatsViewAssembler;
@@ -19,6 +22,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * 统计聚合端点（/api/d 单段 kebab 路径约定；UI 契约形状直出，不包 R）。
  */
+@EndpointModule(value = "ops", domain = "nexmux")
 @Path("/api/d")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -35,6 +39,7 @@ public class StatsEndpoint {
     @GET
     @Path("/stats-dashboard")
     @Operation(operationId = "nexmuxStatsDashboard", summary = "仪表盘聚合")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "ops.dashboard", group = "view")
     public DashboardView dashboard(
             @Parameter(description = "起始日期（yyyy-MM-dd）") @QueryParam("start") String start,
             @Parameter(description = "截止日期（yyyy-MM-dd）") @QueryParam("end") String end) {
@@ -47,6 +52,7 @@ public class StatsEndpoint {
     @GET
     @Path("/stats-model-usage")
     @Operation(operationId = "nexmuxStatsModelUsage", summary = "模型用量聚合")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "ops.model-usage", group = "view")
     public UsageListResult<StatsViewAssembler.ModelUsageRow> modelUsage(
             @QueryParam("start") String start, @QueryParam("end") String end) {
         return statsViewAssembler.modelUsage(start, end);
@@ -58,6 +64,7 @@ public class StatsEndpoint {
     @GET
     @Path("/stats-provider-usage")
     @Operation(operationId = "nexmuxStatsProviderUsage", summary = "供应商用量聚合")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "ops.provider-usage", group = "view")
     public UsageListResult<StatsViewAssembler.ProviderUsageRow> providerUsage(
             @QueryParam("start") String start, @QueryParam("end") String end) {
         return statsViewAssembler.providerUsage(start, end);
@@ -69,6 +76,7 @@ public class StatsEndpoint {
     @GET
     @Path("/stats-client-usage")
     @Operation(operationId = "nexmuxStatsClientUsage", summary = "客户端用量聚合")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "ops.client-usage", group = "view")
     public UsageListResult<StatsViewAssembler.ClientUsageRow> clientUsage(
             @QueryParam("start") String start, @QueryParam("end") String end) {
         return statsViewAssembler.clientUsage(start, end);
@@ -80,6 +88,7 @@ public class StatsEndpoint {
     @GET
     @Path("/stats-provider-availability")
     @Operation(operationId = "nexmuxStatsProviderAvailability", summary = "供应商可用性聚合")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "ops.availability", group = "view")
     public AvailabilityView availability(
             @QueryParam("start") String start, @QueryParam("end") String end) {
         return statsViewAssembler.availability(start, end);

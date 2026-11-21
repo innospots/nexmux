@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.debug;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.core.debug.domain.request.ClientInvokeDebugRequest;
 import com.innospots.nexmux.core.debug.domain.request.ModelInvokeDebugRequest;
@@ -17,6 +20,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "debug", domain = "nexmux")
 @Path("/api/d/debug")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -30,6 +34,7 @@ public class DebugEndpoint {
     @POST
     @Path("/model-invoke")
     @Operation(operationId = "nexmuxDebugModelInvoke", summary = "调试模型调用")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "debug.model-invoke", group = "execute")
     public R<DebugInvokeResultVo> modelInvoke(
             @RequestBody(description = "模型调试请求", required = true) ModelInvokeDebugRequest request) {
         return R.ok(debugService.modelInvoke(request));
@@ -38,6 +43,7 @@ public class DebugEndpoint {
     @POST
     @Path("/client-invoke")
     @Operation(operationId = "nexmuxDebugClientInvoke", summary = "调试客户端调用")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "debug.client-invoke", group = "execute")
     public R<DebugInvokeResultVo> clientInvoke(
             @RequestBody(description = "客户端调试请求", required = true) ClientInvokeDebugRequest request) {
         return R.ok(debugService.clientInvoke(request));
@@ -47,6 +53,7 @@ public class DebugEndpoint {
     @Path("/model-invoke/stream")
     @Produces("text/event-stream")
     @Operation(operationId = "nexmuxDebugModelInvokeStream", summary = "调试模型调用（SSE 流式）")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "debug.model-invoke-stream", group = "execute")
     public StreamingOutput modelInvokeStream(
             @RequestBody(description = "模型调试请求", required = true) ModelInvokeDebugRequest request) {
         return debugService.modelInvokeStream(request);
@@ -56,6 +63,7 @@ public class DebugEndpoint {
     @Path("/client-invoke/stream")
     @Produces("text/event-stream")
     @Operation(operationId = "nexmuxDebugClientInvokeStream", summary = "调试客户端调用（SSE 流式）")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "debug.client-invoke-stream", group = "execute")
     public StreamingOutput clientInvokeStream(
             @RequestBody(description = "客户端调试请求", required = true) ClientInvokeDebugRequest request) {
         return debugService.clientInvokeStream(request);

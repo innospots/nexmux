@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.client;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
 import com.innospots.nexmux.console.access.ClientListResult;
 import com.innospots.nexmux.console.access.ClientRecord;
@@ -33,6 +36,7 @@ import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.MediaType;
 import lombok.RequiredArgsConstructor;
 
+@EndpointModule(value = "client", domain = "nexmux")
 @Path("/api/d/clients")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -50,6 +54,7 @@ public class ClientEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxClientPage", summary = "分页查询客户端")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "client.page", group = "view")
     public ClientListResult page(
             @Parameter(description = "页码，从 1 开始", example = "1")
             @QueryParam("page") @DefaultValue("1") Long page,
@@ -81,6 +86,7 @@ public class ClientEndpoint {
     @GET
     @Path("/{clientCode}")
     @Operation(operationId = "nexmuxClientGetByCode", summary = "按编码查询客户端详情")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "client.get", group = "view")
     public ClientRecord detail(
             @Parameter(description = "客户端编码", required = true) @PathParam("clientCode") String clientCode) {
         return clientViewAssembler.detail(clientCode);
@@ -88,6 +94,7 @@ public class ClientEndpoint {
 
     @POST
     @Operation(operationId = "nexmuxClientCreate", summary = "创建客户端")
+    @EndpointGrant(action = EndpointGrantAction.CREATE, name = "client.create", group = "create")
     public R<ClientCreateResultVo> create(
             @RequestBody(description = "创建客户端", required = true) ClientCreateRequest request) {
         return R.ok(clientService.create(request));
@@ -96,6 +103,7 @@ public class ClientEndpoint {
     @PUT
     @Path("/{clientId}")
     @Operation(operationId = "nexmuxClientUpdate", summary = "更新客户端")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "client.update", group = "update")
     public R<ClientVo> update(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId,
             @RequestBody(description = "更新客户端", required = true) ClientUpdateRequest request) {
@@ -105,6 +113,7 @@ public class ClientEndpoint {
     @POST
     @Path("/{clientId}/rotate-app-key")
     @Operation(operationId = "nexmuxClientRotateAppKey", summary = "轮换客户端 AppKey")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "client.rotate-app-key", group = "secret")
     public R<ClientRotateResultVo> rotateAppKey(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.rotateAppKey(clientId));
@@ -113,6 +122,7 @@ public class ClientEndpoint {
     @PUT
     @Path("/{clientId}/route-grants")
     @Operation(operationId = "nexmuxClientRouteGrants", summary = "更新客户端路由授权")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "client.route-grants", group = "update")
     public R<ClientVo> routeGrants(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId,
             @RequestBody(description = "路由授权", required = true) ClientRouteGrantsRequest request) {
@@ -122,6 +132,7 @@ public class ClientEndpoint {
     @POST
     @Path("/{clientId}/enable")
     @Operation(operationId = "nexmuxClientEnable", summary = "启用客户端")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "client.enable", group = "status")
     public R<ClientVo> enable(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.setEnabled(clientId, true));
@@ -130,6 +141,7 @@ public class ClientEndpoint {
     @POST
     @Path("/{clientId}/disable")
     @Operation(operationId = "nexmuxClientDisable", summary = "停用客户端")
+    @EndpointGrant(action = EndpointGrantAction.STATUS, name = "client.disable", group = "status")
     public R<ClientVo> disable(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         return R.ok(clientService.disable(clientId));
@@ -138,6 +150,7 @@ public class ClientEndpoint {
     @POST
     @Path("/{clientId}/publish")
     @Operation(operationId = "nexmuxClientPublish", summary = "查询当前 Client 策略发布版本")
+    @EndpointGrant(action = EndpointGrantAction.EXECUTE, name = "client.publish", group = "execute")
     public R<ClientPolicyRevisionVo> publish(@PathParam("clientId") String clientId) {
         return R.ok(clientService.publish(clientId));
     }
@@ -145,6 +158,7 @@ public class ClientEndpoint {
     @DELETE
     @Path("/{clientId}")
     @Operation(operationId = "nexmuxClientDelete", summary = "删除客户端")
+    @EndpointGrant(action = EndpointGrantAction.DELETE, name = "client.delete", group = "delete")
     public R<Void> delete(
             @Parameter(description = "客户端 ID", required = true) @PathParam("clientId") String clientId) {
         clientService.delete(clientId);

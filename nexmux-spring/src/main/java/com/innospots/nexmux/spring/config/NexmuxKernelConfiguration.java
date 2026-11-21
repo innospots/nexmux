@@ -5,7 +5,11 @@ import com.innospots.nexmux.console.endpoint.client.ClientTemplateEndpoint;
 import com.innospots.nexmux.console.endpoint.debug.DebugEndpoint;
 import com.innospots.nexmux.console.endpoint.model.ModelEndpoint;
 import com.innospots.nexmux.console.endpoint.model.ModelOptionsEndpoint;
+import com.innospots.nexmux.console.endpoint.ops.AuditEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsEndpoint;
+import com.innospots.nexmux.console.endpoint.ops.OpsModelWriteEndpoint;
+import com.innospots.nexmux.console.endpoint.ops.OpsProviderWriteEndpoint;
+import com.innospots.nexmux.console.endpoint.ops.OpsRouteWriteEndpoint;
 import com.innospots.nexmux.console.endpoint.ops.OpsWriteEndpoint;
 import com.innospots.nexmux.console.endpoint.provider.ProviderEndpoint;
 import com.innospots.nexmux.console.endpoint.provider.ProviderOptionsEndpoint;
@@ -310,11 +314,16 @@ public class NexmuxKernelConfiguration {
     @Lazy
     @Profile("!runtime")
     OpsEndpoint opsEndpoint(
-            AuditQueryService auditQueryService,
-            AuditViewMapper auditViewMapper,
             CallLogViewAssembler callLogViewAssembler,
             CostViewAssembler costViewAssembler) {
-        return new OpsEndpoint(auditQueryService, auditViewMapper, callLogViewAssembler, costViewAssembler);
+        return new OpsEndpoint(callLogViewAssembler, costViewAssembler);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    AuditEndpoint auditEndpoint(AuditQueryService auditQueryService, AuditViewMapper auditViewMapper) {
+        return new AuditEndpoint(auditQueryService, auditViewMapper);
     }
 
     @Bean
@@ -323,6 +332,27 @@ public class NexmuxKernelConfiguration {
     OpsWriteEndpoint opsWriteEndpoint(
             ProviderService providerService, ModelService modelService, RouteService routeService) {
         return new OpsWriteEndpoint(providerService, modelService, routeService);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    OpsProviderWriteEndpoint opsProviderWriteEndpoint(OpsWriteEndpoint opsWriteEndpoint) {
+        return new OpsProviderWriteEndpoint(opsWriteEndpoint);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    OpsModelWriteEndpoint opsModelWriteEndpoint(OpsWriteEndpoint opsWriteEndpoint) {
+        return new OpsModelWriteEndpoint(opsWriteEndpoint);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    OpsRouteWriteEndpoint opsRouteWriteEndpoint(OpsWriteEndpoint opsWriteEndpoint) {
+        return new OpsRouteWriteEndpoint(opsWriteEndpoint);
     }
 
     @Bean

@@ -35,14 +35,9 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
 /**
- * 写操作端点（/api/d/ops 单段 kebab 路径约定，POST；UI 写闭环约定：
- * 成功 {ok:true}，失败非 2xx 由全局异常映射）。code → id 解析在此完成。
- * 表单整包提交时只取契约字段（与原 BFF 写映射一致）。
+ * 配置写操作实现。HTTP 与授权由按模块拆分的 {@code Ops*WriteEndpoint} 暴露，
+ * 避免一个类只能声明一个 {@code @EndpointModule}。
  */
-@Path("/api/d/ops")
-@Produces(MediaType.APPLICATION_JSON)
-@Tag(name = "NexmuxOpsWrite", description = "配置写操作")
-@NexusAuthenticatedApi
 @RequiredArgsConstructor
 public class OpsWriteEndpoint {
 

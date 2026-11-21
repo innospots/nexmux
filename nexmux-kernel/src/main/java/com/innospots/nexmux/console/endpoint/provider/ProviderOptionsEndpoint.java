@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.provider;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexmux.console.provider.ProviderOption;
 import com.innospots.nexmux.console.provider.ProviderViewAssembler;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
@@ -17,6 +20,7 @@ import lombok.RequiredArgsConstructor;
 /**
  * Provider 下拉选项端点（单段 kebab 路径约定；模型新建/编辑页 Select 数据源）。
  */
+@EndpointModule(value = "provider", domain = "nexmux")
 @Path("/api/d/provider-options")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -32,6 +36,7 @@ public class ProviderOptionsEndpoint {
      */
     @GET
     @Operation(operationId = "nexmuxProviderOptions", summary = "Provider 下拉选项")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "provider.options", group = "view")
     public OptionsResult options() {
         return new OptionsResult(providerViewAssembler.options());
     }

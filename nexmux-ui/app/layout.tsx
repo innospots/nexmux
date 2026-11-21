@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import { Geist, Geist_Mono } from "next/font/google";
-import { PactorApp } from "@/pactor/App";
+import { PactorApp } from "@/frontend/App";
 // 顺序约定：globals（本项目 tailwind 工具类 + 皮肤无关的外壳规则）→
 // ui 预建样式（同层冲突时 ui 胜出，保证其内部 base/响应式变体排序生效，
 // 如 Sidebar 的 hidden md:block）→ login.css（登录页视觉，须在 ui 之后，
@@ -15,7 +16,7 @@ export const metadata: Metadata = {
   description: "Nexmux Model Console 管理台",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html
       lang="zh-CN"
@@ -26,7 +27,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script
           dangerouslySetInnerHTML={{
             // 首屏渲染前加载皮肤 link（data-pactor-skin 标记，对应 public/skins/，
-            // 由 Theme Studio 生成；运行时换肤见 src/pactor/skin.ts）并应用明暗
+            // 由 Theme Studio 生成；运行时换肤见 src/frontend/skin.ts）并应用明暗
             //（data-pactor-theme），避免闪烁。皮肤与明暗偏好持久化在
             // localStorage（mc-skin / mc-mode），由 Header 的 ThemeSwitcher 写入；
             // mc-mode 缺省时跟随系统并监听变化。

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 将 src/server/yaml/<域>/*.yaml 中的 service 数据源改为 http 数据源：
+ * 将 src/backend/pages/yaml/<域>/*.yaml 中的 service 数据源改为 http 数据源：
  *   { type: service, service: provider.list, params: {...} }
  *   → { type: http, request: { method: GET, url: /api/data/providers, params: {...} } }
  *
@@ -13,7 +13,7 @@ import { readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { parseDocument, stringify } from "yaml";
 
-const PAGES_DIR = new URL("../src/server/yaml", import.meta.url).pathname;
+const PAGES_DIR = new URL("../src/backend/pages/yaml", import.meta.url).pathname;
 
 /** 递归收集 yaml 下所有页面 DSL（页面按域分子目录存放；跳过 sitemap.yaml） */
 function collectPageFiles(dir) {

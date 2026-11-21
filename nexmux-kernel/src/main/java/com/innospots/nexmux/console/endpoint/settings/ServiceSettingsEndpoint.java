@@ -1,5 +1,8 @@
 package com.innospots.nexmux.console.endpoint.settings;
 
+import com.innospots.nexus.core.endpoint.grant.EndpointModule;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
+import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexmux.core.settings.service.PlatformSettingService;
 import com.innospots.nexus.core.openapi.NexusAuthenticatedApi;
 import jakarta.ws.rs.Consumes;
@@ -20,6 +23,7 @@ import org.eclipse.microprofile.openapi.annotations.tags.Tag;
  * UI 契约：GET 直出扁平设置对象（不包 R），数值键以数字返回；
  * PUT 整包提交已知键（未知键忽略），返回保存后的全量设置。
  */
+@EndpointModule(value = "service-settings", domain = "nexmux")
 @Path("/api/d/service-settings")
 @Produces(MediaType.APPLICATION_JSON)
 @Consumes(MediaType.APPLICATION_JSON)
@@ -36,12 +40,14 @@ public class ServiceSettingsEndpoint {
 
     @GET
     @Operation(operationId = "nexmuxServiceSettingsGet", summary = "查询平台服务设置")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "settings.get", group = "view")
     public Map<String, Object> get() {
         return typed(platformSettingService.getAll());
     }
 
     @PUT
     @Operation(operationId = "nexmuxServiceSettingsSave", summary = "保存平台服务设置")
+    @EndpointGrant(action = EndpointGrantAction.UPDATE, name = "settings.update", group = "update")
     public Map<String, Object> save(Map<String, Object> values) {
         Map<String, String> stringValues = new LinkedHashMap<>();
         if (values != null) {

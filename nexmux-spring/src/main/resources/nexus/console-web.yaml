@@ -13,15 +13,14 @@ nexus:
       # 是否启用 Web 横切；默认 true（与 @ConditionalOnProperty matchIfMissing 一致）
       enabled: true
       security:
-        # 请求侧安全总开关（Bearer 鉴权 + ConsolePagePermissionFilter）；默认 true。
-        # 关闭后不做鉴权与页面 permission 判定；登录/令牌仍由 console-auth.yaml 配置（仅建议本地调试）。
-        # 生产 profile（application-prod.yaml）已覆盖为 true；本地开发保持 false + dev-session。
-        enabled: false
+        # 请求侧安全总开关（Bearer 鉴权 + 资源授权）。本地同样开启，账号来自 console/bootstrap/users.yaml。
+        # 生产 profile（application-prod.yaml）再次覆盖为 true。
+        enabled: true
 
         # dev-session：仅当 security.enabled=false 时生效；注入固定 SessionContext（本地调试）。
         # 生产务必保持 dev-session.enabled=false；建议配合 spring.profiles.active 含 dev。
         dev-session:
-          enabled: true
+          enabled: false
           user-id: "1"
           tenant-id: dev-tenant
           workspace-id: dev-workspace

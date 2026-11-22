@@ -5,10 +5,9 @@ import type { NextConfig } from "next";
 import { withShell } from "@pactor-app/shell/next";
 
 const nextConfig: NextConfig = withShell({
-  transpilePackages: ["nexmux-ui-app", "general-app"],
-  // general-app 以 link 指向仓库外的 pactor starter，Turbopack 需要把两边都放进项目根。
+  transpilePackages: ["nexmux-ui-app", "nexmux-ui-general-app"],
   turbopack: {
-    root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../.."),
+    root: path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../.."),
   },
   /** 根路径与旧工作台入口统一进入 nexmux 仪表盘（页面 path `/dashboard` + basePath `/nexmux`）。 */
   async redirects() {

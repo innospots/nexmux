@@ -7,7 +7,7 @@
       "access": "public"
     },
     {
-      "package": "general-app",
+      "package": "nexmux-ui-general-app",
       "enabled": true,
       "menuMode": "hidden"
     }

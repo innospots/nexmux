@@ -5,9 +5,9 @@
     "dev": "pnpm --filter nexmux-ui-app dev",
     "dev:shell": "pnpm --filter nexmux-ui-shell dev",
     "build": "pnpm --filter nexmux-ui-app build",
-    "build:module": "pnpm --filter nexmux-ui-app build:module",
+    "build:module": "pnpm --filter nexmux-ui-app build:module && pnpm --filter nexmux-ui-general-app build:module",
     "assemble": "pnpm --filter nexmux-ui-shell assemble:modules",
-    "lint": "pnpm --filter nexmux-ui-app lint",
-    "typecheck": "pnpm --filter nexmux-ui-app typecheck"
+    "lint": "pnpm --filter nexmux-ui-app lint && pnpm --filter nexmux-ui-general-app lint",
+    "typecheck": "pnpm --filter nexmux-ui-app typecheck && pnpm --filter nexmux-ui-general-app typecheck && pnpm --filter nexmux-ui-shell typecheck"
   }
 }

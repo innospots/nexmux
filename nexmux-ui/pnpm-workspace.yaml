@@ -1,5 +1,6 @@
 packages:
   - nexmux-ui-app
+  - nexmux-ui-general-app
   - nexmux-ui-shell
 
 # 批准需要 postinstall 的依赖，避免 pnpm 11 的 ERR_PNPM_IGNORED_BUILDS。

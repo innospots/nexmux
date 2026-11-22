@@ -1,6 +1,10 @@
 package com.innospots.nexmux.spring.config;
 
 import com.innospots.nexmux.core.access.dao.ClientDao;
+import com.innospots.nexmux.core.health.dao.BindingHealthDao;
+import com.innospots.nexmux.core.health.operator.BindingHealthOperator;
+import com.innospots.nexmux.core.health.service.BindingHealthRegistry;
+import com.innospots.nexmux.core.health.service.BindingHealthService;
 import com.innospots.nexmux.core.model.dao.ModelDao;
 import com.innospots.nexmux.core.ops.dao.RequestLogDao;
 import com.innospots.nexmux.core.ops.service.RequestLogWriter;
@@ -8,29 +12,34 @@ import com.innospots.nexmux.core.provider.dao.ProviderCredentialDao;
 import com.innospots.nexmux.core.provider.dao.ProviderDao;
 import com.innospots.nexmux.core.route.dao.RouteDao;
 import com.innospots.nexmux.core.settings.service.PlatformSettingService;
-import com.innospots.nexmux.inbound.ingress.RuntimeIngressEndpoint;
-import com.innospots.nexmux.inbound.pipeline.InvocationPipeline;
-import com.innospots.nexmux.inbound.protocol.OpenAiCompatibleChatAdapter;
-import com.innospots.nexmux.inbound.runtime.BindingHealthDao;
-import com.innospots.nexmux.inbound.runtime.BindingHealthProber;
-import com.innospots.nexmux.inbound.runtime.BindingHealthRegistry;
-import com.innospots.nexmux.inbound.runtime.PublishedRouteCache;
-import com.innospots.nexmux.inbound.runtime.RequestLogRetentionCleaner;
-import com.innospots.nexmux.inbound.runtime.RuntimeCatalogCache;
+import com.innospots.nexmux.core.shared.security.CredentialCipher;
+import com.innospots.nexmux.inbound.catalog.service.PublishedRouteCache;
+import com.innospots.nexmux.inbound.catalog.service.RuntimeCatalogCache;
+import com.innospots.nexmux.inbound.health.service.BindingHealthProber;
+import com.innospots.nexmux.inbound.invocation.adapter.OpenAiCompatibleChatAdapter;
+import com.innospots.nexmux.inbound.invocation.endpoint.RuntimeIngressEndpoint;
+import com.innospots.nexmux.inbound.invocation.service.InvocationPipeline;
+import com.innospots.nexmux.inbound.retention.service.RequestLogRetentionCleaner;
 import com.innospots.nexmux.inbound.runtime.RuntimeSnapshotRefresher;
 import org.apache.ibatis.annotations.Mapper;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 /**
- * Model Runtime 数据面装配（ADR-0002 / nexmux-runtime-design §5.1）：
- * 仅在 {@code runtime} profile（独立 JVM 进程、独立端口）激活；
- * 与 Console 进程（{@code !runtime}）共享 artifact 与数据库实例，但装配面完全分离——
- * 本配置只产出 inbound 链路 beans 与 {@code /v1/**} Ingress，Console 管理端点（{@code /api/d/**}）
- * 在 runtime profile 下不装配。
+ * Model Runtime 数据面装配（ADR-0002）。
+ *
+ * <p>仅在 {@code runtime} profile（独立进程、独立端口）激活；与 Console 进程共享 artifact
+ * 与数据库实例，但装配面完全分离——本配置只产出 inbound 链路 beans 与 {@code /v1/**} 入口，
+ * Console 管理端点（{@code /api/d/**}）在 runtime profile 下不装配。</p>
+ *
+ * @author Smars
+ * @date 2026/11/22
+ * @see InvocationPipeline
+ * @see RuntimeIngressEndpoint
  */
 @Configuration
 @Profile("runtime")
@@ -47,8 +56,14 @@ public class NexmuxRuntimeConfiguration {
 
     @Bean
     RuntimeCatalogCache runtimeCatalogCache(ModelDao modelDao, ProviderDao providerDao,
-                                            ProviderCredentialDao providerCredentialDao, ClientDao clientDao) {
+                                            ProviderCredentialDao providerCredentialDao,
+                                            ClientDao clientDao) {
         return new RuntimeCatalogCache(modelDao, providerDao, providerCredentialDao, clientDao);
+    }
+
+    @Bean
+    BindingHealthOperator bindingHealthOperator(BindingHealthDao bindingHealthDao) {
+        return new BindingHealthOperator(bindingHealthDao);
     }
 
     @Bean
@@ -59,53 +74,45 @@ public class NexmuxRuntimeConfiguration {
     }
 
     @Bean
+    BindingHealthService bindingHealthService(BindingHealthRegistry bindingHealthRegistry,
+                                              BindingHealthOperator bindingHealthOperator) {
+        return new BindingHealthService(bindingHealthRegistry, bindingHealthOperator);
+    }
+
+    @Bean
     BindingHealthProber bindingHealthProber(
-            RuntimeCatalogCache catalogCache, BindingHealthRegistry registry, BindingHealthDao healthDao,
-            @Value("${nexmux.runtime.health-probe-timeout-ms:5000}") int probeTimeoutMs,
-            com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
-        return new BindingHealthProber(catalogCache, registry, healthDao, probeTimeoutMs, credentialCipher);
+            RuntimeCatalogCache runtimeCatalogCache,
+            BindingHealthService bindingHealthService,
+            CredentialCipher credentialCipher,
+            @Value("${nexmux.runtime.health-probe-timeout-ms:5000}") int probeTimeoutMillis) {
+        return new BindingHealthProber(runtimeCatalogCache, bindingHealthService,
+                credentialCipher, probeTimeoutMillis);
+    }
+
+    @Bean
+    InvocationPipeline invocationPipeline(RuntimeCatalogCache runtimeCatalogCache,
+                                          PublishedRouteCache publishedRouteCache,
+                                          BindingHealthRegistry bindingHealthRegistry,
+                                          RequestLogWriter requestLogWriter,
+                                          RequestLogDao requestLogDao,
+                                          PlatformSettingService platformSettingService,
+                                          CredentialCipher credentialCipher) {
+        return InvocationPipeline.of(runtimeCatalogCache, publishedRouteCache,
+                bindingHealthRegistry, new OpenAiCompatibleChatAdapter(), requestLogWriter,
+                requestLogDao, platformSettingService, credentialCipher);
     }
 
     @Bean(destroyMethod = "close")
     RuntimeSnapshotRefresher runtimeSnapshotRefresher(
-            PublishedRouteCache routeCache, RuntimeCatalogCache catalogCache,
-            BindingHealthProber healthProber, InvocationPipeline pipeline) {
-        return new RuntimeSnapshotRefresher(routeCache, catalogCache, healthProber, pipeline::resyncQuotas);
+            PublishedRouteCache publishedRouteCache, RuntimeCatalogCache runtimeCatalogCache,
+            BindingHealthProber bindingHealthProber, InvocationPipeline invocationPipeline) {
+        return new RuntimeSnapshotRefresher(publishedRouteCache, runtimeCatalogCache,
+                bindingHealthProber, invocationPipeline::resyncQuotas);
     }
 
     /**
-     * 首轮快照/探活/配额校准在上下文就绪后执行（ApplicationRunner 晚于 spring.sql.init，
-     * 避免建表完成前查库的启动竞态）。
-     */
-    @Bean
-    org.springframework.boot.ApplicationRunner runtimeBootstrap(
-            RuntimeSnapshotRefresher refresher,
-            RequestLogRetentionCleaner retentionCleaner,
-            @Value("${nexmux.runtime.snapshot-poll-interval-seconds:30}") long pollIntervalSeconds,
-            @Value("${nexmux.runtime.health-probe-interval-seconds:60}") long probeIntervalSeconds,
-            @Value("${nexmux.runtime.quota-resync-interval-seconds:300}") long quotaResyncIntervalSeconds) {
-        return args -> {
-            refresher.start(pollIntervalSeconds, probeIntervalSeconds, quotaResyncIntervalSeconds);
-            retentionCleaner.start();
-        };
-    }
-
-    @Bean
-    InvocationPipeline invocationPipeline(RuntimeCatalogCache catalogCache,
-                                          PublishedRouteCache routeCache,
-                                          BindingHealthRegistry healthRegistry,
-                                          RequestLogWriter requestLogWriter,
-                                          RequestLogDao requestLogDao,
-                                          PlatformSettingService platformSettingService,
-                                          com.innospots.nexmux.core.shared.security.CredentialCipher credentialCipher) {
-        return new InvocationPipeline(catalogCache, routeCache, healthRegistry,
-                new OpenAiCompatibleChatAdapter(), requestLogWriter, requestLogDao,
-                platformSettingService, credentialCipher);
-    }
-
-    /**
-     * 调用日志保留清理（G-05）：按服务设置 logRetentionDays 每日清理 mux_request_log
-     * 超期行；启动随 runtimeBootstrap（避让建表竞态）。
+     * 调用日志保留清理：按服务设置 {@code logRetentionDays} 每日清理超期行；
+     * 启动随 bootstrap（避让建表竞态）。
      */
     @Bean(destroyMethod = "close")
     RequestLogRetentionCleaner requestLogRetentionCleaner(
@@ -116,8 +123,26 @@ public class NexmuxRuntimeConfiguration {
                 initialDelayMinutes, periodMinutes);
     }
 
+    /**
+     * 首轮快照/探活/配额校准在上下文就绪后执行（晚于 {@code spring.sql.init}，
+     * 避免建表完成前查库的启动竞态）。
+     */
     @Bean
-    RuntimeIngressEndpoint runtimeIngressEndpoint(InvocationPipeline pipeline) {
-        return new RuntimeIngressEndpoint(pipeline);
+    ApplicationRunner runtimeBootstrap(
+            RuntimeSnapshotRefresher refresher,
+            RequestLogRetentionCleaner retentionCleaner,
+            @Value("${nexmux.runtime.snapshot-poll-interval-seconds:30}") long pollIntervalSeconds,
+            @Value("${nexmux.runtime.health-probe-interval-seconds:60}") long probeIntervalSeconds,
+            @Value("${nexmux.runtime.quota-resync-interval-seconds:300}")
+            long quotaResyncIntervalSeconds) {
+        return args -> {
+            refresher.start(pollIntervalSeconds, probeIntervalSeconds, quotaResyncIntervalSeconds);
+            retentionCleaner.start();
+        };
+    }
+
+    @Bean
+    RuntimeIngressEndpoint runtimeIngressEndpoint(InvocationPipeline invocationPipeline) {
+        return new RuntimeIngressEndpoint(invocationPipeline);
     }
 }

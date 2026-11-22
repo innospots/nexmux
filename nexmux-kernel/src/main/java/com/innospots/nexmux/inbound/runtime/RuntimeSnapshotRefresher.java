@@ -1,44 +1,63 @@
 package com.innospots.nexmux.inbound.runtime;
 
+import com.innospots.nexmux.inbound.catalog.service.PublishedRouteCache;
+import com.innospots.nexmux.inbound.catalog.service.RuntimeCatalogCache;
+import com.innospots.nexmux.inbound.health.service.BindingHealthProber;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 
 /**
- * Runtime 快照调度器（nexmux-runtime-design §5.3/§6.4）：周期性全量重载配置快照
- * （路由 + 目录）并驱动主动探活。单调度线程；单轮失败仅记日志，下轮重试。
- * 生命周期由装配方管理（runtime profile 启动时 {@link #start}，关闭时 {@link #close}）。
+ * 数据面快照调度器：周期性全量重载配置快照、驱动主动探活与配额校准。
+ *
+ * <p>单调度线程；单轮失败仅记日志并在下轮重试，避免把瞬时故障升级为进程退出。
+ * 生命周期由装配方管理（运行模块启动时 {@link #start}，关闭时 {@link #close}）。</p>
+ *
+ * @author Smars
+ * @date 2026/11/22
+ * @see PublishedRouteCache
+ * @see RuntimeCatalogCache
+ * @see BindingHealthProber
  */
+@Slf4j
 public final class RuntimeSnapshotRefresher implements AutoCloseable {
 
-    private static final Logger log = LoggerFactory.getLogger(RuntimeSnapshotRefresher.class);
-
-    private final PublishedRouteCache routeCache;
-    private final RuntimeCatalogCache catalogCache;
-    private final BindingHealthProber healthProber;
+    private final PublishedRouteCache publishedRouteCache;
+    private final RuntimeCatalogCache runtimeCatalogCache;
+    private final BindingHealthProber bindingHealthProber;
     private final Runnable quotaResync;
     private volatile boolean started;
     private final ScheduledExecutorService executor =
-            Executors.newSingleThreadScheduledExecutor(r -> {
-                Thread thread = new Thread(r, "nexmux-runtime-snapshot");
+            Executors.newSingleThreadScheduledExecutor(runnable -> {
+                Thread thread = new Thread(runnable, "nexmux-runtime-snapshot");
                 thread.setDaemon(true);
                 return thread;
             });
 
     /**
-     * @param quotaResync 配额库校准任务（可空 = 不校准）；通常 {@code pipeline::resyncQuotas}
+     * @param publishedRouteCache  已发布路由缓存
+     * @param runtimeCatalogCache  配置目录缓存
+     * @param bindingHealthProber  绑定探活器
+     * @param quotaResync          配额校准任务（可空表示不校准）
      */
-    public RuntimeSnapshotRefresher(PublishedRouteCache routeCache, RuntimeCatalogCache catalogCache,
-                                    BindingHealthProber healthProber, Runnable quotaResync) {
-        this.routeCache = routeCache;
-        this.catalogCache = catalogCache;
-        this.healthProber = healthProber;
+    public RuntimeSnapshotRefresher(PublishedRouteCache publishedRouteCache,
+                                    RuntimeCatalogCache runtimeCatalogCache,
+                                    BindingHealthProber bindingHealthProber,
+                                    Runnable quotaResync) {
+        this.publishedRouteCache = publishedRouteCache;
+        this.runtimeCatalogCache = runtimeCatalogCache;
+        this.bindingHealthProber = bindingHealthProber;
         this.quotaResync = quotaResync;
     }
 
-    /** 启动周期任务（幂等）：先同步执行一轮（启动即可服务），再按各自周期调度。 */
+    /**
+     * 启动周期任务（幂等）：先同步执行一轮（启动即可服务），再按各自周期调度。
+     *
+     * @param snapshotPollIntervalSeconds 快照重载周期（秒）
+     * @param healthProbeIntervalSeconds  探活周期（秒）
+     * @param quotaResyncIntervalSeconds  配额校准周期（秒）
+     */
     public synchronized void start(long snapshotPollIntervalSeconds, long healthProbeIntervalSeconds,
                                    long quotaResyncIntervalSeconds) {
         if (started) {
@@ -60,13 +79,13 @@ public final class RuntimeSnapshotRefresher implements AutoCloseable {
 
     /** 立即重载配置快照（路由 + 目录）。 */
     public void refreshOnce() {
-        catalogCache.refresh();
-        routeCache.refresh();
+        runtimeCatalogCache.refresh();
+        publishedRouteCache.refresh();
     }
 
     /** 立即探活一轮。 */
     public void probeOnce() {
-        healthProber.probeAll();
+        bindingHealthProber.probeAll();
     }
 
     private void resyncQuotaQuietly() {

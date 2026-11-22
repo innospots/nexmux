@@ -245,7 +245,7 @@ body:
                 cell:
                   type: Text
                   props:
-                    text: "${row.status == 'ENABLED' ? t('common.enabled') : t('common.disabled')}"
+                    text: "${row.status == 'ENABLED' ? '启用' : '禁用'}"
               - title:
                   "$i18n{page.roles.column.actions:操作}"
                 align: center
@@ -264,7 +264,7 @@ body:
                             to: /settings/roles/${row.roleId}
                   - type: Button
                     props:
-                      text: "${row.status == 'ENABLED' ? t('common.disable') : t('common.enable')}"
+                      text: "${row.status == 'ENABLED' ? '禁用' : '启用'}"
                       variant: link
                       size: small
                     events:

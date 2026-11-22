@@ -92,7 +92,7 @@ body:
               - title: "$i18n{dictionaryPage.status:状态}"
                 cell:
                   type: Text
-                  props: { text: "${row.status == 'ENABLED' ? t('common.enabled') : t('common.disabled')}" }
+                  props: { text: "${row.status == 'ENABLED' ? '启用' : '禁用'}" }
               - title: "$i18n{dictionaryPage.items:字典项}"
                 cell:
                   type: Text

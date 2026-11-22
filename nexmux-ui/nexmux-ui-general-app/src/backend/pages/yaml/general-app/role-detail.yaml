@@ -90,7 +90,7 @@ body:
     - type: Typography
       props:
         variant: h3
-        text: "${data.role != null && data.role.roleName != null ? data.role.roleName : t('roleDetail.title')}"
+        text: "${data.role != null && data.role.roleName != null ? data.role.roleName : '角色详情'}"
     - type: Tabs
       props:
         className: mt-3
@@ -111,7 +111,7 @@ body:
                   - type: Button
                     when: ${data.role.status == 'ENABLED' || data.role.status == 'DISABLED'}
                     props:
-                      text: "${data.role.status == 'ENABLED' ? t('common.disable') : t('common.enable')}"
+                      text: "${data.role.status == 'ENABLED' ? '禁用' : '启用'}"
                     events:
                       onClick:
                         - action: confirm
@@ -222,8 +222,8 @@ body:
                           value: "${data.role.ownerType != null ? data.role.ownerType : '—'}"
                         - label:
                             "$i18n{page.role-detail.field.status:状态}"
-                          value: "${data.role.status == 'ENABLED' ? t('common.enabled') : data.role.status == 'DISABLED' ?
-                            t('common.disabled') : data.role.status}"
+                          value: "${data.role.status == 'ENABLED' ? '启用' : data.role.status == 'DISABLED' ?
+                            '禁用' : data.role.status}"
                         - label:
                             "$i18n{page.role-detail.field.memberCount:成员数量}"
                           value: "${data.role.memberCount != null ? data.role.memberCount : 0}"
@@ -342,7 +342,7 @@ body:
                 children:
                   - type: Text
                     props:
-                      text: "${state.dirty ? t('roleDetail.dirty') : t('roleDetail.clean')}"
+                      text: "${state.dirty ? '有未保存的更改' : '没有未保存的更改'}"
                       type: secondary
                   - type: Flex
                     props:

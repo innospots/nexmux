@@ -82,20 +82,20 @@ body:
                 cell:
                   type: Text
                   props:
-                    text: "${row.role == 'admin' ? t('users.role.admin') : row.role == 'member' ? t('users.role.member') : row.role == 'guest' ? t('users.role.guest') : row.role}"
+                    text: "${row.role == 'admin' ? '管理员' : row.role == 'member' ? '成员' : row.role == 'guest' ? '访客' : row.role}"
               - { title: "$i18n{page.users.text16:邮箱}", dataIndex: email }
               - { title: "$i18n{page.users.text17:创建时间}", dataIndex: createdAt }
               - title: "$i18n{page.users.status:状态}"
                 cell:
                   type: Text
-                  props: { text: "${row.status == 'DISABLED' ? t('common.inactive') : t('common.enabled')}" }
+                  props: { text: "${row.status == 'DISABLED' ? '停用' : '启用'}" }
               - title: "$i18n{page.users.actions:操作}"
                 align: center
                 fitContent: true
                 fixed: right
                 cell:
                   - type: Button
-                    props: { text: "${row.status == 'DISABLED' ? t('common.enable') : t('common.inactive')}", variant: link, size: small }
+                    props: { text: "${row.status == 'DISABLED' ? '启用' : '停用'}", variant: link, size: small }
                     events:
                       onClick:
                         - action: confirm

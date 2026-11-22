@@ -1,0 +1,171 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: xiaomi
+modelCount: 3
+models:
+- modelCode: xiaomi/mimo-v2.6-flash
+  displayName:
+    en: MiMo V2.6 Flash
+  modelType: LLM
+  providerModelId: mimo-v2.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - xiaomi
+  - octafuse-preset
+  description:
+    en: A cost-efficient omni-modal MiMo model for high-frequency professional work and large-scale tasks.
+    zh-CN: 面向高频办公与规模化任务的小米 MiMo 全模态高性价比模型。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.14
+    output: 0.28
+    cacheRead: 0.0028
+    cacheWrite: 0
+    tiers:
+    - input: 0.14
+      output: 0.28
+      cacheRead: 0.0028
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.14
+          output_price: 0.28
+          cache_read_price: 0.0028
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 1
+          output_price: 2
+          cache_read_price: 0.02
+          cache_write_price: null
+  releaseDate: '2026-09-22'
+- modelCode: xiaomi/mimo-v2.6-pro
+  displayName:
+    en: MiMo V2.6 Pro
+  modelType: LLM
+  providerModelId: mimo-v2.6-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - xiaomi
+  - octafuse-preset
+  description:
+    en: Xiaomi's flagship omni-modal MiMo model for professional, long-horizon, and complex workflows, including scientific
+      research and cybersecurity.
+    zh-CN: 面向专业、长程与复杂工作流的小米 MiMo 全模态旗舰模型，兼顾科学研究与网络安全。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.435
+    output: 0.87
+    cacheRead: 0.0036
+    cacheWrite: 0
+    tiers:
+    - input: 0.435
+      output: 0.87
+      cacheRead: 0.0036
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.435
+          output_price: 0.87
+          cache_read_price: 0.0036
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 3
+          output_price: 6
+          cache_read_price: 0.025
+          cache_write_price: null
+  releaseDate: '2026-09-22'
+- modelCode: xiaomi/mimo-v2.6-pro-ultraspeed
+  displayName:
+    en: MiMo V2.6 Pro UltraSpeed
+  modelType: LLM
+  providerModelId: mimo-v2.6-pro-ultraspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - xiaomi
+  - octafuse-preset
+  description:
+    en: The high-speed serving mode of MiMo V2.6 Pro. It keeps flagship quality and offers up to 20× output speed for latency-sensitive
+      workloads.
+    zh-CN: 保留 MiMo V2.6 Pro 旗舰能力的超高速服务模式，输出速度最高约 20 倍，面向强实时与时延敏感场景。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4.35
+    output: 8.7
+    cacheRead: 0.036
+    cacheWrite: 0
+    tiers:
+    - input: 4.35
+      output: 8.7
+      cacheRead: 0.036
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 4.35
+          output_price: 8.7
+          cache_read_price: 0.036
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 30
+          output_price: 60
+          cache_read_price: 0.25
+          cache_write_price: null
+  releaseDate: '2026-09-22'

@@ -1,0 +1,758 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: anthropic
+modelCount: 18
+models:
+- modelCode: anthropic/claude-fable-5
+  displayName:
+    en: Claude Fable 5
+  modelType: LLM
+  providerModelId: claude-fable-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: An Anthropic model built for autonomous knowledge work, coding, and multimodal agents. It is positioned for autonomous
+      knowledge work and coding with multimodal input, reasoning, and tool-oriented workflows.
+    zh-CN: 面向自主知识工作、编程和多模态 Agent 的 Anthropic 模型。定位于自主知识工作与编程，支持多模态输入、推理及工具驱动工作流。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 1
+    cacheWrite: 12.5
+    tiers:
+    - input: 10
+      output: 50
+      cacheRead: 1
+      cacheWrite: 12.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 10
+          output_price: 50
+          cache_read_price: 1
+          cache_write_price: 12.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 70
+          output_price: 350
+          cache_read_price: 7
+          cache_write_price: 87.5
+  releaseDate: '2026-06-09'
+- modelCode: anthropic/claude-fable-5-1
+  displayName:
+    en: Claude Fable 5.1
+  modelType: LLM
+  providerModelId: claude-fable-5-1
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's successor to Claude Fable 5 for long-running agentic coding, multistep research, and document work. Adaptive
+      thinking is always on; input and output prices match Fable 5, with cheaper prompt-cache reads.
+    zh-CN: Claude Fable 5 的后继模型，面向长时间 Agent 编程、多步研究与文档工作。自适应思考始终开启；输入输出单价与 Fable 5 相同，提示缓存读取更便宜。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 0.25
+    cacheWrite: 12.5
+    tiers:
+    - input: 10
+      output: 50
+      cacheRead: 0.25
+      cacheWrite: 12.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 10
+          output_price: 50
+          cache_read_price: 0.25
+          cache_write_price: 12.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 70
+          output_price: 350
+          cache_read_price: 1.75
+          cache_write_price: 87.5
+  releaseDate: '2026-09-01'
+- modelCode: anthropic/claude-fable-5-2
+  displayName:
+    en: Claude Fable 5.2
+  modelType: LLM
+  providerModelId: claude-fable-5-2
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's model built for demanding reasoning and long-horizon agentic work. It has a 1M context window and a 128K
+      synchronous max output. Adaptive thinking is always on and cannot be turned off; the default effort is high, and supported
+      values are low, medium, high, xhigh, and max. Setting thinking to disabled or sending budget_tokens returns 400. Forced
+      tool_choice values any and tool return 400; use auto or none. Non-default temperature, top_p, and top_k return 400.
+      人民币价为美元刊例价 ×7 的换算占位价，非官方人民币刊例。
+    zh-CN: 面向高要求推理与长程 Agent 工作的 Anthropic 模型。上下文 1M，同步最大输出 128K。自适应思考始终开启且不能关闭，默认 effort 为 high，支持 low、medium、high、xhigh 和
+      max。thinking 设为 disabled，或手动传入 budget_tokens，会返回 400。tool_choice 的 any 与 tool 会返回 400，应使用 auto 或 none。非默认的 temperature、top_p、top_k
+      也会返回 400。人民币价为美元刊例价 ×7 的换算占位价，非官方人民币刊例。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 8
+    output: 40
+    cacheRead: 0.2
+    cacheWrite: 10
+    tiers:
+    - input: 8
+      output: 40
+      cacheRead: 0.2
+      cacheWrite: 10
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 8
+          output_price: 40
+          cache_read_price: 0.2
+          cache_write_price: 10
+      cny:
+        tiers:
+        - upto: null
+          input_price: 56
+          output_price: 280
+          cache_read_price: 1.4
+          cache_write_price: 70
+  releaseDate: '2026-11-09'
+- modelCode: anthropic/claude-haiku-4-5
+  displayName:
+    en: Claude Haiku 4.5 (latest)
+  modelType: LLM
+  providerModelId: claude-haiku-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.1
+    cacheWrite: 1.25
+  releaseDate: null
+- modelCode: anthropic/claude-haiku-4-5-20251001
+  displayName:
+    en: Claude Haiku 4.5
+  modelType: LLM
+  providerModelId: claude-haiku-4-5-20251001
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.1
+    cacheWrite: 1.25
+  releaseDate: null
+- modelCode: anthropic/claude-haiku-5-5
+  displayName:
+    en: Claude Haiku 5.5
+  modelType: LLM
+  providerModelId: claude-haiku-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's fastest Claude 5 model for latency-sensitive tasks. Adaptive thinking is on by default with medium effort
+      and supports low through max; thinking can be disabled at high effort or below. Prompts over 100K tokens are billed
+      at a higher tier. Manual budget_tokens returns 400, as do non-default temperature, top_p, and top_k.
+    zh-CN: Anthropic 最快的 Claude 5 模型，适合延迟敏感任务。自适应思考默认开启，effort 默认 medium，支持 low 到 max；high 及以下可关闭思考。超过 100K tokens 的提示按更高层级计费。手动设置
+      budget_tokens 会返回 400，非默认的 temperature、top_p、top_k 也会返回错误。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.01
+    cacheWrite: 0.125
+    tiers:
+    - upto: 100000
+      input: 0.1
+      output: 0.5
+      cacheRead: 0.01
+      cacheWrite: 0.125
+    - input: 0.5
+      output: 2.5
+      cacheRead: 0.05
+      cacheWrite: 0.625
+    prices:
+      usd:
+        tiers:
+        - upto: 100000
+          input_price: 0.1
+          output_price: 0.5
+          cache_read_price: 0.01
+          cache_write_price: 0.125
+        - upto: null
+          input_price: 0.5
+          output_price: 2.5
+          cache_read_price: 0.05
+          cache_write_price: 0.625
+      cny:
+        tiers:
+        - upto: 100000
+          input_price: 0.7
+          output_price: 3.5
+          cache_read_price: 0.07
+          cache_write_price: 0.875
+        - upto: null
+          input_price: 3.5
+          output_price: 17.5
+          cache_read_price: 0.35
+          cache_write_price: 4.375
+  releaseDate: '2026-10-07'
+- modelCode: anthropic/claude-opus-4-5
+  displayName:
+    en: Claude Opus 4.5 (latest)
+  modelType: LLM
+  providerModelId: claude-opus-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: anthropic/claude-opus-4-5-20251101
+  displayName:
+    en: Claude Opus 4.5
+  modelType: LLM
+  providerModelId: claude-opus-4-5-20251101
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: anthropic/claude-opus-4-6
+  displayName:
+    en: Claude Opus 4.6
+  modelType: LLM
+  providerModelId: claude-opus-4-6
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: anthropic/claude-opus-4-7
+  displayName:
+    en: Claude Opus 4.7
+  modelType: LLM
+  providerModelId: claude-opus-4-7
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: anthropic/claude-opus-4-8
+  displayName:
+    en: Claude Opus 4.8
+  modelType: LLM
+  providerModelId: claude-opus-4-8
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: anthropic/claude-opus-5
+  displayName:
+    en: Claude Opus 5
+  modelType: LLM
+  providerModelId: claude-opus-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's flagship for demanding reasoning, coding, visual analysis, and long-running agents. It is especially capable
+      at end-to-end software tasks, code review and bug finding, document and chart analysis, complex office deliverables,
+      tool use, and coordinating parallel subagents.
+    zh-CN: Anthropic 旗舰模型，面向复杂推理、编程、视觉分析与长时间 Agent 任务。尤其擅长端到端软件任务、代码审查与缺陷定位、文档和图表分析、复杂办公交付、工具调用及并行子 Agent 协作。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+    tiers:
+    - input: 5
+      output: 25
+      cacheRead: 0.5
+      cacheWrite: 6.25
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 5
+          output_price: 25
+          cache_read_price: 0.5
+          cache_write_price: 6.25
+      cny:
+        tiers:
+        - upto: null
+          input_price: 35
+          output_price: 175
+          cache_read_price: 3.5
+          cache_write_price: 43.75
+  releaseDate: '2026-07-24'
+- modelCode: anthropic/claude-opus-5-5
+  displayName:
+    en: Claude Opus 5.5
+  modelType: LLM
+  providerModelId: claude-opus-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's model for long-running agentic coding and knowledge work. Adaptive thinking is always on and cannot be
+      disabled; the default effort is medium. Forced tool_choice values any and tool return an error.
+    zh-CN: 面向长时间 Agent 编程与知识工作的 Anthropic 模型。自适应思考始终开启且不能关闭，默认 effort 为 medium。tool_choice 的 any 与 tool 会返回错误，应使用 auto 或 none。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 5
+    tiers:
+    - input: 4
+      output: 20
+      cacheRead: 0.2
+      cacheWrite: 5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 4
+          output_price: 20
+          cache_read_price: 0.2
+          cache_write_price: 5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 28
+          output_price: 140
+          cache_read_price: 1.4
+          cache_write_price: 35
+  releaseDate: '2026-09-22'
+- modelCode: anthropic/claude-sonnet-4-5
+  displayName:
+    en: Claude Sonnet 4.5 (latest)
+  modelType: LLM
+  providerModelId: claude-sonnet-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3.75
+  releaseDate: null
+- modelCode: anthropic/claude-sonnet-4-5-20250929
+  displayName:
+    en: Claude Sonnet 4.5
+  modelType: LLM
+  providerModelId: claude-sonnet-4-5-20250929
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3.75
+  releaseDate: null
+- modelCode: anthropic/claude-sonnet-4-6
+  displayName:
+    en: Claude Sonnet 4.6
+  modelType: LLM
+  providerModelId: claude-sonnet-4-6
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3.75
+  releaseDate: null
+- modelCode: anthropic/claude-sonnet-5
+  displayName:
+    en: Claude Sonnet 5
+  modelType: LLM
+  providerModelId: claude-sonnet-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: A frontier Sonnet model for coding, professional work, and adaptive agentic reasoning. Adaptive reasoning levels let
+      applications balance frontier coding and agent performance against latency and token use.
+    zh-CN: 适合编程、专业工作与自适应 Agent 推理的前沿 Sonnet 模型。自适应推理等级可在前沿编程与 Agent 能力、延迟和 Token 消耗之间灵活取舍。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 10
+      cacheRead: 0.2
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 10
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 14
+          output_price: 70
+          cache_read_price: 1.4
+          cache_write_price: 17.5
+  releaseDate: '2026-06-30'
+- modelCode: anthropic/claude-sonnet-5-5
+  displayName:
+    en: Claude Sonnet 5.5
+  modelType: LLM
+  providerModelId: claude-sonnet-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - anthropic
+  - octafuse-preset
+  description:
+    en: Anthropic's faster Sonnet for coding, agents, and professional work. Adaptive thinking is on by default and cannot
+      be fully disabled; the default effort is high, and between_tools turns off up-front thinking at high effort or below.
+      Forced tool_choice values any and tool return an error, as do non-default temperature, top_p, and top_k.
+    zh-CN: 更快的 Sonnet，面向编程、Agent 与专业工作。自适应思考默认开启且不能完全关闭，默认 effort 为 high；between_tools 可在 high 及以下关闭前置思考。tool_choice 的 any
+      与 tool，以及非默认的 temperature、top_p、top_k 都会返回错误。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 10
+      cacheRead: 0.1
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 10
+          cache_read_price: 0.1
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 14
+          output_price: 70
+          cache_read_price: 0.7
+          cache_write_price: 17.5
+  releaseDate: '2026-09-28'

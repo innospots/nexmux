@@ -1,0 +1,33 @@
+# Nexmux 模型平台初始用户。已存在的 loginName 不会重置密码或角色。
+# 密码须满足平台策略：至少 8 位，含大写、小写与数字。
+#
+# admin / Admin12345  平台管理员
+# opt01 / Opt12345    配置运营
+# guest / Guest12345  运营观察者
+
+enabled: true
+
+users:
+  - loginName: admin
+    displayName: Admin
+    email: admin@nexmux.local
+    password: Admin12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - mux_admin
+
+  - loginName: opt01
+    displayName: Opt01
+    email: opt01@nexmux.local
+    password: Opt12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - mux_operator
+
+  - loginName: guest
+    displayName: Guest
+    email: guest@nexmux.local
+    password: Guest12345
+    securityRealm: PLATFORM
+    roleCodes:
+      - mux_observer

@@ -1,0 +1,11 @@
+# Shell 站点定制层。
+# 产品导航不在这里维护，由后端 console/meta-sitemap.yaml 经
+# /api/d/platform/navigation/menus 在运行期下发。
+# 未登录平台时回退包默认站点菜单（登录、工作台、主题设置）。
+id: shell
+resourceType: sitemap
+version: 2
+dslVersion: "1.0"
+app: { name: Nexmux }
+
+menus: []

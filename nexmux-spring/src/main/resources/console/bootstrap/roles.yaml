@@ -1,0 +1,94 @@
+# Nexmux 模型平台角色与资源授权。
+# 落库键为 domain.module:grantGroup，分组必须存在于 plugin-declaration.yaml。
+# 由本文件声明的角色为只读，管理端不能删除或改授权。
+
+roles:
+  - roleCode: mux_admin
+    roleName: 平台管理员
+    nameEn: Platform Administrator
+    description: 模型平台内置管理员，拥有全部模型控制台能力
+    ownerType: PLATFORM
+    administrator: true
+    sortOrder: 10
+    grants:
+      - domain: nexmux
+        module: provider
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: model
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: route
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: client
+        grantGroups: [view, create, update, delete, status, execute, secret]
+      - domain: nexmux
+        module: ops
+        grantGroups: [view, cost]
+      - domain: nexmux
+        module: debug
+        grantGroups: [view, execute]
+      - domain: nexmux
+        module: service-settings
+        grantGroups: [view, update]
+      - domain: nexmux
+        module: audit
+        grantGroups: [view]
+      - domain: system
+        module: settings
+        grantGroups: [view, update]
+      - domain: operation
+        module: role
+        grantGroups: [view, create, update, delete, status]
+
+  - roleCode: mux_operator
+    roleName: 配置运营
+    nameEn: Configuration Operator
+    description: 管理供应商、模型、路由与客户端；不含密钥、成本与审计
+    ownerType: PLATFORM
+    administrator: false
+    sortOrder: 20
+    grants:
+      - domain: nexmux
+        module: provider
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: model
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: route
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: client
+        grantGroups: [view, create, update, delete, status, execute]
+      - domain: nexmux
+        module: ops
+        grantGroups: [view]
+      - domain: nexmux
+        module: debug
+        grantGroups: [view, execute]
+
+  - roleCode: mux_observer
+    roleName: 运营观察者
+    nameEn: Operations Observer
+    description: 配置与运行数据只读；不含成本、调试、密钥与审计
+    ownerType: PLATFORM
+    administrator: false
+    sortOrder: 30
+    grants:
+      - domain: nexmux
+        module: provider
+        grantGroups: [view]
+      - domain: nexmux
+        module: model
+        grantGroups: [view]
+      - domain: nexmux
+        module: route
+        grantGroups: [view]
+      - domain: nexmux
+        module: client
+        grantGroups: [view]
+      - domain: nexmux
+        module: ops
+        grantGroups: [view]

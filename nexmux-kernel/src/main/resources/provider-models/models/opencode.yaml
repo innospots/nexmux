@@ -1,0 +1,2589 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: opencode
+modelCount: 87
+models:
+- modelCode: opencode/claude-fable-5
+  displayName:
+    en: Claude Fable 5
+  modelType: LLM
+  providerModelId: claude-fable-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 1
+    cacheWrite: 12.5
+  releaseDate: null
+- modelCode: opencode/claude-fable-5-1
+  displayName:
+    en: Claude Fable 5.1
+  modelType: LLM
+  providerModelId: claude-fable-5-1
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 0.25
+    cacheWrite: 12.5
+  releaseDate: null
+- modelCode: opencode/claude-fable-5-2
+  displayName:
+    en: Claude Fable 5.2
+  modelType: LLM
+  providerModelId: claude-fable-5-2
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 8
+    output: 40
+    cacheRead: 0.2
+    cacheWrite: 10
+  releaseDate: null
+- modelCode: opencode/claude-haiku-4-5
+  displayName:
+    en: Claude Haiku 4.5
+  modelType: LLM
+  providerModelId: claude-haiku-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.1
+    cacheWrite: 1.25
+  releaseDate: null
+- modelCode: opencode/claude-haiku-5-5
+  displayName:
+    en: Claude Haiku 5.5
+  modelType: LLM
+  providerModelId: claude-haiku-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.01
+    cacheWrite: 0.125
+    tiers:
+    - inputTokensAbove: 100000
+      input: 0.5
+      output: 2.5
+      cacheRead: 0.05
+      cacheWrite: 0.625
+  releaseDate: null
+- modelCode: opencode/claude-opus-4-5
+  displayName:
+    en: Claude Opus 4.5
+  modelType: LLM
+  providerModelId: claude-opus-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: opencode/claude-opus-4-6
+  displayName:
+    en: Claude Opus 4.6
+  modelType: LLM
+  providerModelId: claude-opus-4-6
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: opencode/claude-opus-4-7
+  displayName:
+    en: Claude Opus 4.7
+  modelType: LLM
+  providerModelId: claude-opus-4-7
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: opencode/claude-opus-4-8
+  displayName:
+    en: Claude Opus 4.8
+  modelType: LLM
+  providerModelId: claude-opus-4-8
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: opencode/claude-opus-5
+  displayName:
+    en: Claude Opus 5
+  modelType: LLM
+  providerModelId: claude-opus-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 25
+    cacheRead: 0.5
+    cacheWrite: 6.25
+  releaseDate: null
+- modelCode: opencode/claude-opus-5-5
+  displayName:
+    en: Claude Opus 5.5
+  modelType: LLM
+  providerModelId: claude-opus-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 5
+  releaseDate: null
+- modelCode: opencode/claude-sonnet-4-5
+  displayName:
+    en: Claude Sonnet 4.5
+  modelType: LLM
+  providerModelId: claude-sonnet-4-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3.75
+    tiers:
+    - inputTokensAbove: 200000
+      input: 6
+      output: 22.5
+      cacheRead: 0.6
+      cacheWrite: 7.5
+  releaseDate: null
+- modelCode: opencode/claude-sonnet-4-6
+  displayName:
+    en: Claude Sonnet 4.6
+  modelType: LLM
+  providerModelId: claude-sonnet-4-6
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3.75
+  releaseDate: null
+- modelCode: opencode/claude-sonnet-5
+  displayName:
+    en: Claude Sonnet 5
+  modelType: LLM
+  providerModelId: claude-sonnet-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2.5
+  releaseDate: null
+- modelCode: opencode/claude-sonnet-5-5
+  displayName:
+    en: Claude Sonnet 5.5
+  modelType: LLM
+  providerModelId: claude-sonnet-5-5
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 2.5
+  releaseDate: null
+- modelCode: opencode/qwen3.5-plus
+  displayName:
+    en: Qwen3.5 Plus
+  modelType: LLM
+  providerModelId: qwen3.5-plus
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.2
+    cacheRead: 0.02
+    cacheWrite: 0.25
+  releaseDate: null
+- modelCode: opencode/qwen3.6-plus
+  displayName:
+    en: Qwen3.6 Plus
+  modelType: LLM
+  providerModelId: qwen3.6-plus
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 3
+    cacheRead: 0.05
+    cacheWrite: 0.625
+  releaseDate: null
+- modelCode: opencode/qwen3.8-flash
+  displayName:
+    en: Qwen3.8 Flash
+  modelType: LLM
+  providerModelId: qwen3.8-flash
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.47
+    cacheRead: 0.016
+    cacheWrite: 0.2
+  releaseDate: null
+- modelCode: opencode/gemini-3-flash
+  displayName:
+    en: Gemini 3 Flash
+  modelType: LLM
+  providerModelId: gemini-3-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 3
+    cacheRead: 0.05
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.1-pro
+  displayName:
+    en: Gemini 3.1 Pro Preview
+  modelType: LLM
+  providerModelId: gemini-3.1-pro
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.5-flash
+  displayName:
+    en: Gemini 3.5 Flash
+  modelType: LLM
+  providerModelId: gemini-3.5-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 9
+    cacheRead: 0.15
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.5-flash-lite
+  displayName:
+    en: Gemini 3.5 Flash Lite
+  modelType: LLM
+  providerModelId: gemini-3.5-flash-lite
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 2.5
+    cacheRead: 0.03
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.6-flash
+  displayName:
+    en: Gemini 3.6 Flash
+  modelType: LLM
+  providerModelId: gemini-3.6-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 3.75
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.7-flash
+  displayName:
+    en: Gemini 3.7 Flash
+  modelType: LLM
+  providerModelId: gemini-3.7-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 3.75
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-3.8-flash
+  displayName:
+    en: Gemini 3.8 Flash
+  modelType: LLM
+  providerModelId: gemini-3.8-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 3.75
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gemini-4-argon
+  displayName:
+    en: Gemini 4 Argon
+  modelType: LLM
+  providerModelId: gemini-4-argon
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/beam-free
+  displayName:
+    en: Beam Free
+  modelType: LLM
+  providerModelId: beam-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/big-pickle
+  displayName:
+    en: Big Pickle
+  modelType: LLM
+  providerModelId: big-pickle
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 200000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/deepseek-v4-pro
+  displayName:
+    en: DeepSeek V4 Pro
+  modelType: LLM
+  providerModelId: deepseek-v4-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.74
+    output: 3.48
+    cacheRead: 0.145
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/deepseek-v4.1-flash
+  displayName:
+    en: DeepSeek V4.1 Flash
+  modelType: LLM
+  providerModelId: deepseek-v4.1-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.006
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/deepseek-v4.1-flash-free
+  displayName:
+    en: DeepSeek V4.1 Flash Free
+  modelType: LLM
+  providerModelId: deepseek-v4.1-flash-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 200000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/flint-40b-free
+  displayName:
+    en: Flint 40B Free
+  modelType: LLM
+  providerModelId: flint-40b-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5
+  displayName:
+    en: GLM-5
+  modelType: LLM
+  providerModelId: glm-5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 3.2
+    cacheRead: 0.2
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5.1
+  displayName:
+    en: GLM-5.1
+  modelType: LLM
+  providerModelId: glm-5.1
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.4
+    output: 4.4
+    cacheRead: 0.26
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5.2
+  displayName:
+    en: GLM-5.2
+  modelType: LLM
+  providerModelId: glm-5.2
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.4
+    output: 4.4
+    cacheRead: 0.26
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5.3
+  displayName:
+    en: GLM-5.3
+  modelType: LLM
+  providerModelId: glm-5.3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.4
+    output: 4.4
+    cacheRead: 0.26
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5.3-flash
+  displayName:
+    en: GLM-5.3-Flash
+  modelType: LLM
+  providerModelId: glm-5.3-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.5
+    cacheRead: 0.03
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/glm-5.3-flash-free
+  displayName:
+    en: GLM-5.3-Flash Free
+  modelType: LLM
+  providerModelId: glm-5.3-flash-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 200000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/iceman-free
+  displayName:
+    en: Iceman Free
+  modelType: LLM
+  providerModelId: iceman-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/inkling-2-small-free
+  displayName:
+    en: Inkling 2 Small Free
+  modelType: LLM
+  providerModelId: inkling-2-small-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/kimi-k2.5
+  displayName:
+    en: Kimi K2.5
+  modelType: LLM
+  providerModelId: kimi-k2.5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.6
+    output: 3
+    cacheRead: 0.1
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/kimi-k2.6
+  displayName:
+    en: Kimi K2.6
+  modelType: LLM
+  providerModelId: kimi-k2.6
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.95
+    output: 4
+    cacheRead: 0.16
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/kimi-k2.7-code
+  displayName:
+    en: Kimi K2.7 Code
+  modelType: LLM
+  providerModelId: kimi-k2.7-code
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.95
+    output: 4
+    cacheRead: 0.19
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/kimi-k3
+  displayName:
+    en: Kimi K3
+  modelType: LLM
+  providerModelId: kimi-k3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3
+  releaseDate: null
+- modelCode: opencode/longcat-2.5-free
+  displayName:
+    en: LongCat 2.5 Free
+  modelType: LLM
+  providerModelId: longcat-2.5-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/mimo-v2.6-flash-free
+  displayName:
+    en: MiMo-V2.6-Flash Free
+  modelType: LLM
+  providerModelId: mimo-v2.6-flash-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 200000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/minimax-m2.5
+  displayName:
+    en: MiniMax-M2.5
+  modelType: LLM
+  providerModelId: minimax-m2.5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.06
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/minimax-m2.7
+  displayName:
+    en: MiniMax-M2.7
+  modelType: LLM
+  providerModelId: minimax-m2.7
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.06
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/minimax-m3
+  displayName:
+    en: MiniMax-M3
+  modelType: LLM
+  providerModelId: minimax-m3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 512000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.06
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/minimax-m3.1-flash-free
+  displayName:
+    en: MiniMax M3.1 Flash Free
+  modelType: LLM
+  providerModelId: minimax-m3.1-flash-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 512000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/mistral-large-4
+  displayName:
+    en: Mistral Large 4
+  modelType: LLM
+  providerModelId: mistral-large-4
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 524288
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.68
+    output: 2.09
+    cacheRead: 0.07
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/nemotron-3.5-lightning-free
+  displayName:
+    en: Nemotron 3.5 Lightning Free
+  modelType: LLM
+  providerModelId: nemotron-3.5-lightning-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/nemotron-3.5-super-vl-free
+  displayName:
+    en: Nemotron 3.5 Super VL Free
+  modelType: LLM
+  providerModelId: nemotron-3.5-super-vl-free
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/qwen3.8-max
+  displayName:
+    en: Qwen3.8 Max
+  modelType: LLM
+  providerModelId: qwen3.8-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.25
+    cacheWrite: 2.5
+  releaseDate: null
+- modelCode: opencode/gpt-5
+  displayName:
+    en: GPT-5
+  modelType: LLM
+  providerModelId: gpt-5
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.07
+    output: 8.5
+    cacheRead: 0.107
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5-codex
+  displayName:
+    en: GPT-5 Codex
+  modelType: LLM
+  providerModelId: gpt-5-codex
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.07
+    output: 8.5
+    cacheRead: 0.107
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5-nano
+  displayName:
+    en: GPT-5 Nano
+  modelType: LLM
+  providerModelId: gpt-5-nano
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.05
+    output: 0.4
+    cacheRead: 0.005
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.1
+  displayName:
+    en: GPT-5.1
+  modelType: LLM
+  providerModelId: gpt-5.1
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.07
+    output: 8.5
+    cacheRead: 0.107
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.1-codex
+  displayName:
+    en: GPT-5.1 Codex
+  modelType: LLM
+  providerModelId: gpt-5.1-codex
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.07
+    output: 8.5
+    cacheRead: 0.107
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.1-codex-max
+  displayName:
+    en: GPT-5.1 Codex Max
+  modelType: LLM
+  providerModelId: gpt-5.1-codex-max
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0.125
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.1-codex-mini
+  displayName:
+    en: GPT-5.1 Codex Mini
+  modelType: LLM
+  providerModelId: gpt-5.1-codex-mini
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 2
+    cacheRead: 0.025
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.2
+  displayName:
+    en: GPT-5.2
+  modelType: LLM
+  providerModelId: gpt-5.2
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.2-codex
+  displayName:
+    en: GPT-5.2 Codex
+  modelType: LLM
+  providerModelId: gpt-5.2-codex
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.3-codex
+  displayName:
+    en: GPT-5.3 Codex
+  modelType: LLM
+  providerModelId: gpt-5.3-codex
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.4
+  displayName:
+    en: GPT-5.4
+  modelType: LLM
+  providerModelId: gpt-5.4
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 15
+    cacheRead: 0.25
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 5
+      output: 22.5
+      cacheRead: 0.5
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.4-mini
+  displayName:
+    en: GPT-5.4 Mini
+  modelType: LLM
+  providerModelId: gpt-5.4-mini
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 4.5
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.4-nano
+  displayName:
+    en: GPT-5.4 Nano
+  modelType: LLM
+  providerModelId: gpt-5.4-nano
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.25
+    cacheRead: 0.02
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.4-pro
+  displayName:
+    en: GPT-5.4 Pro
+  modelType: LLM
+  providerModelId: gpt-5.4-pro
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 30
+    output: 180
+    cacheRead: 30
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.5
+  displayName:
+    en: GPT-5.5
+  modelType: LLM
+  providerModelId: gpt-5.5
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 30
+    cacheRead: 0.5
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 10
+      output: 45
+      cacheRead: 1
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.5-pro
+  displayName:
+    en: GPT-5.5 Pro
+  modelType: LLM
+  providerModelId: gpt-5.5-pro
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 30
+    output: 180
+    cacheRead: 30
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/gpt-5.6-luna
+  displayName:
+    en: GPT-5.6 Luna
+  modelType: LLM
+  providerModelId: gpt-5.6-luna
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.2
+    cacheRead: 0.02
+    cacheWrite: 0.25
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.4
+      output: 1.8
+      cacheRead: 0.04
+      cacheWrite: 0.5
+  releaseDate: null
+- modelCode: opencode/gpt-5.6-sol
+  displayName:
+    en: GPT-5.6 Sol
+  modelType: LLM
+  providerModelId: gpt-5.6-sol
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.4
+    cacheWrite: 5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 8
+      output: 30
+      cacheRead: 0.8
+      cacheWrite: 10
+  releaseDate: null
+- modelCode: opencode/gpt-5.6-terra
+  displayName:
+    en: GPT-5.6 Terra
+  modelType: LLM
+  providerModelId: gpt-5.6-terra
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: opencode/gpt-6-astra
+  displayName:
+    en: GPT-6 Astra
+  modelType: LLM
+  providerModelId: gpt-6-astra
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 1
+    cacheWrite: 12.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 20
+      output: 75
+      cacheRead: 2
+      cacheWrite: 25
+  releaseDate: null
+- modelCode: opencode/gpt-6-luna
+  displayName:
+    en: GPT-6 Luna
+  modelType: LLM
+  providerModelId: gpt-6-luna
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.01
+    cacheWrite: 0.125
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.2
+      output: 0.75
+      cacheRead: 0.02
+      cacheWrite: 0.25
+  releaseDate: null
+- modelCode: opencode/gpt-6-sol
+  displayName:
+    en: GPT-6 Sol
+  modelType: LLM
+  providerModelId: gpt-6-sol
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: opencode/gpt-6.1-sol
+  displayName:
+    en: GPT-6.1 Sol
+  modelType: LLM
+  providerModelId: gpt-6.1-sol
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.2
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: opencode/grok-4.5
+  displayName:
+    en: Grok 4.5
+  modelType: LLM
+  providerModelId: grok-4.5
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 500000
+  maxOutputTokens: 500000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.3
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 12
+      cacheRead: 0.6
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/grok-4.6
+  displayName:
+    en: Grok 4.6
+  modelType: LLM
+  providerModelId: grok-4.6
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 500000
+  maxOutputTokens: 500000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.5
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 12
+      cacheRead: 1
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/grok-4.7
+  displayName:
+    en: Grok 4.7
+  modelType: LLM
+  providerModelId: grok-4.7
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 500000
+  maxOutputTokens: 500000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.5
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 12
+      cacheRead: 1
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/grok-build-0.1
+  displayName:
+    en: Grok Build 0.1
+  modelType: LLM
+  providerModelId: grok-build-0.1
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 256000
+  maxOutputTokens: 256000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 2
+    cacheRead: 0.2
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/muse-ember-1.0
+  displayName:
+    en: Muse Ember 1.0
+  modelType: LLM
+  providerModelId: muse-ember-1.0
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1048576
+  maxOutputTokens: 270000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.004
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/muse-spark-1.2
+  displayName:
+    en: Muse Spark 1.2
+  modelType: LLM
+  providerModelId: muse-spark-1.2
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 4.25
+    cacheRead: 0.15
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/muse-spark-1.3
+  displayName:
+    en: Muse Spark 1.3
+  modelType: LLM
+  providerModelId: muse-spark-1.3
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 4.25
+    cacheRead: 0.15
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/muse-wonder-1.0
+  displayName:
+    en: Muse Wonder
+  modelType: LLM
+  providerModelId: muse-wonder-1.0
+  primaryUpstreamProtocol: openai-responses
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/jev-1.13
+  displayName:
+    en: Jev 1.13
+  modelType: LLM
+  providerModelId: jev-1.13
+  primaryUpstreamProtocol: typesafe-system-one
+  contextLength: 32000
+  maxOutputTokens: null
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - classifier
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.042
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: opencode/jev-1.13-free
+  displayName:
+    en: Jev 1.13 Free
+  modelType: LLM
+  providerModelId: jev-1.13-free
+  primaryUpstreamProtocol: typesafe-system-one
+  contextLength: 32000
+  maxOutputTokens: null
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - classifier
+  tags:
+  - pi-ai-catalog
+  - opencode
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

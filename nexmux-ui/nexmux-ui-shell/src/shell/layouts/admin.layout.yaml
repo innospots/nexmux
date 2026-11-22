@@ -1,0 +1,37 @@
+# Nexmux 管理端外壳：沿用默认 NavigationShell，关闭壳层面包屑（页面内 Breadcrumb 组件保留）。
+dsl: "1.0"
+body:
+  type: Layout
+  props: { className: shell-root }
+  children:
+    - type: NavigationShell
+      props:
+        breadcrumb: false
+        expandRailOnHover: false
+        brandMark: N
+        menus: ${data.session.menus}
+        railFooter:
+          type: UserMenu
+          props:
+            user:
+              name: ${data.session.user.name || '访客'}
+              email: ${data.session.user.username || ''}
+            items:
+              - { label: 个人中心, value: /profile, icon: user-round }
+            showName: false
+            side: right
+            align: end
+          events:
+            onSelect:
+              - action: navigate
+                params: { to: "${event}" }
+            onSignOut:
+              - action: request
+                params: { method: POST, url: /api/auth/logout }
+              - action: app.reload
+                params: { to: /login }
+      children:
+        - type: Content
+          props: { className: shell-content }
+          children:
+            - type: PageOutlet

@@ -1,0 +1,56 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: meituan
+modelCount: 1
+models:
+- modelCode: meituan/longcat-2.0
+  displayName:
+    en: LongCat 2.0
+  modelType: LLM
+  providerModelId: longcat-2.0
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - octafuse-preset
+  - meituan
+  description:
+    en: A sparse expert model from Meituan for coding, repository work, and long-horizon agents. Its sparse expert architecture
+      is built for repository-scale coding, long-horizon problem solving, and agentic execution.
+    zh-CN: 美团稀疏专家模型，适合编程、代码仓库任务与长周期 Agent。稀疏专家架构面向仓库级编程、长周期问题求解和 Agent 执行。
+    ja: Meituan のスパースエキスパートモデルです。コーディング、リポジトリ単位の作業、長い期間のエージェントに向いています。リポジトリ規模のコーディング、長い問題の解決、エージェントの実行を想定した構成です。
+    ko: Meituan의 희소 전문가 모델입니다. 코딩, 저장소 단위 작업, 긴 주기의 에이전트에 맞습니다. 저장소 규모의 코딩, 긴 문제 풀이, 에이전트 실행을 전제로 한 구조입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 2.95
+    cacheRead: 0.015
+    cacheWrite: 0
+    tiers:
+    - input: 0.75
+      output: 2.95
+      cacheRead: 0.015
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.75
+          output_price: 2.95
+          cache_read_price: 0.015
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 5
+          output_price: 20
+          cache_read_price: 0.1
+          cache_write_price: null
+  releaseDate: '2026-06-30'

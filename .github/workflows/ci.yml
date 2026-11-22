@@ -55,5 +55,5 @@ jobs:
       - name: Typecheck + Lint
         working-directory: nexmux-ui
         run: |
-          npx tsc --noEmit
-          npx eslint src
+          pnpm --filter nexmux-ui-app typecheck
+          pnpm --filter nexmux-ui-app lint

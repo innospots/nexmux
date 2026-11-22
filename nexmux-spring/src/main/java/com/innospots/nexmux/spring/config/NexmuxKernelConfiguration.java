@@ -1,5 +1,7 @@
 package com.innospots.nexmux.spring.config;
 
+import com.innospots.nexmux.console.catalog.ProviderModelPresetViewAssembler;
+import com.innospots.nexmux.console.endpoint.catalog.ProviderModelPresetEndpoint;
 import com.innospots.nexmux.console.endpoint.client.ClientEndpoint;
 import com.innospots.nexmux.console.endpoint.client.ClientTemplateEndpoint;
 import com.innospots.nexmux.console.endpoint.debug.DebugEndpoint;
@@ -26,6 +28,10 @@ import com.innospots.nexmux.console.model.ModelViewAssembler;
 import com.innospots.nexmux.console.stats.StatsViewAssembler;
 import com.innospots.nexmux.console.route.RouteViewAssembler;
 import com.innospots.nexmux.console.provider.ProviderViewAssembler;
+import com.innospots.nexmux.core.catalog.preset.loader.ProviderModelPresetLoader;
+import com.innospots.nexmux.core.catalog.preset.parser.ProviderModelPresetYamlParser;
+import com.innospots.nexmux.core.catalog.preset.service.ProviderModelPresetImportService;
+import com.innospots.nexmux.core.catalog.preset.service.ProviderModelPresetService;
 import com.innospots.nexmux.core.access.dao.ClientDao;
 import com.innospots.nexmux.core.access.dao.ClientTemplateDao;
 import com.innospots.nexmux.core.access.service.ClientService;
@@ -202,6 +208,69 @@ public class NexmuxKernelConfiguration {
     }
 
     @Bean
+    ProviderModelPresetYamlParser providerModelPresetYamlParser() {
+        return new ProviderModelPresetYamlParser();
+    }
+
+    @Bean
+    ProviderModelPresetLoader providerModelPresetLoader(ProviderModelPresetYamlParser parser) {
+        return new ProviderModelPresetLoader(parser);
+    }
+
+    @Bean
+    ProviderModelPresetService providerModelPresetService(ProviderModelPresetLoader loader) {
+        return new ProviderModelPresetService(loader);
+    }
+
+    @Bean
+    ProviderModelPresetImportService providerModelPresetImportService(
+            ProviderModelPresetService presetService,
+            ProviderService providerService,
+            ModelService modelService,
+            ProviderDao providerDao,
+            ModelDao modelDao) {
+        return new ProviderModelPresetImportService(
+                presetService, providerService, modelService, providerDao, modelDao);
+    }
+
+    @Bean
+    ProviderModelPresetViewAssembler providerModelPresetViewAssembler(
+            ProviderModelPresetService presetService,
+            ProviderModelPresetImportService importService,
+            ProviderDao providerDao,
+            ModelDao modelDao) {
+        return new ProviderModelPresetViewAssembler(
+                presetService, importService, providerDao, modelDao);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    ProviderModelPresetEndpoint providerModelPresetEndpoint(
+            ProviderModelPresetViewAssembler viewAssembler) {
+        return new ProviderModelPresetEndpoint(viewAssembler);
+    }
+
+    @Bean
+    com.innospots.nexmux.console.catalog.ModelCatalogViewAssembler modelCatalogViewAssembler(
+            ProviderModelPresetService presetService,
+            ProviderModelPresetImportService importService,
+            ProviderDao providerDao,
+            ModelDao modelDao) {
+        return new com.innospots.nexmux.console.catalog.ModelCatalogViewAssembler(
+                presetService, importService, providerDao, modelDao);
+    }
+
+    @Bean
+    @Lazy
+    @Profile("!runtime")
+    com.innospots.nexmux.console.endpoint.catalog.ModelCatalogEndpoint modelCatalogEndpoint(
+            com.innospots.nexmux.console.catalog.ModelCatalogViewAssembler modelCatalogViewAssembler) {
+        return new com.innospots.nexmux.console.endpoint.catalog.ModelCatalogEndpoint(
+                modelCatalogViewAssembler);
+    }
+
+    @Bean
     ProviderViewAssembler providerViewAssembler(
             ProviderService providerService, ModelService modelService, RouteService routeService,
             DisplayFormatsProvider displayFormatsProvider) {
@@ -219,8 +288,9 @@ public class NexmuxKernelConfiguration {
     @Lazy
     @Profile("!runtime")
     ProviderEndpoint providerEndpoint(
-            ProviderService providerService, ProviderViewAssembler providerViewAssembler) {
-        return new ProviderEndpoint(providerService, providerViewAssembler);
+            ProviderService providerService, ProviderViewAssembler providerViewAssembler,
+            ProviderModelPresetViewAssembler presetViewAssembler) {
+        return new ProviderEndpoint(providerService, providerViewAssembler, presetViewAssembler);
     }
 
     @Bean

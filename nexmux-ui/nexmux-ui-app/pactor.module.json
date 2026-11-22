@@ -1,0 +1,14 @@
+{
+  "id": "nexmux",
+  "name": "nexmux-ui-app",
+  "basePath": "/nexmux",
+  "yamlRoot": "src/backend/pages/yaml",
+  "clientEntry": "module/client.ts",
+  "serverEntry": "module/server.ts",
+  "apiPrefixes": ["/api/d", "/api/auth", "/api/i18n", "/api/users"],
+  "actions": [],
+  "publicDir": "public",
+  "target": "innospots-web-shell@3",
+  "access": { "default": "public" },
+  "tailwind": { "enabled": false }
+}

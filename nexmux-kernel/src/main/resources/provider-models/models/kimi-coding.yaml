@@ -1,0 +1,178 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: kimi-coding
+modelCount: 6
+models:
+- modelCode: kimi-coding/k3
+  displayName:
+    en: Kimi K3
+  modelType: LLM
+  providerModelId: k3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: kimi-coding/k3-256k
+  displayName:
+    en: Kimi K3-256K
+  modelType: LLM
+  providerModelId: k3-256k
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: kimi-coding/k3.1-pro
+  displayName:
+    en: Kimi K3.1 Pro
+  modelType: LLM
+  providerModelId: k3.1-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: kimi-coding/k3.1-pro-highspeed
+  displayName:
+    en: Kimi K3.1 Pro Highspeed
+  modelType: LLM
+  providerModelId: k3.1-pro-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: kimi-coding/kimi-for-coding
+  displayName:
+    en: kimi-for-coding
+  modelType: LLM
+  providerModelId: kimi-for-coding
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.95
+    output: 4
+    cacheRead: 0.19
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: kimi-coding/kimi-for-coding-highspeed
+  displayName:
+    en: Kimi For Coding HighSpeed
+  modelType: LLM
+  providerModelId: kimi-for-coding-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - kimi-coding
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.9
+    output: 8
+    cacheRead: 0.38
+    cacheWrite: 0
+  releaseDate: null

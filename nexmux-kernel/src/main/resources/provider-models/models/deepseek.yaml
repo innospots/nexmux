@@ -1,0 +1,132 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: deepseek
+modelCount: 2
+models:
+- modelCode: deepseek/deepseek-flash
+  displayName:
+    en: DeepSeek V4.1 Flash
+  modelType: LLM
+  providerModelId: deepseek-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - deepseek
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.006
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: deepseek/deepseek-v4-pro
+  displayName:
+    en: DeepSeek V4 Pro
+  modelType: LLM
+  providerModelId: deepseek-v4-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - deepseek
+  - octafuse-preset
+  description:
+    en: The official DeepSeek V4 Pro flagship for advanced reasoning, coding, and sustained agent workloads. The 0813 production
+      checkpoint keeps 1M context and dual thinking modes under the same API name.
+    zh-CN: DeepSeek V4 Pro 正式版旗舰模型，面向高级推理、编程与持续 Agent 任务。0813 生产检查点沿用同一 API 名称，提供 1M 上下文与思考/非思考双模式。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.66
+    output: 1.98
+    cacheRead: 0.022
+    cacheWrite: 0
+    tiers:
+    - input: 0.66
+      output: 1.98
+      cacheRead: 0.022
+      cacheWrite: 0
+    timeMultipliers:
+    - days: 1,2,3,4,5
+      start: 09:00
+      end: '12:00'
+      rate: 2
+    - days: 1,2,3,4,5
+      start: '14:00'
+      end: '18:00'
+      rate: 2
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.66
+          output_price: 1.98
+          cache_read_price: 0.022
+          cache_write_price: null
+        schedule:
+        - start: 09:00
+          end: '12:00'
+          factor: 2
+          days:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+        - start: '14:00'
+          end: '18:00'
+          factor: 2
+          days:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 4.5
+          output_price: 13.5
+          cache_read_price: 0.15
+          cache_write_price: null
+        schedule:
+        - start: 09:00
+          end: '12:00'
+          factor: 2
+          days:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+        - start: '14:00'
+          end: '18:00'
+          factor: 2
+          days:
+          - 1
+          - 2
+          - 3
+          - 4
+          - 5
+  releaseDate: '2026-08-13'

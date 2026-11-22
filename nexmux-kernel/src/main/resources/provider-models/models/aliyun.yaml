@@ -1,0 +1,1163 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: aliyun
+modelCount: 18
+models:
+- modelCode: aliyun/qwen4-max
+  displayName:
+    en: Qwen4 Max
+  modelType: LLM
+  providerModelId: qwen4-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: Next-generation flagship multimodal Qwen model (2.4T-parameter MoE) for coding, office productivity, frontend design,
+      and complex agentic tasks. Accepts text, image, and video input, with a 1M context window, about 128K max output, and
+      up to about 256K for thinking plus the answer. Thinking is on by default and adjustable with reasoning_effort (low /
+      high / xhigh, default high; none turns it off); reasoning_effort and thinking_budget cannot be set together. Supports
+      function calling, structured outputs, explicit and implicit caching, and OpenAI Chat Completions, Responses, and Anthropic
+      Messages protocols. Cache write is the 5-minute list price.
+    zh-CN: 千问新一代旗舰多模态模型（2.4 万亿参数 MoE），面向编程、办公、前端设计与复杂智能体任务。支持文本、图片和视频输入，上下文 1M，最大输出约 128K，思考与回答合计最长约 256K。默认开启深度思考，可用 reasoning_effort（low
+      / high / xhigh，默认 high；none 关闭）调节；reasoning_effort 与 thinking_budget 不能同时设置。支持 Function Calling、结构化输出、显式与隐式缓存，兼容 OpenAI
+      Chat Completions、Responses 与 Anthropic Messages 协议。缓存写入价为 5 分钟档刊例价。
+    ja: 次世代フラッグシップのマルチモーダル Qwen モデル（総パラメータ 2.4兆の MoE）で、コーディング、オフィス業務、フロントエンド設計、複雑なエージェント作業に向きます。テキスト・画像・動画を入力でき、コンテキストは 1M、最大出力は約
+      128K、思考と回答の合計は最長で約 256K です。思考は既定でオンで、reasoning_effort（low / high / xhigh、既定は high。none でオフ）で調整できます。reasoning_effort
+      と thinking_budget は同時に指定できません。Function Calling、構造化出力、明示的・暗黙的キャッシュに対応し、OpenAI Chat Completions、Responses、Anthropic Messages
+      プロトコルと互換です。キャッシュ書き込み価格は 5 分枠の定価です。
+    ko: 차세대 플래그십 멀티모달 Qwen 모델(총 파라미터 2.4조 MoE)로, 코딩, 오피스 업무, 프런트엔드 디자인, 복잡한 에이전트 작업에 적합합니다. 텍스트·이미지·동영상 입력을 지원하며 컨텍스트는 1M,
+      최대 출력은 약 128K, 사고와 답변의 합계는 최대 약 256K입니다. 사고는 기본으로 켜져 있고 reasoning_effort(low / high / xhigh, 기본값 high, none이면 끔)로 조절할
+      수 있습니다. reasoning_effort와 thinking_budget은 동시에 설정할 수 없습니다. Function Calling, 구조화 출력, 명시적·암시적 캐시를 지원하고 OpenAI Chat Completions,
+      Responses, Anthropic Messages 프로토콜과 호환됩니다. 캐시 쓰기 가격은 5분 구간 정가입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 4.5
+    cacheRead: 0.075
+    cacheWrite: 1.875
+    tiers:
+    - input: 1.5
+      output: 4.5
+      cacheRead: 0.075
+      cacheWrite: 1.875
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 4.5
+          cache_read_price: 0.075
+          cache_write_price: 1.875
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10
+          output_price: 30
+          cache_read_price: 0.5
+          cache_write_price: 12.5
+  releaseDate: '2026-11-16'
+- modelCode: aliyun/qwen4-max-preview
+  displayName:
+    en: Qwen4 Max Preview
+  modelType: LLM
+  providerModelId: qwen4-max-preview
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: Next-generation flagship multimodal Qwen preview for coding, office productivity, frontend design, and complex agentic
+      tasks. Accepts text, image, and video input, with a 1M context window and about 384K max output shared by thinking and
+      the answer. Thinking is on by default and adjustable with reasoning_effort (low / medium / xhigh, default xhigh); reasoning_effort
+      and thinking_budget cannot be set together. Available only through Token Plan, not pay-as-you-go; the preview runs until
+      2026-11-25 24:00 (UTC+8) and the model is retired afterwards. Prices follow the list prices of the general-availability
+      qwen4-max (the preview itself is not billed per token).
+    zh-CN: 千问新一代旗舰多模态预览模型，面向编程、办公、前端设计与复杂智能体任务。支持文本、图片和视频输入，上下文 1M，最大输出约 384K（思考与回答共享）。默认开启深度思考，可用 reasoning_effort（low /
+      medium / xhigh，默认 xhigh）调节；reasoning_effort 与 thinking_budget 不能同时设置。仅在 Token Plan 订阅中提供，不支持按量计费；预览期至 2026-11-25 24:00（UTC+8），之后下线。价格与正式版
+      qwen4-max 的刊例价一致（预览版本身不按 token 计费）。
+    ja: 次世代フラッグシップのマルチモーダル Qwen プレビューモデルで、コーディング、オフィス業務、フロントエンド設計、複雑なエージェント作業に向きます。テキスト・画像・動画を入力でき、コンテキストは 1M、最大出力は約 384K（思考と回答で共有）です。思考は既定でオンで、reasoning_effort（low
+      / medium / xhigh、既定は xhigh）で調整できます。reasoning_effort と thinking_budget は同時に指定できません。Token Plan のサブスクリプションでのみ提供され、従量課金は使えません。プレビュー期間は
+      2026-11-25 24:00（UTC+8）までで、その後は終了します。価格は正式版 qwen4-max の定価と同じです（プレビュー自体は token 課金ではありません）。
+    ko: 차세대 플래그십 멀티모달 Qwen 프리뷰 모델로, 코딩, 오피스 업무, 프런트엔드 디자인, 복잡한 에이전트 작업에 적합합니다. 텍스트·이미지·동영상 입력을 지원하며 컨텍스트는 1M, 최대 출력은 약 384K(사고와
+      답변이 공유)입니다. 사고는 기본으로 켜져 있고 reasoning_effort(low / medium / xhigh, 기본값 xhigh)로 조절할 수 있습니다. reasoning_effort와 thinking_budget은
+      동시에 설정할 수 없습니다. Token Plan 구독으로만 제공되며 종량제는 지원하지 않습니다. 프리뷰 기간은 2026-11-25 24:00(UTC+8)까지이며 이후 종료됩니다. 가격은 정식판 qwen4-max의
+      정가와 같습니다(프리뷰 자체는 토큰 과금이 아닙니다).
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 4.5
+    cacheRead: 0.075
+    cacheWrite: 1.875
+    tiers:
+    - input: 1.5
+      output: 4.5
+      cacheRead: 0.075
+      cacheWrite: 1.875
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 4.5
+          cache_read_price: 0.075
+          cache_write_price: 1.875
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10
+          output_price: 30
+          cache_read_price: 0.5
+          cache_write_price: 12.5
+  releaseDate: '2026-11-11'
+- modelCode: aliyun/qwen3.8-max
+  displayName:
+    en: Qwen3.8 Max
+  modelType: LLM
+  providerModelId: qwen3.8-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A 2.4T-parameter MoE flagship for coding, office productivity, vision, and long-horizon agents. Native multimodal
+      understanding supports long documents and video, with strong end-to-end delivery on professional tasks.
+    zh-CN: 2.4 万亿参数 MoE 旗舰，全面提升编程与办公能力，可胜任法律、金融、设计等专业任务，并端到端交付生产级成果。原生视觉理解覆盖规划、执行与验证，支持超长文档与长视频深度解析。
+    ja: 総パラメータ 2.4兆の MoE フラッグシップです。コーディングと事務作業を底上げし、法律・金融・デザインなどの専門タスクから本番品質の成果物まで通して仕上げられます。視覚理解は計画、実行、検証までカバーし、非常に長い文書と長尺動画も読み解けます。
+    ko: 총 파라미터 2.4조 MoE 플래그십입니다. 코딩과 사무 능력을 끌어올려 법률, 금융, 디자인 같은 전문 작업부터 프로덕션 수준의 결과까지 이어서 끝낼 수 있습니다. 시각 이해는 계획, 실행, 검증까지 다루며,
+      매우 긴 문서와 장시간 영상도 깊게 읽습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.25
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 6
+      cacheRead: 0.25
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.25
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 1.5
+          cache_write_price: 15
+  releaseDate: '2026-08-01'
+- modelCode: aliyun/qwen3.8-max-prime
+  displayName:
+    en: Qwen3.8 Max Prime
+  modelType: LLM
+  providerModelId: qwen3.8-max-prime
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A high-throughput variant of Qwen3.8 Max optimized for faster inference. Supports both reasoning and non-reasoning
+      modes with the same 1M context window.
+    zh-CN: Qwen3.8 Max 优速版，推理速度更快。支持思考与非思考双模式，同样具备 1M 上下文窗口。
+    ja: Qwen3.8 Max の高速版です。推論が速く、思考モードと通常応答の両方に対応し、コンテキストは同じく 1M です。
+    ko: Qwen3.8 Max의 고속 버전입니다. 추론이 더 빠르고, 사고 모드와 일반 응답을 모두 지원하며, 컨텍스트도 마찬가지로 1M입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 12
+    cacheRead: 0
+    cacheWrite: 0
+    tiers:
+    - input: 4
+      output: 12
+      cacheRead: 0
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 4
+          output_price: 12
+          cache_read_price: null
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 24
+          output_price: 72
+          cache_read_price: null
+          cache_write_price: null
+  releaseDate: null
+- modelCode: aliyun/qwen3.8-2.4t-a95b
+  displayName:
+    en: Qwen3.8 2.4T-A95B
+  modelType: LLM
+  providerModelId: qwen3.8-2.4t-a95b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A 2.4T-parameter open-source flagship for complex reasoning, coding, and knowledge work. Supports both reasoning and
+      non-reasoning modes with a 1M context window.
+    zh-CN: 2.4 万亿参数开源旗舰模型，面向复杂推理、编程与知识工作。支持思考与非思考双模式，具备 1M 上下文窗口。
+    ja: 総パラメータ 2.4兆のオープンソース・フラッグシップです。難しい推論、コーディング、知識作業向けで、思考モードと通常応答の両方に対応し、コンテキストは 1M です。
+    ko: 총 파라미터 2.4조 오픈소스 플래그십입니다. 복잡한 추론, 코딩, 지식 작업용이며, 사고 모드와 일반 응답을 모두 지원하고 컨텍스트는 1M입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.25
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 6
+      cacheRead: 0.25
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.25
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 1.5
+          cache_write_price: 15
+  releaseDate: '2026-08-01'
+- modelCode: aliyun/qwen3.8-27b
+  displayName:
+    en: Qwen3.8 27B
+  modelType: LLM
+  providerModelId: qwen3.8-27b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A 27B-parameter multimodal Qwen model for efficient reasoning, coding, and visual understanding. Supports both reasoning
+      and non-reasoning modes with image and video input.
+    zh-CN: 270 亿参数 Qwen 多模态模型，面向高效推理、编程与视觉理解。支持思考与非思考双模式，接受图像与视频输入。
+    ja: 270億パラメータの Qwen マルチモーダルモデルです。効率のよい推論、コーディング、視覚理解向けで、思考モードと通常応答の両方に対応し、画像と動画を受け取れます。
+    ko: 270억 파라미터 Qwen 멀티모달 모델입니다. 효율적인 추론, 코딩, 시각 이해용이며, 사고 모드와 일반 응답을 모두 지원하고 이미지와 영상을 받습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 2
+    cacheRead: 0.1
+    cacheWrite: 0.625
+    tiers:
+    - input: 0.5
+      output: 2
+      cacheRead: 0.1
+      cacheWrite: 0.625
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.5
+          output_price: 2
+          cache_read_price: 0.1
+          cache_write_price: 0.625
+      cny:
+        tiers:
+        - upto: null
+          input_price: 3
+          output_price: 12
+          cache_read_price: 0.6
+          cache_write_price: 3.75
+  releaseDate: null
+- modelCode: aliyun/qwen3.8-omni-flash
+  displayName:
+    en: Qwen3.8 Omni Flash
+  modelType: LLM
+  providerModelId: qwen3.8-omni-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  - audio
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A multimodal Qwen model for text, image, audio, and video understanding. Supports deep thinking with adjustable reasoning
+      intensity for complex tasks.
+    zh-CN: Qwen 全模态模型，支持文本、图像、音频与视频理解。默认开启深度思考，可调节思考强度以适应复杂任务。
+    ja: テキスト、画像、音声、動画をまとめて扱う Qwen のオムニモデルです。深い思考は標準でオンになり、難しいタスクに合わせて思考の強さを調整できます。
+    ko: 텍스트, 이미지, 오디오, 영상을 함께 다루는 Qwen 옴니 모델입니다. 깊은 사고는 기본으로 켜져 있고, 어려운 작업에 맞춰 사고 강도를 조절할 수 있습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.13
+    output: 0.45
+    cacheRead: 0.017
+    cacheWrite: 0
+    tiers:
+    - input: 0.13
+      output: 0.45
+      cacheRead: 0.017
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.13
+          output_price: 0.45
+          cache_read_price: 0.017
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.8
+          output_price: 2.7
+          cache_read_price: 0.1
+          cache_write_price: null
+  releaseDate: null
+- modelCode: aliyun/qwen3.8-max-preview
+  displayName:
+    en: Qwen3.8 Max Preview
+  modelType: LLM
+  providerModelId: qwen3.8-max-preview
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A flagship Qwen preview for complex reasoning, coding, vision, and long-horizon agentic workloads. Preview channel
+      for early access; production traffic should prefer qwen3.8-max.
+    zh-CN: 面向复杂推理、编程、视觉理解与长程 Agent 任务的 Qwen 旗舰预览模型。适合抢先体验；生产调用建议优先使用 qwen3.8-max。
+    ja: 難しい推論、コーディング、視覚理解、長いエージェント作業向けの Qwen フラッグシップ・プレビューです。先に試す用途に向いており、本番トラフィックは qwen3.8-max を優先してください。
+    ko: 복잡한 추론, 코딩, 시각 이해, 긴 에이전트 작업용 Qwen 플래그십 프리뷰입니다. 먼저 써 보는 용도에 맞고, 프로덕션 트래픽은 qwen3.8-max를 우선하는 편이 좋습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.25
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 6
+      cacheRead: 0.25
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.25
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 1.5
+          cache_write_price: 15
+  releaseDate: '2026-07-19'
+- modelCode: aliyun/qwen3.8-flash
+  displayName:
+    en: Qwen3.8 Flash
+  modelType: LLM
+  providerModelId: qwen3.8-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A fast multimodal Qwen3.8 model with a native 1M context window for coding, agents, documents, and visual understanding.
+      Near-flagship quality at a fraction of Qwen3.8 Max cost, with image and video input.
+    zh-CN: 通义千问最新多模态 Flash 模型，兼具理解生成能力与响应速度。原生百万级上下文，适合编程辅助、智能体协作、超长文档与图文/长视频理解，以更低推理成本接近旗舰效果。
+    ja: Qwen の新しいマルチモーダル Flash です。理解と生成の両方を持ち、応答も速いモデルです。コンテキストは最初から100万トークン規模で、コーディング支援、エージェント連携、長い文書、画像や長尺動画の理解に向きます。推論コストを抑えつつ、フラッグシップに近い仕上がりを狙えます。
+    ko: Qwen의 새 멀티모달 Flash입니다. 이해와 생성을 함께 하면서 응답도 빠릅니다. 컨텍스트는 처음부터 100만 토큰 규모이고, 코딩 보조, 에이전트 협업, 긴 문서, 이미지와 장시간 영상 이해에 맞습니다.
+      추론 비용을 낮추면서 플래그십에 가까운 결과를 노립니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.47
+    cacheRead: 0.01875
+    cacheWrite: 0.234375
+    tiers:
+    - input: 0.15
+      output: 0.47
+      cacheRead: 0.01875
+      cacheWrite: 0.234375
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.15
+          output_price: 0.47
+          cache_read_price: 0.01875
+          cache_write_price: 0.234375
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.8
+          output_price: 2.7
+          cache_read_price: 0.1
+          cache_write_price: 1.25
+  releaseDate: '2026-08-26'
+- modelCode: aliyun/qwen3.7-plus
+  displayName:
+    en: Qwen3.7 Plus
+  modelType: LLM
+  providerModelId: qwen3.7-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A cost-efficient multimodal Qwen model for general reasoning, vision, and production applications. It combines text
+      and image understanding with a cost-conscious design for production-scale multimodal reasoning.
+    zh-CN: 兼顾成本与效果的 Qwen 多模态模型，适合通用推理、视觉理解与生产应用。兼顾文本与图像理解，并以更具成本效率的设计服务于生产级多模态推理。
+    ja: コストと品質のバランスを取った Qwen のマルチモーダルモデルです。一般的な推論、視覚理解、本番利用に向いています。テキストと画像の両方を扱い、本番規模のマルチモーダル推論をコストを抑えて回せます。
+    ko: 비용과 품질의 균형을 맞춘 Qwen 멀티모달 모델입니다. 일반 추론, 시각 이해, 프로덕션에 맞습니다. 텍스트와 이미지를 함께 다루고, 프로덕션 규모의 멀티모달 추론을 비용을 낮춰 돌릴 수 있습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.4
+    output: 1.6
+    cacheRead: 0.08
+    cacheWrite: 0.5
+    tiers:
+    - upto: 256000
+      input: 0.4
+      output: 1.6
+      cacheRead: 0.08
+      cacheWrite: 0.5
+    - input: 1.2
+      output: 4.8
+      cacheRead: 0.24
+      cacheWrite: 1.5
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.4
+          output_price: 1.6
+          cache_read_price: 0.08
+          cache_write_price: 0.5
+        - upto: null
+          input_price: 1.2
+          output_price: 4.8
+          cache_read_price: 0.24
+          cache_write_price: 1.5
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 2
+          output_price: 8
+          cache_read_price: 0.4
+          cache_write_price: 2.5
+        - upto: null
+          input_price: 6
+          output_price: 24
+          cache_read_price: 1.2
+          cache_write_price: 7.5
+  releaseDate: '2026-06-02'
+- modelCode: aliyun/qwen3.7-max
+  displayName:
+    en: Qwen3.7 Max
+  modelType: LLM
+  providerModelId: qwen3.7-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: The Qwen3.7 flagship, optimized for coding, productivity, and agent-centric workloads. Its agent-oriented design emphasizes
+      coding, office productivity, and complex multi-step work.
+    zh-CN: Qwen3.7 旗舰模型，重点优化编程、生产力任务与 Agent 工作流。其 Agent 导向设计重点覆盖编程、办公生产力和复杂多步骤任务。
+    ja: Qwen3.7 のフラッグシップです。コーディング、実務タスク、エージェントの流れに重点を置いています。設計もエージェント向けで、コーディング、事務作業、手順の多い仕事をカバーします。
+    ko: Qwen3.7 플래그십입니다. 코딩, 실무, 에이전트 워크플로에 무게를 둡니다. 설계도 에이전트 중심이라 코딩, 사무, 단계가 많은 작업을 다룹니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 7.5
+    cacheRead: 0.5
+    cacheWrite: 3.125
+    tiers:
+    - input: 2.5
+      output: 7.5
+      cacheRead: 0.5
+      cacheWrite: 3.125
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2.5
+          output_price: 7.5
+          cache_read_price: 0.5
+          cache_write_price: 3.125
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 2.4
+          cache_write_price: 15
+  releaseDate: '2026-05-20'
+- modelCode: aliyun/qwen3.7-flash
+  displayName:
+    en: Qwen3.7 Flash
+  modelType: LLM
+  providerModelId: qwen3.7-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A fast multimodal Qwen3.7 model with stronger vision, agent execution, and coding throughput than Qwen3.6 Flash. Built
+      for low-latency multimodal understanding and agent workflows.
+    zh-CN: Qwen3.7 原生视觉语言 Flash 模型，相较 3.6-Flash 全面提升多模态理解与 Agent 执行能力，适合低延迟多模态理解与 Coding / Agent 场景。
+    ja: Qwen3.7 のネイティブ視覚言語 Flash です。3.6-Flash よりマルチモーダル理解とエージェント実行が全体的に上がっており、低レイテンシのマルチモーダル理解とコーディング、エージェント向けです。
+    ko: Qwen3.7 네이티브 비전-언어 Flash입니다. 3.6-Flash보다 멀티모달 이해와 에이전트 실행이 전반적으로 올라갔고, 저지연 멀티모달 이해와 코딩, 에이전트에 맞습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.03
+    output: 0.13
+    cacheRead: 0.006
+    cacheWrite: 0.0375
+    tiers:
+    - upto: 32000
+      input: 0.03
+      output: 0.13
+      cacheRead: 0.006
+      cacheWrite: 0.0375
+    - upto: 256000
+      input: 0.1
+      output: 0.4
+      cacheRead: 0.02
+      cacheWrite: 0.125
+    - input: 0.2
+      output: 0.8
+      cacheRead: 0.04
+      cacheWrite: 0.25
+    prices:
+      usd:
+        tiers:
+        - upto: 32000
+          input_price: 0.03
+          output_price: 0.13
+          cache_read_price: 0.006
+          cache_write_price: 0.0375
+        - upto: 256000
+          input_price: 0.1
+          output_price: 0.4
+          cache_read_price: 0.02
+          cache_write_price: 0.125
+        - upto: null
+          input_price: 0.2
+          output_price: 0.8
+          cache_read_price: 0.04
+          cache_write_price: 0.25
+      cny:
+        tiers:
+        - upto: 32000
+          input_price: 0.2
+          output_price: 0.8
+          cache_read_price: 0.04
+          cache_write_price: 0.25
+        - upto: 256000
+          input_price: 0.6
+          output_price: 2.4
+          cache_read_price: 0.12
+          cache_write_price: 0.75
+        - upto: null
+          input_price: 1.2
+          output_price: 4.8
+          cache_read_price: 0.24
+          cache_write_price: 1.5
+  releaseDate: '2026-07-15'
+- modelCode: aliyun/qwen3.6-plus
+  displayName:
+    en: Qwen3.6 Plus
+  modelType: LLM
+  providerModelId: qwen3.6-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A scalable long-context Qwen model balancing strong reasoning with efficient inference. A hybrid of efficient linear
+      attention and sparse expert routing improves scalability and inference efficiency.
+    zh-CN: 兼顾推理能力与推理效率、适合长上下文任务的 Qwen 模型。通过高效线性注意力与稀疏专家路由的混合架构，提升扩展性和推理效率。
+    ja: 推論の強さと効率を両立し、長いコンテキスト向けの Qwen です。線形アテンションと疎なエキスパート経路を組み合わせ、スケールと推論効率を上げています。
+    ko: 추론 능력과 효율을 같이 잡고, 긴 컨텍스트에 맞춘 Qwen입니다. 선형 어텐션과 희소 전문가 라우팅을 섞어 확장성과 추론 효율을 높였습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 3
+    cacheRead: 0.05
+    cacheWrite: 0.625
+    tiers:
+    - upto: 256000
+      input: 0.5
+      output: 3
+      cacheRead: 0.05
+      cacheWrite: 0.625
+    - input: 2
+      output: 6
+      cacheRead: 0.2
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.5
+          output_price: 3
+          cache_read_price: 0.05
+          cache_write_price: 0.625
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 2
+          output_price: 12
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+        - upto: null
+          input_price: 8
+          output_price: 48
+          cache_read_price: 0.8
+          cache_write_price: 10
+  releaseDate: '2026-04-02'
+- modelCode: aliyun/qwen3.6-max
+  displayName:
+    en: Qwen3.6 Max
+  modelType: LLM
+  providerModelId: qwen3.6-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A high-capability Qwen model for demanding reasoning, coding, and knowledge work.
+    zh-CN: 面向高难度推理、编程与知识工作的高性能 Qwen 模型。
+    ja: 難度の高い推論、コーディング、知識作業向けの高性能 Qwen です。
+    ko: 어려운 추론, 코딩, 지식 작업용 고성능 Qwen입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.3
+    output: 7.8
+    cacheRead: 0.13
+    cacheWrite: 1.625
+    tiers:
+    - upto: 128000
+      input: 1.3
+      output: 7.8
+      cacheRead: 0.13
+      cacheWrite: 1.625
+    - input: 2
+      output: 12
+      cacheRead: 0.2
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: 128000
+          input_price: 1.3
+          output_price: 7.8
+          cache_read_price: 0.13
+          cache_write_price: 1.625
+        - upto: null
+          input_price: 2
+          output_price: 12
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: 128000
+          input_price: 9
+          output_price: 54
+          cache_read_price: 0.9
+          cache_write_price: 11.25
+        - upto: null
+          input_price: 15
+          output_price: 90
+          cache_read_price: 1.5
+          cache_write_price: 18.75
+  releaseDate: '2026-04-20'
+- modelCode: aliyun/qwen3.6-flash
+  displayName:
+    en: Qwen3.6 flash
+  modelType: LLM
+  providerModelId: qwen3.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A fast multimodal Qwen model with a large context window for high-throughput workloads. It handles text, image, and
+      video inputs with a long context window for latency-sensitive multimodal applications.
+    zh-CN: 具备大上下文能力的高速 Qwen 多模态模型，适合高吞吐工作负载。支持文本、图像和视频输入，并以长上下文能力面向延迟敏感的多模态应用。
+    ja: 長いコンテキストを持つ高速な Qwen マルチモーダルモデルで、スループットの高い処理に向いています。テキスト、画像、動画を受け取り、レイテンシを気にするマルチモーダル用途に使えます。
+    ko: 긴 컨텍스트를 가진 고속 Qwen 멀티모달 모델로, 처리량이 큰 작업에 맞습니다. 텍스트, 이미지, 영상을 받고, 지연에 민감한 멀티모달 용도로 씁니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 1.5
+    cacheRead: 0.025
+    cacheWrite: 0.3125
+    tiers:
+    - upto: 256000
+      input: 0.25
+      output: 1.5
+      cacheRead: 0.025
+      cacheWrite: 0.3125
+    - input: 1
+      output: 4
+      cacheRead: 0.1
+      cacheWrite: 1.25
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.25
+          output_price: 1.5
+          cache_read_price: 0.025
+          cache_write_price: 0.3125
+        - upto: null
+          input_price: 1
+          output_price: 4
+          cache_read_price: 0.1
+          cache_write_price: 1.25
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 1.2
+          output_price: 7.2
+          cache_read_price: 0.12
+          cache_write_price: 1.5
+        - upto: null
+          input_price: 4.8
+          output_price: 28.8
+          cache_read_price: 0.48
+          cache_write_price: 6
+  releaseDate: '2026-04-16'
+- modelCode: aliyun/qwen3.5-plus
+  displayName:
+    en: Qwen3.5 Plus
+  modelType: LLM
+  providerModelId: qwen3.5-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A balanced Qwen model for general chat, reasoning, coding, and multimodal tasks.
+    zh-CN: 适合通用对话、推理、编程与多模态任务的均衡型 Qwen 模型。
+    ja: 一般的な対話、推論、コーディング、マルチモーダルをひと通りこなす、バランス型の Qwen です。
+    ko: 일반 대화, 추론, 코딩, 멀티모달을 고루 다루는 균형형 Qwen입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.4
+    output: 2.4
+    cacheRead: 0.04
+    cacheWrite: 0.5
+    tiers:
+    - upto: 256000
+      input: 0.4
+      output: 2.4
+      cacheRead: 0.04
+      cacheWrite: 0.5
+    - input: 0.5
+      output: 3
+      cacheRead: 0.05
+      cacheWrite: 0.625
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.4
+          output_price: 2.4
+          cache_read_price: 0.04
+          cache_write_price: 0.5
+        - upto: null
+          input_price: 0.5
+          output_price: 3
+          cache_read_price: 0.05
+          cache_write_price: 0.625
+      cny:
+        tiers:
+        - upto: 128000
+          input_price: 0.8
+          output_price: 4.8
+          cache_read_price: 0.08
+          cache_write_price: 1
+        - upto: 256000
+          input_price: 2
+          output_price: 12
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+        - upto: null
+          input_price: 4
+          output_price: 24
+          cache_read_price: 0.4
+          cache_write_price: 5
+  releaseDate: '2026-02-16'
+- modelCode: aliyun/qwen3.5-flash
+  displayName:
+    en: Qwen3.5 Flash
+  modelType: LLM
+  providerModelId: qwen3.5-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A low-latency Qwen model for responsive chat, extraction, and lightweight agents.
+    zh-CN: 面向低延迟对话、信息抽取与轻量 Agent 场景的 Qwen 模型。
+    ja: 応答を速くしたい対話、情報抽出、軽いエージェント向けの Qwen です。
+    ko: 응답이 빨라야 하는 대화, 정보 추출, 가벼운 에이전트용 Qwen입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.4
+    cacheRead: 0.01
+    cacheWrite: 0.0125
+    tiers:
+    - input: 0.1
+      output: 0.4
+      cacheRead: 0.01
+      cacheWrite: 0.0125
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.1
+          output_price: 0.4
+          cache_read_price: 0.01
+          cache_write_price: 0.0125
+      cny:
+        tiers:
+        - upto: 128000
+          input_price: 0.2
+          output_price: 2
+          cache_read_price: 0.02
+          cache_write_price: null
+        - upto: 256000
+          input_price: 0.8
+          output_price: 8
+          cache_read_price: 0.08
+          cache_write_price: null
+        - upto: null
+          input_price: 1.2
+          output_price: 12
+          cache_read_price: 0.12
+          cache_write_price: null
+  releaseDate: '2026-02-16'
+- modelCode: aliyun/qwen3-vl-plus
+  displayName:
+    en: Qwen3-VL Plus
+  modelType: LLM
+  providerModelId: qwen3-vl-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - aliyun
+  description:
+    en: A vision-language model for document, image, screen, and visual reasoning tasks.
+    zh-CN: 面向文档、图像、屏幕理解与视觉推理任务的视觉语言模型。
+    ja: 文書、画像、画面の理解と視覚的な推論向けの視覚言語モデルです。
+    ko: 문서, 이미지, 화면 이해와 시각 추론용 비전-언어 모델입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.6
+    cacheRead: 0
+    cacheWrite: 0
+    tiers:
+    - upto: 32000
+      input: 0.2
+      output: 1.6
+      cacheRead: 0
+      cacheWrite: 0
+    - upto: 128000
+      input: 0.3
+      output: 2.4
+      cacheRead: 0
+      cacheWrite: 0
+    - input: 0.6
+      output: 4.8
+      cacheRead: 0
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: 32000
+          input_price: 0.2
+          output_price: 1.6
+          cache_read_price: null
+          cache_write_price: null
+        - upto: 128000
+          input_price: 0.3
+          output_price: 2.4
+          cache_read_price: null
+          cache_write_price: null
+        - upto: null
+          input_price: 0.6
+          output_price: 4.8
+          cache_read_price: null
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: 32000
+          input_price: 1
+          output_price: 10
+          cache_read_price: null
+          cache_write_price: null
+        - upto: 128000
+          input_price: 1.5
+          output_price: 15
+          cache_read_price: null
+          cache_write_price: null
+        - upto: null
+          input_price: 3
+          output_price: 30
+          cache_read_price: null
+          cache_write_price: null
+  releaseDate: '2025-12-19'

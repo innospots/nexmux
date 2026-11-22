@@ -1,0 +1,232 @@
+apiVersion: nexus.plugin/v1
+kind: Plugin
+metadata:
+  pluginId: com.innospots.nexmux.console
+  version: "0.1.0"
+spec:
+  apiVersion: 1
+  displayName:
+    en: Nexmux Model Console
+    zh: Nexmux 模型管理
+  description:
+    en: Providers, models, routes, clients, operations, and audit for the model platform.
+    zh: 模型平台的供应商、模型、路由、客户端、运行与审计。
+  tags:
+    kind: entry
+    domain: nexmux
+    module: console
+    realm: platform
+  contributions:
+    - type: console
+      majorVersion: 2
+      domainKey: nexmux
+      displayName:
+        en: Model platform
+        zh: 模型平台
+      description:
+        en: Model gateway console modules.
+        zh: 模型网关控制台模块。
+      orderIndex: 0
+      modules:
+        - moduleKey: provider
+          displayName:
+            en: Providers
+            zh: 供应商
+          description:
+            en: Upstream provider endpoints and credentials.
+            zh: 上游供应商端点与凭证。
+          orderIndex: 10
+          entryPageKey: nexmux-provider-list
+          icon: package
+          viewGroups:
+            - group: view
+              label:
+                en: Browse provider pages
+                zh: 浏览供应商页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: create
+              label: { en: Create, zh: 创建 }
+            - group: update
+              label: { en: Update, zh: 更新 }
+            - group: delete
+              label: { en: Delete, zh: 删除 }
+            - group: status
+              label: { en: Enable or disable, zh: 启停 }
+            - group: execute
+              label: { en: Test connection, zh: 连通性测试 }
+          children: []
+        - moduleKey: model
+          displayName:
+            en: Models
+            zh: 模型
+          description:
+            en: Logical models exposed to clients.
+            zh: 对客户端暴露的逻辑模型。
+          orderIndex: 20
+          entryPageKey: nexmux-model-list
+          icon: box
+          viewGroups:
+            - group: view
+              label:
+                en: Browse model pages
+                zh: 浏览模型页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: create
+              label: { en: Create, zh: 创建 }
+            - group: update
+              label: { en: Update, zh: 更新 }
+            - group: delete
+              label: { en: Delete, zh: 删除 }
+            - group: status
+              label: { en: Enable or disable, zh: 启停 }
+            - group: execute
+              label: { en: Invoke test, zh: 调用测试 }
+          children: []
+        - moduleKey: route
+          displayName:
+            en: Routes
+            zh: 路由
+          description:
+            en: Alias, ingress, and model routing strategy.
+            zh: 别名、入口与模型调度策略。
+          orderIndex: 30
+          entryPageKey: nexmux-route-list
+          icon: share
+          viewGroups:
+            - group: view
+              label:
+                en: Browse route pages
+                zh: 浏览路由页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: create
+              label: { en: Create, zh: 创建 }
+            - group: update
+              label: { en: Update, zh: 更新 }
+            - group: delete
+              label: { en: Delete, zh: 删除 }
+            - group: status
+              label: { en: Enable or disable, zh: 启停 }
+            - group: execute
+              label: { en: Publish, zh: 发布 }
+          children: []
+        - moduleKey: client
+          displayName:
+            en: Clients
+            zh: 客户端
+          description:
+            en: Calling clients, templates, quotas, and app keys.
+            zh: 调用客户端、模板、配额与 AppKey。
+          orderIndex: 40
+          entryPageKey: nexmux-client-list
+          icon: shield
+          viewGroups:
+            - group: view
+              label:
+                en: Browse client pages
+                zh: 浏览客户端页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: create
+              label: { en: Create, zh: 创建 }
+            - group: update
+              label: { en: Update, zh: 更新 }
+            - group: delete
+              label: { en: Delete, zh: 删除 }
+            - group: status
+              label: { en: Enable or disable, zh: 启停 }
+            - group: execute
+              label: { en: Publish policy, zh: 发布策略 }
+            - group: secret
+              label: { en: Manage secrets, zh: 密钥管理 }
+          children: []
+        - moduleKey: ops
+          displayName:
+            en: Operations
+            zh: 运行管理
+          description:
+            en: Call logs, usage, and cost.
+            zh: 调用日志、用量与成本。
+          orderIndex: 50
+          entryPageKey: nexmux-ops-logs
+          icon: eye
+          viewGroups:
+            - group: view
+              label:
+                en: Browse operations pages
+                zh: 浏览运行页面
+            - group: cost
+              label:
+                en: Browse cost pages
+                zh: 浏览成本页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+          children: []
+        - moduleKey: debug
+          displayName:
+            en: Debug
+            zh: 调试台
+          description:
+            en: Client and model debug invocations.
+            zh: 客户端与模型调试调用。
+          orderIndex: 60
+          entryPageKey: nexmux-debug-client
+          icon: terminal
+          viewGroups:
+            - group: view
+              label:
+                en: Browse debug pages
+                zh: 浏览调试页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: execute
+              label: { en: Invoke, zh: 发起调试 }
+          children: []
+        - moduleKey: service-settings
+          displayName:
+            en: Service settings
+            zh: 服务设置
+          description:
+            en: Platform-wide service parameters.
+            zh: 平台全局服务参数。
+          orderIndex: 70
+          entryPageKey: nexmux-settings
+          icon: settings
+          viewGroups:
+            - group: view
+              label:
+                en: Browse service settings
+                zh: 浏览服务设置
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+            - group: update
+              label: { en: Update, zh: 更新 }
+          children: []
+        - moduleKey: audit
+          displayName:
+            en: Audit
+            zh: 审计
+          description:
+            en: Configuration change audit.
+            zh: 配置变更审计。
+          orderIndex: 80
+          entryPageKey: nexmux-audit-list
+          icon: file-text
+          viewGroups:
+            - group: view
+              label:
+                en: Browse audit pages
+                zh: 浏览审计页面
+          operationGroups:
+            - group: operate
+              label: { en: Operations, zh: 操作 }
+          children: []

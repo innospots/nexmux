@@ -23,6 +23,6 @@ spring:
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
         - classpath:schema/nexmux/nexmux-h2.sql
-      # 种子数据：pi-ai 提供商/模型 catalog（MERGE 幂等，可重复执行）
+      # 种子数据：服务设置等（供应商/模型 catalog 改由 classpath provider-models YAML + API 按需导入）
       data-locations:
-        - classpath:schema/nexmux/nexmux-catalog-data-h2.sql
+        - classpath:schema/nexmux/nexmux-settings-data-h2.sql

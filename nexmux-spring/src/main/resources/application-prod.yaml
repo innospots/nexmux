@@ -33,12 +33,8 @@ spring:
         - classpath:schema/nexus-console-h2.sql
         - classpath:schema/nexus-platform-h2.sql
         - classpath:schema/nexmux/nexmux-h2.sql
-      # 生产种子数据（均为幂等 MERGE「只插不更新」，可重复执行；页面/接口的改动重启后保留）：
-      #   - catalog ：47 providers / 1672 models（供应商、模型列表页基线）
-      #   - settings：服务设置页 14 个键（与 PlatformSettingService.DEFAULTS 一致）
-      # 关闭方式：环境变量 SPRING_SQL_INIT_DATA_LOCATIONS=（空值）可整体覆盖为空列表
+      # 生产种子数据：服务设置（供应商/模型 catalog 由 classpath provider-models YAML + API 按需导入）
       data-locations:
-        - classpath:schema/nexmux/nexmux-catalog-data-h2.sql
         - classpath:schema/nexmux/nexmux-settings-data-h2.sql
 
 # 生产安全基线（覆盖 nexus/console-*.yaml 的开发态默认值）

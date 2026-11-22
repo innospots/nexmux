@@ -5,7 +5,7 @@
 -- 保持一致的 14 个键（顺序即服务设置页展示顺序）。
 -- 取值来源：本地开发库 mux_platform_setting 全表导出（2026-10-12），与 DEFAULTS 相同。
 --
--- 幂等约定（与 nexmux-catalog-data-h2.sql 一致）：
+-- 幂等约定（MERGE 只插不更新）：
 --   MERGE ... WHEN NOT MATCHED THEN INSERT —— 只插不更新；
 --   页面/接口对该值的修改重启后保留；
 --   因此修改本文件的值对已落库的行不生效，需清库或手工迁移。

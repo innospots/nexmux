@@ -1,0 +1,60 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: cerebras
+modelCount: 2
+models:
+- modelCode: cerebras/gpt-oss-120b
+  displayName:
+    en: GPT OSS 120B
+  modelType: LLM
+  providerModelId: gpt-oss-120b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 40960
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - cerebras
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.35
+    output: 0.75
+    cacheRead: 0.35
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: cerebras/qwen-3.8-27b
+  displayName:
+    en: Qwen3.8 27B
+  modelType: LLM
+  providerModelId: qwen-3.8-27b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 40960
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - cerebras
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.99
+    output: 1.49
+    cacheRead: 0.99
+    cacheWrite: 0
+  releaseDate: null

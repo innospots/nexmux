@@ -1,0 +1,178 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: moonshotai-cn
+modelCount: 6
+models:
+- modelCode: moonshotai-cn/kimi-k2.6
+  displayName:
+    en: Kimi K2.6
+  modelType: LLM
+  providerModelId: kimi-k2.6
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.9711
+    output: 4.0337
+    cacheRead: 0.1643
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: moonshotai-cn/kimi-k2.7-code
+  displayName:
+    en: Kimi K2.7 Code
+  modelType: LLM
+  providerModelId: kimi-k2.7-code
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.9711
+    output: 4.0337
+    cacheRead: 0.1942
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: moonshotai-cn/kimi-k2.7-code-highspeed
+  displayName:
+    en: Kimi K2.7 Code HighSpeed
+  modelType: LLM
+  providerModelId: kimi-k2.7-code-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.9421
+    output: 8.0673
+    cacheRead: 0.3884
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: moonshotai-cn/kimi-k3
+  displayName:
+    en: Kimi K3
+  modelType: LLM
+  providerModelId: kimi-k3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 1048576
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: moonshotai-cn/kimi-k3.1-pro
+  displayName:
+    en: Kimi K3.1 Pro
+  modelType: LLM
+  providerModelId: kimi-k3.1-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 1048576
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.9437
+    output: 10.1671
+    cacheRead: 0.1944
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: moonshotai-cn/kimi-k3.1-pro-highspeed
+  displayName:
+    en: Kimi K3.1 Pro Highspeed
+  modelType: LLM
+  providerModelId: kimi-k3.1-pro-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 1048576
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3.8874
+    output: 20.3342
+    cacheRead: 0.1944
+    cacheWrite: 0
+  releaseDate: null

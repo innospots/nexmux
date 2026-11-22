@@ -1,7 +1,10 @@
-# 模板独立安装（pnpm install）时批准运行构建脚本的原生依赖：
-# sharp（Next.js 图片优化可选依赖）与 unrs-resolver（eslint-config-next
-# 依赖链上的原生解析器）。显式批准而非 ignoredBuiltDependencies 静默，
-# 避免 strict-dep-builds / CI 环境下报 ERR_PNPM_IGNORED_BUILDS
-onlyBuiltDependencies:
-  - sharp
-  - unrs-resolver
+packages:
+  - nexmux-ui-app
+  - nexmux-ui-shell
+
+# 批准需要 postinstall 的依赖，避免 pnpm 11 的 ERR_PNPM_IGNORED_BUILDS。
+# esbuild 供 pactor module build 使用；sharp / unrs-resolver 来自 Next 与 ESLint。
+allowBuilds:
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

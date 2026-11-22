@@ -1,0 +1,52 @@
+# 覆盖包默认登录页：成功后进入 Nexmux 仪表盘。
+dsl: "1.0"
+page:
+  id: login
+  title: 登录
+  name: login
+  description: 登录页
+
+state:
+  loginFailed: false
+
+body:
+  type: Login
+  props:
+    layout: split
+    authVariant: card
+    brand:
+      name: Nexmux
+      title: 管理后台登录
+      description: 使用平台账号登录。
+    title: 登录
+    subtitle: 平台账号
+    submitText: 登 录
+    errorMessage: 用户名或密码错误
+    errorVisible: ${state.loginFailed}
+  events:
+    onSubmit:
+      - action: setState
+        params:
+          loginFailed: false
+      - id: loginResult
+        action: request
+        params:
+          method: POST
+          url: /api/auth/login
+          body:
+            username: ${event.username}
+            password: ${event.password}
+      - action: setState
+        condition: ${actions.loginResult == null || actions.loginResult.token == null}
+        params:
+          loginFailed: true
+      - action: if
+        params:
+          condition: ${actions.loginResult != null && actions.loginResult.token != null}
+          then:
+            - action: message
+              params:
+                messageType: success
+                text: 登录成功，正在跳转…
+            - action: app.reload
+              params: { to: /nexmux/dashboard }

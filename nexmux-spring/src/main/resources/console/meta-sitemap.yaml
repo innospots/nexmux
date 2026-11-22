@@ -1,0 +1,134 @@
+# 模型平台 Shell 导航。由 /api/d/platform/navigation/menus 下发给 nexmux-ui-shell。
+# pageId 使用装配后的全局页面 id，路径由 Shell 按页面索引补齐。
+id: nexmux-console
+title: Nexmux
+description: 模型管理平台
+version: 2
+updatedAt: "2026-11-21T00:00:00Z"
+
+menus:
+  - id: dashboard
+    type: page
+    pageId: "nexmux:dashboard"
+    title: 仪表盘
+    icon: layout-dashboard
+    order: 1
+
+  - id: assets
+    type: group
+    title: 模型资产
+    icon: boxes
+    order: 10
+    children:
+      - id: providers
+        type: page
+        pageId: "nexmux:provider-list"
+        title: 供应商
+      - id: models
+        type: page
+        pageId: "nexmux:model-list"
+        title: 模型
+      - id: routes
+        type: page
+        pageId: "nexmux:route-list"
+        title: 路由
+
+  - id: access
+    type: group
+    title: 访问治理
+    icon: users
+    order: 20
+    children:
+      - id: clients
+        type: page
+        pageId: "nexmux:client-list"
+        title: 客户端
+      - id: client-templates
+        type: page
+        pageId: "nexmux:client-template-list"
+        title: 客户端模板
+
+  - id: operations
+    type: group
+    title: 运行管理
+    icon: activity
+    order: 30
+    children:
+      - id: call-logs
+        type: page
+        pageId: "nexmux:call-log-list"
+        title: 调用日志
+      - id: model-usage
+        type: page
+        pageId: "nexmux:model-usage"
+        title: 模型用量
+      - id: provider-usage
+        type: page
+        pageId: "nexmux:provider-usage"
+        title: 供应商用量
+      - id: client-usage
+        type: page
+        pageId: "nexmux:client-usage"
+        title: 客户端用量
+      - id: provider-availability
+        type: page
+        pageId: "nexmux:provider-availability"
+        title: 供应商可用性
+      - id: costs
+        type: page
+        pageId: "nexmux:cost-list"
+        title: 成本明细
+
+  - id: debug
+    type: group
+    title: 调试台
+    icon: terminal
+    order: 40
+    children:
+      - id: client-debug
+        type: page
+        pageId: "nexmux:client-debug"
+        title: 客户端调试
+      - id: model-debug
+        type: page
+        pageId: "nexmux:model-debug"
+        title: 模型调试
+
+  - id: system
+    type: group
+    title: 系统
+    icon: settings
+    order: 50
+    children:
+      - id: service-settings
+        type: page
+        pageId: "nexmux:service-settings"
+        title: 服务设置
+      - id: audit
+        type: page
+        pageId: "nexmux:audit-list"
+        title: 操作审计
+      - id: ga-settings
+        type: page
+        pageId: "pactor-app-general-app:system-settings"
+        title: 系统设置
+      - id: ga-dictionaries
+        type: page
+        pageId: "pactor-app-general-app:dictionaries"
+        title: 字典管理
+      - id: ga-audit
+        type: page
+        pageId: "pactor-app-general-app:audit-logs"
+        title: 审计日志
+      - id: ga-roles
+        type: page
+        pageId: "pactor-app-general-app:roles"
+        title: 角色管理
+      - id: ga-users
+        type: page
+        pageId: "pactor-app-general-app:users"
+        title: 用户管理
+      - id: themes
+        type: page
+        pageId: "shell:themes"
+        title: 主题设置

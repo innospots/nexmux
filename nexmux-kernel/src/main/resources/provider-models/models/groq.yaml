@@ -1,0 +1,195 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: groq
+modelCount: 7
+models:
+- modelCode: groq/llama-3.1-8b-instant
+  displayName:
+    en: Llama 3.1 8B
+  modelType: LLM
+  providerModelId: llama-3.1-8b-instant
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.05
+    output: 0.08
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/llama-3.3-70b-versatile
+  displayName:
+    en: Llama 3.3 70B
+  modelType: LLM
+  providerModelId: llama-3.3-70b-versatile
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.59
+    output: 0.79
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/openai/gpt-oss-120b
+  displayName:
+    en: GPT OSS 120B
+  modelType: LLM
+  providerModelId: openai/gpt-oss-120b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.6
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/openai/gpt-oss-20b
+  displayName:
+    en: GPT OSS 20B
+  modelType: LLM
+  providerModelId: openai/gpt-oss-20b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.075
+    output: 0.3
+    cacheRead: 0.0375
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/openai/gpt-oss-safeguard-20b
+  displayName:
+    en: Safety GPT OSS 20B
+  modelType: LLM
+  providerModelId: openai/gpt-oss-safeguard-20b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.075
+    output: 0.3
+    cacheRead: 0.0375
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/qwen/qwen3.6-27b
+  displayName:
+    en: Qwen3.6 27B
+  modelType: LLM
+  providerModelId: qwen/qwen3.6-27b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.6
+    output: 3
+    cacheRead: 0.3
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: groq/qwen/qwen3.8-27b
+  displayName:
+    en: Qwen3.8 27B
+  modelType: LLM
+  providerModelId: qwen/qwen3.8-27b
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - groq
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.8
+    output: 4
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

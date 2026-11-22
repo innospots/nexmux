@@ -1,0 +1,282 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: qwen-token-plan-individual-cn
+modelCount: 10
+models:
+- modelCode: qwen-token-plan-individual-cn/deepseek-v4-flash-0731
+  displayName:
+    en: DeepSeek V4 Flash 0731
+  modelType: LLM
+  providerModelId: deepseek-v4-flash-0731
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/deepseek-v4-pro
+  displayName:
+    en: DeepSeek V4 Pro
+  modelType: LLM
+  providerModelId: deepseek-v4-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/deepseek-v4-pro-0813
+  displayName:
+    en: DeepSeek V4 Pro 0813
+  modelType: LLM
+  providerModelId: deepseek-v4-pro-0813
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/glm-5.2
+  displayName:
+    en: GLM-5.2
+  modelType: LLM
+  providerModelId: glm-5.2
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/glm-5.3
+  displayName:
+    en: GLM-5.3
+  modelType: LLM
+  providerModelId: glm-5.3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/qwen3.6-flash
+  displayName:
+    en: Qwen3.6 Flash
+  modelType: LLM
+  providerModelId: qwen3.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/qwen3.7-max
+  displayName:
+    en: Qwen3.7 Max
+  modelType: LLM
+  providerModelId: qwen3.7-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/qwen3.7-plus
+  displayName:
+    en: Qwen3.7 Plus
+  modelType: LLM
+  providerModelId: qwen3.7-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/qwen3.8-flash
+  displayName:
+    en: Qwen3.8 Flash
+  modelType: LLM
+  providerModelId: qwen3.8-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan-individual-cn/qwen3.8-max
+  displayName:
+    en: Qwen3.8 Max
+  modelType: LLM
+  providerModelId: qwen3.8-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan-individual-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

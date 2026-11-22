@@ -1,0 +1,302 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: zai
+modelCount: 7
+models:
+- modelCode: zai/glm-4.7
+  displayName:
+    en: GLM-4.7
+  modelType: LLM
+  providerModelId: glm-4.7
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.6
+    output: 2.2
+    cacheRead: 0.11
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: zai/glm-5-turbo
+  displayName:
+    en: GLM-5 Turbo
+  modelType: LLM
+  providerModelId: glm-5-turbo
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 200000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  - octafuse-preset
+  description:
+    en: A fast GLM model optimized for real-world agent environments and efficient inference. It is deeply optimized for fast
+      inference in real-world, tool-using agent environments.
+    zh-CN: 针对真实 Agent 环境与高效推理优化的高速 GLM 模型。针对真实世界中使用工具的 Agent 环境进行深度优化，强调快速推理。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.2
+    output: 4
+    cacheRead: 0.24
+    cacheWrite: 0
+    tiers:
+    - input: 1.2
+      output: 4
+      cacheRead: 0.24
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.2
+          output_price: 4
+          cache_read_price: 0.24
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: 32000
+          input_price: 5
+          output_price: 22
+          cache_read_price: 1.2
+          cache_write_price: null
+        - upto: null
+          input_price: 7
+          output_price: 26
+          cache_read_price: 1.8
+          cache_write_price: null
+  releaseDate: '2026-03-15'
+- modelCode: zai/glm-5.2
+  displayName:
+    en: GLM-5.2
+  modelType: LLM
+  providerModelId: glm-5.2
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  - octafuse-preset
+  description:
+    en: A long-context GLM reasoning model for project-level software engineering and agents. The large-scale reasoning model
+      is intended for project-level software engineering and long-horizon agent workflows.
+    zh-CN: 面向项目级软件工程与 Agent 的长上下文 GLM 推理模型。大规模推理模型面向项目级软件工程和长周期 Agent 工作流。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.4
+    output: 4.4
+    cacheRead: 0.26
+    cacheWrite: 0
+    tiers:
+    - input: 1.4
+      output: 4.4
+      cacheRead: 0.26
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.4
+          output_price: 4.4
+          cache_read_price: 0.26
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 8
+          output_price: 28
+          cache_read_price: 2
+          cache_write_price: null
+  releaseDate: '2026-06-13'
+- modelCode: zai/glm-5.2-highspeed
+  displayName:
+    en: GLM-5.2 Highspeed
+  modelType: LLM
+  providerModelId: glm-5.2-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: zai/glm-5.3
+  displayName:
+    en: GLM-5.3
+  modelType: LLM
+  providerModelId: glm-5.3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  - octafuse-preset
+  description:
+    en: A flagship GLM model for long-horizon coding, agents, and security review. It keeps the GLM-5.2 base and raises coding
+      and agent performance through post-training.
+    zh-CN: 面向长程编程、Agent 与安全审查的 GLM 旗舰模型。沿用 GLM-5.2 基座，通过后训练提升编程与智能体表现。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.4
+    output: 4.4
+    cacheRead: 0.26
+    cacheWrite: 0
+    tiers:
+    - input: 1.4
+      output: 4.4
+      cacheRead: 0.26
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.4
+          output_price: 4.4
+          cache_read_price: 0.26
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 8
+          output_price: 28
+          cache_read_price: 2
+          cache_write_price: null
+  releaseDate: '2026-08-14'
+- modelCode: zai/glm-5.3-flash
+  displayName:
+    en: GLM-5.3-Flash
+  modelType: LLM
+  providerModelId: glm-5.3-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - zai
+  - octafuse-preset
+  description:
+    en: A native multimodal GLM Flash model for visual coding, agents, and professional workflows. It outperforms GLM-5.2
+      at a fraction of the cost, with native image, video, and file understanding.
+    zh-CN: 面向视觉编程、Agent 与专业工作流的 GLM 原生多模态 Flash 模型。以远低于 GLM-5.2 的成本提供更强智能，原生支持图片、视频与文件理解。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.5
+    cacheRead: 0.03
+    cacheWrite: 0
+    tiers:
+    - input: 0.15
+      output: 0.5
+      cacheRead: 0.03
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.15
+          output_price: 0.5
+          cache_read_price: 0.03
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.8
+          output_price: 2.8
+          cache_read_price: 0.23
+          cache_write_price: null
+  releaseDate: '2026-08-26'
+- modelCode: zai/glm-5.3-highspeed
+  displayName:
+    en: GLM-5.3 Highspeed
+  modelType: LLM
+  providerModelId: glm-5.3-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - zai
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

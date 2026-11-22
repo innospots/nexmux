@@ -1,0 +1,33 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: typesafe
+modelCount: 1
+models:
+- modelCode: typesafe/jev-latest
+  displayName:
+    en: Jev
+  modelType: LLM
+  providerModelId: jev-latest
+  primaryUpstreamProtocol: typesafe-system-one
+  contextLength: 64000
+  maxOutputTokens: null
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  - classifier
+  tags:
+  - pi-ai-catalog
+  - typesafe
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

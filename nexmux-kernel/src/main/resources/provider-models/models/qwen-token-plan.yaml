@@ -1,0 +1,794 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: qwen-token-plan
+modelCount: 21
+models:
+- modelCode: qwen-token-plan/deepseek-v3.2
+  displayName:
+    en: DeepSeek V3.2
+  modelType: LLM
+  providerModelId: deepseek-v3.2
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 131072
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4-flash
+  displayName:
+    en: DeepSeek V4 Flash
+  modelType: LLM
+  providerModelId: deepseek-v4-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4-flash-0731
+  displayName:
+    en: DeepSeek V4 Flash 0731
+  modelType: LLM
+  providerModelId: deepseek-v4-flash-0731
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4-pro
+  displayName:
+    en: DeepSeek V4 Pro
+  modelType: LLM
+  providerModelId: deepseek-v4-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4-pro-0813
+  displayName:
+    en: DeepSeek V4 Pro 0813
+  modelType: LLM
+  providerModelId: deepseek-v4-pro-0813
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4.1-flash
+  displayName:
+    en: DeepSeek V4.1 Flash
+  modelType: LLM
+  providerModelId: deepseek-v4.1-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/deepseek-v4.1-flash-1017
+  displayName:
+    en: DeepSeek V4.1 Flash 1017
+  modelType: LLM
+  providerModelId: deepseek-v4.1-flash-1017
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/glm-5
+  displayName:
+    en: GLM-5
+  modelType: LLM
+  providerModelId: glm-5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 202752
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/glm-5.1
+  displayName:
+    en: GLM-5.1
+  modelType: LLM
+  providerModelId: glm-5.1
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 202752
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/glm-5.2
+  displayName:
+    en: GLM-5.2
+  modelType: LLM
+  providerModelId: glm-5.2
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/glm-5.3
+  displayName:
+    en: GLM-5.3
+  modelType: LLM
+  providerModelId: glm-5.3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/kimi-k2.5
+  displayName:
+    en: Kimi K2.5
+  modelType: LLM
+  providerModelId: kimi-k2.5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 98304
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/kimi-k2.6
+  displayName:
+    en: Kimi K2.6
+  modelType: LLM
+  providerModelId: kimi-k2.6
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/kimi-k2.7-code
+  displayName:
+    en: Kimi K2.7 Code
+  modelType: LLM
+  providerModelId: kimi-k2.7-code
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 262144
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/MiniMax-M2.5
+  displayName:
+    en: MiniMax-M2.5
+  modelType: LLM
+  providerModelId: MiniMax-M2.5
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 196608
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: qwen-token-plan/qwen3.6-flash
+  displayName:
+    en: Qwen3.6 flash
+  modelType: LLM
+  providerModelId: qwen3.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: A fast multimodal Qwen model with a large context window for high-throughput workloads. It handles text, image, and
+      video inputs with a long context window for latency-sensitive multimodal applications.
+    zh-CN: 具备大上下文能力的高速 Qwen 多模态模型，适合高吞吐工作负载。支持文本、图像和视频输入，并以长上下文能力面向延迟敏感的多模态应用。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 1.5
+    cacheRead: 0.025
+    cacheWrite: 0.3125
+    tiers:
+    - upto: 256000
+      input: 0.25
+      output: 1.5
+      cacheRead: 0.025
+      cacheWrite: 0.3125
+    - input: 1
+      output: 4
+      cacheRead: 0.1
+      cacheWrite: 1.25
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.25
+          output_price: 1.5
+          cache_read_price: 0.025
+          cache_write_price: 0.3125
+        - upto: null
+          input_price: 1
+          output_price: 4
+          cache_read_price: 0.1
+          cache_write_price: 1.25
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 1.2
+          output_price: 7.2
+          cache_read_price: 0.12
+          cache_write_price: 1.5
+        - upto: null
+          input_price: 4.8
+          output_price: 28.8
+          cache_read_price: 0.48
+          cache_write_price: 6
+  releaseDate: '2026-04-16'
+- modelCode: qwen-token-plan/qwen3.6-plus
+  displayName:
+    en: Qwen3.6 Plus
+  modelType: LLM
+  providerModelId: qwen3.6-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: A scalable long-context Qwen model balancing strong reasoning with efficient inference. A hybrid of efficient linear
+      attention and sparse expert routing improves scalability and inference efficiency.
+    zh-CN: 兼顾推理能力与推理效率、适合长上下文任务的 Qwen 模型。通过高效线性注意力与稀疏专家路由的混合架构，提升扩展性和推理效率。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 3
+    cacheRead: 0.05
+    cacheWrite: 0.625
+    tiers:
+    - upto: 256000
+      input: 0.5
+      output: 3
+      cacheRead: 0.05
+      cacheWrite: 0.625
+    - input: 2
+      output: 6
+      cacheRead: 0.2
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.5
+          output_price: 3
+          cache_read_price: 0.05
+          cache_write_price: 0.625
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 2
+          output_price: 12
+          cache_read_price: 0.2
+          cache_write_price: 2.5
+        - upto: null
+          input_price: 8
+          output_price: 48
+          cache_read_price: 0.8
+          cache_write_price: 10
+  releaseDate: '2026-04-02'
+- modelCode: qwen-token-plan/qwen3.7-max
+  displayName:
+    en: Qwen3.7 Max
+  modelType: LLM
+  providerModelId: qwen3.7-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: The Qwen3.7 flagship, optimized for coding, productivity, and agent-centric workloads. Its agent-oriented design emphasizes
+      coding, office productivity, and complex multi-step work.
+    zh-CN: Qwen3.7 旗舰模型，重点优化编程、生产力任务与 Agent 工作流。其 Agent 导向设计重点覆盖编程、办公生产力和复杂多步骤任务。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 7.5
+    cacheRead: 0.5
+    cacheWrite: 3.125
+    tiers:
+    - input: 2.5
+      output: 7.5
+      cacheRead: 0.5
+      cacheWrite: 3.125
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2.5
+          output_price: 7.5
+          cache_read_price: 0.5
+          cache_write_price: 3.125
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 2.4
+          cache_write_price: 15
+  releaseDate: '2026-05-20'
+- modelCode: qwen-token-plan/qwen3.7-plus
+  displayName:
+    en: Qwen3.7 Plus
+  modelType: LLM
+  providerModelId: qwen3.7-plus
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: A cost-efficient multimodal Qwen model for general reasoning, vision, and production applications. It combines text
+      and image understanding with a cost-conscious design for production-scale multimodal reasoning.
+    zh-CN: 兼顾成本与效果的 Qwen 多模态模型，适合通用推理、视觉理解与生产应用。兼顾文本与图像理解，并以更具成本效率的设计服务于生产级多模态推理。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.4
+    output: 1.6
+    cacheRead: 0.08
+    cacheWrite: 0.5
+    tiers:
+    - upto: 256000
+      input: 0.4
+      output: 1.6
+      cacheRead: 0.08
+      cacheWrite: 0.5
+    - input: 1.2
+      output: 4.8
+      cacheRead: 0.24
+      cacheWrite: 1.5
+    prices:
+      usd:
+        tiers:
+        - upto: 256000
+          input_price: 0.4
+          output_price: 1.6
+          cache_read_price: 0.08
+          cache_write_price: 0.5
+        - upto: null
+          input_price: 1.2
+          output_price: 4.8
+          cache_read_price: 0.24
+          cache_write_price: 1.5
+      cny:
+        tiers:
+        - upto: 256000
+          input_price: 2
+          output_price: 8
+          cache_read_price: 0.4
+          cache_write_price: 2.5
+        - upto: null
+          input_price: 6
+          output_price: 24
+          cache_read_price: 1.2
+          cache_write_price: 7.5
+  releaseDate: '2026-06-02'
+- modelCode: qwen-token-plan/qwen3.8-flash
+  displayName:
+    en: Qwen3.8 Flash
+  modelType: LLM
+  providerModelId: qwen3.8-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: A fast multimodal Qwen3.8 model with a native 1M context window for coding, agents, documents, and visual understanding.
+      Near-flagship quality at a fraction of Qwen3.8 Max cost, with image and video input.
+    zh-CN: 通义千问最新多模态 Flash 模型，兼具理解生成能力与响应速度。原生百万级上下文，适合编程辅助、智能体协作、超长文档与图文/长视频理解，以更低推理成本接近旗舰效果。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.47
+    cacheRead: 0.01875
+    cacheWrite: 0.234375
+    tiers:
+    - input: 0.15
+      output: 0.47
+      cacheRead: 0.01875
+      cacheWrite: 0.234375
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.15
+          output_price: 0.47
+          cache_read_price: 0.01875
+          cache_write_price: 0.234375
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.8
+          output_price: 2.7
+          cache_read_price: 0.1
+          cache_write_price: 1.25
+  releaseDate: '2026-08-26'
+- modelCode: qwen-token-plan/qwen3.8-max
+  displayName:
+    en: Qwen3.8 Max
+  modelType: LLM
+  providerModelId: qwen3.8-max
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - qwen-token-plan
+  - octafuse-preset
+  description:
+    en: A 2.4T-parameter MoE flagship for coding, office productivity, vision, and long-horizon agents. Native multimodal
+      understanding supports long documents and video, with strong end-to-end delivery on professional tasks.
+    zh-CN: 2.4 万亿参数 MoE 旗舰，全面提升编程与办公能力，可胜任法律、金融、设计等专业任务，并端到端交付生产级成果。原生视觉理解覆盖规划、执行与验证，支持超长文档与长视频深度解析。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 6
+    cacheRead: 0.25
+    cacheWrite: 2.5
+    tiers:
+    - input: 2
+      output: 6
+      cacheRead: 0.25
+      cacheWrite: 2.5
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 6
+          cache_read_price: 0.25
+          cache_write_price: 2.5
+      cny:
+        tiers:
+        - upto: null
+          input_price: 12
+          output_price: 36
+          cache_read_price: 1.5
+          cache_write_price: 15
+  releaseDate: '2026-08-01'

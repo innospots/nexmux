@@ -4,6 +4,9 @@ import com.innospots.nexus.core.endpoint.grant.EndpointModule;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrantAction;
 import com.innospots.nexus.core.endpoint.grant.EndpointGrant;
 import com.innospots.nexus.base.domain.response.R;
+import com.innospots.nexmux.console.catalog.CatalogLocale;
+import com.innospots.nexmux.console.catalog.ProviderModelPresetViewAssembler;
+import com.innospots.nexmux.console.catalog.domain.vo.ModelPresetVo;
 import com.innospots.nexmux.console.provider.ProviderOption;
 import com.innospots.nexmux.console.provider.ProviderListResult;
 import com.innospots.nexmux.console.provider.ProviderRecord;
@@ -25,6 +28,7 @@ import org.eclipse.microprofile.openapi.annotations.parameters.RequestBody;
 import org.eclipse.microprofile.openapi.annotations.tags.Tag;
 import jakarta.ws.rs.DefaultValue;
 import jakarta.ws.rs.GET;
+import jakarta.ws.rs.HeaderParam;
 import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
@@ -45,6 +49,7 @@ public class ProviderEndpoint {
 
     private final ProviderService providerService;
     private final ProviderViewAssembler providerViewAssembler;
+    private final ProviderModelPresetViewAssembler presetViewAssembler;
 
     /**
      * 分页列表（UI 契约：{items,total,filters} 直出，不包 R）。
@@ -101,6 +106,22 @@ public class ProviderEndpoint {
             @Parameter(description = "提供方编码", required = true)
             @PathParam("providerCode") String providerCode) {
         return providerViewAssembler.pullModels(providerCode);
+    }
+
+    /**
+     * 该供应商可用的上游模型（来自 classpath 模板目录，不依赖是否已建模）。
+     */
+    @GET
+    @Path("/{providerCode}/available-models")
+    @Operation(operationId = "nexmuxProviderAvailableModels", summary = "供应商可用模型")
+    @EndpointGrant(action = EndpointGrantAction.READ, name = "provider.available-models", group = "view")
+    public List<ModelPresetVo> availableModels(
+            @Parameter(description = "提供方编码", required = true)
+            @PathParam("providerCode") String providerCode,
+            @Parameter(description = "语言（BCP 47）") @QueryParam("lang") String lang,
+            @HeaderParam("Accept-Language") String acceptLanguage) {
+        String localeTag = lang == null || lang.isBlank() ? acceptLanguage : lang;
+        return presetViewAssembler.availableModels(providerCode, CatalogLocale.resolve(localeTag));
     }
 
     @POST

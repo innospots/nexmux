@@ -1,0 +1,1370 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: azure
+modelCount: 45
+models:
+- modelCode: azure/chat-latest
+  displayName:
+    en: Chat Latest
+  modelType: LLM
+  providerModelId: chat-latest
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 30
+    cacheRead: 0.5
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4
+  displayName:
+    en: GPT-4
+  modelType: LLM
+  providerModelId: gpt-4
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 8192
+  maxOutputTokens: 8192
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 30
+    output: 60
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4-turbo
+  displayName:
+    en: GPT-4 Turbo
+  modelType: LLM
+  providerModelId: gpt-4-turbo
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 4096
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 30
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4.1
+  displayName:
+    en: GPT-4.1
+  modelType: LLM
+  providerModelId: gpt-4.1
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1047576
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 8
+    cacheRead: 0.5
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4.1-mini
+  displayName:
+    en: GPT-4.1 mini
+  modelType: LLM
+  providerModelId: gpt-4.1-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1047576
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.4
+    output: 1.6
+    cacheRead: 0.1
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4.1-nano
+  displayName:
+    en: GPT-4.1 nano
+  modelType: LLM
+  providerModelId: gpt-4.1-nano
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1047576
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.4
+    cacheRead: 0.025
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4o
+  displayName:
+    en: GPT-4o
+  modelType: LLM
+  providerModelId: gpt-4o
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 10
+    cacheRead: 1.25
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4o-2024-05-13
+  displayName:
+    en: GPT-4o (2024-05-13)
+  modelType: LLM
+  providerModelId: gpt-4o-2024-05-13
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 4096
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 15
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4o-2024-08-06
+  displayName:
+    en: GPT-4o (2024-08-06)
+  modelType: LLM
+  providerModelId: gpt-4o-2024-08-06
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 10
+    cacheRead: 1.25
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4o-2024-11-20
+  displayName:
+    en: GPT-4o (2024-11-20)
+  modelType: LLM
+  providerModelId: gpt-4o-2024-11-20
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 10
+    cacheRead: 1.25
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-4o-mini
+  displayName:
+    en: GPT-4o mini
+  modelType: LLM
+  providerModelId: gpt-4o-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.6
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5
+  displayName:
+    en: GPT-5
+  modelType: LLM
+  providerModelId: gpt-5
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0.125
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5-chat-latest
+  displayName:
+    en: GPT-5 Chat Latest
+  modelType: LLM
+  providerModelId: gpt-5-chat-latest
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 16384
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0.125
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5-mini
+  displayName:
+    en: GPT-5 Mini
+  modelType: LLM
+  providerModelId: gpt-5-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 2
+    cacheRead: 0.025
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5-nano
+  displayName:
+    en: GPT-5 Nano
+  modelType: LLM
+  providerModelId: gpt-5-nano
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.05
+    output: 0.4
+    cacheRead: 0.005
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5-pro
+  displayName:
+    en: GPT-5 Pro
+  modelType: LLM
+  providerModelId: gpt-5-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 15
+    output: 120
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.1
+  displayName:
+    en: GPT-5.1
+  modelType: LLM
+  providerModelId: gpt-5.1
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0.125
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.2
+  displayName:
+    en: GPT-5.2
+  modelType: LLM
+  providerModelId: gpt-5.2
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.2-pro
+  displayName:
+    en: GPT-5.2 Pro
+  modelType: LLM
+  providerModelId: gpt-5.2-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 21
+    output: 168
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.3-codex
+  displayName:
+    en: GPT-5.3 Codex
+  modelType: LLM
+  providerModelId: gpt-5.3-codex
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.3-codex-spark
+  displayName:
+    en: GPT-5.3 Codex Spark
+  modelType: LLM
+  providerModelId: gpt-5.3-codex-spark
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 128000
+  maxOutputTokens: 32000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.75
+    output: 14
+    cacheRead: 0.175
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.4
+  displayName:
+    en: GPT-5.4
+  modelType: LLM
+  providerModelId: gpt-5.4
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2.5
+    output: 15
+    cacheRead: 0.25
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 5
+      output: 22.5
+      cacheRead: 0.5
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.4-mini
+  displayName:
+    en: GPT-5.4 mini
+  modelType: LLM
+  providerModelId: gpt-5.4-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.75
+    output: 4.5
+    cacheRead: 0.075
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.4-nano
+  displayName:
+    en: GPT-5.4 nano
+  modelType: LLM
+  providerModelId: gpt-5.4-nano
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.25
+    cacheRead: 0.02
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.4-pro
+  displayName:
+    en: GPT-5.4 Pro
+  modelType: LLM
+  providerModelId: gpt-5.4-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 30
+    output: 180
+    cacheRead: 0
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 60
+      output: 270
+      cacheRead: 0
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.5
+  displayName:
+    en: GPT-5.5
+  modelType: LLM
+  providerModelId: gpt-5.5
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 5
+    output: 30
+    cacheRead: 0.5
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 10
+      output: 45
+      cacheRead: 1
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.5-pro
+  displayName:
+    en: GPT-5.5 Pro
+  modelType: LLM
+  providerModelId: gpt-5.5-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 30
+    output: 180
+    cacheRead: 0
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 272000
+      input: 60
+      output: 270
+      cacheRead: 0
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/gpt-5.6-cyber
+  displayName:
+    en: GPT-5.6 Cyber
+  modelType: LLM
+  providerModelId: gpt-5.6-cyber
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 12.5
+    output: 75
+    cacheRead: 1.25
+    cacheWrite: 15.625
+  releaseDate: null
+- modelCode: azure/gpt-5.6-luna
+  displayName:
+    en: GPT-5.6 Luna
+  modelType: LLM
+  providerModelId: gpt-5.6-luna
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.2
+    cacheRead: 0.02
+    cacheWrite: 0.25
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.4
+      output: 1.8
+      cacheRead: 0.04
+      cacheWrite: 0.5
+  releaseDate: null
+- modelCode: azure/gpt-5.6-sol
+  displayName:
+    en: GPT-5.6 Sol
+  modelType: LLM
+  providerModelId: gpt-5.6-sol
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.4
+    cacheWrite: 5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 8
+      output: 30
+      cacheRead: 0.8
+      cacheWrite: 10
+  releaseDate: null
+- modelCode: azure/gpt-5.6-terra
+  displayName:
+    en: GPT-5.6 Terra
+  modelType: LLM
+  providerModelId: gpt-5.6-terra
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: azure/gpt-6-astra
+  displayName:
+    en: GPT-6 Astra
+  modelType: LLM
+  providerModelId: gpt-6-astra
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 1
+    cacheWrite: 12.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 20
+      output: 75
+      cacheRead: 2
+      cacheWrite: 25
+  releaseDate: null
+- modelCode: azure/gpt-6-luna
+  displayName:
+    en: GPT-6 Luna
+  modelType: LLM
+  providerModelId: gpt-6-luna
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.01
+    cacheWrite: 0.125
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.2
+      output: 0.75
+      cacheRead: 0.02
+      cacheWrite: 0.25
+  releaseDate: null
+- modelCode: azure/gpt-6-sol
+  displayName:
+    en: GPT-6 Sol
+  modelType: LLM
+  providerModelId: gpt-6-sol
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: azure/gpt-6.1-sol
+  displayName:
+    en: GPT-6.1 Sol
+  modelType: LLM
+  providerModelId: gpt-6.1-sol
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.2
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: azure/gpt-6.1-terra
+  displayName:
+    en: GPT-6.1 Terra
+  modelType: LLM
+  providerModelId: gpt-6.1-terra
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.05
+    cacheWrite: 1.25
+    tiers:
+    - inputTokensAbove: 272000
+      input: 2
+      output: 7.5
+      cacheRead: 0.1
+      cacheWrite: 2.5
+  releaseDate: null
+- modelCode: azure/gpt-daybreak-blue-latest
+  displayName:
+    en: Daybreak Blue
+  modelType: LLM
+  providerModelId: gpt-daybreak-blue-latest
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 1050000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.4
+    cacheWrite: 5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 8
+      output: 30
+      cacheRead: 0.8
+      cacheWrite: 10
+  releaseDate: null
+- modelCode: azure/gpt-daybreak-red-latest
+  displayName:
+    en: Daybreak Red
+  modelType: LLM
+  providerModelId: gpt-daybreak-red-latest
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 400000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 12.5
+    output: 75
+    cacheRead: 1.25
+    cacheWrite: 15.625
+  releaseDate: null
+- modelCode: azure/o1
+  displayName:
+    en: o1
+  modelType: LLM
+  providerModelId: o1
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 15
+    output: 60
+    cacheRead: 7.5
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/o1-pro
+  displayName:
+    en: o1-pro
+  modelType: LLM
+  providerModelId: o1-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 150
+    output: 600
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/o3
+  displayName:
+    en: o3
+  modelType: LLM
+  providerModelId: o3
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 8
+    cacheRead: 0.5
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/o3-mini
+  displayName:
+    en: o3-mini
+  modelType: LLM
+  providerModelId: o3-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.1
+    output: 4.4
+    cacheRead: 0.55
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/o3-pro
+  displayName:
+    en: o3-pro
+  modelType: LLM
+  providerModelId: o3-pro
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 20
+    output: 80
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/o4-mini
+  displayName:
+    en: o4-mini
+  modelType: LLM
+  providerModelId: o4-mini
+  primaryUpstreamProtocol: azure-openai-responses
+  contextLength: 200000
+  maxOutputTokens: 100000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.1
+    output: 4.4
+    cacheRead: 0.275
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: azure/deepseek-v4-pro
+  displayName:
+    en: DeepSeek V4 Pro
+  modelType: LLM
+  providerModelId: deepseek-v4-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 384000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - azure
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.925
+    output: 3.828
+    cacheRead: 0.165
+    cacheWrite: 0
+  releaseDate: null

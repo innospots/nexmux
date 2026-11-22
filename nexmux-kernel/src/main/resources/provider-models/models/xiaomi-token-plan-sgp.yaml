@@ -1,0 +1,62 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: xiaomi-token-plan-sgp
+modelCount: 2
+models:
+- modelCode: xiaomi-token-plan-sgp/mimo-v2.6-flash
+  displayName:
+    en: MiMo-V2.6-Flash
+  modelType: LLM
+  providerModelId: mimo-v2.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - xiaomi-token-plan-sgp
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: xiaomi-token-plan-sgp/mimo-v2.6-pro
+  displayName:
+    en: MiMo-V2.6-Pro
+  modelType: LLM
+  providerModelId: mimo-v2.6-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1048576
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - xiaomi-token-plan-sgp
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

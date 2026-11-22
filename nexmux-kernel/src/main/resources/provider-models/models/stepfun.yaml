@@ -1,0 +1,220 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: stepfun
+modelCount: 4
+models:
+- modelCode: stepfun/step-3.7-flash
+  displayName:
+    en: Step 3.7 Flash
+  modelType: LLM
+  providerModelId: step-3.7-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 256000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - stepfun
+  description:
+    en: An efficient multimodal StepFun model for native image and video understanding. Its multimodal mixture-of-experts
+      design combines a large language backbone with native image and video understanding.
+    zh-CN: 支持原生图像与视频理解的高效率阶跃星辰多模态模型。多模态混合专家设计将大型语言骨干与原生图像、视频理解结合起来。
+    ja: 画像と動画を最初から理解できる、効率のよい StepFun マルチモーダルです。混合エキスパートで、大規模な言語モデル本体と、最初から備わった画像・動画理解を組み合わせています。
+    ko: 이미지와 영상을 처음부터 이해하는 효율 좋은 StepFun 멀티모달입니다. 혼합 전문가로, 큰 언어 모델 본체와 처음부터 갖춘 이미지·영상 이해를 묶었습니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.15
+    cacheRead: 0.04
+    cacheWrite: 0
+    tiers:
+    - input: 0.2
+      output: 1.15
+      cacheRead: 0.04
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.2
+          output_price: 1.15
+          cache_read_price: 0.04
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 1.35
+          output_price: 8.1
+          cache_read_price: 0.27
+          cache_write_price: null
+  releaseDate: '2026-05-29'
+- modelCode: stepfun/step-5-preview
+  displayName:
+    en: Step 5 Preview
+  modelType: LLM
+  providerModelId: step-5-preview
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - stepfun
+  description:
+    en: StepFun's flagship multimodal reasoning model for agentic work, software engineering, and finance, with a 1M context
+      and 64K max output.
+    zh-CN: 阶跃星辰旗舰多模态推理模型，面向智能体工作、软件工程与金融场景，1M 上下文、最大输出 64K。
+    ja: StepFun のフラッグシップマルチモーダル推論モデル。エージェント業務、ソフト開発、金融向けで、1M コンテキスト・最大出力 64K です。
+    ko: StepFun의 플래그십 멀티모달 추론 모델. 에이전트 업무, 소프트웨어 개발, 금융 대상이며 1M 컨텍스트, 최대 출력 64K입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 2.7
+    cacheRead: 0.1
+    cacheWrite: 0
+    tiers:
+    - input: 1
+      output: 2.7
+      cacheRead: 0.1
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1
+          output_price: 2.7
+          cache_read_price: 0.1
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 7
+          output_price: 20
+          cache_read_price: 0.7
+          cache_write_price: null
+  releaseDate: null
+- modelCode: stepfun/step-3.5-flash
+  displayName:
+    en: Step 3.5 Flash
+  modelType: LLM
+  providerModelId: step-3.5-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: null
+  maxOutputTokens: null
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - octafuse-preset
+  - stepfun
+  description:
+    en: A cost-efficient text-only reasoning model from StepFun.
+    zh-CN: 阶跃星辰高性价比纯文本推理模型。
+    ja: StepFun の高コスパなテキスト専用推論モデル。
+    ko: StepFun의 가성비 좋은 텍스트 전용 추론 모델.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.3
+    cacheRead: 0.02
+    cacheWrite: 0
+    tiers:
+    - input: 0.1
+      output: 0.3
+      cacheRead: 0.02
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.1
+          output_price: 0.3
+          cache_read_price: 0.02
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.7
+          output_price: 2.1
+          cache_read_price: 0.14
+          cache_write_price: null
+  releaseDate: null
+- modelCode: stepfun/step-1o-turbo-vision
+  displayName:
+    en: Step 1o Turbo Vision
+  modelType: LLM
+  providerModelId: step-1o-turbo-vision
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 32000
+  maxOutputTokens: null
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - vision
+  tags:
+  - octafuse-preset
+  - stepfun
+  description:
+    en: A fast StepFun vision model for image and video understanding, with text, image, and video input and text-only output,
+      on a 32K context window.
+    zh-CN: 阶跃星辰高速视觉理解模型，支持文本、图像和视频输入、仅文本输出，上下文 32K，擅长图像与视频理解。
+    ja: StepFun の高速ビジョンモデル。テキスト・画像・動画出力入力に対応し、出力はテキストのみ、コンテキストは 32K です。
+    ko: StepFun의 고속 비전 모델. 텍스트·이미지·영상 입력에 대응하고 출력은 텍스트만, 컨텍스트는 32K입니다.
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.36
+    output: 1.15
+    cacheRead: 0.07
+    cacheWrite: 0
+    tiers:
+    - input: 0.36
+      output: 1.15
+      cacheRead: 0.07
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.36
+          output_price: 1.15
+          cache_read_price: 0.07
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 2.5
+          output_price: 8
+          cache_read_price: 0.5
+          cache_write_price: null
+  releaseDate: null

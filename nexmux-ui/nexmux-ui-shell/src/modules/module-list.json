@@ -1,0 +1,15 @@
+{
+  "modules": [
+    {
+      "package": "nexmux-ui-app",
+      "enabled": true,
+      "menuMode": "hidden",
+      "access": "public"
+    },
+    {
+      "package": "general-app",
+      "enabled": true,
+      "menuMode": "hidden"
+    }
+  ]
+}

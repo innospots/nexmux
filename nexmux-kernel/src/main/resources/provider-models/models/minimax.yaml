@@ -1,0 +1,234 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: minimax
+modelCount: 4
+models:
+- modelCode: minimax/MiniMax-M2.7
+  displayName:
+    en: MiniMax M2.7
+  modelType: LLM
+  providerModelId: MiniMax-M2.7
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 200000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - minimax
+  - octafuse-preset
+  description:
+    en: An agentic MiniMax model for autonomous productivity and multi-agent collaboration. It emphasizes autonomous productivity,
+      multi-agent collaboration, and continuous improvement in real-world work.
+    zh-CN: 面向自主生产力与多 Agent 协作的 Agent 型 MiniMax 模型。强调真实工作场景中的自主生产力、多 Agent 协作和持续改进。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.06
+    cacheWrite: 0
+    tiers:
+    - input: 0.3
+      output: 1.2
+      cacheRead: 0.06
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.3
+          output_price: 1.2
+          cache_read_price: 0.06
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 2.1
+          output_price: 8.4
+          cache_read_price: 0.42
+          cache_write_price: 2.625
+  releaseDate: '2026-03-18'
+- modelCode: minimax/MiniMax-M2.7-highspeed
+  displayName:
+    en: MiniMax M2.7 Highspeed
+  modelType: LLM
+  providerModelId: MiniMax-M2.7-highspeed
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 200000
+  maxOutputTokens: 200000
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - minimax
+  - octafuse-preset
+  description:
+    en: A high-speed variant of MiniMax M2.7 for faster inference at the same capability level. Optimized for latency-sensitive
+      productivity and agent workflows.
+    zh-CN: MiniMax M2.7 高速版，相同能力下推理速度更快。针对延迟敏感的生产力任务与 Agent 工作流优化。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.6
+    output: 2.4
+    cacheRead: 0.06
+    cacheWrite: 0.375
+    tiers:
+    - input: 0.6
+      output: 2.4
+      cacheRead: 0.06
+      cacheWrite: 0.375
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.6
+          output_price: 2.4
+          cache_read_price: 0.06
+          cache_write_price: 0.375
+      cny:
+        tiers:
+        - upto: null
+          input_price: 4.2
+          output_price: 16.8
+          cache_read_price: 0.42
+          cache_write_price: 2.625
+  releaseDate: null
+- modelCode: minimax/MiniMax-M3
+  displayName:
+    en: MiniMax M3
+  modelType: LLM
+  providerModelId: MiniMax-M3
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 512000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - minimax
+  - octafuse-preset
+  description:
+    en: A long-context multimodal MiniMax model for coding, knowledge work, and agents. The multimodal foundation is designed
+      for long-horizon agents, coding, and knowledge work over extended context.
+    zh-CN: 适合编程、知识工作与 Agent 的长上下文 MiniMax 多模态模型。多模态基础能力面向长周期 Agent、编程和长上下文知识工作。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 1.2
+    cacheRead: 0.06
+    cacheWrite: 0
+    tiers:
+    - upto: 512000
+      input: 0.3
+      output: 1.2
+      cacheRead: 0.06
+      cacheWrite: 0
+    - input: 0.6
+      output: 2.4
+      cacheRead: 0.12
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: 512000
+          input_price: 0.3
+          output_price: 1.2
+          cache_read_price: 0.06
+          cache_write_price: null
+        - upto: null
+          input_price: 0.6
+          output_price: 2.4
+          cache_read_price: 0.12
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: 512000
+          input_price: 2.1
+          output_price: 8.4
+          cache_read_price: 0.42
+          cache_write_price: null
+        - upto: null
+          input_price: 4.2
+          output_price: 16.8
+          cache_read_price: 0.84
+          cache_write_price: null
+  releaseDate: '2026-06-01'
+- modelCode: minimax/MiniMax-M3.1-Flash
+  displayName:
+    en: MiniMax M3.1 Flash
+  modelType: LLM
+  providerModelId: MiniMax-M3.1-Flash
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 512000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - minimax
+  - octafuse-preset
+  description:
+    en: 'The latest M-series language model for agentic reasoning, tool use, coding, and long-context tasks. A frontier multimodal
+      coding model with a 1M context window and tunable thinking depth: an ultra-efficient open-weight model for everyday
+      work. Input includes text, images, and video.'
+    zh-CN: 最新 M 系列语言模型，适用于 Agent 推理、工具调用、代码和长上下文任务，并可通过 effort 调节思考深度。原生多模态、1M 上下文的 Frontier Coding 模型，面向真实工作的日常高效主力。输入支持文本、图片和视频。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.15
+    output: 0.6
+    cacheRead: 0.015
+    cacheWrite: 0
+    tiers:
+    - input: 0.15
+      output: 0.6
+      cacheRead: 0.015
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.15
+          output_price: 0.6
+          cache_read_price: 0.015
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 1
+          output_price: 4
+          cache_read_price: 0.1
+          cache_write_price: null
+  releaseDate: '2026-10-19'

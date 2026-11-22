@@ -13,7 +13,8 @@
 生图/语音需厂商原生协议，暂不引入），并把已收厂商的模型行补上中文描述、双币定价、
 发布日与模态。
 
-输出：nexmux-spring/src/main/resources/schema/nexmux/nexmux-catalog-data-h2.sql
+输出（已废弃）：nexmux-spring/src/main/resources/schema/nexmux/nexmux-catalog-data-h2.sql
+  请改用：scripts/generate-provider-model-presets-yaml.py → nexmux-kernel/src/main/resources/provider-models/
   - mux_provider / mux_model 种子数据
   - 使用 H2 MERGE INTO ... WHEN NOT MATCHED THEN INSERT，只插不更新
     （已落库的表行不会被本脚本覆盖；改种子值后需清库或手工迁移才生效）

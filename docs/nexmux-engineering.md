@@ -108,7 +108,7 @@ RuntimeIngressEndpoint
 - `NexmuxRuntimeConfiguration`：`runtime` profile 的 Runtime 专用装配。
 - `bin/package.xml`：assembly 描述，生成 `dist/nexmux-spring.tar.gz`。
 - `schema/nexmux/nexmux-h2.sql`：产品表结构与幂等迁移。
-- `schema/nexmux/nexmux-catalog-data-h2.sql`：Provider/Model catalog 种子。
+- `nexmux-kernel/src/main/resources/provider-models/`：Provider/Model 预设 YAML（pi-ai + OctaFuse 生成，不写入 DB）。
 
 禁止把业务规则塞进 Spring `@Configuration`；配置类只做 Bean wiring。
 

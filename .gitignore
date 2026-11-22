@@ -23,6 +23,7 @@
 hs_err_pid*
 replay_pid*
 /.idea/
+/.openidea/
 dist
 target/
 .flattened-pom.xml
@@ -36,4 +37,7 @@ logs
 *.log
 out/
 logsscripts/__pycache__/
-nexmux-ui/tsconfig.tsbuildinfo
+nexmux-ui/**/tsconfig.tsbuildinfo
+nexmux-ui/**/dist-module/
+nexmux-ui/**/.generated/
+nexmux-ui/**/*.tgz

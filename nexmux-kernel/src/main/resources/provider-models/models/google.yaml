@@ -1,0 +1,1067 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: google
+modelCount: 23
+models:
+- modelCode: google/deep-research-max-preview-04-2026
+  displayName:
+    en: Deep Research Max Preview (Apr-21-2026)
+  modelType: LLM
+  providerModelId: deep-research-max-preview-04-2026
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: google/deep-research-preview-04-2026
+  displayName:
+    en: Deep Research Preview (Apr-21-2026)
+  modelType: LLM
+  providerModelId: deep-research-preview-04-2026
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-2.5-computer-use-preview-10-2025
+  displayName:
+    en: Gemini 2.5 Computer Use Preview 10-2025
+  modelType: LLM
+  providerModelId: gemini-2.5-computer-use-preview-10-2025
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 128000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 2.5
+      output: 15
+      cacheRead: 0
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-2.5-flash
+  displayName:
+    en: Gemini 2.5 Flash
+  modelType: LLM
+  providerModelId: gemini-2.5-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A versatile Gemini workhorse balancing reasoning quality, speed, and multimodal support. It balances built-in reasoning
+      with workhorse throughput for coding, mathematics, science, and multimodal production tasks.
+    zh-CN: 在推理质量、速度与多模态能力之间取得平衡的 Gemini 主力模型。在编程、数学、科学和多模态生产任务中平衡内置推理能力与主力级吞吐量。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 2.5
+    cacheRead: 0.03
+    cacheWrite: 0.08333
+    tiers:
+    - input: 0.3
+      output: 2.5
+      cacheRead: 0.03
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.3
+          output_price: 2.5
+          cache_read_price: 0.03
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 2.1
+          output_price: 17.5
+          cache_read_price: 0.21
+          cache_write_price: 0.58331
+  releaseDate: '2025-06-17'
+- modelCode: google/gemini-2.5-flash-lite
+  displayName:
+    en: Gemini 2.5 Flash Lite
+  modelType: LLM
+  providerModelId: gemini-2.5-flash-lite
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A low-cost Gemini reasoning model optimized for throughput and fast token generation. The model prioritizes ultra-low
+      latency, low cost, high throughput, and fast token generation.
+    zh-CN: 针对高吞吐与快速生成优化的低成本 Gemini 推理模型。重点优化超低延迟、低成本、高吞吐和快速 Token 生成。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.4
+    cacheRead: 0.01
+    cacheWrite: 0.08333
+    tiers:
+    - input: 0.1
+      output: 0.4
+      cacheRead: 0.01
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.1
+          output_price: 0.4
+          cache_read_price: 0.01
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 0.7
+          output_price: 2.8
+          cache_read_price: 0.07
+          cache_write_price: 0.58331
+  releaseDate: '2025-07-22'
+- modelCode: google/gemini-2.5-pro
+  displayName:
+    en: Gemini 2.5 Pro
+  modelType: LLM
+  providerModelId: gemini-2.5-pro
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A capable Gemini reasoning model for coding, mathematics, science, and multimodal analysis. Built-in thinking supports
+      more deliberate answers across advanced coding, mathematics, science, and multimodal analysis.
+    zh-CN: 适合编程、数学、科学与多模态分析的高性能 Gemini 推理模型。内置思考能力可在高级编程、数学、科学和多模态分析中给出更审慎的回答。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.25
+    output: 10
+    cacheRead: 0.125
+    cacheWrite: 0.375
+    tiers:
+    - upto: 200000
+      input: 1.25
+      output: 10
+      cacheRead: 0.125
+      cacheWrite: 0.375
+    - input: 2.5
+      output: 15
+      cacheRead: 0.25
+      cacheWrite: 0.375
+    prices:
+      usd:
+        tiers:
+        - upto: 200000
+          input_price: 1.25
+          output_price: 10
+          cache_read_price: 0.125
+          cache_write_price: 0.375
+        - upto: null
+          input_price: 2.5
+          output_price: 15
+          cache_read_price: 0.25
+          cache_write_price: 0.375
+      cny:
+        tiers:
+        - upto: 200000
+          input_price: 8.75
+          output_price: 70
+          cache_read_price: 0.875
+          cache_write_price: 2.625
+        - upto: null
+          input_price: 17.5
+          output_price: 105
+          cache_read_price: 1.75
+          cache_write_price: 2.625
+  releaseDate: '2025-06-17'
+- modelCode: google/gemini-3-flash-preview
+  displayName:
+    en: Gemini 3 Flash Preview
+  modelType: LLM
+  providerModelId: gemini-3-flash-preview
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A fast Gemini thinking model for multi-turn chat, coding, and agent workflows. It offers near-Pro reasoning and tool
+      use at Flash-class speed for multi-turn chat, coding, and agents.
+    zh-CN: 适合多轮对话、编程与 Agent 工作流的高速 Gemini 思考模型。以 Flash 级速度提供接近 Pro 的推理与工具调用能力，适用于多轮对话、编程和 Agent。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.5
+    output: 3
+    cacheRead: 0.05
+    cacheWrite: 0.08333
+    tiers:
+    - input: 0.5
+      output: 3
+      cacheRead: 0.05
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.5
+          output_price: 3
+          cache_read_price: 0.05
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 3.5
+          output_price: 21
+          cache_read_price: 0.35
+          cache_write_price: 0.58331
+  releaseDate: '2025-12-17'
+- modelCode: google/gemini-3.1-flash-lite
+  displayName:
+    en: Gemini 3.1 Flash Lite
+  modelType: LLM
+  providerModelId: gemini-3.1-flash-lite
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A high-efficiency Gemini preview optimized for high-volume, latency-sensitive applications. It is tuned for high-volume
+      workloads while approaching the quality of larger Flash models.
+    zh-CN: 针对高流量、延迟敏感应用优化的高效率 Gemini 预览模型。针对高吞吐工作负载优化，同时力求接近更大型 Flash 模型的质量。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 1.5
+    cacheRead: 0.025
+    cacheWrite: 0.08333
+    tiers:
+    - input: 0.25
+      output: 1.5
+      cacheRead: 0.025
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.25
+          output_price: 1.5
+          cache_read_price: 0.025
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 1.75
+          output_price: 10.5
+          cache_read_price: 0.175
+          cache_write_price: 0.58331
+  releaseDate: '2026-05-07'
+- modelCode: google/gemini-3.1-flash-lite-preview
+  displayName:
+    en: Gemini 3.1 Flash Lite Preview
+  modelType: LLM
+  providerModelId: gemini-3.1-flash-lite-preview
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 1.5
+    cacheRead: 0.025
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-3.1-pro-preview
+  displayName:
+    en: Gemini 3.1 Pro Preview
+  modelType: LLM
+  providerModelId: gemini-3.1-pro-preview
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A frontier Gemini reasoning preview for software engineering and reliable agentic workflows. The preview improves
+      software-engineering performance, agent reliability, and token efficiency across complex workflows.
+    zh-CN: 面向软件工程与高可靠 Agent 工作流的前沿 Gemini 推理预览模型。该预览版在复杂工作流中强化软件工程表现、Agent 可靠性和 Token 效率。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0.375
+    tiers:
+    - upto: 200000
+      input: 2
+      output: 12
+      cacheRead: 0.2
+      cacheWrite: 0.375
+    - input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0.375
+    prices:
+      usd:
+        tiers:
+        - upto: 200000
+          input_price: 2
+          output_price: 12
+          cache_read_price: 0.2
+          cache_write_price: 0.375
+        - upto: null
+          input_price: 4
+          output_price: 18
+          cache_read_price: 0.4
+          cache_write_price: 0.375
+      cny:
+        tiers:
+        - upto: 200000
+          input_price: 14
+          output_price: 84
+          cache_read_price: 1.4
+          cache_write_price: 2.625
+        - upto: null
+          input_price: 28
+          output_price: 126
+          cache_read_price: 2.8
+          cache_write_price: 2.625
+  releaseDate: '2026-02-19'
+- modelCode: google/gemini-3.1-pro-preview-customtools
+  displayName:
+    en: Gemini 3.1 Pro Preview Custom Tools
+  modelType: LLM
+  providerModelId: gemini-3.1-pro-preview-customtools
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-3.5-flash
+  displayName:
+    en: Gemini 3.5 Flash
+  modelType: LLM
+  providerModelId: gemini-3.5-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: An efficient multimodal Gemini model with strong coding, reasoning, and parallel-agent performance. It brings near-Pro
+      coding and reasoning to a faster tier and is tuned for parallel agent execution.
+    zh-CN: 在编程、推理与并行 Agent 场景表现出色的高效 Gemini 多模态模型。在更高效的档位提供接近 Pro 的编程和推理能力，并针对并行 Agent 执行优化。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 9
+    cacheRead: 0.15
+    cacheWrite: 0.08333
+    tiers:
+    - input: 1.5
+      output: 9
+      cacheRead: 0.15
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 9
+          cache_read_price: 0.15
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10.5
+          output_price: 63
+          cache_read_price: 1.05
+          cache_write_price: 0.58331
+  releaseDate: '2026-05-19'
+- modelCode: google/gemini-3.5-flash-lite
+  displayName:
+    en: Gemini 3.5 Flash Lite
+  modelType: LLM
+  providerModelId: gemini-3.5-flash-lite
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A lightweight Gemini model for focused subagents and high-volume production tasks. The lightweight design is especially
+      suited to focused subagents inside larger multi-agent systems.
+    zh-CN: 面向专注型子 Agent 与高流量生产任务的轻量 Gemini 模型。轻量化设计尤其适合大型多 Agent 系统中执行明确子任务的子 Agent。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3
+    output: 2.5
+    cacheRead: 0.03
+    cacheWrite: 0.08333
+    tiers:
+    - input: 0.3
+      output: 2.5
+      cacheRead: 0.03
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.3
+          output_price: 2.5
+          cache_read_price: 0.03
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 2.1
+          output_price: 17.5
+          cache_read_price: 0.21
+          cache_write_price: 0.58331
+  releaseDate: '2026-07-21'
+- modelCode: google/gemini-3.6-flash
+  displayName:
+    en: Gemini 3.6 Flash
+  modelType: LLM
+  providerModelId: gemini-3.6-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A high-efficiency Gemini model for coding, agents, and web or application development. It focuses on polished coding
+      and application outputs with fewer unnecessary edits across agentic workflows.
+    zh-CN: 面向编程、Agent、Web 与应用开发的高效率 Gemini 模型。面向 Agent 工作流中的编程与应用开发，力求以更少的无效修改产出更成熟的结果。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 7.5
+    cacheRead: 0.15
+    cacheWrite: 0.08333
+    tiers:
+    - input: 1.5
+      output: 7.5
+      cacheRead: 0.15
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 7.5
+          cache_read_price: 0.15
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10.5
+          output_price: 52.5
+          cache_read_price: 1.05
+          cache_write_price: 0.58331
+  releaseDate: '2026-07-21'
+- modelCode: google/gemini-3.7-flash
+  displayName:
+    en: Gemini 3.7 Flash
+  modelType: LLM
+  providerModelId: gemini-3.7-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: A high-efficiency Gemini workhorse for coding, agents, and knowledge work. It improves first-pass code accuracy, multi-step
+      tool use, and production-ready application output over Gemini 3.6 Flash.
+    zh-CN: 面向编程、Agent 与知识工作的高效率 Gemini 主力模型。相较 Gemini 3.6 Flash，提升首轮代码准确率、多步工具调用与可上线应用产出。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 7.5
+    cacheRead: 0.15
+    cacheWrite: 0.08333
+    tiers:
+    - input: 1.5
+      output: 7.5
+      cacheRead: 0.15
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 7.5
+          cache_read_price: 0.15
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10.5
+          output_price: 52.5
+          cache_read_price: 1.05
+          cache_write_price: 0.58331
+  releaseDate: '2026-08-13'
+- modelCode: google/gemini-3.8-flash
+  displayName:
+    en: Gemini 3.8 Flash
+  modelType: LLM
+  providerModelId: gemini-3.8-flash
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: Our most intelligent Flash model, engineered for long-horizon software engineering, autonomous agents, and complex
+      enterprise workflows. It improves software engineering, agentic tasks, and multi-step reasoning over Gemini 3.7 Flash.
+    zh-CN: 面向长周期软件工程、自主 Agent 与复杂企业工作流的最强 Gemini Flash 模型。相较 Gemini 3.7 Flash，提升软件工程、Agent 任务与多步推理能力。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 7.5
+    cacheRead: 0.15
+    cacheWrite: 0.08333
+    tiers:
+    - input: 1.5
+      output: 7.5
+      cacheRead: 0.15
+      cacheWrite: 0.08333
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.5
+          output_price: 7.5
+          cache_read_price: 0.15
+          cache_write_price: 0.08333
+      cny:
+        tiers:
+        - upto: null
+          input_price: 10.5
+          output_price: 52.5
+          cache_read_price: 1.05
+          cache_write_price: 0.58331
+  releaseDate: '2026-09-02'
+- modelCode: google/gemini-4-argon
+  displayName:
+    en: Gemini 4 Argon
+  modelType: LLM
+  providerModelId: gemini-4-argon
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1000000
+  maxOutputTokens: 64000
+  inputModalities:
+  - text
+  - image
+  - audio
+  - video
+  - file
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  - octafuse-preset
+  description:
+    en: Google's flagship Gemini reasoning model for complex software engineering, scientific problem solving, and multi-step
+      agents. Input and output share a ~1M window; synchronous output defaults to 64K, and long decode can reach ~1M.
+    zh-CN: 面向复杂软件工程、科学问题求解与多步 Agent 的旗舰 Gemini 推理模型。输入与输出共用约 1M 窗口；同步输出默认 64K，长解码最高约 1M。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - input: 4
+      output: 20
+      cacheRead: 0.2
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 4
+          output_price: 20
+          cache_read_price: 0.2
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 28
+          output_price: 140
+          cache_read_price: 1.4
+          cache_write_price: null
+  releaseDate: '2026-10-13'
+- modelCode: google/gemini-flash-latest
+  displayName:
+    en: Gemini Flash Latest
+  modelType: LLM
+  providerModelId: gemini-flash-latest
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.5
+    output: 9
+    cacheRead: 0.15
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-flash-lite-latest
+  displayName:
+    en: Gemini Flash-Lite Latest
+  modelType: LLM
+  providerModelId: gemini-flash-lite-latest
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.25
+    output: 1.5
+    cacheRead: 0.025
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-pro-latest
+  displayName:
+    en: Gemini Pro Latest
+  modelType: LLM
+  providerModelId: gemini-pro-latest
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 1048576
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 200000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemini-robotics-er-2-preview
+  displayName:
+    en: Gemini Robotics-ER 2 Preview
+  modelType: LLM
+  providerModelId: gemini-robotics-er-2-preview
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 131072
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.1
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemma-4-26b-a4b-it
+  displayName:
+    en: Gemma 4 26B A4B IT
+  modelType: LLM
+  providerModelId: gemma-4-26b-a4b-it
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 262144
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: google/gemma-4-31b-it
+  displayName:
+    en: Gemma 4 31B IT
+  modelType: LLM
+  providerModelId: gemma-4-31b-it
+  primaryUpstreamProtocol: google-generative-ai
+  contextLength: 262144
+  maxOutputTokens: 32768
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - google
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0
+    output: 0
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

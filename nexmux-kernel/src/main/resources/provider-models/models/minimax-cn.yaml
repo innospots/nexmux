@@ -1,0 +1,122 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: minimax-cn
+modelCount: 4
+models:
+- modelCode: minimax-cn/MiniMax-M2.7
+  displayName:
+    en: MiniMax-M2.7
+  modelType: LLM
+  providerModelId: MiniMax-M2.7
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - minimax-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3137
+    output: 1.2549
+    cacheRead: 0.0627
+    cacheWrite: 0.3922
+  releaseDate: null
+- modelCode: minimax-cn/MiniMax-M2.7-highspeed
+  displayName:
+    en: MiniMax-M2.7-highspeed
+  modelType: LLM
+  providerModelId: MiniMax-M2.7-highspeed
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 204800
+  maxOutputTokens: 131072
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - minimax-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.6275
+    output: 2.5098
+    cacheRead: 0.0627
+    cacheWrite: 0.3922
+  releaseDate: null
+- modelCode: minimax-cn/MiniMax-M3
+  displayName:
+    en: MiniMax-M3
+  modelType: LLM
+  providerModelId: MiniMax-M3
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 524288
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - minimax-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.3137
+    output: 1.2549
+    cacheRead: 0.0627
+    cacheWrite: 0
+    tiers:
+    - inputTokensAbove: 512000
+      input: 0.6275
+      output: 2.5098
+      cacheRead: 0.1255
+      cacheWrite: 0
+  releaseDate: null
+- modelCode: minimax-cn/MiniMax-M3.1-Flash
+  displayName:
+    en: MiniMax-M3.1-Flash
+  modelType: LLM
+  providerModelId: MiniMax-M3.1-Flash
+  primaryUpstreamProtocol: anthropic-messages
+  contextLength: 1000000
+  maxOutputTokens: 524288
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - minimax-cn
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1494
+    output: 0.5976
+    cacheRead: 0.0149
+    cacheWrite: 0
+  releaseDate: null

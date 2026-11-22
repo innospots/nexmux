@@ -1,0 +1,53 @@
+@import "tailwindcss";
+
+/* Tailwind v4 自动扫描会跳过 .generated 与 node_modules，
+   显式声明扫描装配后的模块 DSL，保证模块 YAML 中的工具类（p-4、flex 等）被生成 */
+@source "../../.generated/pactor/dsl";
+
+html,
+body {
+  height: 100%;
+}
+
+/* 一级导航：窄轨悬停单项弹出菜单名 tips（不展开整条导航轨） */
+.kn-rail .kn-rail-button {
+  overflow: visible;
+}
+
+.kn-rail .kn-rail-button .kn-rail-label {
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  z-index: 60;
+  display: block;
+  max-width: none;
+  padding: 5px 10px;
+  overflow: visible;
+  border: 1px solid color-mix(in srgb, var(--border, #334155) 70%, transparent);
+  border-radius: 6px;
+  background: var(--popover, #1e293b);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 26%);
+  color: var(--popover-foreground, #f1f5f9);
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  transform: translate(-4px, -50%);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+.kn-rail .kn-rail-button:hover .kn-rail-label,
+.kn-rail .kn-rail-button:focus-visible .kn-rail-label {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(0, -50%);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s;
+}

@@ -1,0 +1,83 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: ant-ling
+modelCount: 3
+models:
+- modelCode: ant-ling/Ling-2.6-1T
+  displayName:
+    en: Ling 2.6 1T
+  modelType: LLM
+  providerModelId: Ling-2.6-1T
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - pi-ai-catalog
+  - ant-ling
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.06
+    output: 0.25
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: ant-ling/Ling-2.6-flash
+  displayName:
+    en: Ling 2.6 Flash
+  modelType: LLM
+  providerModelId: Ling-2.6-flash
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags: []
+  tags:
+  - pi-ai-catalog
+  - ant-ling
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.01
+    output: 0.02
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null
+- modelCode: ant-ling/Ring-2.6-1T
+  displayName:
+    en: Ring 2.6 1T
+  modelType: LLM
+  providerModelId: Ring-2.6-1T
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 262144
+  maxOutputTokens: 65536
+  inputModalities:
+  - text
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  tags:
+  - pi-ai-catalog
+  - ant-ling
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.06
+    output: 0.25
+    cacheRead: 0
+    cacheWrite: 0
+  releaseDate: null

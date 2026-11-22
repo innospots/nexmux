@@ -1,0 +1,804 @@
+apiVersion: nexmux.provider-presets/v1
+updatedAt: '2026-11-21T12:37:59Z'
+providerCount: 48
+modelCount: 1805
+providers:
+- providerCode: aliyun
+  displayName:
+    zh-CN: 阿里云百炼
+    en: Alibaba Cloud Model Studio
+    ja: Alibaba Cloud Model Studio
+    ko: Alibaba Cloud Model Studio
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: aliyun
+  sourceVendorCode: aliyun
+  baseUrl: https://dashscope.aliyuncs.com/compatible-mode/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 阿里云百炼按量端点，提供 OpenAI Chat / Responses、Anthropic Messages，以及 DashScope 原生语音与生图。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses, Anthropic Messages, and native DashScope audio and
+      image generation.
+    ja: Alibaba Cloud Model Studio の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses、Anthropic Messages、DashScope ネイティブの音声と画像生成に対応しています。
+    ko: Alibaba Cloud Model Studio 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses, Anthropic Messages, DashScope 네이티브 음성과 이미지 생성을
+      제공합니다.
+  modelCount: 18
+- providerCode: amazon-bedrock
+  displayName:
+    en: Amazon Bedrock
+  providerType: CLOUD
+  defaultProtocol: bedrock-converse-stream
+  vendorCode: amazon-bedrock
+  sourceVendorCode: amazon-bedrock
+  baseUrl: https://bedrock-runtime.us-east-1.amazonaws.com
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Amazon Bedrock'
+  modelCount: 202
+- providerCode: ant-ling
+  displayName:
+    en: Ant Ling
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: ant-ling
+  sourceVendorCode: ant-ling
+  baseUrl: https://api.ant-ling.com/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Ant Ling'
+  modelCount: 3
+- providerCode: anthropic
+  displayName:
+    zh-CN: Anthropic
+    en: Anthropic
+    ja: Anthropic
+    ko: Anthropic
+  providerType: COMMERCIAL
+  defaultProtocol: anthropic-messages
+  vendorCode: anthropic
+  sourceVendorCode: anthropic
+  baseUrl: https://api.anthropic.com
+  timeoutMs: 60000
+  description:
+    zh-CN: Anthropic 官方 Messages API 根地址。
+    en: Anthropic’s official Messages API root.
+    ja: Anthropic 公式 Messages API のルート。
+    ko: Anthropic 공식 Messages API 루트.
+  modelCount: 18
+- providerCode: azure
+  displayName:
+    zh-CN: Azure OpenAI
+    en: Azure OpenAI
+    ja: Azure OpenAI
+    ko: Azure OpenAI
+  providerType: COMMERCIAL
+  defaultProtocol: azure-openai-responses
+  vendorCode: azure
+  sourceVendorCode: azure
+  baseUrl: https://{resource}.openai.azure.com
+  timeoutMs: 60000
+  description:
+    zh-CN: Azure OpenAI 的 OpenAI v1 地址。导入后替换资源名。Foundry 控制台给出的 *.services.ai.azure.com/openai/v1 同样可用。
+    en: Azure OpenAI v1 base URL. Replace the resource name after import. The Foundry host *.services.ai.azure.com/openai/v1
+      is the same template.
+    ja: Azure OpenAI の OpenAI v1 アドレス。インポート後にリソース名を置き換えます。Foundry の *.services.ai.azure.com/openai/v1 も同じテンプレートです。
+    ko: Azure OpenAI의 OpenAI v1 주소. 가져온 뒤 리소스 이름을 바꿉니다. Foundry의 *.services.ai.azure.com/openai/v1도 같은 템플릿입니다.
+  modelCount: 45
+- providerCode: baseten
+  displayName:
+    en: Baseten
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: baseten
+  sourceVendorCode: baseten
+  baseUrl: https://inference.baseten.co/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Baseten'
+  modelCount: 15
+- providerCode: cerebras
+  displayName:
+    zh-CN: Cerebras
+    en: Cerebras
+    ja: Cerebras
+    ko: Cerebras
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: cerebras
+  sourceVendorCode: cerebras
+  baseUrl: https://api.cerebras.ai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: Cerebras Inference 的 OpenAI 兼容高速对话 API。
+    en: Cerebras Inference’s high-speed OpenAI-compatible chat API.
+    ja: Cerebras Inference の高速 OpenAI 互換チャット API。
+    ko: Cerebras Inference의 고속 OpenAI 호환 대화 API.
+  modelCount: 2
+- providerCode: cloudflare-ai-gateway
+  displayName:
+    en: Cloudflare Ai Gateway
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: cloudflare-ai-gateway
+  sourceVendorCode: cloudflare-ai-gateway
+  baseUrl: https://gateway.ai.cloudflare.com/v1/{CLOUDFLARE_ACCOUNT_ID}/{CLOUDFLARE_GATEWAY_ID}/openai
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Cloudflare Ai Gateway'
+  modelCount: 59
+- providerCode: cloudflare-workers-ai
+  displayName:
+    en: Cloudflare Workers Ai
+  providerType: CLOUD
+  defaultProtocol: openai-completions
+  vendorCode: cloudflare-workers-ai
+  sourceVendorCode: cloudflare-workers-ai
+  baseUrl: https://api.cloudflare.com/client/v4/accounts/{CLOUDFLARE_ACCOUNT_ID}/ai/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Cloudflare Workers Ai'
+  modelCount: 24
+- providerCode: deepseek
+  displayName:
+    zh-CN: DeepSeek
+    en: DeepSeek
+    ja: DeepSeek
+    ko: DeepSeek
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: deepseek
+  sourceVendorCode: deepseek
+  baseUrl: https://api.deepseek.com
+  timeoutMs: 60000
+  description:
+    zh-CN: DeepSeek 官方开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: DeepSeek’s official platform with OpenAI Chat/Responses and Anthropic Messages.
+    ja: DeepSeek 公式プラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: DeepSeek 공식 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 2
+- providerCode: fireworks
+  displayName:
+    zh-CN: Fireworks AI
+    en: Fireworks AI
+    ja: Fireworks AI
+    ko: Fireworks AI
+  providerType: COMMERCIAL
+  defaultProtocol: anthropic-messages
+  vendorCode: fireworks
+  sourceVendorCode: fireworks
+  baseUrl: https://api.fireworks.ai/inference
+  timeoutMs: 60000
+  description:
+    zh-CN: Fireworks AI 的 OpenAI 兼容推理 API。
+    en: Fireworks AI’s OpenAI-compatible inference API.
+    ja: Fireworks AI の OpenAI 互換推論 API。
+    ko: Fireworks AI의 OpenAI 호환 추론 API.
+  modelCount: 27
+- providerCode: github-copilot
+  displayName:
+    en: Github Copilot
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: github-copilot
+  sourceVendorCode: github-copilot
+  baseUrl: https://api.individual.githubcopilot.com
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Github Copilot'
+  modelCount: 28
+- providerCode: google
+  displayName:
+    zh-CN: Google Gemini（Generative Language API）
+    en: Google Gemini (Generative Language API)
+    ja: Google Gemini（Generative Language API）
+    ko: Google Gemini (Generative Language API)
+  providerType: COMMERCIAL
+  defaultProtocol: google-generative-ai
+  vendorCode: google
+  sourceVendorCode: google
+  baseUrl: https://generativelanguage.googleapis.com/v1beta
+  timeoutMs: 60000
+  description:
+    zh-CN: Gemini Developer API，支持原生 Gemini 与 OpenAI 兼容协议。
+    en: Gemini Developer API with native Gemini and OpenAI-compatible access.
+    ja: Gemini Developer API。ネイティブ Gemini と OpenAI 互換プロトコルに対応しています。
+    ko: Gemini Developer API. 네이티브 Gemini와 OpenAI 호환 프로토콜을 지원합니다.
+  modelCount: 23
+- providerCode: google-vertex
+  displayName:
+    en: Google Vertex
+  providerType: CLOUD
+  defaultProtocol: google-vertex
+  vendorCode: google-vertex
+  sourceVendorCode: google-vertex
+  baseUrl: https://{location}-aiplatform.googleapis.com
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Google Vertex'
+  modelCount: 13
+- providerCode: groq
+  displayName:
+    zh-CN: Groq（OpenAI 兼容）
+    en: Groq (OpenAI Compatible)
+    ja: Groq（OpenAI 互換）
+    ko: Groq (OpenAI 호환)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: groq
+  sourceVendorCode: groq
+  baseUrl: https://api.groq.com/openai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: GroqCloud 的 OpenAI 兼容高速推理 API。
+    en: GroqCloud’s high-speed OpenAI-compatible inference API.
+    ja: GroqCloud の高速 OpenAI 互換推論 API。
+    ko: GroqCloud의 고속 OpenAI 호환 추론 API.
+  modelCount: 7
+- providerCode: huggingface
+  displayName:
+    zh-CN: Hugging Face Inference Providers
+    en: Hugging Face Inference Providers
+    ja: Hugging Face Inference Providers
+    ko: Hugging Face Inference Providers
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: huggingface
+  sourceVendorCode: huggingface
+  baseUrl: https://router.huggingface.co/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: Hugging Face 推理路由的 OpenAI 兼容对话 API，可按模型指定上游供应商。
+    en: Hugging Face’s OpenAI-compatible chat router across many inference providers.
+    ja: Hugging Face 推論ルーターの OpenAI 互換チャット API。モデルごとに上流プロバイダーを指定できます。
+    ko: Hugging Face 추론 라우터의 OpenAI 호환 대화 API. 모델마다 업스트림 공급자를 지정할 수 있습니다.
+  modelCount: 78
+- providerCode: kimi-coding
+  displayName:
+    zh-CN: 月之暗面 Moonshot
+    en: Moonshot AI
+    ja: Moonshot AI
+    ko: 문샷 AI (Moonshot AI)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: kimi-coding
+  sourceVendorCode: kimi-coding
+  baseUrl: https://api.kimi.com/coding/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 月之暗面中国区按量端点，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: Moonshot AI の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 문샷 AI(Moonshot AI) 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 6
+- providerCode: meituan
+  displayName:
+    zh-CN: 美团 LongCat
+    en: Meituan LongCat
+    ja: 美団 LongCat
+    ko: 메이투안 LongCat
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: meituan
+  sourceVendorCode: meituan
+  baseUrl: https://api.longcat.chat/openai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: LongCat 开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: LongCat endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: LongCat オープンプラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: LongCat 오픈 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 1
+- providerCode: meta
+  displayName:
+    zh-CN: Meta Model API
+    en: Meta Model API
+    ja: Meta Model API
+    ko: Meta Model API
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: meta
+  sourceVendorCode: meta
+  baseUrl: https://api.meta.ai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: Meta 官方 Model API（Muse Spark），支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: Meta’s official Model API for Muse Spark, with OpenAI Chat/Responses and Anthropic Messages.
+    ja: Meta 公式 Model API（Muse Spark）。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: Meta 공식 Model API(Muse Spark). OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 7
+- providerCode: minimax
+  displayName:
+    zh-CN: MiniMax
+    en: MiniMax
+    ja: MiniMax
+    ko: MiniMax
+  providerType: COMMERCIAL
+  defaultProtocol: anthropic-messages
+  vendorCode: minimax
+  sourceVendorCode: minimax
+  baseUrl: https://api.minimax.io/anthropic
+  timeoutMs: 60000
+  description:
+    zh-CN: MiniMax 国内开放平台，支持 OpenAI Chat / Responses、Anthropic Messages，以及原生文件转写、同步语音合成与生图。
+    en: China-region MiniMax endpoints for OpenAI Chat/Responses, Anthropic Messages, and native file transcription, speech
+      synthesis, and image generation.
+    ja: MiniMax 中国リージョン。OpenAI Chat / Responses、Anthropic Messages、ネイティブのファイル文字起こし、同期音声合成、画像生成に対応しています。
+    ko: MiniMax 중국 리전. OpenAI Chat / Responses, Anthropic Messages, 네이티브 파일 전사, 동기 음성 합성과 이미지 생성을 지원합니다.
+  modelCount: 4
+- providerCode: minimax-cn
+  displayName:
+    zh-CN: MiniMax
+    en: MiniMax
+    ja: MiniMax
+    ko: MiniMax
+  providerType: COMMERCIAL
+  defaultProtocol: anthropic-messages
+  vendorCode: minimax-cn
+  sourceVendorCode: minimax-cn
+  baseUrl: https://api.minimaxi.com/anthropic
+  timeoutMs: 60000
+  description:
+    zh-CN: MiniMax 国内开放平台，支持 OpenAI Chat / Responses、Anthropic Messages，以及原生文件转写、同步语音合成与生图。
+    en: China-region MiniMax endpoints for OpenAI Chat/Responses, Anthropic Messages, and native file transcription, speech
+      synthesis, and image generation.
+    ja: MiniMax 中国リージョン。OpenAI Chat / Responses、Anthropic Messages、ネイティブのファイル文字起こし、同期音声合成、画像生成に対応しています。
+    ko: MiniMax 중국 리전. OpenAI Chat / Responses, Anthropic Messages, 네이티브 파일 전사, 동기 음성 합성과 이미지 생성을 지원합니다.
+  modelCount: 4
+- providerCode: mistral
+  displayName:
+    zh-CN: Mistral AI
+    en: Mistral AI
+    ja: Mistral AI
+    ko: Mistral AI
+  providerType: COMMERCIAL
+  defaultProtocol: mistral-conversations
+  vendorCode: mistral
+  sourceVendorCode: mistral
+  baseUrl: https://api.mistral.ai
+  timeoutMs: 60000
+  description:
+    zh-CN: Mistral 官方 OpenAI 兼容对话 API。
+    en: Mistral’s official OpenAI-compatible chat API.
+    ja: Mistral 公式の OpenAI 互換チャット API。
+    ko: Mistral 공식 OpenAI 호환 대화 API.
+  modelCount: 34
+- providerCode: moonshotai
+  displayName:
+    zh-CN: 月之暗面 Moonshot
+    en: Moonshot AI
+    ja: Moonshot AI
+    ko: 문샷 AI (Moonshot AI)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: moonshotai
+  sourceVendorCode: moonshotai
+  baseUrl: https://api.moonshot.ai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 月之暗面中国区按量端点，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: Moonshot AI の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 문샷 AI(Moonshot AI) 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 6
+- providerCode: moonshotai-cn
+  displayName:
+    zh-CN: 月之暗面 Moonshot
+    en: Moonshot AI
+    ja: Moonshot AI
+    ko: 문샷 AI (Moonshot AI)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: moonshotai-cn
+  sourceVendorCode: moonshotai-cn
+  baseUrl: https://api.moonshot.cn/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 月之暗面中国区按量端点，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: Moonshot AI の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 문샷 AI(Moonshot AI) 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 6
+- providerCode: nvidia
+  displayName:
+    zh-CN: NVIDIA NIM（integrate.api）
+    en: NVIDIA NIM (integrate.api)
+    ja: NVIDIA NIM（integrate.api）
+    ko: NVIDIA NIM (integrate.api)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: nvidia
+  sourceVendorCode: nvidia
+  baseUrl: https://integrate.api.nvidia.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: NVIDIA Build 提供的 NIM OpenAI 兼容推理入口。
+    en: NVIDIA Build’s OpenAI-compatible NIM inference endpoint.
+    ja: NVIDIA Build が提供する NIM の OpenAI 互換推論エンドポイント。
+    ko: NVIDIA Build가 제공하는 NIM OpenAI 호환 추론 엔드포인트.
+  modelCount: 20
+- providerCode: openai
+  displayName:
+    zh-CN: OpenAI
+    en: OpenAI
+    ja: OpenAI
+    ko: OpenAI
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: openai
+  sourceVendorCode: openai
+  baseUrl: https://api.openai.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: OpenAI 官方 API 根地址，覆盖对话、图片等开放能力。
+    en: OpenAI’s official API root for chat, images, and other supported capabilities.
+    ja: OpenAI 公式 API のルート。対話、画像などの公開機能に対応しています。
+    ko: OpenAI 공식 API 루트. 대화, 이미지 등 공개 기능을 다룹니다.
+  modelCount: 44
+- providerCode: openai-codex
+  displayName:
+    en: Openai Codex
+  providerType: COMMERCIAL
+  defaultProtocol: openai-codex-responses
+  vendorCode: openai-codex
+  sourceVendorCode: openai-codex
+  baseUrl: https://chatgpt.com/backend-api
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Openai Codex'
+  modelCount: 8
+- providerCode: opencode
+  displayName:
+    zh-CN: OpenCode Zen
+    en: OpenCode Zen
+    ja: OpenCode Zen
+    ko: OpenCode Zen
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: opencode
+  sourceVendorCode: opencode
+  baseUrl: https://opencode.ai/inference/openai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: OpenCode 按量端点（/inference），支持 OpenAI Chat、Responses、Anthropic，以及 Bearer 鉴权的 Gemini。勿与 Go 套餐端点混用。
+    en: OpenCode pay-as-you-go endpoints (/inference) for OpenAI Chat, Responses, Anthropic, and Bearer-authenticated Gemini.
+      Do not mix with Go.
+    ja: OpenCode の従量課金エンドポイント（/inference）。OpenAI Chat、Responses、Anthropic、Bearer 認証の Gemini に対応しています。Go プランのエンドポイントと混在させないでください。
+    ko: OpenCode 종량제 엔드포인트(/inference). OpenAI Chat, Responses, Anthropic, Bearer 인증 Gemini를 지원합니다. Go 플랜 엔드포인트와 섞어 쓰지 마세요.
+  modelCount: 87
+- providerCode: opencode-go
+  displayName:
+    en: Opencode Go
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: opencode-go
+  sourceVendorCode: opencode-go
+  baseUrl: https://opencode.ai/inference/go/openai/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Opencode Go'
+  modelCount: 32
+- providerCode: openrouter
+  displayName:
+    zh-CN: OpenRouter
+    en: OpenRouter
+    ja: OpenRouter
+    ko: OpenRouter
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: openrouter
+  sourceVendorCode: openrouter
+  baseUrl: https://openrouter.ai/api/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: OpenRouter 聚合平台，统一访问多家对话与图片模型。
+    en: A unified aggregation platform for chat and image models from many vendors.
+    ja: OpenRouter の統合プラットフォーム。複数ベンダーの対話モデルと画像モデルをまとめて利用できます。
+    ko: OpenRouter 통합 플랫폼. 여러 공급사의 대화·이미지 모델을 한곳에서 사용할 수 있습니다.
+  modelCount: 500
+- providerCode: qwen-token-plan
+  displayName:
+    zh-CN: 阿里云百炼
+    en: Alibaba Cloud Model Studio
+    ja: Alibaba Cloud Model Studio
+    ko: Alibaba Cloud Model Studio
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: qwen-token-plan
+  sourceVendorCode: qwen-token-plan
+  baseUrl: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 阿里云百炼按量端点，提供 OpenAI Chat / Responses、Anthropic Messages，以及 DashScope 原生语音与生图。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses, Anthropic Messages, and native DashScope audio and
+      image generation.
+    ja: Alibaba Cloud Model Studio の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses、Anthropic Messages、DashScope ネイティブの音声と画像生成に対応しています。
+    ko: Alibaba Cloud Model Studio 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses, Anthropic Messages, DashScope 네이티브 음성과 이미지 생성을
+      제공합니다.
+  modelCount: 21
+- providerCode: qwen-token-plan-cn
+  displayName:
+    zh-CN: 阿里云百炼
+    en: Alibaba Cloud Model Studio
+    ja: Alibaba Cloud Model Studio
+    ko: Alibaba Cloud Model Studio
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: qwen-token-plan-cn
+  sourceVendorCode: qwen-token-plan-cn
+  baseUrl: https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 阿里云百炼按量端点，提供 OpenAI Chat / Responses、Anthropic Messages，以及 DashScope 原生语音与生图。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses, Anthropic Messages, and native DashScope audio and
+      image generation.
+    ja: Alibaba Cloud Model Studio の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses、Anthropic Messages、DashScope ネイティブの音声と画像生成に対応しています。
+    ko: Alibaba Cloud Model Studio 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses, Anthropic Messages, DashScope 네이티브 음성과 이미지 생성을
+      제공합니다.
+  modelCount: 21
+- providerCode: qwen-token-plan-individual
+  displayName:
+    zh-CN: 阿里云百炼
+    en: Alibaba Cloud Model Studio
+    ja: Alibaba Cloud Model Studio
+    ko: Alibaba Cloud Model Studio
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: qwen-token-plan-individual
+  sourceVendorCode: qwen-token-plan-individual
+  baseUrl: https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 阿里云百炼按量端点，提供 OpenAI Chat / Responses、Anthropic Messages，以及 DashScope 原生语音与生图。
+    en: China-region pay-as-you-go endpoints for OpenAI Chat/Responses, Anthropic Messages, and native DashScope audio and
+      image generation.
+    ja: Alibaba Cloud Model Studio の中国リージョン従量課金エンドポイント。OpenAI Chat / Responses、Anthropic Messages、DashScope ネイティブの音声と画像生成に対応しています。
+    ko: Alibaba Cloud Model Studio 중국 리전 종량제 엔드포인트. OpenAI Chat / Responses, Anthropic Messages, DashScope 네이티브 음성과 이미지 생성을
+      제공합니다.
+  modelCount: 10
+- providerCode: qwen-token-plan-individual-cn
+  displayName:
+    en: Qwen Token Plan Individual Cn
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: qwen-token-plan-individual-cn
+  sourceVendorCode: qwen-token-plan-individual-cn
+  baseUrl: https://token-plan.cn-beijing.maas.aliyuncs.com/compatible-mode/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Qwen Token Plan Individual Cn'
+  modelCount: 10
+- providerCode: radius
+  displayName:
+    en: Radius Gateway
+  providerType: CUSTOM
+  defaultProtocol: pi-messages
+  vendorCode: radius
+  sourceVendorCode: radius
+  baseUrl: https://radius.pi.dev/v1
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Radius Gateway'
+  modelCount: 35
+- providerCode: stepfun
+  displayName:
+    zh-CN: 阶跃星辰 StepFun
+    en: StepFun
+    ja: StepFun（階躍星辰）
+    ko: 스텝펀 (StepFun)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: stepfun
+  sourceVendorCode: stepfun
+  baseUrl: https://api.stepfun.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 阶跃星辰按量端点，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: StepFun pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: 階躍星辰の従量課金エンドポイント。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 스텝펀(StepFun) 종량제 엔드포인트. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 4
+- providerCode: tencent
+  displayName:
+    zh-CN: 腾讯云 TokenHub
+    en: Tencent Cloud TokenHub
+    ja: Tencent Cloud TokenHub
+    ko: Tencent Cloud TokenHub
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: tencent
+  sourceVendorCode: tencent
+  baseUrl: https://tokenhub.tencentmaas.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 腾讯云 TokenHub 广州按量入口，支持 OpenAI Chat、Responses、Embeddings 与 Anthropic Messages。不要和 Token Plan 的 sk-tp- Key 或 /plan
+      地址混用。
+    en: TokenHub Guangzhou pay-as-you-go endpoints for OpenAI Chat, Responses, Embeddings, and Anthropic Messages.
+    ja: Tencent Cloud TokenHub の広州リージョン従量課金エンドポイント。OpenAI Chat、Responses、Embeddings、Anthropic Messages に対応しています。
+    ko: Tencent Cloud TokenHub 광저우 종량제 엔드포인트. OpenAI Chat, Responses, Embeddings, Anthropic Messages를 지원합니다.
+  modelCount: 5
+- providerCode: together
+  displayName:
+    zh-CN: Together AI
+    en: Together AI
+    ja: Together AI
+    ko: Together AI
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: together
+  sourceVendorCode: together
+  baseUrl: https://api.together.ai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: Together AI 的 OpenAI 兼容 API，覆盖对话、图片、语音转写与语音合成模型。
+    en: Together AI’s OpenAI-compatible API for chat, images, speech transcription, and speech synthesis.
+    ja: Together AI の OpenAI 互換 API。対話、画像、音声文字起こし、音声合成モデルに対応しています。
+    ko: Together AI의 OpenAI 호환 API. 대화, 이미지, 음성 전사, 음성 합성 모델을 다룹니다.
+  modelCount: 16
+- providerCode: typesafe
+  displayName:
+    en: Typesafe
+  providerType: CUSTOM
+  defaultProtocol: typesafe-system-one
+  vendorCode: typesafe
+  sourceVendorCode: typesafe
+  baseUrl: https://api.typesafe.ai/v1/
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Typesafe'
+  modelCount: 1
+- providerCode: vercel-ai-gateway
+  displayName:
+    en: Vercel Ai Gateway
+  providerType: COMMERCIAL
+  defaultProtocol: anthropic-messages
+  vendorCode: vercel-ai-gateway
+  sourceVendorCode: vercel-ai-gateway
+  baseUrl: https://ai-gateway.vercel.sh
+  timeoutMs: 60000
+  description:
+    en: 'Imported from pi-ai model catalog: Vercel Ai Gateway'
+  modelCount: 325
+- providerCode: volcengine
+  displayName:
+    zh-CN: 火山方舟
+    en: Volcengine Ark
+    ja: Volcengine Ark（火山方舟）
+    ko: Volcengine Ark
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: volcengine
+  sourceVendorCode: volcengine
+  baseUrl: https://ark.cn-beijing.volces.com/api/v3
+  timeoutMs: 60000
+  description:
+    zh-CN: 火山方舟标准按量端点，提供 OpenAI Chat / Responses、Anthropic Messages，以及 Seedream 图片生成。
+    en: Standard pay-as-you-go Ark endpoints for OpenAI Chat/Responses, Anthropic Messages, and Seedream image generation.
+    ja: Volcengine Ark の標準従量課金エンドポイント。OpenAI Chat / Responses、Anthropic Messages、Seedream の画像生成に対応しています。
+    ko: Volcengine Ark 표준 종량제 엔드포인트. OpenAI Chat / Responses, Anthropic Messages, Seedream 이미지 생성을 제공합니다.
+  modelCount: 10
+- providerCode: xai
+  displayName:
+    zh-CN: xAI（Grok）
+    en: xAI (Grok)
+    ja: xAI（Grok）
+    ko: xAI (Grok)
+  providerType: COMMERCIAL
+  defaultProtocol: openai-responses
+  vendorCode: xai
+  sourceVendorCode: xai
+  baseUrl: https://api.x.ai/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: xAI 官方 OpenAI 兼容 API，支持 Grok 对话、Responses 与图片生成。
+    en: xAI’s OpenAI-compatible API for Grok chat, Responses, and image generation.
+    ja: xAI 公式の OpenAI 互換 API。Grok の対話、Responses、画像生成に対応しています。
+    ko: xAI 공식 OpenAI 호환 API. Grok 대화, Responses, 이미지 생성을 지원합니다.
+  modelCount: 4
+- providerCode: xiaomi
+  displayName:
+    zh-CN: 小米 MiMo
+    en: Xiaomi MiMo
+    ja: シャオミ MiMo
+    ko: 샤오미 MiMo
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: xiaomi
+  sourceVendorCode: xiaomi
+  baseUrl: https://api.xiaomimimo.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 小米 MiMo 按量开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: Xiaomi MiMo pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: シャオミ MiMo の従量課金オープンプラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 샤오미 MiMo 종량제 오픈 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 3
+- providerCode: xiaomi-token-plan-ams
+  displayName:
+    zh-CN: 小米 MiMo
+    en: Xiaomi MiMo
+    ja: シャオミ MiMo
+    ko: 샤오미 MiMo
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: xiaomi-token-plan-ams
+  sourceVendorCode: xiaomi-token-plan-ams
+  baseUrl: https://token-plan-ams.xiaomimimo.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 小米 MiMo 按量开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: Xiaomi MiMo pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: シャオミ MiMo の従量課金オープンプラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 샤오미 MiMo 종량제 오픈 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 2
+- providerCode: xiaomi-token-plan-cn
+  displayName:
+    zh-CN: 小米 MiMo
+    en: Xiaomi MiMo
+    ja: シャオミ MiMo
+    ko: 샤오미 MiMo
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: xiaomi-token-plan-cn
+  sourceVendorCode: xiaomi-token-plan-cn
+  baseUrl: https://token-plan-cn.xiaomimimo.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 小米 MiMo 按量开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: Xiaomi MiMo pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: シャオミ MiMo の従量課金オープンプラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 샤오미 MiMo 종량제 오픈 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 2
+- providerCode: xiaomi-token-plan-sgp
+  displayName:
+    zh-CN: 小米 MiMo
+    en: Xiaomi MiMo
+    ja: シャオミ MiMo
+    ko: 샤오미 MiMo
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: xiaomi-token-plan-sgp
+  sourceVendorCode: xiaomi-token-plan-sgp
+  baseUrl: https://token-plan-sgp.xiaomimimo.com/v1
+  timeoutMs: 60000
+  description:
+    zh-CN: 小米 MiMo 按量开放平台，支持 OpenAI Chat / Responses 与 Anthropic Messages。
+    en: Xiaomi MiMo pay-as-you-go endpoints for OpenAI Chat/Responses and Anthropic Messages.
+    ja: シャオミ MiMo の従量課金オープンプラットフォーム。OpenAI Chat / Responses と Anthropic Messages に対応しています。
+    ko: 샤오미 MiMo 종량제 오픈 플랫폼. OpenAI Chat / Responses와 Anthropic Messages를 지원합니다.
+  modelCount: 2
+- providerCode: zai
+  displayName:
+    zh-CN: 智谱 GLM
+    en: Zhipu GLM
+    ja: 智譜AI GLM
+    ko: 즈푸 AI GLM
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: zai
+  sourceVendorCode: zai
+  baseUrl: https://api.z.ai/api/coding/paas/v4
+  timeoutMs: 60000
+  description:
+    zh-CN: 智谱中国区标准 API，支持 OpenAI Chat、Responses、Anthropic Messages，以及 GLM 图片生成。
+    en: China-region API for OpenAI Chat, Responses, Anthropic Messages, and GLM image generation.
+    ja: 智譜AIの中国リージョン標準 API。OpenAI Chat、Responses、Anthropic Messages、GLM の画像生成に対応しています。
+    ko: 즈푸 AI 중국 리전 표준 API. OpenAI Chat, Responses, Anthropic Messages, GLM 이미지 생성을 지원합니다.
+  modelCount: 7
+- providerCode: zai-coding-cn
+  displayName:
+    zh-CN: 智谱 GLM
+    en: Zhipu GLM
+    ja: 智譜AI GLM
+    ko: 즈푸 AI GLM
+  providerType: COMMERCIAL
+  defaultProtocol: openai-completions
+  vendorCode: zai-coding-cn
+  sourceVendorCode: zai-coding-cn
+  baseUrl: https://open.bigmodel.cn/api/coding/paas/v4
+  timeoutMs: 60000
+  description:
+    zh-CN: 智谱中国区标准 API，支持 OpenAI Chat、Responses、Anthropic Messages，以及 GLM 图片生成。
+    en: China-region API for OpenAI Chat, Responses, Anthropic Messages, and GLM image generation.
+    ja: 智譜AIの中国リージョン標準 API。OpenAI Chat、Responses、Anthropic Messages、GLM の画像生成に対応しています。
+    ko: 즈푸 AI 중국 리전 표준 API. OpenAI Chat, Responses, Anthropic Messages, GLM 이미지 생성을 지원합니다.
+  modelCount: 4

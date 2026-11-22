@@ -1,0 +1,11 @@
+# 平台登录。密码在浏览器内用 RSA-OAEP 加密后提交。
+dsl: "1.0"
+page:
+  id: login
+  title: $i18n{nexmux.page.login.title:登录}
+  name: login
+  access-mode: public
+  description: 模型平台登录
+
+body:
+  type: NexmuxLoginForm

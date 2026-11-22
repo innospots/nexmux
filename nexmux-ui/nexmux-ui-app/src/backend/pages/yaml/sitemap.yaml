@@ -1,0 +1,295 @@
+# 页面路由与布局。导航菜单由后端 meta-sitemap 按授权下发。
+# 每个页面 YAML 声明 access-mode；登录页为 public，其余为 grant。
+
+id: site
+resourceType: sitemap
+version: 1
+dslVersion: "1.0"
+app: { name: Nexmux Model Console }
+layout: admin
+auth: { loginPath: /login }
+
+pages:
+  - { id: login, path: /login, title: 登录, version: 1, lazy: true }
+  - { id: dashboard, path: /dashboard, title: 仪表盘, version: 1, lazy: true }
+  # 模型资产
+  - {
+      id: provider-list,
+      path: /providers,
+      title: 供应商,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-create,
+      path: /providers/new,
+      title: 新增 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-detail,
+      path: /providers/:code,
+      title: Provider 详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-edit,
+      path: /providers/:code/edit,
+      title: 编辑 Provider,
+      version: 1,
+      lazy: true,
+    }
+  - { id: model-list, path: /models, title: 模型, version: 1, lazy: true, }
+  - {
+      id: model-create,
+      path: /models/new,
+      title: 新增模型,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-detail,
+      path: /models/:code,
+      title: 模型详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-edit,
+      path: /models/:code/edit,
+      title: 编辑模型,
+      version: 1,
+      lazy: true,
+    }
+  # 模型路由
+  - { id: route-list, path: /routes, title: 路由, version: 1, lazy: true, }
+  - {
+      id: route-create,
+      path: /routes/new,
+      title: 新增路由,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-detail,
+      path: /routes/:code,
+      title: 路由详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: route-edit,
+      path: /routes/:code/edit,
+      title: 编辑路由,
+      version: 1,
+      lazy: true,
+    }
+  # 访问治理
+  - { id: client-list, path: /clients, title: 客户端, version: 1, lazy: true, }
+  - {
+      id: client-create,
+      path: /clients/new,
+      title: 新建客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-detail,
+      path: /clients/:code,
+      title: 客户端详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-edit,
+      path: /clients/:code/edit,
+      title: 编辑客户端,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-list,
+      path: /client-templates,
+      title: 客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-create,
+      path: /client-templates/new,
+      title: 新建客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-detail,
+      path: /client-templates/:code,
+      title: 客户端模板详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-template-edit,
+      path: /client-templates/:code/edit,
+      title: 编辑客户端模板,
+      version: 1,
+      lazy: true,
+    }
+  # 运行管理
+  - {
+      id: call-log-list,
+      path: /call-logs,
+      title: 调用日志,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: call-log-detail,
+      path: /call-logs/:id,
+      title: 调用日志详情,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-usage,
+      path: /model-usage,
+      title: 模型用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-usage,
+      path: /provider-usage,
+      title: 供应商用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: client-usage,
+      path: /client-usage,
+      title: 客户端用量,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: provider-availability,
+      path: /provider-availability,
+      title: 供应商可用性,
+      version: 1,
+      lazy: true,
+    }
+  - { id: cost-list, path: /costs, title: 成本明细, version: 1, lazy: true, }
+  - {
+      id: cost-detail,
+      path: /costs/:id,
+      title: 成本明细详情,
+      version: 1,
+      lazy: true,
+    }
+  # 调试台
+  - {
+      id: client-debug,
+      path: /client-debug,
+      title: 客户端调试,
+      version: 1,
+      lazy: true,
+    }
+  - {
+      id: model-debug,
+      path: /model-debug,
+      title: 模型调试,
+      version: 1,
+      lazy: true,
+    }
+  # 系统管理
+  - {
+      id: service-settings,
+      path: /service-settings,
+      title: 服务设置,
+      version: 1,
+      lazy: true,
+    }
+  - { id: audit-list, path: /audit, title: 审计, version: 1, lazy: true, }
+  - {
+      id: audit-detail,
+      path: /audit/:id,
+      title: 审计详情,
+      version: 1,
+      lazy: true,
+    }
+layouts:
+  # 管理端外壳：Sidebar + Header + Content。换肤与角色权限由 Shell / general-app 提供。
+  admin:
+    dsl: "1.0"
+    body:
+      type: Layout
+      props: { className: shell-root }
+      children:
+        - type: Sidebar
+          props:
+            className: shell-main
+            brand: { title: Model Console, logo: /next.svg }
+            collapsible: true
+            content:
+              type: SitemapMenu
+              props:
+                items: ${data.session.menus}
+                collapsible: true
+                className: shell-menu
+              events:
+                onSelect:
+                  - action: navigate
+                    params: { to: "${event}" }
+          children:
+            - type: Header
+              props:
+                className: shell-header
+                locales:
+                  - { label: 中文, value: zh-CN }
+                  - { label: English, value: en-US }
+                user:
+                  name: ${data.session.user.name}
+                  items:
+                    - { label: 个人中心, value: profile, icon: user }
+                    - { label: 退出登录, value: logout, icon: log-out }
+              events:
+                onUserSelect:
+                  - action: if
+                    params:
+                      condition: ${event == 'logout'}
+                      then:
+                        - action: util.request
+                          params:
+                            method: POST
+                            url: /api/auth/logout
+                        - action: app.reload
+                          params: { to: /login }
+                      else:
+                        - action: message
+                          params:
+                            messageType: info
+                            text: 个人中心暂未开放（账号体系由平台侧统一管理）
+                onLocaleChange:
+                  - action: app.locale
+                    params: { locale: "${event}" }
+            - type: Content
+              props: { className: shell-content }
+              children:
+                - type: PageOutlet
+  # 登录页外壳：login-page 全屏渐变容器（model-console 中由宿主 div 提供，
+  # 此处由布局承担），样式见 app/login.css
+  login:
+    dsl: "1.0"
+    body:
+      type: Flex
+      props:
+        className: login-page
+      children:
+        - type: PageOutlet
+  # 裸布局：无外壳，页面铺满
+  blank:
+    dsl: "1.0"
+    body:
+      type: PageOutlet

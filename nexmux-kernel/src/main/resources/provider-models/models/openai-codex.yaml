@@ -1,0 +1,284 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: openai-codex
+modelCount: 8
+models:
+- modelCode: openai-codex/gpt-5.6-luna
+  displayName:
+    en: GPT-5.6 Luna
+  modelType: LLM
+  providerModelId: gpt-5.6-luna
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.2
+    output: 1.2
+    cacheRead: 0.02
+    cacheWrite: 0.25
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.4
+      output: 1.8
+      cacheRead: 0.04
+      cacheWrite: 0.5
+  releaseDate: null
+- modelCode: openai-codex/gpt-5.6-sol
+  displayName:
+    en: GPT-5.6 Sol
+  modelType: LLM
+  providerModelId: gpt-5.6-sol
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.4
+    cacheWrite: 5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 8
+      output: 30
+      cacheRead: 0.8
+      cacheWrite: 10
+  releaseDate: null
+- modelCode: openai-codex/gpt-5.6-terra
+  displayName:
+    en: GPT-5.6 Terra
+  modelType: LLM
+  providerModelId: gpt-5.6-terra
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 12
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 18
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: openai-codex/gpt-6-astra
+  displayName:
+    en: GPT-6 Astra
+  modelType: LLM
+  providerModelId: gpt-6-astra
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 10
+    output: 50
+    cacheRead: 1
+    cacheWrite: 12.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 20
+      output: 75
+      cacheRead: 2
+      cacheWrite: 25
+  releaseDate: null
+- modelCode: openai-codex/gpt-6-luna
+  displayName:
+    en: GPT-6 Luna
+  modelType: LLM
+  providerModelId: gpt-6-luna
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.1
+    output: 0.5
+    cacheRead: 0.01
+    cacheWrite: 0.125
+    tiers:
+    - inputTokensAbove: 272000
+      input: 0.2
+      output: 0.75
+      cacheRead: 0.02
+      cacheWrite: 0.25
+  releaseDate: null
+- modelCode: openai-codex/gpt-6-sol
+  displayName:
+    en: GPT-6 Sol
+  modelType: LLM
+  providerModelId: gpt-6-sol
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 272000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.4
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: openai-codex/gpt-6.1-sol
+  displayName:
+    en: GPT-6.1 Sol
+  modelType: LLM
+  providerModelId: gpt-6.1-sol
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 500000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.1
+    cacheWrite: 2.5
+    tiers:
+    - inputTokensAbove: 272000
+      input: 4
+      output: 15
+      cacheRead: 0.2
+      cacheWrite: 5
+  releaseDate: null
+- modelCode: openai-codex/gpt-6.1-terra
+  displayName:
+    en: GPT-6.1 Terra
+  modelType: LLM
+  providerModelId: gpt-6.1-terra
+  primaryUpstreamProtocol: openai-codex-responses
+  contextLength: 500000
+  maxOutputTokens: 128000
+  inputModalities:
+  - text
+  - image
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - openai-codex
+  description: null
+  metadataSpec: null
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1
+    output: 5
+    cacheRead: 0.05
+    cacheWrite: 1.25
+    tiers:
+    - inputTokensAbove: 272000
+      input: 2
+      output: 7.5
+      cacheRead: 0.1
+      cacheWrite: 2.5
+  releaseDate: null

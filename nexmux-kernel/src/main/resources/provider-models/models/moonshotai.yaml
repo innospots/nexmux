@@ -1,0 +1,334 @@
+apiVersion: nexmux.model-presets/v1
+providerCode: moonshotai
+modelCount: 6
+models:
+- modelCode: moonshotai/kimi-k2.6
+  displayName:
+    en: Kimi K2.6
+  modelType: LLM
+  providerModelId: kimi-k2.6
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 256000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: A multimodal Kimi model for long-horizon coding, UI generation, and agent orchestration. It targets long-horizon coding,
+      code-driven UI generation, and coordinated multi-agent execution across complex projects.
+    zh-CN: 面向长周期编程、UI 生成与 Agent 编排的多模态 Kimi 模型。面向长周期编程、代码驱动的 UI 生成，以及复杂项目中的多 Agent 协同执行。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.95
+    output: 4
+    cacheRead: 0.16
+    cacheWrite: 0
+    tiers:
+    - input: 0.95
+      output: 4
+      cacheRead: 0.16
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.95
+          output_price: 4
+          cache_read_price: 0.16
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 6.5
+          output_price: 27
+          cache_read_price: 1.1
+          cache_write_price: null
+  releaseDate: '2026-04-20'
+- modelCode: moonshotai/kimi-k2.7-code
+  displayName:
+    en: Kimi K2.7 Code
+  modelType: LLM
+  providerModelId: kimi-k2.7-code
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 256000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: A coding-focused Kimi model for reliable end-to-end programming across long contexts. The coding-focused design aims
+      to complete end-to-end programming tasks reliably across long contexts.
+    zh-CN: 面向长上下文端到端编程任务、强调可靠性的 Kimi Code 模型。以编程为中心，旨在长上下文中可靠完成端到端开发任务。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 0.95
+    output: 4
+    cacheRead: 0.19
+    cacheWrite: 0
+    tiers:
+    - input: 0.95
+      output: 4
+      cacheRead: 0.19
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 0.95
+          output_price: 4
+          cache_read_price: 0.19
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 6.5
+          output_price: 27
+          cache_read_price: 1.3
+          cache_write_price: null
+  releaseDate: '2026-06-12'
+- modelCode: moonshotai/kimi-k2.7-code-highspeed
+  displayName:
+    en: Kimi K2.7 Code Highspeed
+  modelType: LLM
+  providerModelId: kimi-k2.7-code-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 256000
+  maxOutputTokens: 256000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: A high-speed variant of Kimi K2.7 Code for faster inference on coding tasks. Optimized for latency-sensitive coding
+      workflows and agent applications.
+    zh-CN: Kimi K2.7 Code 高速版，面向编程任务的更快推理。针对延迟敏感的编程工作流与 Agent 应用优化。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 1.9
+    output: 8
+    cacheRead: 0.38
+    cacheWrite: 0
+    tiers:
+    - input: 1.9
+      output: 8
+      cacheRead: 0.38
+      cacheWrite: 0
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 1.9
+          output_price: 8
+          cache_read_price: 0.38
+          cache_write_price: null
+      cny:
+        tiers:
+        - upto: null
+          input_price: 13
+          output_price: 54
+          cache_read_price: 2.6
+          cache_write_price: null
+  releaseDate: null
+- modelCode: moonshotai/kimi-k3
+  displayName:
+    en: Kimi K3
+  modelType: LLM
+  providerModelId: kimi-k3
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 1000000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: An open-weight multimodal Kimi model for complex coding, reasoning, and agentic work. The open-weight multimodal reasoning
+      model is positioned for complex coding, knowledge work, and long-running agents.
+    zh-CN: 面向复杂编程、推理与 Agent 工作的开放权重 Kimi 多模态模型。这款开放权重多模态推理模型面向复杂编程、知识工作和长时间运行的 Agent。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 3
+    output: 15
+    cacheRead: 0.3
+    cacheWrite: 3
+    tiers:
+    - input: 3
+      output: 15
+      cacheRead: 0.3
+      cacheWrite: 3
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 3
+          output_price: 15
+          cache_read_price: 0.3
+          cache_write_price: 3
+      cny:
+        tiers:
+        - upto: null
+          input_price: 20
+          output_price: 100
+          cache_read_price: 2
+          cache_write_price: 20
+  releaseDate: '2026-07-16'
+- modelCode: moonshotai/kimi-k3.1-pro
+  displayName:
+    en: Kimi K3.1 Pro
+  modelType: LLM
+  providerModelId: kimi-k3.1-pro
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 1000000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: The first K3.1-series flagship and Kimi's most capable 3T-class open-weight model, with native visual understanding
+      and a 1M context. It improves coding, 3D creation, financial research, and long-horizon agent work.
+    zh-CN: K3.1 系列首个旗舰，也是 Kimi 迄今能力最强的 3 万亿级开放权重模型，具备原生视觉理解与 1M 上下文。面向编程、3D 创作、金融研究与长时间 Agent 工作。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 2
+    output: 10
+    cacheRead: 0.2
+    cacheWrite: 2
+    tiers:
+    - input: 2
+      output: 10
+      cacheRead: 0.2
+      cacheWrite: 2
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 2
+          output_price: 10
+          cache_read_price: 0.2
+          cache_write_price: 2
+      cny:
+        tiers:
+        - upto: null
+          input_price: 13
+          output_price: 68
+          cache_read_price: 1.3
+          cache_write_price: 13
+  releaseDate: '2026-10-23'
+- modelCode: moonshotai/kimi-k3.1-pro-highspeed
+  displayName:
+    en: Kimi K3.1 Pro Highspeed
+  modelType: LLM
+  providerModelId: kimi-k3.1-pro-highspeed
+  primaryUpstreamProtocol: openai-completions
+  contextLength: 1000000
+  maxOutputTokens: 1000000
+  inputModalities:
+  - text
+  - image
+  - video
+  outputModalities:
+  - text
+  capabilityTags:
+  - reasoning
+  - vision
+  tags:
+  - pi-ai-catalog
+  - moonshotai
+  - octafuse-preset
+  description:
+    en: The high-speed variant of Kimi K3.1 Pro with the same intelligence and a 1M context, at about 2-3× the speed. It stays
+      in the multimodal model list and keeps the same parameter constraints as K3.1 Pro.
+    zh-CN: Kimi K3.1 Pro 高速版，同等智能与 1M 上下文，速度约为 K3.1 Pro 的 2–3 倍。仍列在多模态模型中，参数约束与 K3.1 Pro 相同。
+  metadataSpec:
+    source: octafuse-preset
+  pricingSpec:
+    currency: USD
+    unit: per_million_tokens
+    input: 4
+    output: 20
+    cacheRead: 0.2
+    cacheWrite: 4
+    tiers:
+    - input: 4
+      output: 20
+      cacheRead: 0.2
+      cacheWrite: 4
+    prices:
+      usd:
+        tiers:
+        - upto: null
+          input_price: 4
+          output_price: 20
+          cache_read_price: 0.2
+          cache_write_price: 4
+      cny:
+        tiers:
+        - upto: null
+          input_price: 26
+          output_price: 136
+          cache_read_price: 1.3
+          cache_write_price: 26
+  releaseDate: '2026-10-23'

@@ -87,6 +87,23 @@ export function mergeHiddenRouteMenus(menus: ShellMenu[]): ShellMenu[] {
 
 /** 用平台登录态拉取后端导航，并按已装配页面补上公开路径。 */
 export async function loadBackendMenus(accessToken: string): Promise<ShellMenu[] | null> {
+  const result = await fetchBackendMenus(accessToken);
+  return result.menus;
+}
+
+/** 后端导航拉取结果：`unauthorized` 表示令牌失效，调用方应清会话回登录页。 */
+export interface BackendMenusResult {
+  menus: ShellMenu[] | null;
+  unauthorized: boolean;
+}
+
+/**
+ * 拉取后端导航，并区分「令牌失效」与「其他失败」。
+ *
+ * @param accessToken 平台访问令牌
+ * @returns 菜单与鉴权状态
+ */
+export async function fetchBackendMenus(accessToken: string): Promise<BackendMenusResult> {
   let response: Response;
   try {
     response = await fetch(`${BACKEND}/api/d/platform/navigation/menus`, {
@@ -94,13 +111,18 @@ export async function loadBackendMenus(accessToken: string): Promise<ShellMenu[]
       cache: "no-store",
     });
   } catch {
-    return null;
+    return { menus: null, unauthorized: false };
   }
-  if (!response.ok) return null;
+  if (response.status === 401 || response.status === 403) {
+    return { menus: null, unauthorized: true };
+  }
+  if (!response.ok) return { menus: null, unauthorized: false };
   const envelope = (await response.json()) as { success?: boolean; data?: unknown };
-  if (envelope.success === false || !Array.isArray(envelope.data)) return null;
+  if (envelope.success === false || !Array.isArray(envelope.data)) {
+    return { menus: null, unauthorized: false };
+  }
   const pages = new Map(getPagesIndex().pages.map((page) => [page.globalPageId, page.path]));
-  return convertNavigation(envelope.data as NavigationMenu[], pages);
+  return { menus: convertNavigation(envelope.data as NavigationMenu[], pages), unauthorized: false };
 }
 
 function convertNavigation(

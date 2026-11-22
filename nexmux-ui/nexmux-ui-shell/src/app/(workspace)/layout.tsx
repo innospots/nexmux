@@ -10,6 +10,7 @@ import "@pactor-app/shell/styles.css";
 
 import type { ReactNode } from "react";
 
+import { SessionExpiryGuard } from "@/frontend/SessionExpiryGuard";
 import { WorkspaceShell } from "@/frontend/WorkspaceShell";
 
 /**
@@ -19,6 +20,7 @@ import { WorkspaceShell } from "@/frontend/WorkspaceShell";
 export default function WorkspaceLayout({ children }: { children: ReactNode }) {
   return (
     <>
+      <SessionExpiryGuard />
       <WorkspaceShell />
       {children}
     </>
